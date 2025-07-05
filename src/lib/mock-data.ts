@@ -1,4 +1,4 @@
-import type { KpiCardData, ScenarioData, ChartData, RiskData } from "@/lib/types";
+import type { KpiCardData, ScenarioData, ChartData, RiskData, SegmentData, TemplateData, ReportData, CampaignData } from "@/lib/types";
 import type { LucideIcon } from "lucide-react";
 import {
   Mail,
@@ -246,3 +246,36 @@ export const risksData: RiskData[] = [
         }
     },
 ]
+
+export const segmentsData: SegmentData[] = [
+  { id: '1', name: 'Новые игроки (без депозита)', description: 'Пользователи, зарегистрировавшиеся за последние 7 дней и не совершившие ни одного депозита.', playerCount: 1250, createdAt: '2024-07-01', createdBy: 'AI' },
+  { id: '2', name: 'VIP-игроки', description: 'Игроки с общей суммой депозитов > €5,000.', playerCount: 320, createdAt: '2024-06-28', createdBy: 'Пользователь' },
+  { id: '3', name: 'Риск оттока', description: 'Игроки, чья активность снизилась на 50% за последние 14 дней, с высоким Churn Probability Score.', playerCount: 890, createdAt: '2024-07-03', createdBy: 'AI' },
+  { id: '4', name: 'Сделали первый депозит', description: 'Игроки, которые совершили свой первый депозит за последний месяц.', playerCount: 2100, createdAt: '2024-06-15', createdBy: 'Пользователь' },
+  { id: '5', name: 'Спящие (30+ дней)', description: 'Игроки, не заходившие в игру более 30 дней.', playerCount: 450, createdAt: '2024-05-20', createdBy: 'Пользователь' },
+  { id: '6', name: 'Любители слотов', description: 'Игроки, которые 80% времени проводят в слотах.', playerCount: 5400, createdAt: '2024-07-04', createdBy: 'AI' },
+];
+
+export const templatesData: TemplateData[] = [
+    { id: '1', name: 'Welcome-цепочка', description: 'Серия из 3 писем для новых игроков для их активации и первого депозита.', category: 'Onboarding', performance: 5, channel: 'Email' },
+    { id: '2', name: 'Реактивация "спящих"', description: 'Push-уведомление с бонусом для игроков, неактивных 30+ дней.', category: 'Reactivation', performance: 4, channel: 'Push' },
+    { id: '3', name: 'Бонус для VIP-игроков', description: 'Еженедельное эксклюзивное предложение для сегмента VIP.', category: 'Retention', performance: 5, channel: 'Multi-channel' },
+    { id: '4', name: 'Запрос обратной связи', description: 'In-app сообщение с просьбой оценить игру после 5 сессий.', category: 'Feedback', performance: 3, channel: 'InApp' },
+    { id: '5', name: 'Напоминание о брошенной корзине', description: 'SMS-напоминание игрокам, которые начали, но не завершили депозит.', category: 'Conversion', performance: 4, channel: 'SMS' },
+];
+
+export const reportsData: ReportData[] = [
+    { id: '1', name: 'Еженедельный отчет по Retention', type: 'Retention', createdAt: '2024-07-05 10:00', status: 'Готов', createdBy: 'Автоматически' },
+    { id: '2', name: 'Эффективность Welcome-цепочки', type: 'Сценарий', createdAt: '2024-07-04 15:30', status: 'Готов', createdBy: 'John Doe' },
+    { id: '3', name: 'Анализ сегмента VIP-игроков', type: 'Сегмент', createdAt: '2024-07-03 11:00', status: 'Готов', createdBy: 'Jane Smith' },
+    { id: '4', name: 'Отчет по churn-кампаниям за Q2', type: 'Сценарий', createdAt: '2024-07-05 16:00', status: 'В процессе', createdBy: 'John Doe' },
+];
+
+export const campaignsData: CampaignData[] = [
+    { id: '1', name: 'Welcome Chain', date: '2024-07-01', type: 'Email' },
+    { id: '2', name: 'Summer Slots Promo', date: '2024-07-05', type: 'Promo' },
+    { id: '3', name: 'Reactivation Push', date: '2024-07-08', type: 'Push' },
+    { id: '4', name: 'VIP Bonus Drop', date: '2024-07-12', type: 'Email' },
+    { id: '5', name: 'Weekend Tournament', date: '2024-07-19', type: 'Promo' },
+    { id: '6', name: 'Feedback Request', date: '2024-07-22', type: 'Push' },
+];

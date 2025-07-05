@@ -39,3 +39,37 @@ export type RiskData = {
         link: string;
     };
 }
+
+export type SegmentData = {
+  id: string;
+  name: string;
+  description: string;
+  playerCount: number;
+  createdAt: string;
+  createdBy: 'AI' | 'Пользователь';
+};
+
+export type TemplateData = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  performance: number; // 1-5 stars
+  channel: "Email" | "Push" | "SMS" | "InApp" | "Multi-channel";
+};
+
+export type ReportData = {
+  id: string;
+  name: string;
+  type: "Сценарий" | "Сегмент" | "Retention";
+  createdAt: string;
+  status: "Готов" | "В процессе";
+  createdBy: string;
+};
+
+export type CampaignData = {
+  id: string;
+  name: string;
+  date: string; // e.g. "2024-07-15"
+  type: "Email" | "Push" | "Promo";
+};
