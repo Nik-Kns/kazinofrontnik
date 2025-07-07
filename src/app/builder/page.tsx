@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift } from "lucide-react";
+import { Activity, ArrowDown, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const triggerElements = [
   { name: 'Регистрация', icon: PlusCircle, description: 'Сценарий запускается при регистрации нового пользователя.' },
@@ -22,6 +23,30 @@ const logicElements = [
   { name: 'Условие "Если/То"', icon: GitBranch, description: 'Разветвление сценария на основе данных игрока.' },
   { name: 'A/B тест', icon: Activity, description: 'Разделение аудитории для проверки гипотез.' },
 ];
+
+
+const ScenarioNode = ({ icon: Icon, title, children, className }: { icon: React.ElementType, title: string, children?: React.ReactNode, className?: string }) => {
+  return (
+    <Card className={cn("w-64 absolute shadow-lg hover:shadow-xl transition-shadow bg-card z-10", className)}>
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3 mb-2">
+          <Icon className="h-5 w-5 text-primary" />
+          <h4 className="font-semibold">{title}</h4>
+        </div>
+        {children}
+      </CardContent>
+    </Card>
+  )
+};
+
+const Connector = ({ className }: { className?: string }) => {
+  return (
+    <div className={cn("absolute bg-muted-foreground/50 flex items-center justify-center z-0", className)}>
+      <ArrowDown className="h-4 w-4 text-muted-foreground/80" />
+    </div>
+  )
+};
+
 
 export default function BuilderPage() {
   return (
@@ -86,12 +111,43 @@ export default function BuilderPage() {
                 </ScrollArea>
             </div>
         </aside>
-        <main className="flex-1 p-6">
-            <div className="flex h-full w-full items-center justify-center rounded-lg border-2 border-dashed border-muted bg-background">
-                <div className="text-center">
-                    <h2 className="text-xl font-semibold">Холст для сценария</h2>
-                    <p className="text-muted-foreground">Перетащите сюда элементы, чтобы начать строить сценарий</p>
-                </div>
+        <main className="flex-1 p-6 bg-muted/30">
+            <div className="relative h-full w-full rounded-lg border-2 border-dashed border-muted bg-background overflow-auto p-8">
+                {/* Example Scenario Flow */}
+                <ScenarioNode icon={PlusCircle} title="Триггер: Регистрация" className="top-10 left-1/2 -translate-x-1/2" />
+                <Connector className="top-[100px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
+
+                <ScenarioNode icon={Clock} title="Задержка: 1 час" className="top-40 left-1/2 -translate-x-1/2">
+                  <p className="text-sm text-muted-foreground">Ожидаем 60 минут перед следующим шагом.</p>
+                </ScenarioNode>
+                <Connector className="top-[248px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
+
+                <ScenarioNode icon={Mail} title="Действие: Отправить Email" className="top-80 left-1/2 -translate-x-1/2">
+                   <p className="text-sm text-muted-foreground mb-3">Шаблон: "Welcome Email #1".</p>
+                   <Button variant="outline" size="sm" className="w-full">
+                      <Lightbulb className="mr-2 h-4 w-4 text-yellow-400"/>
+                      Улучшить контент с AI
+                   </Button>
+                </ScenarioNode>
+                <Connector className="top-[416px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
+                
+                <ScenarioNode icon={GitBranch} title="Условие: A/B тест 50/50" className="top-[496px] left-1/2 -translate-x-1/2"/>
+
+                {/* Branching Connectors */}
+                <div className="absolute top-[568px] left-1/2 -translate-x-1/2 w-0.5 h-8 bg-muted-foreground/50 z-0"></div>
+                <div className="absolute top-[600px] left-[calc(50%-200px)] w-[400px] h-0.5 bg-muted-foreground/50 z-0"></div>
+                <div className="absolute top-[600px] left-[calc(50%-200px)] w-0.5 h-8 bg-muted-foreground/50 z-0"><ArrowDown className="h-4 w-4 text-muted-foreground/80 absolute -bottom-5 -left-[7px]" /></div>
+                <div className="absolute top-[600px] right-[calc(50%-200px)] w-0.5 h-8 bg-muted-foreground/50 z-0"><ArrowDown className="h-4 w-4 text-muted-foreground/80 absolute -bottom-5 -left-[7px]" /></div>
+
+                {/* Branch A */}
+                <ScenarioNode icon={Gift} title="Действие: Бонус 'A'" className="top-[660px] left-[calc(50%-200px)] -translate-x-1/2">
+                  <p className="text-sm text-muted-foreground">Начислить 10 фриспинов.</p>
+                </ScenarioNode>
+
+                 {/* Branch B */}
+                <ScenarioNode icon={Gift} title="Действие: Бонус 'B'" className="top-[660px] left-[calc(50%+200px)] -translate-x-1/2">
+                   <p className="text-sm text-muted-foreground">Начислить 100% на депозит.</p>
+                </ScenarioNode>
             </div>
         </main>
       </div>
