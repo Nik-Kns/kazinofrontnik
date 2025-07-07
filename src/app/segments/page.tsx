@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { segmentsData } from "@/lib/mock-data";
-import { Bot, Copy, Pencil, PlusCircle, Trash2 } from "lucide-react";
+import { Bot, Copy, Pencil, PlusCircle, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -21,9 +21,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+
+const segmentAttributes = [
+    "Recency", "Frequency", "Monetary Value", "Country", "Age", "Gender", "Last Login Date", "Churn Probability", "Total Revenue"
+];
+const segmentConditions = [
+    "равно", "не равно", "больше чем", "меньше чем", "содержит", "не содержит"
+];
 
 
 export default function SegmentsPage() {
+    const [rules, setRules] = React.useState([{ id: 1, attribute: 'Recency', condition: 'больше чем', value: '30' }]);
+
+    const addRule = () => {
+        setRules([...rules, { id: Date.now(), attribute: '', condition: '', value: '' }]);
+    };
+
+    const removeRule = (id: number) => {
+        setRules(rules.filter(rule => rule.id !== id));
+    };
+
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -64,18 +83,39 @@ export default function SegmentsPage() {
                 </div>
               </TabsContent>
               <TabsContent value="manual">
-                <div className="grid gap-4 py-4">
+                <div className="space-y-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="name" className="text-right">Название</Label>
-                    <Input id="name" placeholder="Например: VIP игроки" className="col-span-3" />
+                    <Input id="name" placeholder="Например: VIP игроки на грани оттока" className="col-span-3" />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="description" className="text-right">Описание</Label>
-                    <Textarea id="description" placeholder="Краткое описание для вашей команды" className="col-span-3" />
-                  </div>
-                  <div className="text-center text-muted-foreground p-4 border-2 border-dashed rounded-lg">
-                    Здесь будет конструктор правил
-                  </div>
+                   <div className="p-4 border-2 border-dashed rounded-lg space-y-3">
+                    <Label>Правила сегментации</Label>
+                    {rules.map((rule, index) => (
+                         <div key={rule.id} className="flex items-center gap-2">
+                            <Select defaultValue={rule.attribute}>
+                                <SelectTrigger><SelectValue placeholder="Атрибут" /></SelectTrigger>
+                                <SelectContent>
+                                    {segmentAttributes.map(attr => <SelectItem key={attr} value={attr}>{attr}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                             <Select defaultValue={rule.condition}>
+                                <SelectTrigger><SelectValue placeholder="Условие" /></SelectTrigger>
+                                <SelectContent>
+                                    {segmentConditions.map(cond => <SelectItem key={cond} value={cond}>{cond}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <Input placeholder="Значение" defaultValue={rule.value} />
+                            <Button variant="ghost" size="icon" onClick={() => removeRule(rule.id)} disabled={rules.length <= 1}>
+                                <X className="h-4 w-4" />
+                            </Button>
+                         </div>
+                    ))}
+
+                    <Button variant="outline" size="sm" onClick={addRule}>
+                        <PlusCircle className="mr-2 h-4 w-4"/>
+                        Добавить правило
+                    </Button>
+                   </div>
                 </div>
               </TabsContent>
             </Tabs>

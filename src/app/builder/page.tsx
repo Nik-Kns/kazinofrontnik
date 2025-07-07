@@ -1,33 +1,40 @@
+"use client";
+
+import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Activity, ArrowDown, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { segmentsData } from '@/lib/mock-data';
 
 const triggerElements = [
-  { name: 'Регистрация', icon: PlusCircle, description: 'Сценарий запускается при регистрации нового пользователя.' },
-  { name: 'Первый депозит', icon: CheckCircle, description: 'Срабатывает после первого пополнения счета.' },
-  { name: 'Сегмент', icon: GitBranch, description: 'Срабатывает при попадании игрока в определенный сегмент.' },
+  { name: 'Попадание в сегмент', icon: GitBranch, description: 'Срабатывает при попадании игрока в определенный сегмент.', type: 'segment_trigger' },
+  { name: 'Регистрация', icon: PlusCircle, description: 'Сценарий запускается при регистрации нового пользователя.', type: 'registration_trigger' },
+  { name: 'Первый депозит', icon: CheckCircle, description: 'Срабатывает после первого пополнения счета.', type: 'deposit_trigger' },
 ];
 
 const actionElements = [
-  { name: 'Отправить Email', icon: Mail, description: 'Отправка email-сообщения через SendGrid.' },
-  { name: 'Отправить Push', icon: Smartphone, description: 'Отправка push-уведомления.' },
-  { name: 'Отправить SMS', icon: MessageSquare, description: 'Отправка SMS через Twilio.' },
-  { name: 'In-App сообщение', icon: Zap, description: 'Показ сообщения внутри приложения.' },
-  { name: 'Начислить бонус', icon: Gift, description: 'Начисление бонусных баллов или фриспинов игроку.' },
+  { name: 'Отправить Email', icon: Mail, description: 'Отправка email-сообщения через SendGrid.', type: 'email_action' },
+  { name: 'Отправить Push', icon: Smartphone, description: 'Отправка push-уведомления.', type: 'push_action' },
+  { name: 'Отправить SMS', icon: MessageSquare, description: 'Отправка SMS через Twilio.', type: 'sms_action' },
+  { name: 'In-App сообщение', icon: Zap, description: 'Показ сообщения внутри приложения.', type: 'inapp_action' },
+  { name: 'Начислить бонус', icon: Gift, description: 'Начисление бонусных баллов или фриспинов игроку.', type: 'bonus_action' },
 ];
 
 const logicElements = [
-  { name: 'Задержка', icon: Clock, description: 'Пауза в сценарии на заданное время.' },
-  { name: 'Условие "Если/То"', icon: GitBranch, description: 'Разветвление сценария на основе данных игрока.' },
-  { name: 'A/B тест', icon: Activity, description: 'Разделение аудитории для проверки гипотез.' },
+  { name: 'Задержка', icon: Clock, description: 'Пауза в сценарии на заданное время.', type: 'delay_logic' },
+  { name: 'Условие "Если/То"', icon: GitBranch, description: 'Разветвление сценария на основе данных игрока.', type: 'if_else_logic' },
+  { name: 'A/B тест', icon: Activity, description: 'Разделение аудитории для проверки гипотез.', type: 'ab_test_logic' },
 ];
 
-
-const ScenarioNode = ({ icon: Icon, title, children, className }: { icon: React.ElementType, title: string, children?: React.ReactNode, className?: string }) => {
+const ScenarioNode = ({ icon: Icon, title, children, className, onClick }: { icon: React.ElementType, title: string, children?: React.ReactNode, className?: string, onClick?: () => void }) => {
   return (
-    <Card className={cn("w-64 absolute shadow-lg hover:shadow-xl transition-shadow bg-card z-10", className)}>
+    <Card className={cn("w-72 absolute shadow-lg hover:shadow-xl transition-shadow bg-card z-10 cursor-pointer hover:border-primary", className)} onClick={onClick}>
       <CardContent className="p-4">
         <div className="flex items-center gap-3 mb-2">
           <Icon className="h-5 w-5 text-primary" />
@@ -47,13 +54,106 @@ const Connector = ({ className }: { className?: string }) => {
   )
 };
 
+const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: any, isOpen: boolean, onOpenChange: (open: boolean) => void }) => {
+    if (!node) return null;
+
+    const renderForm = () => {
+        switch(node.type) {
+            case 'segment_trigger':
+                return (
+                     <div className="space-y-4">
+                        <Label>Выберите сегмент</Label>
+                        <Select defaultValue={segmentsData[2].id}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Выберите сегмент..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {segmentsData.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Card className="bg-muted/50">
+                            <CardContent className="p-3 text-sm text-muted-foreground">
+                                <p className="font-bold mb-2">Описание сегмента:</p>
+                                {segmentsData.find(s => s.id === (node.config?.segmentId || segmentsData[2].id))?.description}
+                            </CardContent>
+                        </Card>
+                     </div>
+                );
+            case 'bonus_action':
+                 return (
+                     <div className="space-y-4">
+                         <div>
+                            <Label htmlFor="bonus-type">Тип бонуса</Label>
+                            <Select defaultValue="freespins">
+                                <SelectTrigger id="bonus-type">
+                                    <SelectValue placeholder="Выберите тип" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="freespins">Фриспины</SelectItem>
+                                    <SelectItem value="deposit_bonus">Бонус на депозит</SelectItem>
+                                    <SelectItem value="cashback">Кэшбек</SelectItem>
+                                </SelectContent>
+                            </Select>
+                         </div>
+                         <div>
+                            <Label htmlFor="bonus-amount">Количество / Процент</Label>
+                            <Input id="bonus-amount" type="number" defaultValue="25" />
+                         </div>
+                         <div>
+                            <Label htmlFor="bonus-wager">Вейджер (Wager)</Label>
+                            <Input id="bonus-wager" type="number" defaultValue="40" placeholder="x40" />
+                         </div>
+                         <div>
+                            <Label htmlFor="bonus-ttl">Срок жизни бонуса (в часах)</Label>
+                            <Input id="bonus-ttl" type="number" defaultValue="72" />
+                         </div>
+                     </div>
+                 )
+            default:
+                return <p className="text-muted-foreground">Для этого элемента нет дополнительных настроек.</p>
+        }
+    }
+
+    return (
+        <Sheet open={isOpen} onOpenChange={onOpenChange}>
+            <SheetContent className="sm:max-w-md">
+                <SheetHeader>
+                    <SheetTitle>Настройка: {node.title}</SheetTitle>
+                    <SheetDescription>
+                        Отредактируйте параметры для выбранного элемента сценария.
+                    </SheetDescription>
+                </SheetHeader>
+                <div className="py-6">
+                    {renderForm()}
+                </div>
+                <SheetFooter>
+                    <SheetClose asChild>
+                        <Button type="button" variant="secondary">Отмена</Button>
+                    </SheetClose>
+                     <SheetClose asChild>
+                        <Button type="submit">Сохранить</Button>
+                    </SheetClose>
+                </SheetFooter>
+            </SheetContent>
+        </Sheet>
+    )
+}
+
 
 export default function BuilderPage() {
+  const [selectedNode, setSelectedNode] = React.useState<any>(null);
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+
+  const handleNodeClick = (node: any) => {
+    setSelectedNode(node);
+    setIsSheetOpen(true);
+  };
+    
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">
        <header className="flex h-16 items-center justify-between border-b bg-background/95 px-6">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Конструктор сценариев</h1>
+          <h1 className="text-xl font-bold tracking-tight">Welcome-цепочка для новичков</h1>
           <p className="text-sm text-muted-foreground">Создавайте автоматизированные CRM-цепочки</p>
         </div>
         <div className="flex items-center gap-2">
@@ -114,43 +214,28 @@ export default function BuilderPage() {
         <main className="flex-1 p-6 bg-muted/30">
             <div className="relative h-full w-full rounded-lg border-2 border-dashed border-muted bg-background overflow-auto p-8">
                 {/* Example Scenario Flow */}
-                <ScenarioNode icon={PlusCircle} title="Триггер: Регистрация" className="top-10 left-1/2 -translate-x-1/2" />
-                <Connector className="top-[100px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
-
-                <ScenarioNode icon={Clock} title="Задержка: 1 час" className="top-40 left-1/2 -translate-x-1/2">
-                  <p className="text-sm text-muted-foreground">Ожидаем 60 минут перед следующим шагом.</p>
+                <ScenarioNode icon={GitBranch} title="Триггер: Попал в сегмент" className="top-10 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Триггер: Попал в сегмент', type: 'segment_trigger' })}>
+                  <p className="text-sm text-muted-foreground">Сегмент: <span className="font-semibold text-foreground">Риск оттока (предиктивный)</span></p>
                 </ScenarioNode>
-                <Connector className="top-[248px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
+                <Connector className="top-[108px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
 
-                <ScenarioNode icon={Mail} title="Действие: Отправить Email" className="top-80 left-1/2 -translate-x-1/2">
-                   <p className="text-sm text-muted-foreground mb-3">Шаблон: "Welcome Email #1".</p>
+                <ScenarioNode icon={Gift} title="Действие: Начислить бонус" className="top-44 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Начислить бонус', type: 'bonus_action' })}>
+                  <p className="text-sm text-muted-foreground">Тип: Фриспины, Кол-во: 25</p>
+                </ScenarioNode>
+                <Connector className="top-[252px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
+
+                <ScenarioNode icon={Mail} title="Действие: Отправить Email" className="top-80 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Отправить Email', type: 'email_action' })}>
+                   <p className="text-sm text-muted-foreground mb-3">Шаблон: "We miss you bonus".</p>
                    <Button variant="outline" size="sm" className="w-full">
                       <Lightbulb className="mr-2 h-4 w-4 text-yellow-400"/>
                       Улучшить контент с AI
                    </Button>
                 </ScenarioNode>
-                <Connector className="top-[416px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
                 
-                <ScenarioNode icon={GitBranch} title="Условие: A/B тест 50/50" className="top-[496px] left-1/2 -translate-x-1/2"/>
-
-                {/* Branching Connectors */}
-                <div className="absolute top-[568px] left-1/2 -translate-x-1/2 w-0.5 h-8 bg-muted-foreground/50 z-0"></div>
-                <div className="absolute top-[600px] left-[calc(50%-200px)] w-[400px] h-0.5 bg-muted-foreground/50 z-0"></div>
-                <div className="absolute top-[600px] left-[calc(50%-200px)] w-0.5 h-8 bg-muted-foreground/50 z-0"><ArrowDown className="h-4 w-4 text-muted-foreground/80 absolute -bottom-5 -left-[7px]" /></div>
-                <div className="absolute top-[600px] right-[calc(50%-200px)] w-0.5 h-8 bg-muted-foreground/50 z-0"><ArrowDown className="h-4 w-4 text-muted-foreground/80 absolute -bottom-5 -left-[7px]" /></div>
-
-                {/* Branch A */}
-                <ScenarioNode icon={Gift} title="Действие: Бонус 'A'" className="top-[660px] left-[calc(50%-200px)] -translate-x-1/2">
-                  <p className="text-sm text-muted-foreground">Начислить 10 фриспинов.</p>
-                </ScenarioNode>
-
-                 {/* Branch B */}
-                <ScenarioNode icon={Gift} title="Действие: Бонус 'B'" className="top-[660px] left-[calc(50%+200px)] -translate-x-1/2">
-                   <p className="text-sm text-muted-foreground">Начислить 100% на депозит.</p>
-                </ScenarioNode>
             </div>
         </main>
       </div>
+      <NodeConfigPanel node={selectedNode} isOpen={isSheetOpen} onOpenChange={setIsSheetOpen} />
     </div>
   );
 }

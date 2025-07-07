@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -57,7 +58,7 @@ export default function SettingsPage() {
               <CardTitle>Интеграции с сервисами</CardTitle>
               <CardDescription>Подключите внешние сервисы для отправки сообщений.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-6 md:grid-cols-2">
+            <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -92,6 +93,27 @@ export default function SettingsPage() {
                    <div className="grid gap-2">
                     <Label htmlFor="twilio-token">Auth Token</Label>
                     <Input id="twilio-token" type="password" placeholder="••••••••••••••••" />
+                  </div>
+                  <Button>Подключить</Button>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-3">
+                         <img src="https://www.vectorlogo.zone/logos/sendpulse/sendpulse-icon.svg" alt="SendPulse Logo" className="h-8 w-8"/>
+                        <CardTitle className="text-xl">SendPulse</CardTitle>
+                    </div>
+                     <Badge variant="secondary">Push</Badge>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Интеграция для отправки Push-уведомлений.</p>
+                  <div className="grid gap-2">
+                    <Label htmlFor="sendpulse-id">User ID</Label>
+                    <Input id="sendpulse-id" placeholder="User ID" />
+                  </div>
+                   <div className="grid gap-2">
+                    <Label htmlFor="sendpulse-secret">REST API ID</Label>
+                    <Input id="sendpulse-secret" type="password" placeholder="••••••••••••••••" />
                   </div>
                   <Button>Подключить</Button>
                 </CardContent>

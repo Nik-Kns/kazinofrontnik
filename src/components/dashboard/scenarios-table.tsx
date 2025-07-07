@@ -29,11 +29,17 @@ const channelIcons = {
   "Multi-channel": Zap,
 };
 
-const statusColors = {
+const statusColors: { [key: string]: string } = {
   Активен: "bg-success",
   Пауза: "bg-warning",
   Завершён: "bg-muted-foreground",
 };
+
+const frequencyColors: { [key: string]: string } = {
+  Триггерный: "secondary",
+  Регулярный: "default",
+  Разовый: "outline",
+}
 
 export function ScenariosTable() {
   return (
@@ -50,6 +56,7 @@ export function ScenariosTable() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[250px]">Название сценария</TableHead>
+              <TableHead>Тип</TableHead>
               <TableHead>Канал</TableHead>
               <TableHead>Статус</TableHead>
               <TableHead>Сегмент</TableHead>
@@ -67,6 +74,9 @@ export function ScenariosTable() {
               return (
                 <TableRow key={scenario.name}>
                   <TableCell className="font-medium">{scenario.name}</TableCell>
+                  <TableCell>
+                     <Badge variant={frequencyColors[scenario.frequency] as "secondary" | "default" | "outline"}>{scenario.frequency}</Badge>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <ChannelIcon className="h-4 w-4 text-muted-foreground" />

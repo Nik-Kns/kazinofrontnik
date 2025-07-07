@@ -24,7 +24,7 @@ export const kpiData: KpiCardData[] = [
     change: "+0.5%",
     changeType: "increase",
     icon: "Mail",
-    aiHint: "The percentage of emails successfully delivered to the recipients' mailboxes.",
+    aiHint: "Процент успешно доставленных сообщений. Норма >95%. Низкий показатель может свидетельствовать о плохом качестве базы или проблемах с провайдером.",
   },
   {
     title: "Open Rate",
@@ -32,7 +32,7 @@ export const kpiData: KpiCardData[] = [
     change: "+3.1%",
     changeType: "increase",
     icon: "TrendingUp",
-    aiHint: "The percentage of recipients who opened your email campaign.",
+    aiHint: "Процент получателей, открывших сообщение. Ключевая метрика релевантности темы и заголовка.",
   },
   {
     title: "CTR",
@@ -40,7 +40,7 @@ export const kpiData: KpiCardData[] = [
     change: "-0.2%",
     changeType: "decrease",
     icon: "MousePointerClick",
-    aiHint: "Click-Through Rate: The percentage of email recipients who clicked on one or more links contained in an email.",
+    aiHint: "Click-Through Rate: Процент получателей, кликнувших по одной или нескольким ссылкам в сообщении. Показывает релевантность контента.",
   },
   {
     title: "Conversion Rate (CR)",
@@ -48,7 +48,7 @@ export const kpiData: KpiCardData[] = [
     change: "+0.8%",
     changeType: "increase",
     icon: "Target",
-    aiHint: "The percentage of users who completed a desired action (e.g., made a deposit).",
+    aiHint: "Процент пользователей, выполнивших целевое действие (например, депозит) после получения сообщения.",
   },
   {
     title: "D7 Retention",
@@ -56,7 +56,7 @@ export const kpiData: KpiCardData[] = [
     change: "-1.5%",
     changeType: "decrease",
     icon: "Users",
-    aiHint: "The percentage of new users who returned to the app on the 7th day after their first session.",
+    aiHint: "Процент новых пользователей, вернувшихся в приложение на 7-й день после первой сессии.",
   },
   {
     title: "Reactivation Rate",
@@ -64,7 +64,7 @@ export const kpiData: KpiCardData[] = [
     change: "+0.9%",
     changeType: "increase",
     icon: "RefreshCw",
-    aiHint: "The percentage of churned users who became active again after a reactivation campaign.",
+    aiHint: "Процент \"спящих\" игроков, которых удалось вернуть с помощью CRM-кампаний.",
   },
   {
     title: "Revenue from CRM (€)",
@@ -72,7 +72,7 @@ export const kpiData: KpiCardData[] = [
     change: "+12.4%",
     changeType: "increase",
     icon: "Euro",
-    aiHint: "Total revenue generated directly from CRM campaigns within the selected period.",
+    aiHint: "Общий доход, сгенерированный непосредственно от CRM-кампаний за выбранный период.",
   },
   {
     title: "Unsubscribe Rate",
@@ -80,14 +80,15 @@ export const kpiData: KpiCardData[] = [
     change: "+0.02%",
     changeType: "decrease",
     icon: "MailWarning",
-    aiHint: "The percentage of recipients who unsubscribed from your mailing list. Lower is better.",
+    aiHint: "Процент получателей, отписавшихся от рассылки. Рост этого показателя - признак усталости базы.",
   },
 ];
 
 export const scenariosData: ScenarioData[] = [
   {
     name: "Welcome Chain",
-    type: "Onboarding",
+    category: "Onboarding",
+    frequency: "Триггерный",
     channel: "Multi-channel",
     status: "Активен",
     segment: "Новички",
@@ -100,7 +101,8 @@ export const scenariosData: ScenarioData[] = [
   },
   {
     name: "Churn Reactivation",
-    type: "Reactivation",
+    category: "Reactivation",
+    frequency: "Триггерный",
     channel: "Push",
     status: "Активен",
     segment: "Спящие",
@@ -113,7 +115,8 @@ export const scenariosData: ScenarioData[] = [
   },
   {
     name: "VIP Weekly Bonus",
-    type: "Retention",
+    category: "Retention",
+    frequency: "Регулярный",
     channel: "Email",
     status: "Активен",
     segment: "VIP",
@@ -126,7 +129,8 @@ export const scenariosData: ScenarioData[] = [
   },
   {
     name: "Summer Promo",
-    type: "Promotion",
+    category: "Promotion",
+    frequency: "Разовый",
     channel: "SMS",
     status: "Пауза",
     segment: "Все активные",
@@ -139,7 +143,8 @@ export const scenariosData: ScenarioData[] = [
   },
   {
     name: "Q2 Survey",
-    type: "Feedback",
+    category: "Feedback",
+    frequency: "Триггерный",
     channel: "InApp",
     status: "Завершён",
     segment: "Активные 90д",
@@ -214,46 +219,46 @@ export const analyticsChartsData: { title: string; type: "line" | "area" | "bar"
 export const risksData: RiskData[] = [
     {
         type: "critical",
-        title: "Ошибка отправки сообщений",
+        title: "Ошибка отправки email",
         date: "Обнаружено 3 июля, 18:47",
-        details: "Канал: Email. Сценарий: 'VIP Retention Offer'. Описание: Вебхук не дал ответ в течение 5 секунд.",
-        recommendation: "Возможно, интеграция с вашим почтовым сервисом неисправна. Проверьте статус API.",
+        details: "Канал: Email (SendGrid). Сценарий: 'VIP Weekly Bonus'. Ответ от API SendGrid превысил 10 секунд.",
+        recommendation: "API SendGrid может быть перегружен или недоступен. Проверьте статус сервиса SendGrid и логи интеграции. Если проблема повторяется, свяжитесь с поддержкой.",
         action: {
             text: "Проверить интеграцию",
-            link: "#"
+            link: "/settings"
         }
     },
     {
         type: "warning",
         title: "Open Rate резко упал",
         date: "Обнаружено 4 июля, 09:21",
-        details: "Сценарий: 'Reactivate Sleepers' (Push). Причина: Упала вовлечённость среди игроков сегмента 'спящие'.",
-        recommendation: "Рекомендуется сократить частоту сообщений или обновить креативы.",
+        details: "Сценарий: 'Reactivate Sleepers' (Push). Open Rate упал на 40% по сравнению со средним за 14 дней для этого сценария.",
+        recommendation: "Возможно, креативы выгорели или предложение стало нерелевантным. Рекомендуется провести A/B тест с новым текстом и/или бонусом.",
         action: {
             text: "Перейти к сценарию",
-            link: "#"
+            link: "/builder"
         }
     },
     {
         type: "info",
         title: "Возможность роста ROI",
         date: "Обнаружено 2 июля, 11:03",
-        details: "AI-анализ: Кампания “Welcome Chain” показала рост ROI на 35% — расширьте сегмент.",
-        recommendation: "Попробуйте включить в сегмент пользователей со схожими поведенческими паттернами для увеличения охвата.",
+        details: "AI-анализ кампании “Welcome Chain” показал, что пользователи, пришедшие с источника X, конвертируются в депозит на 50% лучше среднего.",
+        recommendation: "Попробуйте создать отдельный сценарий для этого сегмента с более агрессивным предложением, чтобы максимизировать конверсию.",
         action: {
-            text: "Расширить аудиторию",
-            link: "#"
+            text: "Создать сегмент",
+            link: "/segments"
         }
     },
 ]
 
 export const segmentsData: SegmentData[] = [
   { id: '1', name: 'Новые игроки (без депозита)', description: 'Пользователи, зарегистрировавшиеся за последние 7 дней и не совершившие ни одного депозита.', playerCount: 1250, createdAt: '2024-07-01', createdBy: 'AI' },
-  { id: '2', name: 'VIP-игроки', description: 'Игроки с общей суммой депозитов > €5,000.', playerCount: 320, createdAt: '2024-06-28', createdBy: 'Пользователь' },
-  { id: '3', name: 'Риск оттока', description: 'Игроки, чья активность снизилась на 50% за последние 14 дней, с высоким Churn Probability Score.', playerCount: 890, createdAt: '2024-07-03', createdBy: 'AI' },
+  { id: '2', name: 'VIP-игроки', description: 'Игроки с Lifetime Revenue > €5,000 и последней активностью не позднее 30 дней назад.', playerCount: 320, createdAt: '2024-06-28', createdBy: 'Пользователь' },
+  { id: '3', name: 'Риск оттока (предиктивный)', description: 'Игроки с Churn Probability Score > 75% и снижением частоты сессий на 50% за последние 14 дней.', playerCount: 890, createdAt: '2024-07-03', createdBy: 'AI' },
   { id: '4', name: 'Сделали первый депозит', description: 'Игроки, которые совершили свой первый депозит за последний месяц.', playerCount: 2100, createdAt: '2024-06-15', createdBy: 'Пользователь' },
-  { id: '5', name: 'Спящие (30+ дней)', description: 'Игроки, не заходившие в игру более 30 дней.', playerCount: 450, createdAt: '2024-05-20', createdBy: 'Пользователь' },
-  { id: '6', name: 'Любители слотов', description: 'Игроки, которые 80% времени проводят в слотах.', playerCount: 5400, createdAt: '2024-07-04', createdBy: 'AI' },
+  { id: '5', name: 'Спящие (30+ дней)', description: 'Игроки, не заходившие в игру более 30 дней, но имеющие хотя бы 1 депозит в истории.', playerCount: 450, createdAt: '2024-05-20', createdBy: 'Пользователь' },
+  { id: '6', name: 'Любители слотов', description: 'Игроки, у которых 80% игрового времени приходится на слоты.', playerCount: 5400, createdAt: '2024-07-04', createdBy: 'AI' },
 ];
 
 export const templatesData: TemplateData[] = [
@@ -261,7 +266,7 @@ export const templatesData: TemplateData[] = [
     { id: '2', name: 'Реактивация "спящих"', description: 'Push-уведомление с бонусом для игроков, неактивных 30+ дней.', category: 'Reactivation', performance: 4, channel: 'Push' },
     { id: '3', name: 'Бонус для VIP-игроков', description: 'Еженедельное эксклюзивное предложение для сегмента VIP.', category: 'Retention', performance: 5, channel: 'Multi-channel' },
     { id: '4', name: 'Запрос обратной связи', description: 'In-app сообщение с просьбой оценить игру после 5 сессий.', category: 'Feedback', performance: 3, channel: 'InApp' },
-    { id: '5', name: 'Напоминание о брошенной корзине', description: 'SMS-напоминание игрокам, которые начали, но не завершили депозит.', category: 'Conversion', performance: 4, channel: 'SMS' },
+    { id: '5', name: 'Напоминание о брошенном депозите', description: 'SMS-напоминание игрокам, которые начали, но не завершили процесс пополнения.', category: 'Conversion', performance: 4, channel: 'SMS' },
 ];
 
 export const reportsData: ReportData[] = [

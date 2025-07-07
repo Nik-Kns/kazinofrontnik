@@ -11,7 +11,8 @@ export type KpiCardData = {
 
 export type ScenarioData = {
   name: string;
-  type: string;
+  category: string;
+  frequency: "Регулярный" | "Разовый" | "Триггерный";
   channel: "Email" | "Push" | "SMS" | "InApp" | "Multi-channel";
   status: "Активен" | "Пауза" | "Завершён";
   segment: string;
@@ -73,3 +74,13 @@ export type CampaignData = {
   date: string; // e.g. "2024-07-15"
   type: "Email" | "Push" | "Promo";
 };
+
+export type ScenarioNodeData = {
+  id: string;
+  type: 'trigger' | 'action' | 'logic';
+  title: string;
+  description?: string;
+  icon: React.ElementType;
+  position: { top: number; left: string; transform?: string };
+  config?: any;
+}
