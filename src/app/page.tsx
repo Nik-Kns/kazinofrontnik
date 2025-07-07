@@ -6,15 +6,17 @@ import { RisksAndWarnings } from "@/components/dashboard/risks-and-warnings";
 
 export default function CommandCenterPage() {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="sticky top-0 z-10 bg-background/95 py-4 backdrop-blur-sm">
+    <div>
+      <div className="sticky top-0 z-10 bg-background/95 py-4 backdrop-blur-sm px-4 md:px-6 lg:px-8">
         <h1 className="text-2xl font-bold tracking-tight mb-4">Командный центр</h1>
         <Filters />
       </div>
-      <KpiGrid />
-      <ScenariosTable />
-      <AnalyticsCharts />
-      <RisksAndWarnings />
+      <div className="p-4 md:p-6 lg:p-8 flex flex-col gap-6">
+        <KpiGrid />
+        <ScenariosTable />
+        <AnalyticsCharts />
+        <RisksAndWarnings />
+      </div>
     </div>
   );
 }
