@@ -1,59 +1,70 @@
 "use client";
 
-import {
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
-    LayoutDashboard,
-    Repeat,
-    Users,
-    Workflow,
-    ClipboardCopy,
-    UserCircle,
-    Map,
-    BarChart2,
-    MessageSquare,
-    Bot,
-    Settings,
-    HelpCircle,
-    FileText,
-    Calendar,
-} from 'lucide-react';
+  LayoutDashboard,
+  Users,
+  Workflow,
+  ClipboardCopy,
+  BarChart2,
+  FileText,
+  Calendar,
+  Settings,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const navItems = [
-    { href: '/', label: 'Командный центр', icon: LayoutDashboard },
-    { href: '/segments', label: 'Сегменты', icon: Users },
-    { href: '/builder', label: 'Конструктор сценариев', icon: Workflow },
-    { href: '/templates', label: 'Шаблоны сценариев', icon: ClipboardCopy },
-    { href: '/analytics', label: 'Аналитика', icon: BarChart2 },
-    { href: '/reports', label: 'Отчёты', icon: FileText },
-    { href: '/calendar', label: 'Календарь кампаний', icon: Calendar },
-    { href: '/settings', label: 'Настройки', icon: Settings },
+  { href: "/", label: "Командный центр", icon: LayoutDashboard },
+  { href: "/segments", label: "Сегменты", icon: Users },
+  { href: "/builder", label: "Конструктор сценариев", icon: Workflow },
+  { href: "/templates", label: "Шаблоны сценариев", icon: ClipboardCopy },
+  { href: "/analytics", label: "Аналитика", icon: BarChart2 },
+  { href: "/reports", label: "Отчёты", icon: FileText },
+  { href: "/calendar", label: "Календарь кампаний", icon: Calendar },
+  { href: "/settings", label: "Настройки", icon: Settings },
 ];
 
-export default function SidebarNav() {
+export default function SidebarNav({ isCollapsed }: { isCollapsed: boolean }) {
   const pathname = usePathname();
 
   return (
-    <SidebarMenu>
-      {navItems.map((item) => (
-        <SidebarMenuItem key={item.href}>
-          <Link href={item.href} legacyBehavior passHref>
-            <SidebarMenuButton
-              isActive={pathname === item.href}
-              className="w-full justify-start"
-              tooltip={item.label}
-            >
-              <item.icon className="h-4 w-4 mr-2" />
-              <span>{item.label}</span>
-            </SidebarMenuButton>
-          </Link>
-        </SidebarMenuItem>
-      ))}
-    </SidebarMenu>
+    <TooltipProvider delayDuration={0}>
+      <nav className="grid gap-1 px-2 py-4">
+        {navItems.map((item) =>
+            <Tooltip key={item.href}>
+              <TooltipTrigger asChild>
+                <Button
+                  asChild
+                  variant={pathname === item.href ? "secondary" : "ghost"}
+                  className={cn(
+                    "w-full justify-start",
+                    isCollapsed && "h-10 w-10 justify-center"
+                  )}
+                >
+                  <Link href={item.href}>
+                    <item.icon className={cn("h-5 w-5", !isCollapsed && "mr-2")} />
+                    <span className={cn(isCollapsed ? "sr-only" : "")}>
+                      {item.label}
+                    </span>
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              {isCollapsed && (
+                <TooltipContent side="right" sideOffset={5}>
+                  {item.label}
+                </TooltipContent>
+              )}
+            </Tooltip>
+        )}
+      </nav>
+    </TooltipProvider>
   );
 }

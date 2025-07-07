@@ -1,19 +1,14 @@
 "use client";
 
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarInset,
-  SidebarHeader,
-  SidebarTrigger,
-  SidebarContent,
-  SidebarFooter,
-} from "@/components/ui/sidebar";
-import SidebarNav from "./sidebar-nav";
+import * as React from "react";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Button } from "../ui/button";
-import { Bell, BotMessageSquare } from "lucide-react";
+import {
+  Bell,
+  BotMessageSquare,
+  PanelLeft,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,57 +16,85 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import SidebarNav from "./sidebar-nav";
+import { cn } from "@/lib/utils";
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+
   return (
-    <SidebarProvider>
-      <Sidebar className="border-r" collapsible>
-        <SidebarHeader className="p-4">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Button variant="outline" size="icon" className="h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
-              <BotMessageSquare className="h-5 w-5" />
-              <span className="sr-only">Retentlytics AI</span>
-            </Button>
-            <h1 className="font-semibold text-lg tracking-tight group-data-[state=collapsed]:hidden">Retentlytics AI</h1>
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-10 hidden h-full flex-col border-r bg-background transition-all duration-300 sm:flex",
+          isCollapsed ? "w-20" : "w-64"
+        )}
+      >
+        <div className="flex h-16 shrink-0 items-center border-b px-4 lg:px-6">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-semibold text-primary"
+          >
+            <BotMessageSquare className="h-6 w-6" />
+            <span className={cn(isCollapsed && "hidden")}>Retentlytics AI</span>
+            <span className="sr-only">Retentlytics AI</span>
           </Link>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarNav />
-        </SidebarContent>
-        <SidebarFooter>
-          {/* Footer content if any */}
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset>
-        <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur-sm md:px-6">
-          <SidebarTrigger />
-          <div className="flex-1" />
+        </div>
+        <SidebarNav isCollapsed={isCollapsed} />
+      </aside>
+      <div
+        className={cn(
+          "flex flex-1 flex-col transition-all duration-300",
+          isCollapsed ? "sm:pl-20" : "sm:pl-64"
+        )}
+      >
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="sm:rounded-full"
+          >
+            <PanelLeft className="h-5 w-5" />
+            <span className="sr-only">Toggle sidebar</span>
+          </Button>
+
+          <div className="relative ml-auto flex-1 md:grow-0">
+            {/* Optional search bar can go here */}
+          </div>
           <Button variant="ghost" size="icon" className="rounded-full">
             <Bell className="h-5 w-5" />
-            <span className="sr-only">Notifications</span>
+            <span className="sr-only">Уведомления</span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="ghost" size="icon" className="overflow-hidden rounded-full">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src="https://placehold.co/36x36.png" alt="@user" data-ai-hint="person portrait" />
+                  <AvatarImage
+                    src="https://placehold.co/36x36.png"
+                    alt="@user"
+                    data-ai-hint="person portrait"
+                  />
                   <AvatarFallback>RA</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>Мой аккаунт</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
+              <DropdownMenuItem>Настройки</DropdownMenuItem>
+              <DropdownMenuItem>Поддержка</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem>Выйти</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <div className="flex-1 overflow-y-auto overflow-x-hidden">{children}</div>
-      </SidebarInset>
-    </SidebarProvider>
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+            {children}
+        </main>
+      </div>
+    </div>
   );
 }
