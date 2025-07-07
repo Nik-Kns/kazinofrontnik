@@ -46,6 +46,7 @@ export default function SidebarNav() {
             <SidebarMenuButton
               isActive={pathname === item.href}
               className="w-full justify-start"
+              tooltip={item.label}
             >
               <item.icon className="h-4 w-4 mr-2" />
               <span>{item.label}</span>

@@ -26,14 +26,14 @@ import {
 export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <Sidebar className="border-r">
+      <Sidebar className="border-r" collapsible>
         <SidebarHeader className="p-4">
           <Link href="/" className="flex items-center gap-2.5">
             <Button variant="outline" size="icon" className="h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
               <BotMessageSquare className="h-5 w-5" />
               <span className="sr-only">Retentlytics AI</span>
             </Button>
-            <h1 className="font-semibold text-lg tracking-tight">Retentlytics AI</h1>
+            <h1 className="font-semibold text-lg tracking-tight group-data-[state=collapsed]:hidden">Retentlytics AI</h1>
           </Link>
         </SidebarHeader>
         <SidebarContent>
@@ -45,7 +45,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarInset>
         <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur-sm md:px-6">
-          <SidebarTrigger className="md:hidden" />
+          <SidebarTrigger />
           <div className="flex-1" />
           <Button variant="ghost" size="icon" className="rounded-full">
             <Bell className="h-5 w-5" />

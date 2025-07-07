@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap } from "lucide-react";
+import { Activity, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift } from "lucide-react";
 
 const triggerElements = [
   { name: 'Регистрация', icon: PlusCircle, description: 'Сценарий запускается при регистрации нового пользователя.' },
@@ -14,6 +14,7 @@ const actionElements = [
   { name: 'Отправить Push', icon: Smartphone, description: 'Отправка push-уведомления.' },
   { name: 'Отправить SMS', icon: MessageSquare, description: 'Отправка SMS через Twilio.' },
   { name: 'In-App сообщение', icon: Zap, description: 'Показ сообщения внутри приложения.' },
+  { name: 'Начислить бонус', icon: Gift, description: 'Начисление бонусных баллов или фриспинов игроку.' },
 ];
 
 const logicElements = [
