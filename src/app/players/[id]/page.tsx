@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from 'react';
+import { useParams } from 'next/navigation';
 import { getPlayerDetails } from "@/lib/mock-data";
 import { PlayerProfileHeader } from "@/components/players/player-profile-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,17 +12,20 @@ import { PlayerAiAnalytics } from "@/components/players/player-ai-analytics";
 import { Bot, LineChart, List, Lock } from 'lucide-react';
 import type { PlayerData, PlayerDetails } from '@/lib/types';
 
-export default function PlayerProfilePage({ params }: { params: { id: string } }) {
+export default function PlayerProfilePage() {
+    const params = useParams<{ id: string }>();
     const [playerDetails, setPlayerDetails] = React.useState<PlayerDetails | null>(null);
 
     React.useEffect(() => {
-        const details = getPlayerDetails(params.id);
-        setPlayerDetails(details);
-    }, [params.id]);
+        if (params?.id) {
+            const details = getPlayerDetails(params.id);
+            setPlayerDetails(details);
+        }
+    }, [params]);
 
 
     if (!playerDetails) {
-        return <div className="p-8">Loading player profile...</div>
+        return <div className="p-8">Loading player profile...</div>;
     }
 
     return (
