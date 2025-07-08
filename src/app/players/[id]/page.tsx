@@ -8,7 +8,7 @@ import { PlayerKpiGrid } from "@/components/players/player-kpi-grid";
 import { PlayerActivityFeed } from "@/components/players/player-activity-feed";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlayerAiAnalytics } from "@/components/players/player-ai-analytics";
-import { Bot, LineChart, List, Lock, MessageSquare } from 'lucide-react';
+import { Bot, LineChart, List, Lock } from 'lucide-react';
 
 export default function PlayerProfilePage({ params }: { params: { id: string } }) {
     const playerDetails = getPlayerDetails(params.id);
@@ -25,8 +25,8 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                     <TabsTrigger value="chat"><Lock className="mr-2 h-4 w-4" />Чат (скоро)</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview" className="grid gap-6 md:grid-cols-5">
-                    <Card className="md:col-span-2">
+                <TabsContent value="overview" className="space-y-6">
+                    <Card>
                         <CardHeader>
                             <CardTitle>Демография и контакты</CardTitle>
                         </CardHeader>
@@ -39,9 +39,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                             ))}
                         </CardContent>
                     </Card>
-                    <div className="md:col-span-3">
-                         <PlayerKpiGrid kpis={playerDetails.kpis} />
-                    </div>
+                    <PlayerKpiGrid kpis={playerDetails.kpis} />
                 </TabsContent>
                 
                 <TabsContent value="activity">
