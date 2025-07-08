@@ -6,7 +6,7 @@ import { templatesData } from "@/lib/mock-data";
 import { ClipboardCopy, Filter, LayoutGrid, List, Mail, MessageSquare, PlusCircle, Smartphone, Star, Zap } from "lucide-react";
 
 
-const channelIcons = {
+const channelIcons: { [key: string]: React.ElementType } = {
   Email: Mail,
   Push: Smartphone,
   SMS: MessageSquare,

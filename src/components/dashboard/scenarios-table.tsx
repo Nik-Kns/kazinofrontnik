@@ -18,7 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { scenariosData } from "@/lib/mock-data";
-import { ArrowUpRight, Mail, MessageSquare, Smartphone, Zap } from "lucide-react";
+import { ArrowUpRight, FileText, Mail, MessageSquare, Smartphone, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const channelIcons = {
@@ -65,7 +65,7 @@ export function ScenariosTable() {
               <TableHead className="text-right">Open Rate</TableHead>
               <TableHead className="text-right">CTR</TableHead>
               <TableHead className="text-right">CR</TableHead>
-              <TableHead className="text-right">Подробнее</TableHead>
+              <TableHead className="text-right">Действия</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -98,8 +98,11 @@ export function ScenariosTable() {
                   <TableCell className="text-right">{scenario.ctr}</TableCell>
                   <TableCell className="text-right text-success font-semibold">{scenario.cr}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="icon">
                       <ArrowUpRight className="h-4 w-4" />
+                    </Button>
+                     <Button variant="ghost" size="icon">
+                      <FileText className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>

@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   Users,
   Workflow,
-  ClipboardCopy,
   BarChart2,
   FileText,
   Calendar,
@@ -24,8 +23,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/", label: "Дашборд", icon: LayoutDashboard },
   { href: "/segments", label: "Сегменты", icon: Users },
-  { href: "/builder", label: "Конструктор сценариев", icon: Workflow },
-  { href: "/templates", label: "Шаблоны сценариев", icon: ClipboardCopy },
+  { href: "/builder", label: "Сценарии", icon: Workflow },
   { href: "/analytics", label: "Аналитика", icon: BarChart2 },
   { href: "/reports", label: "Отчёты", icon: FileText },
   { href: "/calendar", label: "Календарь кампаний", icon: Calendar },
