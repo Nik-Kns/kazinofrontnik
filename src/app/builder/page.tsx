@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowDown, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb, ClipboardCopy, Star, FileText, ArrowUpRight } from "lucide-react";
+import { Activity, ArrowDown, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb, ClipboardCopy, Star, FileText, ArrowUpRight, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
@@ -289,7 +289,7 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: any, isOpen: bo
     )
 }
 
-const BuilderTab = () => {
+const BuilderTab = ({ onExit }: { onExit: () => void }) => {
     const [selectedNode, setSelectedNode] = React.useState<any>(null);
     const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
@@ -299,11 +299,16 @@ const BuilderTab = () => {
     };
 
     return (
-        <div className="flex h-[calc(100vh-14rem)] flex-col mt-6">
-            <header className="flex h-16 items-center justify-between border-b bg-background/95 px-6">
-                <div>
-                    <h1 className="text-xl font-bold tracking-tight">Welcome-цепочка для новичков</h1>
-                    <p className="text-sm text-muted-foreground">Создавайте автоматизированные CRM-цепочки</p>
+        <div className="flex h-full flex-1 flex-col">
+            <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background/95 px-6">
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" size="icon" onClick={onExit}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <div>
+                        <h1 className="text-xl font-bold tracking-tight">Welcome-цепочка для новичков</h1>
+                        <p className="text-sm text-muted-foreground">Создавайте автоматизированные CRM-цепочки</p>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline">Сохранить как черновик</Button>
@@ -316,9 +321,9 @@ const BuilderTab = () => {
             </header>
             <div className="grid flex-1 md:grid-cols-[260px_1fr]">
                 <aside className="hidden flex-col border-r bg-background/80 md:flex">
-                    <div className="flex-1 p-4">
+                    <div className="flex flex-1 flex-col p-4">
                         <h3 className="mb-4 text-lg font-semibold">Элементы</h3>
-                        <ScrollArea className="h-[calc(100vh-22rem)]">
+                        <ScrollArea className="flex-1">
                             <div className="space-y-6 p-1">
                                 <div>
                                     <h4 className="mb-2 text-sm font-medium text-muted-foreground">Триггеры</h4>
@@ -389,13 +394,28 @@ const BuilderTab = () => {
 
 
 export default function ScenariosPage() {
+    const [activeTab, setActiveTab] = React.useState('campaigns');
+    const [isBuilderMode, setIsBuilderMode] = React.useState(false);
+
+    const handleTabChange = (value: string) => {
+        if (value === 'builder') {
+            setIsBuilderMode(true);
+        } else {
+            setActiveTab(value);
+        }
+    };
+
+    if (isBuilderMode) {
+        return <BuilderTab onExit={() => setIsBuilderMode(false)} />;
+    }
+
     return (
         <div className="p-4 md:p-6 lg:p-8">
             <h1 className="text-2xl font-bold tracking-tight">Сценарии</h1>
             <p className="text-muted-foreground mb-6">
                 Создавайте, управляйте и анализируйте ваши CRM-кампании и сценарии.
             </p>
-            <Tabs defaultValue="campaigns" className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="campaigns">Все кампании</TabsTrigger>
                     <TabsTrigger value="active">Активные</TabsTrigger>
@@ -412,7 +432,7 @@ export default function ScenariosPage() {
                     <TemplatesTab />
                 </TabsContent>
                 <TabsContent value="builder">
-                    <BuilderTab />
+                    {/* The content is rendered conditionally at the top level */}
                 </TabsContent>
             </Tabs>
         </div>
