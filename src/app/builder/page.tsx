@@ -5,9 +5,9 @@ import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowDown, Bot, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb, ClipboardCopy, Star, FileText, ArrowLeft, Pencil, Sparkles } from "lucide-react";
+import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PlusCircle, Smartphone, Sparkles, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,6 +18,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { ScenarioData } from '@/lib/types';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
+
+import ReactFlow, {
+  Controls,
+  MiniMap,
+  Background,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  ReactFlowProvider,
+  Handle,
+  Position,
+  useReactFlow,
+  type Node,
+  type Edge,
+  type OnConnect,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
 
 // --- Helper components & data for TABS ---
 
@@ -167,53 +184,31 @@ const TemplatesTab = () => (
 // --- Builder Components ---
 
 const triggerElements = [
-  { name: 'Попадание в сегмент', icon: GitBranch, description: 'Срабатывает при попадании игрока в определенный сегмент.', type: 'segment_trigger' },
-  { name: 'Регистрация', icon: PlusCircle, description: 'Сценарий запускается при регистрации нового пользователя.', type: 'registration_trigger' },
-  { name: 'Первый депозит', icon: CheckCircle, description: 'Срабатывает после первого пополнения счета.', type: 'deposit_trigger' },
+  { name: 'Попадание в сегмент', icon: GitBranch, description: 'Срабатывает при попадании игрока в определенный сегмент.', type: 'segmentTrigger' },
+  { name: 'Регистрация', icon: PlusCircle, description: 'Сценарий запускается при регистрации нового пользователя.', type: 'registrationTrigger' },
+  { name: 'Первый депозит', icon: CheckCircle, description: 'Срабатывает после первого пополнения счета.', type: 'depositTrigger' },
 ];
 
 const actionElements = [
-  { name: 'Отправить Email', icon: Mail, description: 'Отправка email-сообщения через SendGrid.', type: 'email_action' },
-  { name: 'Отправить Push', icon: Smartphone, description: 'Отправка push-уведомления.', type: 'push_action' },
-  { name: 'Отправить SMS', icon: MessageSquare, description: 'Отправка SMS через Twilio.', type: 'sms_action' },
-  { name: 'In-App сообщение', icon: Zap, description: 'Показ сообщения внутри приложения.', type: 'inapp_action' },
-  { name: 'Начислить бонус', icon: Gift, description: 'Начисление бонусных баллов или фриспинов игроку.', type: 'bonus_action' },
+  { name: 'Отправить Email', icon: Mail, description: 'Отправка email-сообщения через SendGrid.', type: 'emailAction' },
+  { name: 'Отправить Push', icon: Smartphone, description: 'Отправка push-уведомления.', type: 'pushAction' },
+  { name: 'Отправить SMS', icon: MessageSquare, description: 'Отправка SMS через Twilio.', type: 'smsAction' },
+  { name: 'In-App сообщение', icon: Zap, description: 'Показ сообщения внутри приложения.', type: 'inappAction' },
+  { name: 'Начислить бонус', icon: Gift, description: 'Начисление бонусных баллов или фриспинов игроку.', type: 'bonusAction' },
 ];
 
 const logicElements = [
-  { name: 'Задержка', icon: Clock, description: 'Пауза в сценарии на заданное время.', type: 'delay_logic' },
-  { name: 'Условие "Если/То"', icon: GitBranch, description: 'Разветвление сценария на основе данных игрока.', type: 'if_else_logic' },
-  { name: 'A/B тест', icon: Activity, description: 'Разделение аудитории для проверки гипотез.', type: 'ab_test_logic' },
+  { name: 'Задержка', icon: Clock, description: 'Пауза в сценарии на заданное время.', type: 'delayLogic' },
+  { name: 'Условие "Если/То"', icon: GitBranch, description: 'Разветвление сценария на основе данных игрока.', type: 'ifElseLogic' },
+  { name: 'A/B тест', icon: Activity, description: 'Разделение аудитории для проверки гипотез.', type: 'abTestLogic' },
 ];
 
-const ScenarioNode = ({ icon: Icon, title, children, className, onClick }: { icon: React.ElementType, title: string, children?: React.ReactNode, className?: string, onClick?: () => void }) => {
-  return (
-    <Card className={cn("w-72 absolute shadow-lg hover:shadow-xl transition-shadow bg-card z-10 cursor-pointer hover:border-primary", className)} onClick={onClick}>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3 mb-2">
-          <Icon className="h-5 w-5 text-primary" />
-          <h4 className="font-semibold">{title}</h4>
-        </div>
-        {children}
-      </CardContent>
-    </Card>
-  )
-};
 
-const Connector = ({ className, label }: { className?: string, label?: string }) => {
-  return (
-    <div className={cn("absolute bg-muted-foreground/50 flex items-center justify-center z-0", className)}>
-        {label && <Badge variant="secondary" className="z-10 text-xs">{label}</Badge>}
-      <ArrowDown className="h-4 w-4 text-muted-foreground/80 absolute" />
-    </div>
-  )
-};
-
-const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: any, isOpen: boolean, onOpenChange: (open: boolean) => void }) => {
+const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: Node | null, isOpen: boolean, onOpenChange: (open: boolean) => void }) => {
     if (!node) return null;
 
     const renderForm = () => {
-        switch(node.type) {
+        switch(node.data.configType) {
             case 'segment_trigger':
                 return (
                      <div className="space-y-4">
@@ -229,7 +224,7 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: any, isOpen: bo
                         <Card className="bg-muted/50">
                             <CardContent className="p-3 text-sm text-muted-foreground">
                                 <p className="font-bold mb-2">Описание сегмента:</p>
-                                {segmentsData.find(s => s.id === (node.config?.segmentId || segmentsData[2].id))?.description}
+                                {segmentsData.find(s => s.id === (node.data.config?.segmentId || segmentsData[2].id))?.description}
                             </CardContent>
                         </Card>
                      </div>
@@ -353,7 +348,7 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: any, isOpen: bo
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
             <SheetContent className="sm:max-w-md">
                 <SheetHeader>
-                    <SheetTitle>Настройка: {node.title}</SheetTitle>
+                    <SheetTitle>Настройка: {node.data.label}</SheetTitle>
                     <SheetDescription>
                         Отредактируйте параметры для выбранного элемента сценария.
                     </SheetDescription>
@@ -374,17 +369,110 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: any, isOpen: bo
     )
 }
 
-const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioData | null }) => {
-    const [selectedNode, setSelectedNode] = React.useState<any>(null);
-    const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+// --- React Flow Implementation ---
 
-    const handleNodeClick = (node: any) => {
+const initialNodes: Node[] = [
+  { id: '1', type: 'custom', position: { x: 250, y: 5 }, data: { label: 'Триггер: Попал в сегмент', description: 'Сегмент: Риск оттока (предиктивный)', icon: GitBranch, configType: 'segment_trigger' } },
+  { id: '2', type: 'custom', position: { x: 250, y: 155 }, data: { label: 'Условие: VIP игрок?', description: 'Если Lifetime Spend > €1000', icon: GitBranch, configType: 'if_else_logic' } },
+  { id: '3', type: 'custom', position: { x: 50, y: 305 }, data: { label: 'Действие: Начислить бонус', description: 'Тип: Кэшбек, Кол-во: 10%', icon: Gift, configType: 'bonus_action' } },
+  { id: '4', type: 'custom', position: { x: 450, y: 305 }, data: { label: 'Логика: A/B тест', description: 'Разделение 50% / 50%', icon: Activity, configType: 'ab_test_logic' } },
+  { id: '5', type: 'custom', position: { x: 350, y: 455 }, data: { label: 'Действие: Email (Скидка)', description: 'Шаблон: "Скидка 15%"', icon: Mail, configType: 'email_action' } },
+  { id: '6', type: 'custom', position: { x: 550, y: 455 }, data: { label: 'Действие: Email (Бонус)', description: 'Шаблон: "Бонус 25 FS"', icon: Mail, configType: 'email_action' } },
+];
+
+const initialEdges: Edge[] = [
+  { id: 'e1-2', source: '1', target: '2', animated: true },
+  { id: 'e2-3', source: '2', target: '3', label: 'Да' },
+  { id: 'e2-4', source: '2', target: '4', label: 'Нет' },
+  { id: 'e4-5', source: '4', target: '5', label: 'Ветка A' },
+  { id: 'e4-6', source: '4', target: '6', label: 'Ветка B' },
+];
+
+const CustomNode = ({ data }: { data: { label: string, description: string, icon: React.ElementType } }) => {
+  const Icon = data.icon;
+  return (
+    <>
+      <Handle type="target" position={Position.Top} className="!bg-primary" />
+      <Card className="w-72 shadow-lg hover:shadow-xl transition-shadow bg-card z-10 hover:border-primary">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <Icon className="h-5 w-5 text-primary" />
+            <h4 className="font-semibold">{data.label}</h4>
+          </div>
+          <p className="text-sm text-muted-foreground">{data.description}</p>
+        </CardContent>
+      </Card>
+      <Handle type="source" position={Position.Bottom} className="!bg-primary" />
+    </>
+  );
+};
+
+const nodeTypes = {
+  custom: CustomNode,
+};
+
+let id = 7;
+const getId = () => `dndnode_${id++}`;
+
+const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioData | null }) => {
+    const reactFlowWrapper = React.useRef<HTMLDivElement>(null);
+    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    const [selectedNode, setSelectedNode] = React.useState<Node | null>(null);
+    const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+    const { screenToFlowPosition } = useReactFlow();
+
+    const onConnect: OnConnect = React.useCallback(
+        (params) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
+        [setEdges]
+    );
+
+    const handleNodeClick = React.useCallback((event: React.MouseEvent, node: Node) => {
         setSelectedNode(node);
         setIsSheetOpen(true);
+    }, []);
+
+    const onDragStart = (event: React.DragEvent<HTMLDivElement>, nodeInfo: any) => {
+        event.dataTransfer.setData('application/reactflow', JSON.stringify(nodeInfo));
+        event.dataTransfer.effectAllowed = 'move';
     };
 
-    const DraggableNode = ({ item }: { item: { name: string, icon: React.ElementType, description: string } }) => (
-        <div className="mb-2 cursor-grab rounded-lg border p-3 hover:shadow-md active:cursor-grabbing bg-background">
+    const onDragOver = React.useCallback((event: React.DragEvent) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+    }, []);
+
+    const onDrop = React.useCallback(
+        (event: React.DragEvent) => {
+            event.preventDefault();
+            if (!reactFlowWrapper.current) return;
+
+            const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+            const nodeInfo = JSON.parse(event.dataTransfer.getData('application/reactflow'));
+            
+            const position = screenToFlowPosition({
+                x: event.clientX - reactFlowBounds.left,
+                y: event.clientY - reactFlowBounds.top,
+            });
+
+            const newNode: Node = {
+                id: getId(),
+                type: 'custom',
+                position,
+                data: { label: nodeInfo.name, description: nodeInfo.description, icon: nodeInfo.icon, configType: nodeInfo.type },
+            };
+            
+            setNodes((nds) => nds.concat(newNode));
+        },
+        [screenToFlowPosition, setNodes]
+    );
+
+    const DraggableNode = ({ item }: { item: { name: string, icon: React.ElementType, description: string, type: string } }) => (
+        <div
+            className="mb-2 cursor-grab rounded-lg border p-3 hover:shadow-md active:cursor-grabbing bg-background"
+            onDragStart={(event) => onDragStart(event, { ...item, icon: item.icon.displayName })}
+            draggable
+        >
             <div className="flex items-center gap-3">
                 <item.icon className="h-5 w-5 text-primary" />
                 <span className="font-semibold">{item.name}</span>
@@ -392,10 +480,15 @@ const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: Scenar
             <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
         </div>
     );
+    
+    // Assign displayName for serialization
+    triggerElements.forEach(el => el.icon.displayName = el.icon.name);
+    actionElements.forEach(el => el.icon.displayName = el.icon.name);
+    logicElements.forEach(el => el.icon.displayName = el.icon.name);
 
     return (
-        <div className="flex h-full flex-1 flex-col">
-            <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background/95 px-6 flex-wrap gap-2">
+        <div className="fixed inset-0 bg-background z-50 flex flex-col">
+            <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background/95 px-6 flex-wrap gap-2 z-10">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" onClick={onExit}>
                         <ArrowLeft className="h-4 w-4" />
@@ -437,59 +530,35 @@ const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: Scenar
                         </ScrollArea>
                     </div>
                 </aside>
-                <main className="flex-1 overflow-auto p-6 bg-muted/30">
-                    <div className="relative h-[800px] w-full rounded-lg border-2 border-dashed border-muted bg-background p-8">
-                        {/* Canvas Content */}
-                        <ScenarioNode icon={GitBranch} title="Триггер: Попал в сегмент" className="top-10 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Триггер: Попал в сегмент', type: 'segment_trigger' })}>
-                            <p className="text-sm text-muted-foreground">Сегмент: <span className="font-semibold text-foreground">Риск оттока (предиктивный)</span></p>
-                        </ScenarioNode>
-
-                        <Connector className="top-[108px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
-
-                        <ScenarioNode icon={GitBranch} title="Условие: VIP игрок?" className="top-44 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Условие: VIP игрок?', type: 'if_else_logic' })}>
-                            <p className="text-sm text-muted-foreground">Если Lifetime Spend &gt; €1000</p>
-                        </ScenarioNode>
-                        
-                        {/* YES Branch */}
-                        <Connector className="top-[252px] left-[calc(50%-150px)] -translate-x-1/2 w-0.5 h-16" label="Да" />
-                        <div className="absolute top-[252px] left-1/2 h-0.5 w-[150px] bg-muted-foreground/50 z-0"></div>
-                        <div className="absolute top-[252px] left-[calc(50%-150px)] h-[1px] w-[1px] bg-muted-foreground/50 z-0"></div>
-
-                        <ScenarioNode icon={Gift} title="Действие: Начислить бонус" className="top-80 left-[calc(50%-150px)] -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Начислить бонус', type: 'bonus_action' })}>
-                            <p className="text-sm text-muted-foreground">Тип: Кэшбек, Кол-во: 10%</p>
-                        </ScenarioNode>
-
-                        {/* NO Branch */}
-                        <Connector className="top-[252px] left-[calc(50%+150px)] -translate-x-1/2 w-0.5 h-16" label="Нет"/>
-                        <div className="absolute top-[252px] left-[calc(50%)] h-0.5 w-[150px] bg-muted-foreground/50 z-0"></div>
-                        <div className="absolute top-[252px] left-[calc(50%+150px)] h-[1px] w-[1px] bg-muted-foreground/50 z-0"></div>
-
-                        <ScenarioNode icon={Activity} title="Логика: A/B тест" className="top-80 left-[calc(50%+150px)] -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Логика: A/B тест', type: 'ab_test_logic' })}>
-                             <p className="text-sm text-muted-foreground">Разделение 50% / 50%</p>
-                        </ScenarioNode>
-
-                        <Connector className="top-[388px] left-[calc(50%+150px)] -translate-x-1/2 w-0.5 h-16" />
-
-                        {/* A/B Branches */}
-                        <Connector className="top-[496px] left-[calc(50%+75px)] -translate-x-1/2 w-0.5 h-16" label="A"/>
-                        <div className="absolute top-[496px] left-[calc(50%+75px)] h-0.5 w-[75px] bg-muted-foreground/50 z-0"></div>
-
-                        <ScenarioNode icon={Mail} title="Действие: Email (Скидка)" className="top-[550px] left-[calc(50%+75px)] -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Отправить Email', type: 'email_action' })}>
-                           <p className="text-sm text-muted-foreground">Шаблон: "Скидка 15%"</p>
-                        </ScenarioNode>
-
-                        <Connector className="top-[496px] left-[calc(50%+225px)] -translate-x-1/2 w-0.5 h-16" label="B" />
-                        <div className="absolute top-[496px] left-[calc(50%+150px)] h-0.5 w-[75px] bg-muted-foreground/50 z-0"></div>
-                         <ScenarioNode icon={Mail} title="Действие: Email (Бонус)" className="top-[550px] left-[calc(50%+225px)] -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Отправить Email', type: 'email_action' })}>
-                           <p className="text-sm text-muted-foreground">Шаблон: "Бонус 25 FS"</p>
-                        </ScenarioNode>
-                    </div>
+                <main className="flex-1" ref={reactFlowWrapper}>
+                    <ReactFlow
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                        onNodeClick={handleNodeClick}
+                        nodeTypes={nodeTypes}
+                        onDrop={onDrop}
+                        onDragOver={onDragOver}
+                        fitView
+                    >
+                        <Controls />
+                        <MiniMap />
+                        <Background gap={16} />
+                    </ReactFlow>
                 </main>
             </div>
             <NodeConfigPanel node={selectedNode} isOpen={isSheetOpen} onOpenChange={setIsSheetOpen} />
         </div>
-    )
+    );
 };
+
+const BuilderWrapper = (props: { onExit: () => void; scenario: ScenarioData | null }) => (
+    <ReactFlowProvider>
+        <Builder {...props} />
+    </ReactFlowProvider>
+);
 
 
 export default function ScenariosPage() {
@@ -504,7 +573,7 @@ export default function ScenariosPage() {
 
     const handleTabChange = (value: string) => {
         if (value === 'builder') {
-            setEditingScenario(null); // Ensure we're creating a new scenario
+            setEditingScenario(null);
             setIsBuilderMode(true);
         } else {
             setIsBuilderMode(false);
@@ -515,12 +584,7 @@ export default function ScenariosPage() {
     const handleExitBuilder = () => {
         setIsBuilderMode(false);
         setEditingScenario(null);
-        setActiveTab('campaigns'); // Go back to the campaigns list
     };
-
-    if (isBuilderMode) {
-        return <BuilderTab onExit={handleExitBuilder} scenario={editingScenario} />;
-    }
 
     return (
         <div className="p-4 md:p-6 lg:p-8">
@@ -544,10 +608,9 @@ export default function ScenariosPage() {
                 <TabsContent value="templates" className="mt-6">
                     <TemplatesTab />
                 </TabsContent>
-                <TabsContent value="builder">
-                    {/* The content is rendered conditionally at the top level */}
-                </TabsContent>
             </Tabs>
+
+            {isBuilderMode && <BuilderWrapper onExit={handleExitBuilder} scenario={editingScenario} />}
         </div>
     );
 }
