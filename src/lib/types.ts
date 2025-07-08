@@ -84,3 +84,24 @@ export type ScenarioNodeData = {
   position: { top: number; left: string; transform?: string };
   config?: any;
 }
+
+export type WebhookLogData = {
+  id: string;
+  timestamp: string;
+  service: 'SendGrid' | 'Twilio' | 'Custom';
+  event: string;
+  status: 'Success' | 'Failed';
+  requestId: string;
+};
+
+export type CampaignPerformanceData = {
+  id: string;
+  campaignName: string;
+  segment: string;
+  sent: number;
+  delivered: number;
+  openRate: string;
+  ctr: string;
+  cr: string;
+  revenue: number;
+};

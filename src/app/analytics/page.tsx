@@ -4,6 +4,7 @@ import { KpiGrid } from "@/components/dashboard/kpi-grid";
 import { AnalyticsCharts } from "@/components/dashboard/analytics-charts";
 import { Filters } from "@/components/dashboard/filters";
 import { HandCoins, TrendingUp, Users } from "lucide-react";
+import { CampaignPerformanceTable } from "@/components/analytics/campaign-performance-table";
 
 export default function AnalyticsPage() {
   return (
@@ -22,6 +23,7 @@ export default function AnalyticsPage() {
           <TabsTrigger value="crm"><Users className="mr-2 h-4 w-4" />CRM</TabsTrigger>
           <TabsTrigger value="finance"><HandCoins className="mr-2 h-4 w-4" />Финансы</TabsTrigger>
         </TabsList>
+
         <TabsContent value="retention" className="space-y-6">
             <Card>
                 <CardHeader>
@@ -32,20 +34,14 @@ export default function AnalyticsPage() {
                     <KpiGrid />
                 </CardContent>
             </Card>
-             <AnalyticsCharts />
-        </TabsContent>
-        <TabsContent value="crm" className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Ключевые метрики CRM</CardTitle>
-                    <CardDescription>Обзор показателей эффективности кампаний.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <KpiGrid />
-                </CardContent>
-            </Card>
             <AnalyticsCharts />
         </TabsContent>
+
+        <TabsContent value="crm" className="space-y-6">
+            <CampaignPerformanceTable />
+            <AnalyticsCharts />
+        </TabsContent>
+
         <TabsContent value="finance" className="space-y-6">
             <Card>
                 <CardHeader>

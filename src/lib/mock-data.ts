@@ -1,4 +1,4 @@
-import type { KpiCardData, ScenarioData, ChartData, RiskData, SegmentData, TemplateData, ReportData, CampaignData } from "@/lib/types";
+import type { KpiCardData, ScenarioData, ChartData, RiskData, SegmentData, TemplateData, ReportData, CampaignData, WebhookLogData, CampaignPerformanceData } from "@/lib/types";
 import type { LucideIcon } from "lucide-react";
 import {
   Mail,
@@ -283,4 +283,21 @@ export const campaignsData: CampaignData[] = [
     { id: '4', name: 'VIP Bonus Drop', date: '2024-07-12', type: 'Email' },
     { id: '5', name: 'Weekend Tournament', date: '2024-07-19', type: 'Promo' },
     { id: '6', name: 'Feedback Request', date: '2024-07-22', type: 'Push' },
+];
+
+export const webhookLogsData: WebhookLogData[] = [
+  { id: '1', timestamp: '2024-07-10 14:01:59', service: 'SendGrid', event: 'email.delivered', status: 'Success', requestId: 'd-12345...' },
+  { id: '2', timestamp: '2024-07-10 14:01:58', service: 'SendGrid', event: 'email.open', status: 'Success', requestId: 'd-12345...' },
+  { id: '3', timestamp: '2024-07-10 14:00:12', service: 'Twilio', event: 'sms.sent', status: 'Success', requestId: 'SM-6789...' },
+  { id: '4', timestamp: '2024-07-10 13:55:05', service: 'Custom', event: 'user.level_up', status: 'Success', requestId: 'evt-abc...' },
+  { id: '5', timestamp: '2024-07-10 13:50:21', service: 'SendGrid', event: 'email.bounce', status: 'Failed', requestId: 'd-09876...' },
+  { id: '6', timestamp: '2024-07-10 13:45:10', service: 'Twilio', event: 'sms.failed', status: 'Failed', requestId: 'SM-5432...' },
+];
+
+export const campaignPerformanceData: CampaignPerformanceData[] = [
+    { id: '1', campaignName: 'Welcome Chain', segment: 'Новички', sent: 1250, delivered: 1243, openRate: '45.2%', ctr: '12.3%', cr: '8.1%', revenue: 12850 },
+    { id: '2', campaignName: 'Churn Reactivation', segment: 'Спящие', sent: 450, delivered: 414, openRate: '15.8%', ctr: '5.2%', cr: '2.3%', revenue: 3420 },
+    { id: '3', campaignName: 'VIP Weekly Bonus', segment: 'VIP-игроки', sent: 320, delivered: 320, openRate: '65.7%', ctr: '25.1%', cr: '18.9%', revenue: 21500 },
+    { id: '4', campaignName: 'Summer Promo', segment: 'Все активные', sent: 8540, delivered: 8321, openRate: 'N/A', ctr: '8.9%', cr: '4.5%', revenue: 31200 },
+    { id: '5', campaignName: 'Q2 Survey', segment: 'Активные 90д', sent: 6300, delivered: 6300, openRate: '100%', ctr: '35.6%', cr: '30.1%', revenue: 0 },
 ];
