@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PlusCircle, Smartphone, Sparkles, Star, Zap } from "lucide-react";
+import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
@@ -30,6 +30,9 @@ import ReactFlow, {
   Handle,
   Position,
   useReactFlow,
+  getBezierPath,
+  EdgeLabelRenderer,
+  BaseEdge,
   type Node,
   type Edge,
   type OnConnect,
@@ -203,13 +206,19 @@ const logicElements = [
   { name: 'A/B тест', icon: Activity, description: 'Разделение аудитории для проверки гипотез.', type: 'abTestLogic' },
 ];
 
+const elementLibrary = {
+    ...triggerElements.reduce((acc, el) => ({ ...acc, [el.type]: el }), {}),
+    ...actionElements.reduce((acc, el) => ({ ...acc, [el.type]: el }), {}),
+    ...logicElements.reduce((acc, el) => ({ ...acc, [el.type]: el }), {}),
+};
+
 
 const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: Node | null, isOpen: boolean, onOpenChange: (open: boolean) => void }) => {
     if (!node) return null;
 
     const renderForm = () => {
         switch(node.data.configType) {
-            case 'segment_trigger':
+            case 'segmentTrigger':
                 return (
                      <div className="space-y-4">
                         <Label>Выберите сегмент</Label>
@@ -229,7 +238,7 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: Node | null, is
                         </Card>
                      </div>
                 );
-            case 'email_action':
+            case 'emailAction':
                 return (
                     <div className="space-y-4">
                         <div>
@@ -272,7 +281,7 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: Node | null, is
                         </div>
                     </div>
                 )
-            case 'if_else_logic':
+            case 'ifElseLogic':
                 return (
                     <div className="space-y-4">
                        <Label>Условие ветвления</Label>
@@ -293,7 +302,7 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: Node | null, is
                        <p className="text-sm text-muted-foreground">Пользователи, не соответствующие правилу, пойдут по ветке "Else".</p>
                     </div>
                 )
-             case 'ab_test_logic':
+             case 'abTestLogic':
                 return (
                     <div className="space-y-6">
                         <Label>Разделение трафика</Label>
@@ -309,7 +318,7 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: Node | null, is
                         <p className="text-xs text-muted-foreground">Аудитория будет случайным образом разделена в указанной пропорции для отправки разных версий сообщения.</p>
                     </div>
                 )
-            case 'bonus_action':
+            case 'bonusAction':
                  return (
                      <div className="space-y-4">
                          <div>
@@ -372,20 +381,20 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: Node | null, is
 // --- React Flow Implementation ---
 
 const initialNodes: Node[] = [
-  { id: '1', type: 'custom', position: { x: 250, y: 5 }, data: { label: 'Триггер: Попал в сегмент', description: 'Сегмент: Риск оттока (предиктивный)', icon: GitBranch, configType: 'segment_trigger' } },
-  { id: '2', type: 'custom', position: { x: 250, y: 155 }, data: { label: 'Условие: VIP игрок?', description: 'Если Lifetime Spend > €1000', icon: GitBranch, configType: 'if_else_logic' } },
-  { id: '3', type: 'custom', position: { x: 50, y: 305 }, data: { label: 'Действие: Начислить бонус', description: 'Тип: Кэшбек, Кол-во: 10%', icon: Gift, configType: 'bonus_action' } },
-  { id: '4', type: 'custom', position: { x: 450, y: 305 }, data: { label: 'Логика: A/B тест', description: 'Разделение 50% / 50%', icon: Activity, configType: 'ab_test_logic' } },
-  { id: '5', type: 'custom', position: { x: 350, y: 455 }, data: { label: 'Действие: Email (Скидка)', description: 'Шаблон: "Скидка 15%"', icon: Mail, configType: 'email_action' } },
-  { id: '6', type: 'custom', position: { x: 550, y: 455 }, data: { label: 'Действие: Email (Бонус)', description: 'Шаблон: "Бонус 25 FS"', icon: Mail, configType: 'email_action' } },
+  { id: '1', type: 'custom', position: { x: 250, y: 5 }, data: { label: 'Триггер: Попал в сегмент', description: 'Сегмент: Риск оттока (предиктивный)', icon: GitBranch, configType: 'segmentTrigger' } },
+  { id: '2', type: 'custom', position: { x: 250, y: 155 }, data: { label: 'Условие: VIP игрок?', description: 'Если Lifetime Spend > €1000', icon: GitBranch, configType: 'ifElseLogic' } },
+  { id: '3', type: 'custom', position: { x: 50, y: 305 }, data: { label: 'Действие: Начислить бонус', description: 'Тип: Кэшбек, Кол-во: 10%', icon: Gift, configType: 'bonusAction' } },
+  { id: '4', type: 'custom', position: { x: 450, y: 305 }, data: { label: 'Логика: A/B тест', description: 'Разделение 50% / 50%', icon: Activity, configType: 'abTestLogic' } },
+  { id: '5', type: 'custom', position: { x: 350, y: 455 }, data: { label: 'Действие: Email (Скидка)', description: 'Шаблон: "Скидка 15%"', icon: Mail, configType: 'emailAction' } },
+  { id: '6', type: 'custom', position: { x: 550, y: 455 }, data: { label: 'Действие: Email (Бонус)', description: 'Шаблон: "Бонус 25 FS"', icon: Mail, configType: 'emailAction' } },
 ];
 
 const initialEdges: Edge[] = [
-  { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e2-3', source: '2', target: '3', label: 'Да' },
-  { id: 'e2-4', source: '2', target: '4', label: 'Нет' },
-  { id: 'e4-5', source: '4', target: '5', label: 'Ветка A' },
-  { id: 'e4-6', source: '4', target: '6', label: 'Ветка B' },
+  { id: 'e1-2', source: '1', target: '2', animated: true, type: 'custom' },
+  { id: 'e2-3', source: '2', target: '3', label: 'Да', type: 'custom' },
+  { id: 'e2-4', source: '2', target: '4', label: 'Нет', type: 'custom' },
+  { id: 'e4-5', source: '4', target: '5', label: 'Ветка A', type: 'custom' },
+  { id: 'e4-6', source: '4', target: '6', label: 'Ветка B', type: 'custom' },
 ];
 
 const CustomNode = ({ data }: { data: { label: string, description: string, icon: React.ElementType } }) => {
@@ -407,8 +416,64 @@ const CustomNode = ({ data }: { data: { label: string, description: string, icon
   );
 };
 
+function CustomEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style = {}, label }: any) {
+  const { setEdges } = useReactFlow();
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+
+  const onEdgeClick = (evt: React.MouseEvent) => {
+    evt.stopPropagation();
+    setEdges((edges) => edges.filter((edge) => edge.id !== id));
+  };
+
+  return (
+    <>
+      <BaseEdge path={edgePath} style={style} />
+      <EdgeLabelRenderer>
+        <div
+          style={{
+            position: 'absolute',
+            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+            pointerEvents: 'all',
+          }}
+          className="nodrag nopan bg-background p-1 rounded-md text-xs font-semibold"
+        >
+          {label}
+        </div>
+        <div
+           style={{
+            position: 'absolute',
+            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+            pointerEvents: 'all',
+          }}
+          className="nodrag nopan group"
+        >
+            <Button
+                variant="destructive"
+                className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                size="icon"
+                onClick={onEdgeClick}
+                >
+                <Trash2 className="h-3 w-3" />
+            </Button>
+        </div>
+      </EdgeLabelRenderer>
+    </>
+  );
+}
+
 const nodeTypes = {
   custom: CustomNode,
+};
+
+const edgeTypes = {
+  custom: CustomEdge,
 };
 
 let id = 7;
@@ -423,7 +488,7 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
     const { screenToFlowPosition } = useReactFlow();
 
     const onConnect: OnConnect = React.useCallback(
-        (params) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
+        (params) => setEdges((eds) => addEdge({ ...params, animated: true, type: 'custom' }, eds)),
         [setEdges]
     );
 
@@ -432,8 +497,8 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
         setIsSheetOpen(true);
     }, []);
 
-    const onDragStart = (event: React.DragEvent<HTMLDivElement>, nodeInfo: any) => {
-        event.dataTransfer.setData('application/reactflow', JSON.stringify(nodeInfo));
+    const onDragStart = (event: React.DragEvent<HTMLDivElement>, nodeType: string) => {
+        event.dataTransfer.setData('application/reactflow', nodeType);
         event.dataTransfer.effectAllowed = 'move';
     };
 
@@ -445,21 +510,28 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
     const onDrop = React.useCallback(
         (event: React.DragEvent) => {
             event.preventDefault();
-            if (!reactFlowWrapper.current) return;
 
-            const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
-            const nodeInfo = JSON.parse(event.dataTransfer.getData('application/reactflow'));
-            
+            if (!reactFlowWrapper.current) return;
+            const type = event.dataTransfer.getData('application/reactflow');
+
+            if (typeof type === 'undefined' || !type) {
+                return;
+            }
+
             const position = screenToFlowPosition({
-                x: event.clientX - reactFlowBounds.left,
-                y: event.clientY - reactFlowBounds.top,
+                x: event.clientX,
+                y: event.clientY,
             });
+
+            const elementInfo = elementLibrary[type as keyof typeof elementLibrary];
+
+            if (!elementInfo) return;
 
             const newNode: Node = {
                 id: getId(),
                 type: 'custom',
                 position,
-                data: { label: nodeInfo.name, description: nodeInfo.description, icon: nodeInfo.icon, configType: nodeInfo.type },
+                data: { label: elementInfo.name, description: elementInfo.description, icon: elementInfo.icon, configType: elementInfo.type },
             };
             
             setNodes((nds) => nds.concat(newNode));
@@ -470,7 +542,7 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
     const DraggableNode = ({ item }: { item: { name: string, icon: React.ElementType, description: string, type: string } }) => (
         <div
             className="mb-2 cursor-grab rounded-lg border p-3 hover:shadow-md active:cursor-grabbing bg-background"
-            onDragStart={(event) => onDragStart(event, { ...item, icon: item.icon.displayName })}
+            onDragStart={(event) => onDragStart(event, item.type)}
             draggable
         >
             <div className="flex items-center gap-3">
@@ -481,11 +553,6 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
         </div>
     );
     
-    // Assign displayName for serialization
-    triggerElements.forEach(el => el.icon.displayName = el.icon.name);
-    actionElements.forEach(el => el.icon.displayName = el.icon.name);
-    logicElements.forEach(el => el.icon.displayName = el.icon.name);
-
     return (
         <div className="fixed inset-0 bg-background z-50 flex flex-col">
             <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background/95 px-6 flex-wrap gap-2 z-10">
@@ -539,6 +606,7 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
                         onConnect={onConnect}
                         onNodeClick={handleNodeClick}
                         nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
                         onDrop={onDrop}
                         onDragOver={onDragOver}
                         fitView

@@ -26,7 +26,9 @@ export type ScenarioData = {
 
 export type ChartData = {
   date: string;
-  [key: string]: number | string;
+  value: number | null;
+  predictedValue?: number | null;
+  [key: string]: number | string | null | undefined;
 };
 
 export type RiskData = {

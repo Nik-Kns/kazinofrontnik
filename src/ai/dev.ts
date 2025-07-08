@@ -9,3 +9,4 @@ import '@/ai/flows/generate-segments.ts';
 import '@/ai/flows/ai-copilot-improvement.ts';
 import '@/ai/flows/ai-insights-retention.ts';
 import '@/ai/flows/ai-recommendation-risks.ts';
+import '@/ai/flows/explain-metric-prediction.ts';
