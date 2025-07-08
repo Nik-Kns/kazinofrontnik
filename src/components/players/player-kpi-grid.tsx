@@ -7,7 +7,7 @@ export function PlayerKpiGrid({ kpis }: { kpis: PlayerKpi[] }) {
             <CardHeader>
                 <CardTitle>Ключевые метрики</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {kpis.map((kpi) => (
                     <div key={kpi.title} className="bg-muted/50 p-3 rounded-lg">
                         <p className="text-sm text-muted-foreground">{kpi.title}</p>

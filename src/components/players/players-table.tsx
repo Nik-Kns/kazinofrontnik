@@ -52,7 +52,7 @@ export function PlayersTable() {
                                         </Avatar>
                                         <div>
                                             <p className="font-medium">{player.name}</p>
-                                            <p className="text-xs text-muted-foreground">{player.email}</p>
+                                            <p className="text-xs text-muted-foreground">ID: usr_{player.id.padStart(8, '0')}</p>
                                         </div>
                                     </div>
                                 </TableCell>

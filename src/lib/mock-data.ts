@@ -300,11 +300,11 @@ export const campaignPerformanceData: CampaignPerformanceData[] = [
 ];
 
 export const playersData: PlayerData[] = [
-    { id: '1', name: 'John "Gamer" Doe', avatar: 'https://placehold.co/40x40.png', email: 'john.d@example.com', ltv: 1250, lastSeen: '2 часа назад', churnRisk: 'Низкий', status: 'Активен' },
-    { id: '2', name: 'Jane "Winner" Smith', avatar: 'https://placehold.co/40x40.png', email: 'jane.s@example.com', ltv: 5320, lastSeen: '1 день назад', churnRisk: 'Низкий', status: 'Активен' },
-    { id: '3', name: 'Peter "Sleeper" Jones', avatar: 'https://placehold.co/40x40.png', email: 'peter.j@example.com', ltv: 320, lastSeen: '35 дней назад', churnRisk: 'Высокий', status: 'Спящий' },
-    { id: '4', name: 'Mary "HighRoller" White', avatar: 'https://placehold.co/40x40.png', email: 'mary.w@example.com', ltv: 25800, lastSeen: '2 дня назад', churnRisk: 'Средний', status: 'Активен' },
-    { id: '5', name: 'Chris "Churned" Green', avatar: 'https://placehold.co/40x40.png', email: 'chris.g@example.com', ltv: 150, lastSeen: '95 дней назад', churnRisk: 'Высокий', status: 'Отток' },
+    { id: '1', name: 'John "Gamer" Doe', avatar: 'https://placehold.co/40x40.png', ltv: 1250, lastSeen: '2 часа назад', churnRisk: 'Низкий', status: 'Активен' },
+    { id: '2', name: 'Jane "Winner" Smith', avatar: 'https://placehold.co/40x40.png', ltv: 5320, lastSeen: '1 день назад', churnRisk: 'Низкий', status: 'Активен' },
+    { id: '3', name: 'Peter "Sleeper" Jones', avatar: 'https://placehold.co/40x40.png', ltv: 320, lastSeen: '35 дней назад', churnRisk: 'Высокий', status: 'Спящий' },
+    { id: '4', name: 'Mary "HighRoller" White', avatar: 'https://placehold.co/40x40.png', ltv: 25800, lastSeen: '2 дня назад', churnRisk: 'Средний', status: 'Активен' },
+    { id: '5', name: 'Chris "Churned" Green', avatar: 'https://placehold.co/40x40.png', ltv: 150, lastSeen: '95 дней назад', churnRisk: 'Высокий', status: 'Отток' },
 ];
 
 export const getPlayerDetails = (id: string) => {
@@ -318,12 +318,15 @@ export const getPlayerDetails = (id: string) => {
             "Страна": "Германия",
             "Язык": "DE",
             "Дата регистрации": "2023-05-12",
+            "Устройство": "iPhone 15 Pro",
         },
         kpis: [
             { title: "Lifetime Value", value: `€${playerBase.ltv.toLocaleString()}`},
             { title: "Средний депозит", value: "€52.50"},
             { title: "Всего депозитов", value: "24"},
             { title: "Всего выводов", value: "5"},
+            { title: "NGR (Net Gaming Revenue)", value: "€820"},
+            { title: "RTP (Return to Player)", value: "96.5%"},
             { title: "Кол-во сессий (30д)", value: "48"},
             { title: "Сред. длит. сессии", value: "25 мин"},
         ] as PlayerKpi[],

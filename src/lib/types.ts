@@ -110,7 +110,6 @@ export type PlayerData = {
     id: string;
     name: string;
     avatar: string;
-    email: string;
     ltv: number;
     lastSeen: string;
     churnRisk: 'Низкий' | 'Средний' | 'Высокий';
