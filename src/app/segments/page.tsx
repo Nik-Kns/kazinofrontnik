@@ -118,7 +118,7 @@ export default function SegmentsPage() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
             <h1 className="text-2xl font-bold tracking-tight">Сегменты</h1>
             <p className="text-muted-foreground">Создание и управление сегментами пользователей для CRM-кампаний.</p>
@@ -167,7 +167,7 @@ export default function SegmentsPage() {
                    <div className="p-4 border-2 border-dashed rounded-lg space-y-3">
                     <Label>Правила сегментации</Label>
                     {rules.map((rule, index) => (
-                         <div key={rule.id} className="flex items-center gap-2">
+                         <div key={rule.id} className="flex flex-col sm:flex-row items-center gap-2">
                             <Select defaultValue={rule.attribute}>
                                 <SelectTrigger><SelectValue placeholder="Атрибут" /></SelectTrigger>
                                 <SelectContent>

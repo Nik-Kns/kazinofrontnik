@@ -6,7 +6,7 @@ import { templatesData } from "@/lib/mock-data";
 import { ClipboardCopy, Filter, LayoutGrid, List, Mail, MessageSquare, PlusCircle, Smartphone, Star, Zap } from "lucide-react";
 
 
-const channelIcons: { [key: string]: React.ElementType } = {
+const channelIcons: Record<string, React.ElementType> = {
   Email: Mail,
   Push: Smartphone,
   SMS: MessageSquare,
@@ -25,12 +25,12 @@ const PerformanceStars = ({ count }: { count: number }) => (
 export default function TemplatesPage() {
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
-       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
             <h1 className="text-2xl font-bold tracking-tight">Шаблоны сценариев</h1>
             <p className="text-muted-foreground">Библиотека готовых шаблонов для быстрого старта ваших кампаний.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
             <div className="relative w-full md:w-64">
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Поиск по шаблонам..." className="pl-10" />

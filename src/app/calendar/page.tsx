@@ -41,7 +41,7 @@ const campaignsByDate = campaignsData.reduce((acc, campaign) => {
     return acc;
 }, {} as Record<number, typeof campaignsData>);
 
-const campaignColors = {
+const campaignColors: Record<string, string> = {
     Email: "bg-blue-200 border-blue-400",
     Push: "bg-purple-200 border-purple-400",
     Promo: "bg-green-200 border-green-400",
@@ -52,12 +52,12 @@ export default function CalendarPage() {
   return (
     <div className="p-4 md:p-6 lg:p-8">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
                 <CardTitle>Календарь кампаний</CardTitle>
                 <CardDescription>Визуальный план всех активностей с просмотром по месяцам.</CardDescription>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon">
                         <ChevronLeft className="h-4 w-4" />
@@ -79,7 +79,7 @@ export default function CalendarPage() {
                     <div key={day} className="border-b border-r p-2 text-center font-semibold text-muted-foreground">{day}</div>
                 ))}
                 {calendarDays.map((dayInfo, index) => (
-                    <div key={index} className={`h-36 border-b border-r p-2 ${dayInfo.isCurrentMonth ? '' : 'bg-muted/50'}`}>
+                    <div key={index} className={`h-36 border-b border-r p-2 overflow-y-auto ${dayInfo.isCurrentMonth ? '' : 'bg-muted/50'}`}>
                         {dayInfo.day && (
                             <>
                                 <span className={`font-medium ${dayInfo.isCurrentMonth ? '' : 'text-muted-foreground'}`}>{dayInfo.day.getDate()}</span>

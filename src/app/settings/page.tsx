@@ -14,7 +14,7 @@ export default function SettingsPage() {
     <div className="p-4 md:p-6 lg:p-8">
       <h1 className="text-2xl font-bold tracking-tight mb-4">Настройки</h1>
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-6 mb-6">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-6">
           <TabsTrigger value="profile"><CircleUserRound className="mr-2 h-4 w-4" />Профиль</TabsTrigger>
           <TabsTrigger value="access"><ShieldCheck className="mr-2 h-4 w-4" />Доступ</TabsTrigger>
           <TabsTrigger value="integrations"><LinkIcon className="mr-2 h-4 w-4" />Интеграции</TabsTrigger>

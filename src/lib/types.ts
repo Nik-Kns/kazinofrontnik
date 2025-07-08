@@ -130,3 +130,18 @@ export type PlayerActivityEvent = {
     value?: string;
     icon: React.ElementType;
 };
+
+export type PlayerDetails = PlayerData & {
+  demographics: {
+      "ID клиента": string;
+      "Пол": string;
+      "Возраст": string;
+      "Страна": string;
+      "Язык": string;
+      "Дата регистрации": string;
+      "Устройство": string;
+  };
+  kpis: PlayerKpi[];
+  activity: PlayerActivityEvent[];
+  aiCharts: any[];
+};

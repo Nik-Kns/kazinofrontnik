@@ -9,9 +9,20 @@ import { PlayerActivityFeed } from "@/components/players/player-activity-feed";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlayerAiAnalytics } from "@/components/players/player-ai-analytics";
 import { Bot, LineChart, List, Lock } from 'lucide-react';
+import type { PlayerData, PlayerDetails } from '@/lib/types';
 
 export default function PlayerProfilePage({ params }: { params: { id: string } }) {
-    const playerDetails = getPlayerDetails(params.id);
+    const [playerDetails, setPlayerDetails] = React.useState<PlayerDetails | null>(null);
+
+    React.useEffect(() => {
+        const details = getPlayerDetails(params.id);
+        setPlayerDetails(details);
+    }, [params.id]);
+
+
+    if (!playerDetails) {
+        return <div className="p-8">Loading player profile...</div>
+    }
 
     return (
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -34,7 +45,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                             {Object.entries(playerDetails.demographics).map(([key, value]) => (
                                 <div key={key} className="flex justify-between">
                                     <span className="text-muted-foreground">{key}:</span>
-                                    <span className="font-medium">{value}</span>
+                                    <span className="font-medium">{String(value)}</span>
                                 </div>
                             ))}
                         </CardContent>

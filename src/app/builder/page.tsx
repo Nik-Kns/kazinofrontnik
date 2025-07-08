@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowDown, Bot, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb, ClipboardCopy, Star, FileText, ArrowUpRight, ArrowLeft, Pencil, Sparkles } from "lucide-react";
+import { Activity, ArrowDown, Bot, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb, ClipboardCopy, Star, FileText, ArrowLeft, Pencil, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
@@ -39,7 +39,7 @@ const PerformanceStars = ({ count }: { count: number }) => (
 );
 
 // For "Campaigns" Tab
-const channelIconsScenarios = {
+const channelIconsScenarios: Record<string, React.ElementType> = {
   Email: Mail,
   Push: Smartphone,
   SMS: MessageSquare,
@@ -395,7 +395,7 @@ const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: Scenar
 
     return (
         <div className="flex h-full flex-1 flex-col">
-            <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background/95 px-6">
+            <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background/95 px-6 flex-wrap gap-2">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" onClick={onExit}>
                         <ArrowLeft className="h-4 w-4" />
@@ -405,7 +405,7 @@ const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: Scenar
                         <p className="text-sm text-muted-foreground">Создавайте автоматизированные CRM-цепочки</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                     <Button variant="outline" size="sm"> <Sparkles className="mr-2 h-4 w-4" />Prettify</Button>
                     <Button variant="outline">Сохранить как черновик</Button>
                     <Button>Активировать сценарий</Button>
@@ -529,7 +529,7 @@ export default function ScenariosPage() {
                 Создавайте, управляйте и анализируйте ваши CRM-кампании и сценарии.
             </p>
             <Tabs value={isBuilderMode ? 'builder' : activeTab} onValueChange={handleTabChange} className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                     <TabsTrigger value="campaigns">Все кампании</TabsTrigger>
                     <TabsTrigger value="active">Активные</TabsTrigger>
                     <TabsTrigger value="templates">Шаблоны сценариев</TabsTrigger>
