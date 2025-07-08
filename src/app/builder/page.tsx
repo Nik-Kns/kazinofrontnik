@@ -1,10 +1,11 @@
+
 "use client";
 
 import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowDown, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb, ClipboardCopy, Star, FileText, ArrowUpRight, ArrowLeft } from "lucide-react";
+import { Activity, ArrowDown, Bot, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb, ClipboardCopy, Star, FileText, ArrowUpRight, ArrowLeft, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
@@ -14,6 +15,9 @@ import { segmentsData, scenariosData, templatesData } from '@/lib/mock-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import type { ScenarioData } from '@/lib/types';
+import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
 
 // --- Helper components & data for TABS ---
 
@@ -57,7 +61,7 @@ const frequencyColors: { [key: string]: string } = {
 
 // --- TAB COMPONENTS ---
 
-const AllCampaignsTab = () => (
+const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void }) => (
     <Card>
       <CardHeader>
         <CardTitle>Все сценарии и кампании</CardTitle>
@@ -106,8 +110,8 @@ const AllCampaignsTab = () => (
                   <TableCell>{scenario.goal}</TableCell>
                   <TableCell className="text-right text-success font-semibold">{scenario.cr}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon">
-                      <ArrowUpRight className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
+                      <Pencil className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon">
                       <FileText className="h-4 w-4" />
@@ -160,7 +164,7 @@ const TemplatesTab = () => (
 );
 
 
-// --- Builder Components (from original page) ---
+// --- Builder Components ---
 
 const triggerElements = [
   { name: 'Попадание в сегмент', icon: GitBranch, description: 'Срабатывает при попадании игрока в определенный сегмент.', type: 'segment_trigger' },
@@ -196,10 +200,11 @@ const ScenarioNode = ({ icon: Icon, title, children, className, onClick }: { ico
   )
 };
 
-const Connector = ({ className }: { className?: string }) => {
+const Connector = ({ className, label }: { className?: string, label?: string }) => {
   return (
     <div className={cn("absolute bg-muted-foreground/50 flex items-center justify-center z-0", className)}>
-      <ArrowDown className="h-4 w-4 text-muted-foreground/80" />
+        {label && <Badge variant="secondary" className="z-10 text-xs">{label}</Badge>}
+      <ArrowDown className="h-4 w-4 text-muted-foreground/80 absolute" />
     </div>
   )
 };
@@ -229,6 +234,86 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: any, isOpen: bo
                         </Card>
                      </div>
                 );
+            case 'email_action':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Интеграция</Label>
+                            <div className="flex items-center gap-2 rounded-md border p-2 bg-muted/50">
+                                <img src="https://www.vectorlogo.zone/logos/sendgrid/sendgrid-icon.svg" alt="SendGrid" className="h-5 w-5"/>
+                                <span className="text-sm font-medium">Отправка через SendGrid</span>
+                            </div>
+                        </div>
+                         <div>
+                            <Label htmlFor="email-template">Шаблон письма</Label>
+                            <Select defaultValue="we-miss-you">
+                                <SelectTrigger id="email-template"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="we-miss-you">We miss you bonus</SelectItem>
+                                    <SelectItem value="welcome-gift">Welcome Gift</SelectItem>
+                                    <SelectItem value="deposit-success">Успешный депозит</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <Label htmlFor="email-subject">Тема письма</Label>
+                            <Input id="email-subject" defaultValue="Для вас специальный бонус!"/>
+                        </div>
+                        <div>
+                            <Label>Контент</Label>
+                            <Tabs defaultValue="ai" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="ai"><Bot className="mr-2 h-4 w-4"/> С AI</TabsTrigger>
+                                    <TabsTrigger value="manual">Редактор</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="ai" className="pt-4 space-y-2">
+                                    <Textarea placeholder="Опишите суть письма: напомнить про бонус, поздравить с годовщиной регистрации..." defaultValue="Напомни игроку, что мы скучаем и даем ему 25 фриспинов на Book of Ra, если он вернется."/>
+                                    <Button className="w-full"><Bot className="mr-2 h-4 w-4"/>Сгенерировать</Button>
+                                </TabsContent>
+                                <TabsContent value="manual" className="pt-4">
+                                    <Textarea defaultValue="Привет, {{firstName}}! Мы скучали! Чтобы скрасить твое возвращение, мы начислили тебе 25 фриспинов в игре Book of Ra. Жми на кнопку и забирай свой подарок!" className="min-h-[200px]"/>
+                                </TabsContent>
+                            </Tabs>
+                        </div>
+                    </div>
+                )
+            case 'if_else_logic':
+                return (
+                    <div className="space-y-4">
+                       <Label>Условие ветвления</Label>
+                       <div className="p-4 border rounded-lg space-y-2 bg-muted/30">
+                           <p className="text-sm">Если пользователь соответствует правилу:</p>
+                           <div className="flex items-center gap-2">
+                               <Select defaultValue="Monetary Value (total spend)">
+                                   <SelectTrigger><SelectValue/></SelectTrigger>
+                                   <SelectContent><SelectItem value="Monetary Value (total spend)">Lifetime Spend</SelectItem></SelectContent>
+                               </Select>
+                               <Select defaultValue="больше чем">
+                                   <SelectTrigger><SelectValue/></SelectTrigger>
+                                   <SelectContent><SelectItem value="больше чем">больше чем</SelectItem></SelectContent>
+                               </Select>
+                               <Input placeholder="Значение" defaultValue="1000" />
+                           </div>
+                       </div>
+                       <p className="text-sm text-muted-foreground">Пользователи, не соответствующие правилу, пойдут по ветке "Else".</p>
+                    </div>
+                )
+             case 'ab_test_logic':
+                return (
+                    <div className="space-y-6">
+                        <Label>Разделение трафика</Label>
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm font-medium">Ветка A</span>
+                            <Slider defaultValue={[50]} max={100} step={1} />
+                            <span className="text-sm font-medium">Ветка B</span>
+                        </div>
+                        <div className="flex justify-between text-sm font-bold text-primary">
+                            <span>50%</span>
+                            <span>50%</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Аудитория будет случайным образом разделена в указанной пропорции для отправки разных версий сообщения.</p>
+                    </div>
+                )
             case 'bonus_action':
                  return (
                      <div className="space-y-4">
@@ -289,7 +374,7 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: any, isOpen: bo
     )
 }
 
-const BuilderTab = ({ onExit }: { onExit: () => void }) => {
+const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioData | null }) => {
     const [selectedNode, setSelectedNode] = React.useState<any>(null);
     const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
@@ -306,7 +391,7 @@ const BuilderTab = ({ onExit }: { onExit: () => void }) => {
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div>
-                        <h1 className="text-xl font-bold tracking-tight">Welcome-цепочка для новичков</h1>
+                        <h1 className="text-xl font-bold tracking-tight">{scenario?.name || "Новый сценарий"}</h1>
                         <p className="text-sm text-muted-foreground">Создавайте автоматизированные CRM-цепочки</p>
                     </div>
                 </div>
@@ -367,22 +452,49 @@ const BuilderTab = ({ onExit }: { onExit: () => void }) => {
                 </aside>
                 <main className="flex-1 p-6 bg-muted/30">
                     <div className="relative h-full w-full rounded-lg border-2 border-dashed border-muted bg-background overflow-auto p-8">
+                        {/* Canvas Content */}
                         <ScenarioNode icon={GitBranch} title="Триггер: Попал в сегмент" className="top-10 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Триггер: Попал в сегмент', type: 'segment_trigger' })}>
                             <p className="text-sm text-muted-foreground">Сегмент: <span className="font-semibold text-foreground">Риск оттока (предиктивный)</span></p>
                         </ScenarioNode>
+
                         <Connector className="top-[108px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
 
-                        <ScenarioNode icon={Gift} title="Действие: Начислить бонус" className="top-44 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Начислить бонус', type: 'bonus_action' })}>
-                            <p className="text-sm text-muted-foreground">Тип: Фриспины, Кол-во: 25</p>
+                        <ScenarioNode icon={GitBranch} title="Условие: VIP игрок?" className="top-44 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Условие: VIP игрок?', type: 'if_else_logic' })}>
+                            <p className="text-sm text-muted-foreground">Если Lifetime Spend &gt; €1000</p>
                         </ScenarioNode>
-                        <Connector className="top-[252px] left-1/2 -translate-x-1/2 w-0.5 h-16" />
+                        
+                        {/* YES Branch */}
+                        <Connector className="top-[252px] left-[calc(50%-150px)] -translate-x-1/2 w-0.5 h-16" label="Да" />
+                        <div className="absolute top-[252px] left-1/2 h-0.5 w-[150px] bg-muted-foreground/50 z-0"></div>
+                        <div className="absolute top-[252px] left-[calc(50%-150px)] h-[1px] w-[1px] bg-muted-foreground/50 z-0"></div>
 
-                        <ScenarioNode icon={Mail} title="Действие: Отправить Email" className="top-80 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Отправить Email', type: 'email_action' })}>
-                            <p className="text-sm text-muted-foreground mb-3">Шаблон: "We miss you bonus".</p>
-                            <Button variant="outline" size="sm" className="w-full">
-                                <Lightbulb className="mr-2 h-4 w-4 text-yellow-400" />
-                                Улучшить контент с AI
-                            </Button>
+                        <ScenarioNode icon={Gift} title="Действие: Начислить бонус" className="top-80 left-[calc(50%-150px)] -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Начислить бонус', type: 'bonus_action' })}>
+                            <p className="text-sm text-muted-foreground">Тип: Кэшбек, Кол-во: 10%</p>
+                        </ScenarioNode>
+
+                        {/* NO Branch */}
+                        <Connector className="top-[252px] left-[calc(50%+150px)] -translate-x-1/2 w-0.5 h-16" label="Нет"/>
+                        <div className="absolute top-[252px] left-[calc(50%)] h-0.5 w-[150px] bg-muted-foreground/50 z-0"></div>
+                        <div className="absolute top-[252px] left-[calc(50%+150px)] h-[1px] w-[1px] bg-muted-foreground/50 z-0"></div>
+
+                        <ScenarioNode icon={Activity} title="Логика: A/B тест" className="top-80 left-[calc(50%+150px)] -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Логика: A/B тест', type: 'ab_test_logic' })}>
+                             <p className="text-sm text-muted-foreground">Разделение 50% / 50%</p>
+                        </ScenarioNode>
+
+                        <Connector className="top-[388px] left-[calc(50%+150px)] -translate-x-1/2 w-0.5 h-16" />
+
+                        {/* A/B Branches */}
+                        <Connector className="top-[496px] left-[calc(50%+75px)] -translate-x-1/2 w-0.5 h-16" label="A"/>
+                        <div className="absolute top-[496px] left-[calc(50%+75px)] h-0.5 w-[75px] bg-muted-foreground/50 z-0"></div>
+
+                        <ScenarioNode icon={Mail} title="Действие: Email (Скидка)" className="top-[550px] left-[calc(50%+75px)] -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Отправить Email', type: 'email_action' })}>
+                           <p className="text-sm text-muted-foreground">Шаблон: "Скидка 15%"</p>
+                        </ScenarioNode>
+
+                        <Connector className="top-[496px] left-[calc(50%+225px)] -translate-x-1/2 w-0.5 h-16" label="B" />
+                        <div className="absolute top-[496px] left-[calc(50%+150px)] h-0.5 w-[75px] bg-muted-foreground/50 z-0"></div>
+                         <ScenarioNode icon={Mail} title="Действие: Email (Бонус)" className="top-[550px] left-[calc(50%+225px)] -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Действие: Отправить Email', type: 'email_action' })}>
+                           <p className="text-sm text-muted-foreground">Шаблон: "Бонус 25 FS"</p>
                         </ScenarioNode>
                     </div>
                 </main>
@@ -396,17 +508,31 @@ const BuilderTab = ({ onExit }: { onExit: () => void }) => {
 export default function ScenariosPage() {
     const [activeTab, setActiveTab] = React.useState('campaigns');
     const [isBuilderMode, setIsBuilderMode] = React.useState(false);
+    const [editingScenario, setEditingScenario] = React.useState<ScenarioData | null>(null);
+
+    const handleEditClick = (scenario: ScenarioData) => {
+        setEditingScenario(scenario);
+        setIsBuilderMode(true);
+    };
 
     const handleTabChange = (value: string) => {
         if (value === 'builder') {
+            setEditingScenario(null); // Ensure we're creating a new scenario
             setIsBuilderMode(true);
         } else {
+            setIsBuilderMode(false);
             setActiveTab(value);
         }
     };
+    
+    const handleExitBuilder = () => {
+        setIsBuilderMode(false);
+        setEditingScenario(null);
+        setActiveTab('campaigns'); // Go back to the campaigns list
+    };
 
     if (isBuilderMode) {
-        return <BuilderTab onExit={() => setIsBuilderMode(false)} />;
+        return <BuilderTab onExit={handleExitBuilder} scenario={editingScenario} />;
     }
 
     return (
@@ -415,7 +541,7 @@ export default function ScenariosPage() {
             <p className="text-muted-foreground mb-6">
                 Создавайте, управляйте и анализируйте ваши CRM-кампании и сценарии.
             </p>
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <Tabs value={isBuilderMode ? 'builder' : activeTab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="campaigns">Все кампании</TabsTrigger>
                     <TabsTrigger value="active">Активные</TabsTrigger>
@@ -423,10 +549,10 @@ export default function ScenariosPage() {
                     <TabsTrigger value="builder">Конструктор</TabsTrigger>
                 </TabsList>
                 <TabsContent value="campaigns" className="mt-6">
-                    <AllCampaignsTab />
+                    <AllCampaignsTab onEdit={handleEditClick} />
                 </TabsContent>
                 <TabsContent value="active" className="mt-6">
-                    <AllCampaignsTab />
+                    <AllCampaignsTab onEdit={handleEditClick} />
                 </TabsContent>
                 <TabsContent value="templates" className="mt-6">
                     <TemplatesTab />
@@ -438,3 +564,4 @@ export default function ScenariosPage() {
         </div>
     );
 }
+
