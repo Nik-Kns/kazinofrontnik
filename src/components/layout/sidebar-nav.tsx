@@ -26,6 +26,7 @@ const navItems = [
   { href: "/segments", label: "Сегменты", icon: Users },
   { href: "/builder", label: "Конструктор сценариев", icon: Workflow },
   { href: "/templates", label: "Шаблоны сценариев", icon: ClipboardCopy },
+  { href: "/analytics", label: "Аналитика", icon: BarChart2 },
   { href: "/reports", label: "Отчёты", icon: FileText },
   { href: "/calendar", label: "Календарь кампаний", icon: Calendar },
   { href: "/settings", label: "Настройки", icon: Settings },

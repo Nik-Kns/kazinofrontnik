@@ -20,20 +20,74 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SegmentData } from '@/lib/types';
 
 
-const segmentAttributes = [
-    "Recency", "Frequency", "Monetary Value", "Country", "Age", "Gender", "Last Login Date", "Churn Probability", "Total Revenue"
+const segmentAttributeGroups = [
+    {
+      label: "Базовые атрибуты",
+      attributes: [
+        "Coins Balance", "Coins Earned Last Week", "Coins Redeemed Lifetime", "Comms Preference", "Conversion Probability Score", "Country", "Currency", "Customer ID", "Registration Date", "First Purchase Date", "Last Purchase Date", "Age", "birthday", "Gender", "Email", "Phone Number", "Language", "Time Zone"
+      ],
+    },
+    {
+      label: "RFM и монетарные метрики",
+      attributes: [
+        "Recency (days since last purchase)", "Frequency (purchase frequency)", "Monetary Value (total spend)", "Average Order Value", "Total Revenue", "Total Orders", "Revenue Last 30 Days", "Revenue Last 90 Days", "Revenue Lifetime", "Orders Last 30 Days", "Orders Last 90 Days", "Orders Lifetime"
+      ],
+    },
+    {
+      label: "Поведенческие атрибуты",
+      attributes: [
+        "Website Sessions", "Page Views", "Time on Site", "games types played", "Bounce Rate", "Cart Abandonment", "Product Views", "Category Preferences", "Brand Preferences", "Purchase Channel", "Device Type", "Browser Type", "Operating System"
+      ],
+    },
+    {
+      label: "Предиктивные скоры (ИИ)",
+      attributes: [
+        "Churn Probability", "Predicted LTV", "Propensity to Buy", "Upsell Propensity", "Cross-sell Propensity", "Retention Probability", "Engagement Score", "Loyalty Score"
+      ],
+    },
+    {
+      label: "Кампании и коммуникации",
+      attributes: [
+        "Campaign Response History", "Email Open Rate", "Email Click Rate", "SMS Response Rate", "phone call answer rate", "Push Notification Response", "Channel Preference", "Communication Frequency", "Last Campaign Response", "Total Campaign Responses"
+      ],
+    },
+    {
+      label: "Жизненный цикл",
+      attributes: [
+        "Customer Lifecycle Stage", "Tenure (days since registration)", "Activation Status", "Onboarding Status", "VIP Status", "Loyalty Program Status", "Subscription Status"
+      ],
+    },
+    {
+      label: "Продуктовые атрибуты",
+      attributes: [
+        "Product Categories Purchased", "Discount Usage", "Promo Code Usage", "Return History", "Refund History", "Product Ratings Given", "Reviews Written"
+      ],
+    },
+    {
+      label: "Временные паттерны",
+      attributes: [
+        "Day of Week Preference", "Time of Day Preference", "Seasonal Patterns", "Holiday Behavior", "Weekend vs Weekday Activity"
+      ],
+    },
+    {
+      label: "Технические атрибуты",
+      attributes: [
+        "App Version", "Last Login Date", "Session Duration", "Feature Usage", "Error Events", "Performance Metrics"
+      ],
+    },
 ];
+
 const segmentConditions = [
     "равно", "не равно", "больше чем", "меньше чем", "содержит", "не содержит"
 ];
 
 
 export default function SegmentsPage() {
-    const [rules, setRules] = React.useState([{ id: 1, attribute: 'Recency', condition: 'больше чем', value: '30' }]);
+    const [rules, setRules] = React.useState([{ id: 1, attribute: 'Recency (days since last purchase)', condition: 'больше чем', value: '30' }]);
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [selectedSegment, setSelectedSegment] = React.useState<SegmentData | null>(null);
 
@@ -47,7 +101,7 @@ export default function SegmentsPage() {
 
     const handleCreateClick = () => {
         setSelectedSegment(null);
-        setRules([{ id: 1, attribute: 'Recency', condition: 'больше чем', value: '30' }]);
+        setRules([{ id: 1, attribute: 'Recency (days since last purchase)', condition: 'больше чем', value: '30' }]);
         setIsDialogOpen(true);
     }
 
@@ -55,7 +109,7 @@ export default function SegmentsPage() {
         setSelectedSegment(segment);
         // Mock rules for demo
         if (segment.name.includes('VIP')) {
-             setRules([{ id: 1, attribute: 'Monetary Value', condition: 'больше чем', value: '5000' }]);
+             setRules([{ id: 1, attribute: 'Monetary Value (total spend)', condition: 'больше чем', value: '5000' }]);
         } else {
              setRules([{ id: 1, attribute: 'Last Login Date', condition: 'больше чем', value: '7' }]);
         }
@@ -117,7 +171,12 @@ export default function SegmentsPage() {
                             <Select defaultValue={rule.attribute}>
                                 <SelectTrigger><SelectValue placeholder="Атрибут" /></SelectTrigger>
                                 <SelectContent>
-                                    {segmentAttributes.map(attr => <SelectItem key={attr} value={attr}>{attr}</SelectItem>)}
+                                    {segmentAttributeGroups.map(group => (
+                                        <SelectGroup key={group.label}>
+                                            <SelectLabel>{group.label}</SelectLabel>
+                                            {group.attributes.map(attr => <SelectItem key={attr} value={attr}>{attr}</SelectItem>)}
+                                        </SelectGroup>
+                                    ))}
                                 </SelectContent>
                             </Select>
                              <Select defaultValue={rule.condition}>
