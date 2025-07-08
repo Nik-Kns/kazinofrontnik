@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowDown, Bot, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb, ClipboardCopy, Star, FileText, ArrowUpRight, ArrowLeft, Pencil } from "lucide-react";
+import { Activity, ArrowDown, Bot, BotMessageSquare, CheckCircle, Clock, GitBranch, Mail, MessageSquare, PlusCircle, Smartphone, Zap, Gift, Lightbulb, ClipboardCopy, Star, FileText, ArrowUpRight, ArrowLeft, Pencil, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
@@ -383,6 +383,16 @@ const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: Scenar
         setIsSheetOpen(true);
     };
 
+    const DraggableNode = ({ item }: { item: { name: string, icon: React.ElementType, description: string } }) => (
+        <div className="mb-2 cursor-grab rounded-lg border p-3 hover:shadow-md active:cursor-grabbing bg-background">
+            <div className="flex items-center gap-3">
+                <item.icon className="h-5 w-5 text-primary" />
+                <span className="font-semibold">{item.name}</span>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
+        </div>
+    );
+
     return (
         <div className="flex h-full flex-1 flex-col">
             <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background/95 px-6">
@@ -396,6 +406,7 @@ const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: Scenar
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm"> <Sparkles className="mr-2 h-4 w-4" />Prettify</Button>
                     <Button variant="outline">Сохранить как черновик</Button>
                     <Button>Активировать сценарий</Button>
                     <Button variant="accent" className="bg-accent text-accent-foreground hover:bg-accent/90">
@@ -412,39 +423,15 @@ const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: Scenar
                             <div className="space-y-6 p-1">
                                 <div>
                                     <h4 className="mb-2 text-sm font-medium text-muted-foreground">Триггеры</h4>
-                                    {triggerElements.map(item => (
-                                        <div key={item.name} className="mb-2 cursor-grab rounded-lg border p-3 hover:shadow-md active:cursor-grabbing">
-                                            <div className="flex items-center gap-3">
-                                                <item.icon className="h-5 w-5 text-primary" />
-                                                <span className="font-semibold">{item.name}</span>
-                                            </div>
-                                            <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
-                                        </div>
-                                    ))}
+                                    {triggerElements.map(item => <DraggableNode key={item.name} item={item} />)}
                                 </div>
                                 <div>
                                     <h4 className="mb-2 text-sm font-medium text-muted-foreground">Действия</h4>
-                                    {actionElements.map(item => (
-                                        <div key={item.name} className="mb-2 cursor-grab rounded-lg border p-3 hover:shadow-md active:cursor-grabbing">
-                                            <div className="flex items-center gap-3">
-                                                <item.icon className="h-5 w-5 text-primary" />
-                                                <span className="font-semibold">{item.name}</span>
-                                            </div>
-                                            <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
-                                        </div>
-                                    ))}
+                                    {actionElements.map(item => <DraggableNode key={item.name} item={item} />)}
                                 </div>
                                 <div>
                                     <h4 className="mb-2 text-sm font-medium text-muted-foreground">Логика</h4>
-                                    {logicElements.map(item => (
-                                        <div key={item.name} className="mb-2 cursor-grab rounded-lg border p-3 hover:shadow-md active:cursor-grabbing">
-                                            <div className="flex items-center gap-3">
-                                                <item.icon className="h-5 w-5 text-primary" />
-                                                <span className="font-semibold">{item.name}</span>
-                                            </div>
-                                            <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
-                                        </div>
-                                    ))}
+                                    {logicElements.map(item => <DraggableNode key={item.name} item={item} />)}
                                 </div>
                             </div>
                         </ScrollArea>
@@ -564,4 +551,3 @@ export default function ScenariosPage() {
         </div>
     );
 }
-

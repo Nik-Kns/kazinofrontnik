@@ -10,6 +10,8 @@ import {
   FileText,
   Calendar,
   Settings,
+  FolderKanban,
+  Contact,
 } from "lucide-react";
 import {
   Tooltip,
@@ -22,7 +24,8 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", label: "Дашборд", icon: LayoutDashboard },
-  { href: "/segments", label: "Сегменты", icon: Users },
+  { href: "/players", label: "Игроки", icon: Users },
+  { href: "/segments", label: "Сегменты", icon: FolderKanban },
   { href: "/builder", label: "Сценарии", icon: Workflow },
   { href: "/analytics", label: "Аналитика", icon: BarChart2 },
   { href: "/reports", label: "Отчёты", icon: FileText },
@@ -41,7 +44,7 @@ export default function SidebarNav({ isCollapsed }: { isCollapsed: boolean }) {
               <TooltipTrigger asChild>
                 <Button
                   asChild
-                  variant={pathname === item.href ? "secondary" : "ghost"}
+                  variant={pathname.startsWith(item.href) && item.href !== '/' || pathname === item.href ? "secondary" : "ghost"}
                   className={cn(
                     "w-full justify-start",
                     isCollapsed && "h-10 w-10 justify-center"

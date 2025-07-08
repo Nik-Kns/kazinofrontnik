@@ -105,3 +105,29 @@ export type CampaignPerformanceData = {
   cr: string;
   revenue: number;
 };
+
+export type PlayerData = {
+    id: string;
+    name: string;
+    avatar: string;
+    email: string;
+    ltv: number;
+    lastSeen: string;
+    churnRisk: 'Низкий' | 'Средний' | 'Высокий';
+    status: 'Активен' | 'Спящий' | 'Отток';
+};
+
+export type PlayerKpi = {
+    title: string;
+    value: string;
+};
+
+export type PlayerActivityEvent = {
+    id: string;
+    timestamp: string;
+    type: 'deposit' | 'bet' | 'win' | 'session' | 'communication' | 'note';
+    title: string;
+    details: string;
+    value?: string;
+    icon: React.ElementType;
+};

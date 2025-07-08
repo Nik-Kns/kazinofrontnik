@@ -1,20 +1,17 @@
-import type { KpiCardData, ScenarioData, ChartData, RiskData, SegmentData, TemplateData, ReportData, CampaignData, WebhookLogData, CampaignPerformanceData } from "@/lib/types";
-import type { LucideIcon } from "lucide-react";
+import type { KpiCardData, ScenarioData, ChartData, RiskData, SegmentData, TemplateData, ReportData, CampaignData, WebhookLogData, CampaignPerformanceData, PlayerData, PlayerKpi, PlayerActivityEvent } from "@/lib/types";
 import {
   Mail,
-  MousePointerClick,
-  Target,
   TrendingUp,
   Users,
   RefreshCw,
   Euro,
   MailWarning,
-  AlertTriangle,
-  Lightbulb,
-  XCircle,
-  BarChart,
-  LineChart,
-  AreaChart,
+  MessageCircle,
+  Smartphone,
+  StickyNote,
+  LogIn,
+  Swords,
+  Trophy
 } from "lucide-react";
 
 export const kpiData: KpiCardData[] = [
@@ -157,11 +154,11 @@ export const scenariosData: ScenarioData[] = [
   },
 ];
 
-export const analyticsChartsData: { title: string; type: "line" | "area" | "bar", icon: LucideIcon, data: ChartData[] }[] = [
+export const analyticsChartsData: { title: string; type: "line" | "area" | "bar", icon: any, data: ChartData[] }[] = [
     {
         title: "Open Rate",
         type: "line",
-        icon: LineChart,
+        icon: TrendingUp,
         data: [
             { date: "Mon", value: 22 },
             { date: "Tue", value: 21 },
@@ -175,7 +172,7 @@ export const analyticsChartsData: { title: string; type: "line" | "area" | "bar"
     {
         title: "Conversion Rate",
         type: "line",
-        icon: LineChart,
+        icon: Users,
         data: [
             { date: "Mon", value: 2.1 },
             { date: "Tue", value: 2.3 },
@@ -189,7 +186,7 @@ export const analyticsChartsData: { title: string; type: "line" | "area" | "bar"
     {
         title: "Churn Rate",
         type: "line",
-        icon: LineChart,
+        icon: Users,
         data: [
             { date: "Mon", value: 1.5 },
             { date: "Tue", value: 1.6 },
@@ -203,7 +200,7 @@ export const analyticsChartsData: { title: string; type: "line" | "area" | "bar"
     {
         title: "CRM ROI",
         type: "area",
-        icon: AreaChart,
+        icon: Euro,
         data: [
             { date: "Mon", value: 150 },
             { date: "Tue", value: 180 },
@@ -301,3 +298,57 @@ export const campaignPerformanceData: CampaignPerformanceData[] = [
     { id: '4', campaignName: 'Summer Promo', segment: 'Все активные', sent: 8540, delivered: 8321, openRate: 'N/A', ctr: '8.9%', cr: '4.5%', revenue: 31200 },
     { id: '5', campaignName: 'Q2 Survey', segment: 'Активные 90д', sent: 6300, delivered: 6300, openRate: '100%', ctr: '35.6%', cr: '30.1%', revenue: 0 },
 ];
+
+export const playersData: PlayerData[] = [
+    { id: '1', name: 'John "Gamer" Doe', avatar: 'https://placehold.co/40x40.png', email: 'john.d@example.com', ltv: 1250, lastSeen: '2 часа назад', churnRisk: 'Низкий', status: 'Активен' },
+    { id: '2', name: 'Jane "Winner" Smith', avatar: 'https://placehold.co/40x40.png', email: 'jane.s@example.com', ltv: 5320, lastSeen: '1 день назад', churnRisk: 'Низкий', status: 'Активен' },
+    { id: '3', name: 'Peter "Sleeper" Jones', avatar: 'https://placehold.co/40x40.png', email: 'peter.j@example.com', ltv: 320, lastSeen: '35 дней назад', churnRisk: 'Высокий', status: 'Спящий' },
+    { id: '4', name: 'Mary "HighRoller" White', avatar: 'https://placehold.co/40x40.png', email: 'mary.w@example.com', ltv: 25800, lastSeen: '2 дня назад', churnRisk: 'Средний', status: 'Активен' },
+    { id: '5', name: 'Chris "Churned" Green', avatar: 'https://placehold.co/40x40.png', email: 'chris.g@example.com', ltv: 150, lastSeen: '95 дней назад', churnRisk: 'Высокий', status: 'Отток' },
+];
+
+export const getPlayerDetails = (id: string) => {
+    const playerBase = playersData.find(p => p.id === id) || playersData[0];
+    return {
+        ...playerBase,
+        demographics: {
+            "ID клиента": `usr_${id.padStart(8, '0')}`,
+            "Пол": "Мужской",
+            "Возраст": "34",
+            "Страна": "Германия",
+            "Язык": "DE",
+            "Дата регистрации": "2023-05-12",
+        },
+        kpis: [
+            { title: "Lifetime Value", value: `€${playerBase.ltv.toLocaleString()}`},
+            { title: "Средний депозит", value: "€52.50"},
+            { title: "Всего депозитов", value: "24"},
+            { title: "Всего выводов", value: "5"},
+            { title: "Кол-во сессий (30д)", value: "48"},
+            { title: "Сред. длит. сессии", value: "25 мин"},
+        ] as PlayerKpi[],
+        activity: [
+            { id: '1', timestamp: '2024-07-19 15:30', type: 'note', title: 'Добавлена заметка', details: 'Менеджер John S. добавил заметку: "Игрок жаловался на долгий вывод средств, вопрос решен."', icon: StickyNote },
+            { id: '2', timestamp: '2024-07-19 14:00', type: 'deposit', title: 'Депозит', details: 'VISA **** 1234', value: "+ €50.00", icon: Euro },
+            { id: '3', timestamp: '2024-07-19 13:45', type: 'communication', title: 'Отправлено Push-уведомление', details: 'Сценарий "VIP Bonus Drop": "Ваш еженедельный бонус ждет!"', icon: Smartphone },
+            { id: '4', timestamp: '2024-07-18 21:10', type: 'win', title: 'Крупный выигрыш', details: 'Слот: Book of Dead', value: "+ €350.00", icon: Trophy },
+            { id: '5', timestamp: '2024-07-18 20:30', type: 'bet', title: 'Ставка', details: 'Слот: Book of Dead', value: "- €5.00", icon: Swords },
+            { id: '6', timestamp: '2024-07-18 20:25', type: 'session', title: 'Начало сессии', details: 'Устройство: iPhone 15 Pro, IP: 89.123.45.67', icon: LogIn },
+            { id: '7', timestamp: '2024-07-15 10:00', type: 'communication', title: 'Отправлено Email', details: 'Сценарий "Welcome Chain": "Добро пожаловать в AIGAMING.BOT!"', icon: Mail },
+        ] as PlayerActivityEvent[],
+        aiCharts: [
+            {
+                title: "Динамика LTV",
+                type: "area",
+                icon: Euro,
+                data: [ { date: "Jan", value: 150 }, { date: "Feb", value: 280 }, { date: "Mar", value: 420 }, { date: "Apr", value: 510 }, { date: "May", value: 850 }, { date: "Jun", value: 1100 }, { date: "Jul", value: 1250 } ]
+            },
+            {
+                title: "Частота сессий",
+                type: "bar",
+                icon: Users,
+                data: [ { date: "Mon", value: 2 }, { date: "Tue", value: 3 }, { date: "Wed", value: 1 }, { date: "Thu", value: 4 }, { date: "Fri", value: 5 }, { date: "Sat", value: 8 }, { date: "Sun", value: 3 } ]
+            }
+        ]
+    };
+};

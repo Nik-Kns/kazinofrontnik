@@ -38,15 +38,15 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             className="flex items-center gap-2 font-semibold text-primary"
           >
             <BotMessageSquare className="h-6 w-6" />
-            <span className={cn(isCollapsed && "hidden")}>Retentlytics AI</span>
-            <span className="sr-only">Retentlytics AI</span>
+            <span className={cn(isCollapsed && "hidden")}>AIGAMING.BOT</span>
+            <span className="sr-only">AIGAMING.BOT</span>
           </Link>
         </div>
         <SidebarNav isCollapsed={isCollapsed} />
       </aside>
       <div
         className={cn(
-          "flex flex-1 flex-col transition-all duration-300",
+          "flex flex-1 flex-col overflow-x-hidden transition-all duration-300",
           isCollapsed ? "sm:pl-20" : "sm:pl-64"
         )}
       >
@@ -77,7 +77,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                     alt="@user"
                     data-ai-hint="person portrait"
                   />
-                  <AvatarFallback>RA</AvatarFallback>
+                  <AvatarFallback>AG</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -91,7 +91,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <main className="flex-1 items-start">
             {children}
         </main>
       </div>
