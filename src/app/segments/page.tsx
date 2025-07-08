@@ -14,7 +14,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -22,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { SegmentData } from '@/lib/types';
 
 
 const segmentAttributes = [
@@ -34,6 +34,8 @@ const segmentConditions = [
 
 export default function SegmentsPage() {
     const [rules, setRules] = React.useState([{ id: 1, attribute: 'Recency', condition: 'больше чем', value: '30' }]);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+    const [selectedSegment, setSelectedSegment] = React.useState<SegmentData | null>(null);
 
     const addRule = () => {
         setRules([...rules, { id: Date.now(), attribute: '', condition: '', value: '' }]);
@@ -43,6 +45,23 @@ export default function SegmentsPage() {
         setRules(rules.filter(rule => rule.id !== id));
     };
 
+    const handleCreateClick = () => {
+        setSelectedSegment(null);
+        setRules([{ id: 1, attribute: 'Recency', condition: 'больше чем', value: '30' }]);
+        setIsDialogOpen(true);
+    }
+
+    const handleEditClick = (segment: SegmentData) => {
+        setSelectedSegment(segment);
+        // Mock rules for demo
+        if (segment.name.includes('VIP')) {
+             setRules([{ id: 1, attribute: 'Monetary Value', condition: 'больше чем', value: '5000' }]);
+        } else {
+             setRules([{ id: 1, attribute: 'Last Login Date', condition: 'больше чем', value: '7' }]);
+        }
+        setIsDialogOpen(true);
+    }
+
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -50,21 +69,24 @@ export default function SegmentsPage() {
             <h1 className="text-2xl font-bold tracking-tight">Сегменты</h1>
             <p className="text-muted-foreground">Создание и управление сегментами пользователей для CRM-кампаний.</p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Создать сегмент
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[625px]">
+        <Button onClick={handleCreateClick}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Создать сегмент
+        </Button>
+      </div>
+
+       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[625px]" key={selectedSegment?.id ?? 'new'}>
             <DialogHeader>
-              <DialogTitle>Создание сегмента</DialogTitle>
+              <DialogTitle>{selectedSegment ? "Редактировать сегмент" : "Создание сегмента"}</DialogTitle>
               <DialogDescription>
-                Создайте сегмент с помощью AI или настройте правила вручную.
+                {selectedSegment 
+                    ? `Измените правила для сегмента "${selectedSegment.name}".`
+                    : "Создайте сегмент с помощью AI или настройте правила вручную."
+                }
               </DialogDescription>
             </DialogHeader>
-            <Tabs defaultValue="ai" className="w-full">
+            <Tabs defaultValue="manual" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="ai"><Bot className="mr-2 h-4 w-4"/> Создать с AI</TabsTrigger>
                 <TabsTrigger value="manual"><Pencil className="mr-2 h-4 w-4"/> Ручная настройка</TabsTrigger>
@@ -86,7 +108,7 @@ export default function SegmentsPage() {
                 <div className="space-y-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="name" className="text-right">Название</Label>
-                    <Input id="name" placeholder="Например: VIP игроки на грани оттока" className="col-span-3" />
+                    <Input id="name" defaultValue={selectedSegment?.name} placeholder="Например: VIP игроки на грани оттока" className="col-span-3" />
                   </div>
                    <div className="p-4 border-2 border-dashed rounded-lg space-y-3">
                     <Label>Правила сегментации</Label>
@@ -127,7 +149,6 @@ export default function SegmentsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
 
       <Card>
         <CardHeader>
@@ -160,7 +181,7 @@ export default function SegmentsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(segment)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon">

@@ -22,11 +22,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "Командный центр", icon: LayoutDashboard },
+  { href: "/", label: "Дашборд", icon: LayoutDashboard },
   { href: "/segments", label: "Сегменты", icon: Users },
   { href: "/builder", label: "Конструктор сценариев", icon: Workflow },
   { href: "/templates", label: "Шаблоны сценариев", icon: ClipboardCopy },
-  { href: "/analytics", label: "Аналитика", icon: BarChart2 },
   { href: "/reports", label: "Отчёты", icon: FileText },
   { href: "/calendar", label: "Календарь кампаний", icon: Calendar },
   { href: "/settings", label: "Настройки", icon: Settings },
