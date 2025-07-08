@@ -415,8 +415,8 @@ const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: Scenar
                     </Button>
                 </div>
             </header>
-            <div className="grid flex-1 md:grid-cols-[260px_1fr]">
-                <aside className="hidden flex-col border-r bg-background/80 md:flex">
+            <div className="flex flex-1 flex-row overflow-hidden">
+                <aside className="hidden w-[260px] flex-shrink-0 flex-col border-r bg-background/80 md:flex">
                     <div className="flex flex-1 flex-col p-4">
                         <h3 className="mb-4 text-lg font-semibold">Элементы</h3>
                         <ScrollArea className="flex-1">
@@ -437,8 +437,8 @@ const BuilderTab = ({ onExit, scenario }: { onExit: () => void; scenario: Scenar
                         </ScrollArea>
                     </div>
                 </aside>
-                <main className="flex-1 p-6 bg-muted/30">
-                    <div className="relative h-full w-full rounded-lg border-2 border-dashed border-muted bg-background overflow-auto p-8">
+                <main className="flex-1 overflow-auto p-6 bg-muted/30">
+                    <div className="relative h-[800px] w-full rounded-lg border-2 border-dashed border-muted bg-background p-8">
                         {/* Canvas Content */}
                         <ScenarioNode icon={GitBranch} title="Триггер: Попал в сегмент" className="top-10 left-1/2 -translate-x-1/2" onClick={() => handleNodeClick({ title: 'Триггер: Попал в сегмент', type: 'segment_trigger' })}>
                             <p className="text-sm text-muted-foreground">Сегмент: <span className="font-semibold text-foreground">Риск оттока (предиктивный)</span></p>
