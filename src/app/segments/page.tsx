@@ -30,61 +30,58 @@ const segmentAttributeGroups = [
     {
       label: "Базовые атрибуты",
       attributes: [
-        "Coins Balance", "Coins Earned Last Week", "Coins Redeemed Lifetime", "Comms Preference", "Conversion Probability Score", "Country", "Currency", "Customer ID", "Registration Date", "First Purchase Date", "Last Purchase Date", "Age", "birthday", "Gender", "Email", "Phone Number", "Language", "Time Zone"
+        { value: "Country", type: "country-select", options: ["Германия", "США", "Канада", "Великобритания"] },
+        { value: "Currency", type: "string" },
+        { value: "Customer ID", type: "string" },
+        { value: "Registration Date", type: "date" },
+        { value: "Last Purchase Date", type: "date" },
+        { value: "Age", type: "number" },
+        { value: "Gender", type: "select", options: ["Мужской", "Женский"] },
+        { value: "Language", type: "string" },
+        { value: "Time Zone", type: "string" },
       ],
     },
     {
       label: "RFM и монетарные метрики",
       attributes: [
-        "Recency (days since last purchase)", "Frequency (purchase frequency)", "Monetary Value (total spend)", "Average Order Value", "Total Revenue", "Total Orders", "Revenue Last 30 Days", "Revenue Last 90 Days", "Revenue Lifetime", "Orders Last 30 Days", "Orders Last 90 Days", "Orders Lifetime"
+        { value: "Recency (days since last purchase)", type: "number" },
+        { value: "Frequency (purchase frequency)", type: "number" },
+        { value: "Monetary Value (total spend)", type: "number" },
+        { value: "Average Order Value", type: "number" },
+        { value: "Total Revenue", type: "number" },
+        { value: "Total Orders", type: "number" },
       ],
     },
     {
       label: "Поведенческие атрибуты",
       attributes: [
-        "Website Sessions", "Page Views", "Time on Site", "games types played", "Bounce Rate", "Cart Abandonment", "Product Views", "Category Preferences", "Brand Preferences", "Purchase Channel", "Device Type", "Browser Type", "Operating System"
+        { value: "Website Sessions", type: "number" },
+        { value: "Page Views", type: "number" },
+        { value: "Time on Site", type: "number" }, // in seconds
+        { value: "Device Type", type: "select", options: ["Desktop", "Mobile", "Tablet"] },
       ],
     },
     {
       label: "Предиктивные скоры (ИИ)",
       attributes: [
-        "Churn Probability", "Predicted LTV", "Propensity to Buy", "Upsell Propensity", "Cross-sell Propensity", "Retention Probability", "Engagement Score", "Loyalty Score"
+        { value: "Churn Probability", type: "percentage" },
+        { value: "Predicted LTV", type: "number" },
+        { value: "Engagement Score", type: "number" },
       ],
     },
     {
-      label: "Кампании и коммуникации",
-      attributes: [
-        "Campaign Response History", "Email Open Rate", "Email Click Rate", "SMS Response Rate", "phone call answer rate", "Push Notification Response", "Channel Preference", "Communication Frequency", "Last Campaign Response", "Total Campaign Responses"
-      ],
-    },
-    {
-      label: "Жизненный цикл",
-      attributes: [
-        "Customer Lifecycle Stage", "Tenure (days since registration)", "Activation Status", "Onboarding Status", "VIP Status", "Loyalty Program Status", "Subscription Status"
-      ],
-    },
-    {
-      label: "Продуктовые атрибуты",
-      attributes: [
-        "Product Categories Purchased", "Discount Usage", "Promo Code Usage", "Return History", "Refund History", "Product Ratings Given", "Reviews Written"
-      ],
-    },
-    {
-      label: "Временные паттерны",
-      attributes: [
-        "Day of Week Preference", "Time of Day Preference", "Seasonal Patterns", "Holiday Behavior", "Weekend vs Weekday Activity"
-      ],
-    },
-    {
-      label: "Технические атрибуты",
-      attributes: [
-        "App Version", "Last Login Date", "Session Duration", "Feature Usage", "Error Events", "Performance Metrics"
-      ],
-    },
+        label: "Жизненный цикл",
+        attributes: [
+            { value: "Customer Lifecycle Stage", type: "select", options: ["Lead", "Active", "At Risk", "Churned"] },
+            { value: "VIP Status", type: "boolean" },
+        ]
+    }
 ];
 
+const allAttributes = segmentAttributeGroups.flatMap(g => g.attributes);
+
 const segmentConditions = [
-    "равно", "не равно", "больше чем", "меньше чем", "содержит", "не содержит"
+    "равно", "не равно", "больше чем", "меньше чем", "содержит", "не содержит", "начинается с", "заканчивается на", "в списке", "не в списке", "заполнено", "не заполнено"
 ];
 
 
@@ -100,6 +97,10 @@ export default function SegmentsPage() {
     const removeRule = (id: number) => {
         setRules(rules.filter(rule => rule.id !== id));
     };
+
+    const handleRuleChange = (id: number, field: string, value: any) => {
+        setRules(rules.map(rule => rule.id === id ? { ...rule, [field]: value } : rule));
+    }
 
     const handleCreateClick = () => {
         setSelectedSegment(null);
@@ -117,6 +118,43 @@ export default function SegmentsPage() {
         }
         setIsDialogOpen(true);
     }
+
+    const renderValueInput = (rule: any) => {
+        const attributeInfo = allAttributes.find(a => a.value === rule.attribute);
+
+        if (!attributeInfo) return <Input placeholder="Значение" value={rule.value} onChange={(e) => handleRuleChange(rule.id, 'value', e.target.value)} />;
+        
+        switch (attributeInfo.type) {
+            case 'number':
+            case 'percentage':
+                return <Input type="number" placeholder="Значение" value={rule.value} onChange={(e) => handleRuleChange(rule.id, 'value', e.target.value)} />;
+            case 'date':
+                return <Input type="date" value={rule.value} onChange={(e) => handleRuleChange(rule.id, 'value', e.target.value)} />;
+            case 'boolean':
+                return (
+                    <Select value={rule.value} onValueChange={(value) => handleRuleChange(rule.id, 'value', value)}>
+                        <SelectTrigger><SelectValue placeholder="Выберите..." /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="true">Да</SelectItem>
+                            <SelectItem value="false">Нет</SelectItem>
+                        </SelectContent>
+                    </Select>
+                );
+            case 'select':
+            case 'country-select':
+                 return (
+                    <Select value={rule.value} onValueChange={(value) => handleRuleChange(rule.id, 'value', value)}>
+                        <SelectTrigger><SelectValue placeholder="Выберите..." /></SelectTrigger>
+                        <SelectContent>
+                            {attributeInfo.options?.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                );
+            default:
+                return <Input placeholder="Значение" value={rule.value} onChange={(e) => handleRuleChange(rule.id, 'value', e.target.value)} />;
+        }
+    }
+
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -159,28 +197,30 @@ export default function SegmentsPage() {
                    <div className="p-4 border-2 border-dashed rounded-lg space-y-3">
                     <Label>Правила сегментации</Label>
                     {rules.map((rule, index) => (
-                         <div key={rule.id} className="flex flex-col sm:flex-row items-center gap-2">
-                            <Select defaultValue={rule.attribute}>
-                                <SelectTrigger><SelectValue placeholder="Атрибут" /></SelectTrigger>
+                         <div key={rule.id} className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
+                            <Select value={rule.attribute} onValueChange={(value) => handleRuleChange(rule.id, 'attribute', value)}>
+                                <SelectTrigger className="sm:col-span-2"><SelectValue placeholder="Атрибут" /></SelectTrigger>
                                 <SelectContent>
                                     {segmentAttributeGroups.map(group => (
                                         <SelectGroup key={group.label}>
                                             <SelectLabel>{group.label}</SelectLabel>
-                                            {group.attributes.map(attr => <SelectItem key={attr} value={attr}>{attr}</SelectItem>)}
+                                            {group.attributes.map(attr => <SelectItem key={attr.value} value={attr.value}>{attr.value}</SelectItem>)}
                                         </SelectGroup>
                                     ))}
                                 </SelectContent>
                             </Select>
-                             <Select defaultValue={rule.condition}>
+                             <Select value={rule.condition} onValueChange={(value) => handleRuleChange(rule.id, 'condition', value)}>
                                 <SelectTrigger><SelectValue placeholder="Условие" /></SelectTrigger>
                                 <SelectContent>
                                     {segmentConditions.map(cond => <SelectItem key={cond} value={cond}>{cond}</SelectItem>)}
                                 </SelectContent>
                             </Select>
-                            <Input placeholder="Значение" defaultValue={rule.value} />
-                            <Button variant="ghost" size="icon" onClick={() => removeRule(rule.id)} disabled={rules.length <= 1}>
-                                <X className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                {renderValueInput(rule)}
+                                <Button variant="ghost" size="icon" onClick={() => removeRule(rule.id)} disabled={rules.length <= 1}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
                          </div>
                     ))}
 

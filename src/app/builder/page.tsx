@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap } from "lucide-react";
+import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PhoneCall, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
@@ -197,6 +197,7 @@ const actionElements = [
   { name: 'Отправить Email', icon: Mail, description: 'Отправка email-сообщения через SendGrid.', type: 'emailAction' },
   { name: 'Отправить Push', icon: Smartphone, description: 'Отправка push-уведомления.', type: 'pushAction' },
   { name: 'Отправить SMS', icon: MessageSquare, description: 'Отправка SMS через Twilio.', type: 'smsAction' },
+  { name: 'AI Звонок', icon: PhoneCall, description: 'Инициировать звонок через Twilio с AI-ассистентом.', type: 'aiCallAction' },
   { name: 'In-App сообщение', icon: Zap, description: 'Показ сообщения внутри приложения.', type: 'inappAction' },
   { name: 'Начислить бонус', icon: Gift, description: 'Начисление бонусных баллов или фриспинов игроку.', type: 'bonusAction' },
 ];
@@ -282,6 +283,37 @@ const NodeConfigPanel = ({ node, isOpen, onOpenChange }: { node: Node | null, is
                         </div>
                     </div>
                 )
+             case 'aiCallAction':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Интеграция</Label>
+                            <div className="flex items-center gap-2 rounded-md border p-2 bg-muted/50">
+                                <img src="https://www.vectorlogo.zone/logos/twilio/twilio-icon.svg" alt="Twilio" className="h-5 w-5"/>
+                                <span className="text-sm font-medium">Звонок через Twilio</span>
+                            </div>
+                        </div>
+                        <div>
+                            <Label htmlFor="ai-voice">Голос AI</Label>
+                            <Select defaultValue="female-1">
+                                <SelectTrigger id="ai-voice"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="female-1">Женский (Eva)</SelectItem>
+                                    <SelectItem value="male-1">Мужской (Alex)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <Label htmlFor="ai-prompt">Сценарий звонка (AI промпт)</Label>
+                            <Textarea
+                                id="ai-prompt"
+                                placeholder="Опишите цель звонка и что должен сказать AI. Вы можете использовать переменные, например {{firstName}}."
+                                defaultValue="Привет, {{firstName}}. Мы из AIGAMING.BOT. Заметили, что вы давно не заходили. Хотим предложить вам специальный бонус - 50 фриспинов. Вам интересно?"
+                                className="min-h-[200px]"
+                            />
+                        </div>
+                    </div>
+                );
             case 'ifElseLogic':
                 return (
                     <div className="space-y-4">
