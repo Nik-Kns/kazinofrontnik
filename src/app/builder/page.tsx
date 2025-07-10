@@ -38,6 +38,7 @@ import ReactFlow, {
   type OnConnect,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { AiCopilotChat } from '@/components/ai/ai-copilot-chat';
 
 // --- Helper components & data for TABS ---
 
@@ -485,6 +486,7 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const [selectedNode, setSelectedNode] = React.useState<Node | null>(null);
     const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+    const [isCopilotOpen, setIsCopilotOpen] = React.useState(false);
     const { screenToFlowPosition } = useReactFlow();
 
     const onConnect: OnConnect = React.useCallback(
@@ -569,7 +571,7 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
                     <Button variant="outline" size="sm"> <Sparkles className="mr-2 h-4 w-4" />Prettify</Button>
                     <Button variant="outline">Сохранить как черновик</Button>
                     <Button>Активировать сценарий</Button>
-                    <Button variant="accent" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                    <Button variant="accent" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => setIsCopilotOpen(true)}>
                         <BotMessageSquare className="mr-2 h-4 w-4" />
                         AI Co-pilot
                     </Button>
@@ -618,6 +620,19 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
                 </main>
             </div>
             <NodeConfigPanel node={selectedNode} isOpen={isSheetOpen} onOpenChange={setIsSheetOpen} />
+            <Sheet open={isCopilotOpen} onOpenChange={setIsCopilotOpen}>
+                <SheetContent className="sm:max-w-lg">
+                    <SheetHeader>
+                        <SheetTitle className="flex items-center gap-2"><BotMessageSquare /> AI Co-pilot</SheetTitle>
+                        <SheetDescription>
+                            Ваш помощник в создании эффективных сценариев. Опишите задачу, и AI предложит решение.
+                        </SheetDescription>
+                    </SheetHeader>
+                    <div className="py-4 h-[calc(100%-80px)]">
+                       <AiCopilotChat copilotType="scenario_builder" />
+                    </div>
+                </SheetContent>
+            </Sheet>
         </div>
     );
 };

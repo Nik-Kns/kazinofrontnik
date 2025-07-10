@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -22,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SegmentData } from '@/lib/types';
+import { AiCopilotChat } from '@/components/ai/ai-copilot-chat';
 
 
 const segmentAttributeGroups = [
@@ -130,7 +132,7 @@ export default function SegmentsPage() {
       </div>
 
        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[625px]" key={selectedSegment?.id ?? 'new'}>
+          <DialogContent className="sm:max-w-4xl" key={selectedSegment?.id ?? 'new'}>
             <DialogHeader>
               <DialogTitle>{selectedSegment ? "Редактировать сегмент" : "Создание сегмента"}</DialogTitle>
               <DialogDescription>
@@ -145,18 +147,8 @@ export default function SegmentsPage() {
                 <TabsTrigger value="ai"><Bot className="mr-2 h-4 w-4"/> Создать с AI</TabsTrigger>
                 <TabsTrigger value="manual"><Pencil className="mr-2 h-4 w-4"/> Ручная настройка</TabsTrigger>
               </TabsList>
-              <TabsContent value="ai">
-                 <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="ai-description">Опишите сегмент</Label>
-                    <Textarea id="ai-description" placeholder="Например: 'Высокодоходные игроки, которые давно не заходили в игру, но часто покупали дорогие предметы'" className="min-h-[100px]" />
-                    <p className="text-xs text-muted-foreground">Наш AI проанализирует ваш запрос и создаст набор правил.</p>
-                  </div>
-                  <Button type="submit" className="w-full">
-                    <Bot className="mr-2 h-4 w-4" />
-                    Сгенерировать правила
-                  </Button>
-                </div>
+              <TabsContent value="ai" className="min-h-[400px]">
+                 <AiCopilotChat copilotType="segment_generator" />
               </TabsContent>
               <TabsContent value="manual">
                 <div className="space-y-4 py-4">
