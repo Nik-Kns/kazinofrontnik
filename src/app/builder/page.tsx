@@ -575,13 +575,13 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
 
     const DraggableNode = ({ item }: { item: { name: string, icon: React.ElementType, description: string, type: string } }) => (
         <div
-            className="mb-2 cursor-grab rounded-lg border p-3 hover:shadow-md active:cursor-grabbing bg-background"
+            className="mb-1.5 cursor-grab rounded-lg border p-2 hover:shadow-md active:cursor-grabbing bg-background"
             onDragStart={(event) => onDragStart(event, item.type)}
             draggable
         >
-            <div className="flex items-center gap-3">
-                <item.icon className="h-5 w-5 text-primary" />
-                <span className="font-semibold">{item.name}</span>
+            <div className="flex items-center gap-2">
+                <item.icon className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold">{item.name}</span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
         </div>
@@ -610,11 +610,11 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
                 </div>
             </header>
             <div className="flex flex-1 flex-row overflow-hidden">
-                <aside className="hidden w-[260px] flex-shrink-0 flex-col border-r bg-background/80 md:flex">
-                    <div className="flex flex-1 flex-col p-4">
+                <aside className="hidden w-[280px] flex-shrink-0 flex-col border-r bg-background/80 md:flex">
+                    <div className="flex h-full flex-col p-4">
                         <h3 className="mb-4 text-lg font-semibold">Элементы</h3>
-                        <ScrollArea className="flex-1">
-                            <div className="space-y-6 p-1">
+                        <ScrollArea className="flex-1 -mr-4 pr-4">
+                            <div className="space-y-4">
                                 <div>
                                     <h4 className="mb-2 text-sm font-medium text-muted-foreground">Триггеры</h4>
                                     {triggerElements.map(item => <DraggableNode key={item.name} item={item} />)}

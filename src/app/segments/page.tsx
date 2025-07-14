@@ -217,7 +217,7 @@ export default function SegmentsPage() {
                             </Select>
                             <div className="flex items-center gap-2">
                                 {renderValueInput(rule)}
-                                <Button variant="ghost" size="icon" onClick={() => removeRule(rule.id)} disabled={rules.length <= 1}>
+                                <Button variant="ghost" size="icon" onClick={() => removeRule(rule.id)}>
                                     <X className="h-4 w-4" />
                                 </Button>
                             </div>

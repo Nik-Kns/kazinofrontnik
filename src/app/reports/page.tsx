@@ -55,7 +55,7 @@ export default function ReportsPage() {
                     <Badge className={cn(statusColors[report.status])}>{report.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" disabled={report.status !== 'Готов'}>
+                    <Button variant="ghost" size="icon">
                       <Download className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon">
