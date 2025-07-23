@@ -5,8 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KpiGrid } from "@/components/dashboard/kpi-grid";
 import { AnalyticsCharts } from "@/components/dashboard/analytics-charts";
 import { AnalyticsFilters } from "@/components/analytics/analytics-filters";
-import { HandCoins, TrendingUp, Users } from "lucide-react";
+import { HandCoins, TrendingUp, Users, BarChart3 } from "lucide-react";
 import { CampaignPerformanceTable } from "@/components/analytics/campaign-performance-table";
+import { RetentionMetricsDashboard } from "@/components/analytics/retention-metrics-dashboard";
 import { useState } from "react";
 import type { FilterConfig } from "@/lib/types";
 
@@ -33,6 +34,7 @@ export default function AnalyticsPage() {
           <TabsTrigger value="retention"><TrendingUp className="mr-2 h-4 w-4" />Retention</TabsTrigger>
           <TabsTrigger value="crm"><Users className="mr-2 h-4 w-4" />CRM</TabsTrigger>
           <TabsTrigger value="finance"><HandCoins className="mr-2 h-4 w-4" />Финансы</TabsTrigger>
+          <TabsTrigger value="detailed"><BarChart3 className="mr-2 h-4 w-4" />Подробная аналитика</TabsTrigger>
         </TabsList>
 
         <TabsContent value="retention" className="space-y-6">
@@ -64,6 +66,21 @@ export default function AnalyticsPage() {
                 </CardContent>
             </Card>
              <AnalyticsCharts />
+        </TabsContent>
+
+        <TabsContent value="detailed" className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Подробная аналитика и мониторинг эффективности ретеншена</CardTitle>
+                    <CardDescription>
+                        25 важнейших показателей и их рекомендуемые значения для различных сегментов игроков. 
+                        Эффективное удержание игроков требует глубокого и регулярного анализа ключевых метрик.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <RetentionMetricsDashboard />
+                </CardContent>
+            </Card>
         </TabsContent>
       </Tabs>
     </div>

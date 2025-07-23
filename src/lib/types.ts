@@ -196,3 +196,47 @@ export type FilterGroup = {
   min?: number;
   max?: number;
 };
+
+// Типы для расширенной системы метрик ретеншена
+export type RetentionMetric = {
+  id: string;
+  name: string;
+  description: string;
+  value: string | number;
+  unit?: '%' | '$' | '€' | 'days' | 'times' | 'hours' | 'min' | '/5' | '';
+  category: 'retention' | 'revenue' | 'engagement' | 'conversion' | 'satisfaction';
+  frequency: 'daily' | 'weekly' | 'monthly';
+  targetValue?: string | number;
+  trend?: 'up' | 'down' | 'stable';
+  trendValue?: string;
+};
+
+export type SegmentMetrics = {
+  segmentName: string;
+  segmentId: string;
+  metrics: {
+    retentionRate: string;
+    averageDepositAmount: string;
+    depositFrequency: string;
+    ltv: string;
+    conversionRate?: string;
+    bonusActivationRate?: string;
+    activePlayersRatio?: string;
+    referralRate?: string;
+  };
+  recommendations: string[];
+};
+
+export type MonitoringSchedule = {
+  daily: string[];
+  weekly: string[];
+  monthly: string[];
+};
+
+export type AlertThresholds = {
+  [metricName: string]: {
+    critical?: number;
+    warning?: number;
+    criticalDrop?: number;
+  };
+};
