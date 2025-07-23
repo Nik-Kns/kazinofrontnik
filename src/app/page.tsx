@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { RisksAndWarnings } from "@/components/dashboard/risks-and-warnings";
+import { RetentionMetricsSummary } from "@/components/dashboard/retention-metrics-summary";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -240,6 +241,9 @@ export default function CommandCenterPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Ключевые метрики ретеншена */}
+      <RetentionMetricsSummary />
 
       {/* AI предупреждения и риски */}
       <RisksAndWarnings />

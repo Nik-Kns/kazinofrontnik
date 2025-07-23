@@ -16,6 +16,8 @@ export default function AnalyticsPage() {
 
   const handleFiltersChange = (filters: FilterConfig) => {
     setActiveFilters(filters);
+    // Сохраняем фильтры в localStorage для использования на главной
+    localStorage.setItem('analyticsFilters', JSON.stringify(filters));
     console.log('Фильтры аналитики обновлены:', filters);
   };
 
