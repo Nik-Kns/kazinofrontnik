@@ -1,12 +1,23 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KpiGrid } from "@/components/dashboard/kpi-grid";
 import { AnalyticsCharts } from "@/components/dashboard/analytics-charts";
-import { Filters } from "@/components/dashboard/filters";
+import { AnalyticsFilters } from "@/components/analytics/analytics-filters";
 import { HandCoins, TrendingUp, Users } from "lucide-react";
 import { CampaignPerformanceTable } from "@/components/analytics/campaign-performance-table";
+import { useState } from "react";
+import type { FilterConfig } from "@/lib/types";
 
 export default function AnalyticsPage() {
+  const [activeFilters, setActiveFilters] = useState<FilterConfig>({});
+
+  const handleFiltersChange = (filters: FilterConfig) => {
+    setActiveFilters(filters);
+    console.log('Фильтры аналитики обновлены:', filters);
+  };
+
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
       <div className="flex flex-col gap-4">
@@ -14,7 +25,7 @@ export default function AnalyticsPage() {
         <p className="text-muted-foreground">
           Раздел с метриками по Retention, CRM, финансам. Здесь будут настраиваемые дашборды, сравнение периодов и экспорт отчетов.
         </p>
-        <Filters />
+        <AnalyticsFilters onFiltersChange={handleFiltersChange} />
       </div>
 
       <Tabs defaultValue="retention">

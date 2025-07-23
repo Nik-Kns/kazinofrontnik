@@ -22,8 +22,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { SegmentData } from '@/lib/types';
+import type { SegmentData, FilterConfig, FilterGroup } from '@/lib/types';
 import { AiCopilotChat } from '@/components/ai/ai-copilot-chat';
+import { AdvancedFilters } from '@/components/ui/advanced-filters';
 
 
 const segmentAttributeGroups = [
@@ -84,11 +85,61 @@ const segmentConditions = [
     "равно", "не равно", "больше чем", "меньше чем", "содержит", "не содержит", "начинается с", "заканчивается на", "в списке", "не в списке", "заполнено", "не заполнено"
 ];
 
+// Конфигурация фильтров для страницы сегментов
+const SEGMENTS_FILTER_GROUPS: FilterGroup[] = [
+  {
+    id: 'games',
+    label: 'Игра',
+    type: 'multiselect',
+    options: [
+      { value: 'slots', label: 'Слоты' },
+      { value: 'poker', label: 'Покер' },
+      { value: 'blackjack', label: 'Блэкджек' },
+      { value: 'roulette', label: 'Рулетка' },
+      { value: 'sports', label: 'Спортбеттинг' },
+    ]
+  },
+  {
+    id: 'sources',
+    label: 'Источник',
+    type: 'multiselect',
+    options: [
+      { value: 'google', label: 'Google' },
+      { value: 'facebook', label: 'Facebook' },
+      { value: 'instagram', label: 'Instagram' },
+      { value: 'tiktok', label: 'TikTok' },
+      { value: 'organic', label: 'Органика' },
+      { value: 'referral', label: 'Реферальная программа' },
+    ]
+  },
+  {
+    id: 'dateRange',
+    label: 'Период создания',
+    type: 'daterange'
+  },
+  {
+    id: 'playerCountRange',
+    label: 'Количество игроков',
+    type: 'range',
+    placeholder: 'От-До'
+  },
+  {
+    id: 'createdBy',
+    label: 'Автор',
+    type: 'select',
+    options: [
+      { value: 'ai', label: 'AI' },
+      { value: 'user', label: 'Пользователь' },
+    ],
+    placeholder: 'Выберите автора'
+  }
+];
 
 export default function SegmentsPage() {
     const [rules, setRules] = React.useState([{ id: 1, attribute: 'Recency (days since last purchase)', condition: 'больше чем', value: '30' }]);
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [selectedSegment, setSelectedSegment] = React.useState<SegmentData | null>(null);
+    const [filters, setFilters] = React.useState<FilterConfig>({});
 
     const addRule = () => {
         setRules([...rules, { id: Date.now(), attribute: '', condition: '', value: '' }]);
@@ -155,6 +206,11 @@ export default function SegmentsPage() {
         }
     }
 
+    const handleFiltersChange = (newFilters: FilterConfig) => {
+        setFilters(newFilters);
+        // Здесь можно добавить логику фильтрации сегментов
+        console.log('Применены фильтры для сегментов:', newFilters);
+    };
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -168,6 +224,12 @@ export default function SegmentsPage() {
             Создать сегмент
         </Button>
       </div>
+      
+      <AdvancedFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        filterGroups={SEGMENTS_FILTER_GROUPS}
+      />
 
        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-4xl" key={selectedSegment?.id ?? 'new'}>

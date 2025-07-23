@@ -147,3 +147,52 @@ export type PlayerDetails = PlayerData & {
   activity: PlayerActivityEvent[];
   aiCharts: any[];
 };
+
+// Типы для системы фильтрации
+export type SegmentType = 'active' | 'reactivated' | 'churning' | 'new' | 'firstdeposit';
+export type ChannelType = 'sms' | 'email' | 'telegram' | 'whatsapp' | 'push';
+export type VipLevel = 'previp1' | 'previp2' | 'previp3' | 'vip';
+
+export type FilterConfig = {
+  // Основные фильтры
+  vertical?: string;            // Вертикаль (казино, спорт, покер и т.д.)
+  games?: string[];              // Игры
+  playerId?: string;            // ID игрока
+  promocode?: string;           // Промокод
+  dateRange?: {                 // Период
+    from: Date;
+    to: Date;
+  };
+  depositAmount?: {             // Сумма депозита
+    min?: number;
+    max?: number;
+  };
+  trackingId?: string;          // URL/Tracking ID
+  minDeposit?: number;          // Минимальный депозит
+  registrationDate?: {          // Дата регистрации
+    from: Date;
+    to: Date;
+  };
+  segments?: SegmentType[];     // Сегменты
+  sources?: string[];           // Источники
+  channels?: ChannelType[];     // Подключенные каналы
+  lastInteractionChannel?: ChannelType; // Последний канал взаимодействия
+  vipLevels?: VipLevel[];       // VIP уровни
+};
+
+export type FilterOption<T = string> = {
+  value: T;
+  label: string;
+  icon?: React.ElementType;
+  count?: number;
+};
+
+export type FilterGroup = {
+  id: string;
+  label: string;
+  type: 'select' | 'multiselect' | 'range' | 'daterange' | 'text' | 'number';
+  options?: FilterOption[];
+  placeholder?: string;
+  min?: number;
+  max?: number;
+};

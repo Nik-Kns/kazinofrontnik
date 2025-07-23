@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { FilterConfig } from "@/lib/types";
 
 const statusColors = {
     'Активен': 'bg-success/20 text-success-foreground',
@@ -22,7 +23,14 @@ const riskColors = {
     'Высокий': 'text-destructive',
 };
 
-export function PlayersTable() {
+interface PlayersTableProps {
+    filters?: FilterConfig;
+}
+
+export function PlayersTable({ filters }: PlayersTableProps) {
+    // Здесь можно добавить логику фильтрации данных на основе filters
+    // Пока используем все данные
+    const filteredPlayers = playersData;
     return (
         <Card>
             <CardHeader>
@@ -42,7 +50,7 @@ export function PlayersTable() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {playersData.map((player) => (
+                        {filteredPlayers.map((player) => (
                             <TableRow key={player.id}>
                                 <TableCell>
                                     <div className="flex items-center gap-3">
