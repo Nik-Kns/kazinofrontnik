@@ -108,6 +108,7 @@ export type CampaignPerformanceData = {
   revenue: number;
 };
 
+// Базовая информация об игроке
 export type PlayerData = {
     id: string;
     name: string;
@@ -118,6 +119,262 @@ export type PlayerData = {
     status: 'Активен' | 'Спящий' | 'Отток';
 };
 
+// Основная информация игрока
+export type PlayerMainInfo = {
+    id: string;
+    nickname: string;
+    country: string;
+    geo: string;
+    language: string;
+    registrationDate: Date;
+    trafficSource: {
+        utm: string;
+        referral: string;
+        affiliate?: string;
+        streamer?: string;
+    };
+    platform: 'desktop' | 'mobile' | 'iOS' | 'Android';
+    kycStatus: 'unverified' | 'pending' | 'verified' | 'rejected';
+    sourceChannel: 'web' | 'affiliate' | 'streamer' | 'organic' | 'other';
+};
+
+// Финансовая активность
+export type PlayerFinancialActivity = {
+    totalDeposit: number;
+    totalWithdrawal: number;
+    currentBalance: number;
+    depositFrequency: string;
+    averageDeposit: number;
+    averageTimeBetweenDeposits: string;
+    lastDepositDate: Date;
+    firstDepositAmount: number;
+    timeToFirstDeposit: string;
+    reDepositsCount: number;
+    reDepositFrequency: string;
+    accountCurrency: string;
+    depositHistory: Transaction[];
+    withdrawalHistory: Transaction[];
+    successfulTransactions: number;
+    failedTransactions: number;
+    paymentMethods: string[];
+};
+
+// Транзакция
+export type Transaction = {
+    id: string;
+    date: Date;
+    amount: number;
+    currency: string;
+    status: 'pending' | 'completed' | 'failed' | 'cancelled';
+    method: string;
+    type: 'deposit' | 'withdrawal';
+};
+
+// Игровая активность
+export type PlayerGameActivity = {
+    favoriteGames: string[];
+    favoriteProviders: string[];
+    totalWagered: number;
+    averageBetSize: number;
+    sessionCount: number;
+    averageSessionDuration: string;
+    lastSessionDuration: string;
+    lastPlayTime: Date;
+    sessionFrequency: string;
+    peakActivityTime: string;
+    winHistory: GameWin[];
+    playerRTP: number;
+    gameTypes: {
+        live: boolean;
+        slots: boolean;
+        table: boolean;
+        aviator: boolean;
+        other: string[];
+    };
+    engagementLevel: 'active' | 'sleeping' | 'at_risk' | 'churned';
+};
+
+// Выигрыш в игре
+export type GameWin = {
+    id: string;
+    date: Date;
+    game: string;
+    amount: number;
+    multiplier: number;
+};
+
+// Маркетинговая активность
+export type PlayerMarketingActivity = {
+    bonusParticipation: boolean;
+    bonusActivations: number;
+    bonusUtilization: number;
+    bonusTypes: string[];
+    campaignMetrics: {
+        openRate: number;
+        clickRate: number;
+        conversionRate: number;
+    };
+    communicationHistory: CommunicationEvent[];
+    reactivationHistory: ReactivationAttempt[];
+    usedPromocodes: string[];
+    lastPromoActivity: Date;
+    vipStatus: boolean;
+    vipLevel?: number;
+    participatesIn: {
+        tournaments: boolean;
+        cashback: boolean;
+        referral: boolean;
+    };
+};
+
+// Событие коммуникации
+export type CommunicationEvent = {
+    id: string;
+    date: Date;
+    type: 'email' | 'sms' | 'push' | 'inapp';
+    campaign: string;
+    status: 'sent' | 'opened' | 'clicked' | 'converted';
+};
+
+// Попытка реактивации
+export type ReactivationAttempt = {
+    id: string;
+    date: Date;
+    method: string;
+    offer: string;
+    result: 'success' | 'failed' | 'pending';
+};
+
+// Поведенческие метрики
+export type PlayerBehaviorMetrics = {
+    retentionRate: {
+        d7: number;
+        d14: number;
+        d30: number;
+        d60: number;
+        d90: number;
+    };
+    churnRisk: number; // 0-100%
+    ltv: number;
+    arpu: number;
+    arppu: number;
+    ngr: number;
+    acquisitionROI: number;
+    customerSegment: string; // RFM или ML сегмент
+    nps?: number;
+    csat?: number;
+    predictedCLV: number;
+    fraudRisk: 'low' | 'medium' | 'high';
+};
+
+// AI показатели и рекомендации
+export type PlayerAIInsights = {
+    mlSegment: string;
+    behaviorProfile: string;
+    recommendedGames: string[];
+    recommendedBonuses: string[];
+    reDepositProbability: number;
+    recommendedReactivationOffer: string;
+    churnProbability: number;
+    autoTriggers: string[]; // ["Ждёт кэшбэк", "Играет каждый вторник", и т.д.]
+};
+
+// Журнал действий
+export type PlayerActionLog = {
+    loginHistory: LoginEvent[];
+    supportRequests: SupportTicket[];
+    complaints: Complaint[];
+    managerNotes: ManagerNote[];
+    manualInterventions: Intervention[];
+};
+
+// События входа
+export type LoginEvent = {
+    id: string;
+    date: Date;
+    ip: string;
+    device: string;
+    location: string;
+};
+
+// Тикет в поддержку
+export type SupportTicket = {
+    id: string;
+    date: Date;
+    subject: string;
+    status: 'open' | 'in_progress' | 'resolved' | 'closed';
+    priority: 'low' | 'medium' | 'high' | 'critical';
+};
+
+// Жалоба
+export type Complaint = {
+    id: string;
+    date: Date;
+    type: string;
+    description: string;
+    status: string;
+};
+
+// Заметка менеджера
+export type ManagerNote = {
+    id: string;
+    date: Date;
+    author: string;
+    content: string;
+    type: 'info' | 'warning' | 'action';
+};
+
+// Вмешательство
+export type Intervention = {
+    id: string;
+    date: Date;
+    type: string;
+    description: string;
+    performedBy: string;
+};
+
+// VIP и high-risk дополнения
+export type PlayerVIPInfo = {
+    personalManager?: string;
+    chatHistory?: ChatMessage[];
+    limits?: {
+        depositLimit?: number;
+        lossLimit?: number;
+        sessionLimit?: string;
+        selfExclusion?: {
+            active: boolean;
+            until?: Date;
+        };
+    };
+    legalStatus?: string;
+    responsibleGambling: {
+        score: number;
+        flags: string[];
+        lastAssessment: Date;
+    };
+};
+
+// Сообщение в чате
+export type ChatMessage = {
+    id: string;
+    date: Date;
+    from: string;
+    message: string;
+};
+
+// Полная карточка игрока
+export type PlayerFullProfile = {
+    mainInfo: PlayerMainInfo;
+    financial: PlayerFinancialActivity;
+    gaming: PlayerGameActivity;
+    marketing: PlayerMarketingActivity;
+    behavior: PlayerBehaviorMetrics;
+    ai: PlayerAIInsights;
+    actionLog: PlayerActionLog;
+    vipInfo?: PlayerVIPInfo;
+};
+
+// Старые типы для совместимости
 export type PlayerKpi = {
     title: string;
     value: string;
@@ -149,35 +406,70 @@ export type PlayerDetails = PlayerData & {
 };
 
 // Типы для системы фильтрации
-export type SegmentType = 'active' | 'reactivated' | 'churning' | 'new' | 'firstdeposit';
+export type SegmentType = 'all' | 'vip' | 'previp' | 'active' | 'dep1' | 'dep2' | 'dep3' | 'dep4' | 'dep5' | 'dep6' | 'dep7' | 'highroller' | 'prechurn' | 'deepprechurn' | 'churn' | 'deepchurn' | 'reactivation' | 'deepreactivation' | 'sleeping';
 export type ChannelType = 'sms' | 'email' | 'telegram' | 'whatsapp' | 'push';
 export type VipLevel = 'previp1' | 'previp2' | 'previp3' | 'vip';
 
 export type FilterConfig = {
   // Основные фильтры
-  vertical?: string;            // Вертикаль (казино, спорт, покер и т.д.)
-  games?: string[];              // Игры
-  playerId?: string;            // ID игрока
-  promocode?: string;           // Промокод
+  casinoName?: string;          // Название казино
+  casinoLogo?: string;          // Логотип казино (URL или base64)
+  projectBrand?: string;        // Выбор проекта/бренда
   dateRange?: {                 // Период
     from: Date;
     to: Date;
   };
+  datePreset?: 'today' | 'yesterday' | 'week' | 'month' | 'custom'; // Быстрые периоды
+  
+  // Фильтр по сегментам
+  segments?: SegmentType[];     // Все сегменты из списка
+  
+  // Фильтры по источнику
+  sourceType?: 'url' | 'streamer' | 'organic' | 'promo' | 'other'; // Тип источника
+  sourceUrl?: string;           // URL источника
+  trid?: string;                // Tracking ID
+  streamerName?: string;        // Имя стримера
+  promoCode?: string;           // Промокод
+  
+  // Прочие фильтры
+  device?: 'desktop' | 'mobile' | 'tablet' | 'all'; // Устройство
+  gender?: 'male' | 'female' | 'all';              // Пол
+  countries?: string[];         // Гео (страны)
+  language?: string;            // Язык
+  currency?: string;            // Валюта
+  emailVerified?: boolean;      // Верифицирован ли email
+  email?: string;               // Email
+  phoneNumber?: string;         // Номер телефона
+  
+  // Фильтры по поведению на платформе
   depositAmount?: {             // Сумма депозита
     min?: number;
     max?: number;
   };
-  trackingId?: string;          // URL/Tracking ID
-  minDeposit?: number;          // Минимальный депозит
   registrationDate?: {          // Дата регистрации
     from: Date;
     to: Date;
   };
-  segments?: SegmentType[];     // Сегменты
-  sources?: string[];           // Источники
-  channels?: ChannelType[];     // Подключенные каналы
-  lastInteractionChannel?: ChannelType; // Последний канал взаимодействия
-  vipLevels?: VipLevel[];       // VIP уровни
+  lastPlayDate?: {              // Дата последней игры
+    from: Date;
+    to: Date;
+  };
+  lastDepositDate?: {           // Дата последнего депозита
+    from: Date;
+    to: Date;
+  };
+  playedGames?: string[];       // Игры в которые играет (с ограничением)
+  
+  // Legacy поля для совместимости
+  vertical?: string;
+  games?: string[];
+  playerId?: string;
+  trackingId?: string;
+  minDeposit?: number;
+  sources?: string[];
+  channels?: ChannelType[];
+  lastInteractionChannel?: ChannelType;
+  vipLevels?: VipLevel[];
 };
 
 export type FilterOption<T = string> = {
@@ -239,4 +531,44 @@ export type AlertThresholds = {
     warning?: number;
     criticalDrop?: number;
   };
+};
+
+// Типы для KPI Summary
+export type KPIMetric = {
+  id: string;
+  name: string;
+  currentValue: string | number;
+  previousValue?: string | number;
+  unit?: string;
+  change?: number; // В процентах
+  status: 'green' | 'yellow' | 'red'; // Светофор
+  benchmark?: string | number; // Целевое значение
+  description?: string;
+};
+
+// Типы для селектора метрик
+export type AvailableMetric = {
+  id: string;
+  name: string;
+  category: 'retention' | 'revenue' | 'engagement' | 'conversion' | 'satisfaction';
+  description: string;
+  unit?: string;
+  defaultEnabled?: boolean;
+};
+
+// Типы для графиков
+export type ChartMetric = {
+  metricId: string;
+  metricName: string;
+  data: ChartData[];
+  color?: string;
+  showPrediction?: boolean;
+};
+
+// Типы для Customer.io интеграции
+export type CustomerIOConfig = {
+  siteId: string;
+  apiKey: string;
+  trackingApiKey?: string;
+  region?: 'us' | 'eu';
 };

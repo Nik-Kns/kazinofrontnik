@@ -1,325 +1,335 @@
-// Структура данных для 25 ключевых метрик ретеншена в онлайн-казино
+import type { RetentionMetric, SegmentMetrics, MonitoringSchedule } from "@/lib/types";
 
-import type { RetentionMetric, SegmentMetrics } from "@/lib/types";
-
-// 25 ключевых метрик для мониторинга ретеншена
+// 25 ключевых метрик ретеншена
 export const retentionMetrics: RetentionMetric[] = [
+  // Retention метрики
   {
-    id: '1',
+    id: 'retention_rate',
     name: 'Retention Rate',
-    description: 'Процент удержанных игроков за период',
-    value: '72.3',
+    description: 'Процент удержанных игроков',
+    value: 62.3,
     unit: '%',
     category: 'retention',
     frequency: 'daily',
-    targetValue: '75',
+    targetValue: 75,
     trend: 'down',
     trendValue: '-2.1%'
   },
   {
-    id: '2',
+    id: 'churn_rate',
     name: 'Churn Rate',
     description: 'Уровень оттока игроков',
-    value: '3.2',
+    value: 3.2,
     unit: '%',
     category: 'retention',
     frequency: 'daily',
-    targetValue: '2.5',
+    targetValue: 2.5,
     trend: 'up',
     trendValue: '+0.5%'
   },
   {
-    id: '3',
+    id: 'player_reactivation_rate',
+    name: 'Player Reactivation Rate',
+    description: 'Процент возвращённых игроков',
+    value: 15.7,
+    unit: '%',
+    category: 'retention',
+    frequency: 'weekly',
+    targetValue: 20,
+    trend: 'up',
+    trendValue: '+2.3%'
+  },
+  
+  // Revenue метрики
+  {
+    id: 'ltv',
     name: 'Lifetime Value (LTV)',
-    description: 'Общий доход от игрока за всё время',
-    value: '8,450',
+    description: 'Общий доход от игрока',
+    value: 8450,
     unit: '€',
     category: 'revenue',
     frequency: 'monthly',
-    targetValue: '10,000',
+    targetValue: 10000,
     trend: 'up',
-    trendValue: '+12.3%'
+    trendValue: '+€12.3'
   },
   {
-    id: '4',
+    id: 'arpu',
     name: 'Average Revenue Per User (ARPU)',
     description: 'Средний доход на игрока',
-    value: '125',
+    value: 125,
     unit: '€',
     category: 'revenue',
     frequency: 'weekly',
-    targetValue: '150',
-    trend: 'stable',
-    trendValue: '+0.2%'
+    targetValue: 150,
+    trend: 'up',
+    trendValue: '+€0.2'
   },
   {
-    id: '5',
+    id: 'average_deposit',
     name: 'Average Deposit Amount',
     description: 'Средний размер депозита',
-    value: '85',
+    value: 85,
     unit: '€',
     category: 'revenue',
     frequency: 'weekly',
-    targetValue: '100',
-    trend: 'up',
-    trendValue: '+5.4%'
+    targetValue: 100,
+    trend: 'stable',
+    trendValue: '0%'
   },
   {
-    id: '6',
+    id: 'roi_campaigns',
+    name: 'ROI of Campaigns',
+    description: 'Возврат инвестиций в кампании',
+    value: 145,
+    unit: '%',
+    category: 'revenue',
+    frequency: 'weekly',
+    targetValue: 150,
+    trend: 'up',
+    trendValue: '+5%'
+  },
+  {
+    id: 'average_bet_size',
+    name: 'Average Bet Size',
+    description: 'Средний размер ставки',
+    value: 12.5,
+    unit: '€',
+    category: 'revenue',
+    frequency: 'daily',
+    targetValue: 15,
+    trend: 'down',
+    trendValue: '-€0.5'
+  },
+  {
+    id: 'average_time_between_deposits',
+    name: 'Average Time Between Deposits',
+    description: 'Среднее время между депозитами',
+    value: 7.5,
+    unit: 'days',
+    category: 'revenue',
+    frequency: 'weekly',
+    targetValue: 5,
+    trend: 'up',
+    trendValue: '+0.5'
+  },
+  
+  // Engagement метрики
+  {
+    id: 'frequency_deposits',
     name: 'Frequency of Deposits',
-    description: 'Частота депозитов (раз в месяц)',
-    value: '3.8',
+    description: 'Частота депозитов',
+    value: 3.2,
     unit: 'times',
     category: 'engagement',
     frequency: 'weekly',
-    targetValue: '4.5',
+    targetValue: 4,
     trend: 'down',
     trendValue: '-0.3'
   },
   {
-    id: '7',
-    name: 'Conversion Rate',
-    description: 'Конверсия из регистрации в активного игрока',
-    value: '52.4',
-    unit: '%',
-    category: 'conversion',
-    frequency: 'daily',
-    targetValue: '60',
-    trend: 'up',
-    trendValue: '+3.1%'
-  },
-  {
-    id: '8',
-    name: 'Bonus Activation Rate',
-    description: 'Доля игроков, активирующих бонусы',
-    value: '68.9',
-    unit: '%',
-    category: 'engagement',
-    frequency: 'weekly',
-    targetValue: '75',
-    trend: 'stable',
-    trendValue: '+0.8%'
-  },
-  {
-    id: '9',
-    name: 'Bonus Utilization Rate',
-    description: 'Доля использованных бонусов',
-    value: '71.2',
-    unit: '%',
-    category: 'engagement',
-    frequency: 'weekly',
-    targetValue: '80',
-    trend: 'up',
-    trendValue: '+2.5%'
-  },
-  {
-    id: '10',
+    id: 'average_session_duration',
     name: 'Average Session Duration',
-    description: 'Средняя продолжительность сессии (минуты)',
-    value: '32.5',
+    description: 'Средняя продолжительность сессии',
+    value: 35,
     unit: 'min',
     category: 'engagement',
     frequency: 'daily',
-    targetValue: '35',
-    trend: 'down',
-    trendValue: '-1.2 min'
+    targetValue: 45,
+    trend: 'stable',
+    trendValue: '0'
   },
   {
-    id: '11',
+    id: 'active_players_ratio',
     name: 'Active Players Ratio',
-    description: 'Соотношение активных игроков к общему числу',
-    value: '42.8',
-    unit: '%',
-    category: 'retention',
-    frequency: 'daily',
-    targetValue: '50',
-    trend: 'stable',
-    trendValue: '+0.3%'
-  },
-  {
-    id: '12',
-    name: 'VIP Conversion Rate',
-    description: 'Конверсия игроков в VIP-уровень',
-    value: '8.3',
-    unit: '%',
-    category: 'conversion',
-    frequency: 'monthly',
-    targetValue: '10',
-    trend: 'up',
-    trendValue: '+1.1%'
-  },
-  {
-    id: '13',
-    name: 'ROI of Campaigns',
-    description: 'Возврат инвестиций в маркетинговые кампании',
-    value: '285',
-    unit: '%',
-    category: 'revenue',
-    frequency: 'weekly',
-    targetValue: '300',
-    trend: 'up',
-    trendValue: '+15%'
-  },
-  {
-    id: '14',
-    name: 'Average Bet Size',
-    description: 'Средний размер ставки',
-    value: '12.50',
-    unit: '€',
-    category: 'engagement',
-    frequency: 'daily',
-    targetValue: '15',
-    trend: 'stable',
-    trendValue: '+0.25€'
-  },
-  {
-    id: '15',
-    name: 'Player Reactivation Rate',
-    description: 'Процент возвращённых игроков',
-    value: '15.7',
-    unit: '%',
-    category: 'retention',
-    frequency: 'weekly',
-    targetValue: '20',
-    trend: 'up',
-    trendValue: '+2.3%'
-  },
-  {
-    id: '16',
-    name: 'Customer Satisfaction Score (CSAT)',
-    description: 'Удовлетворённость клиентов',
-    value: '4.2',
-    unit: '/5',
-    category: 'satisfaction',
-    frequency: 'monthly',
-    targetValue: '4.5',
-    trend: 'stable',
-    trendValue: '+0.1'
-  },
-  {
-    id: '17',
-    name: 'Net Promoter Score (NPS)',
-    description: 'Готовность рекомендовать казино',
-    value: '42',
-    unit: '',
-    category: 'satisfaction',
-    frequency: 'monthly',
-    targetValue: '50',
-    trend: 'up',
-    trendValue: '+5'
-  },
-  {
-    id: '18',
-    name: 'Withdrawal Success Rate',
-    description: 'Процент успешных выводов средств',
-    value: '98.7',
-    unit: '%',
-    category: 'satisfaction',
-    frequency: 'daily',
-    targetValue: '99',
-    trend: 'stable',
-    trendValue: '+0.1%'
-  },
-  {
-    id: '19',
-    name: 'Customer Support Interaction Rate',
-    description: 'Частота обращений в поддержку',
-    value: '12.3',
-    unit: '%',
-    category: 'satisfaction',
-    frequency: 'weekly',
-    targetValue: '10',
-    trend: 'down',
-    trendValue: '-0.8%'
-  },
-  {
-    id: '20',
-    name: 'Referral Rate',
-    description: 'Доля игроков, приходящих по рекомендациям',
-    value: '18.5',
-    unit: '%',
-    category: 'conversion',
-    frequency: 'weekly',
-    targetValue: '25',
-    trend: 'up',
-    trendValue: '+1.7%'
-  },
-  {
-    id: '21',
-    name: 'First Deposit Time',
-    description: 'Время до первого депозита (часы)',
-    value: '4.2',
-    unit: 'hours',
-    category: 'conversion',
-    frequency: 'daily',
-    targetValue: '3',
-    trend: 'down',
-    trendValue: '-0.3h'
-  },
-  {
-    id: '22',
-    name: 'Re-deposit Rate',
-    description: 'Частота повторных депозитов',
-    value: '64.8',
+    description: 'Соотношение активных игроков',
+    value: 68,
     unit: '%',
     category: 'engagement',
-    frequency: 'weekly',
-    targetValue: '70',
+    frequency: 'daily',
+    targetValue: 70,
     trend: 'up',
-    trendValue: '+2.1%'
+    trendValue: '+2%'
   },
   {
-    id: '23',
+    id: 'session_frequency',
+    name: 'Session Frequency',
+    description: 'Частота игровых сессий',
+    value: 4.5,
+    unit: 'times',
+    category: 'engagement',
+    frequency: 'weekly',
+    targetValue: 5,
+    trend: 'stable',
+    trendValue: '0'
+  },
+  {
+    id: 'peak_activity_time',
     name: 'Peak Activity Time',
-    description: 'Время максимальной активности игроков',
-    value: '21:00-23:00',
+    description: 'Время максимальной активности',
+    value: '20:00-23:00',
     unit: '',
     category: 'engagement',
     frequency: 'daily',
     trend: 'stable'
   },
+  
+  // Conversion метрики
   {
-    id: '24',
-    name: 'Average Time Between Deposits',
-    description: 'Среднее время между депозитами',
-    value: '7.8',
-    unit: 'days',
-    category: 'engagement',
+    id: 'conversion_rate',
+    name: 'Conversion Rate',
+    description: 'Конверсия в активного игрока',
+    value: 52.4,
+    unit: '%',
+    category: 'conversion',
     frequency: 'weekly',
-    targetValue: '5',
-    trend: 'down',
-    trendValue: '-0.5 days'
+    targetValue: 60,
+    trend: 'up',
+    trendValue: '+3.1%'
   },
   {
-    id: '25',
-    name: 'Session Frequency',
-    description: 'Частота игровых сессий (в неделю)',
-    value: '5.2',
-    unit: 'times',
-    category: 'engagement',
-    frequency: 'daily',
-    targetValue: '7',
+    id: 'bonus_activation_rate',
+    name: 'Bonus Activation Rate',
+    description: 'Доля активирующих бонусы',
+    value: 71,
+    unit: '%',
+    category: 'conversion',
+    frequency: 'weekly',
+    targetValue: 80,
+    trend: 'down',
+    trendValue: '-2%'
+  },
+  {
+    id: 'bonus_utilization_rate',
+    name: 'Bonus Utilization Rate',
+    description: 'Доля использованных бонусов',
+    value: 65,
+    unit: '%',
+    category: 'conversion',
+    frequency: 'weekly',
+    targetValue: 75,
     trend: 'stable',
-    trendValue: '+0.1'
+    trendValue: '0%'
+  },
+  {
+    id: 'vip_conversion_rate',
+    name: 'VIP Conversion Rate',
+    description: 'Конверсия в VIP-уровень',
+    value: 8.3,
+    unit: '%',
+    category: 'conversion',
+    frequency: 'monthly',
+    targetValue: 10,
+    trend: 'up',
+    trendValue: '+0.5%'
+  },
+  {
+    id: 'first_deposit_time',
+    name: 'First Deposit Time',
+    description: 'Время до первого депозита',
+    value: 2.5,
+    unit: 'hours',
+    category: 'conversion',
+    frequency: 'weekly',
+    targetValue: 2,
+    trend: 'down',
+    trendValue: '-0.2'
+  },
+  {
+    id: 're_deposit_rate',
+    name: 'Re-deposit Rate',
+    description: 'Частота повторных депозитов',
+    value: 45,
+    unit: '%',
+    category: 'conversion',
+    frequency: 'weekly',
+    targetValue: 55,
+    trend: 'up',
+    trendValue: '+1.5%'
+  },
+  
+  // Satisfaction метрики
+  {
+    id: 'csat',
+    name: 'Customer Satisfaction Score (CSAT)',
+    description: 'Удовлетворённость клиентов',
+    value: 4.2,
+    unit: '/5',
+    category: 'satisfaction',
+    frequency: 'monthly',
+    targetValue: 4.5,
+    trend: 'stable',
+    trendValue: '0'
+  },
+  {
+    id: 'nps',
+    name: 'Net Promoter Score (NPS)',
+    description: 'Готовность рекомендовать',
+    value: 42,
+    unit: '',
+    category: 'satisfaction',
+    frequency: 'monthly',
+    targetValue: 50,
+    trend: 'up',
+    trendValue: '+3'
+  },
+  {
+    id: 'withdrawal_success_rate',
+    name: 'Withdrawal Success Rate',
+    description: 'Процент успешных выводов',
+    value: 98.5,
+    unit: '%',
+    category: 'satisfaction',
+    frequency: 'daily',
+    targetValue: 99,
+    trend: 'stable',
+    trendValue: '0%'
+  },
+  {
+    id: 'support_interaction_rate',
+    name: 'Customer Support Interaction Rate',
+    description: 'Частота обращений в поддержку',
+    value: 12,
+    unit: '%',
+    category: 'satisfaction',
+    frequency: 'weekly',
+    targetValue: 10,
+    trend: 'down',
+    trendValue: '-1%'
+  },
+  {
+    id: 'referral_rate',
+    name: 'Referral Rate',
+    description: 'Доля по рекомендациям',
+    value: 18,
+    unit: '%',
+    category: 'satisfaction',
+    frequency: 'monthly',
+    targetValue: 25,
+    trend: 'up',
+    trendValue: '+2%'
   }
 ];
 
-// Примерные значения метрик для разных сегментов
+// Метрики по сегментам
 export const segmentMetricsData: SegmentMetrics[] = [
   {
     segmentName: 'VIP-игроки',
     segmentId: 'vip',
     metrics: {
       retentionRate: '80-90%',
-      averageDepositAmount: 'от €5,000',
+      averageDepositAmount: 'от €5000',
       depositFrequency: '2-4 раза в месяц',
       ltv: '€50,000+',
+      conversionRate: '95%',
+      bonusActivationRate: '70%',
+      activePlayersRatio: '92%',
+      referralRate: '35%'
     },
     recommendations: [
       'Персональный менеджер для каждого VIP',
       'Эксклюзивные бонусы и турниры',
-      'Приоритетная обработка выводов',
-      'Индивидуальные лимиты'
+      'Приоритетная поддержка 24/7'
     ]
   },
   {
@@ -330,30 +340,34 @@ export const segmentMetricsData: SegmentMetrics[] = [
       averageDepositAmount: '€200-€500',
       depositFrequency: 'еженедельно',
       ltv: '€5,000-€10,000',
+      conversionRate: '75%',
+      bonusActivationRate: '80%',
+      activePlayersRatio: '85%',
+      referralRate: '20%'
     },
     recommendations: [
-      'Регулярные бонусы на депозит',
+      'Регулярные акции и турниры',
       'Программа лояльности с уровнями',
-      'Персонализированные push-уведомления',
-      'Участие в турнирах'
+      'Персонализированные email-кампании'
     ]
   },
   {
     segmentName: 'Новички',
-    segmentId: 'newbies',
+    segmentId: 'new',
     metrics: {
-      conversionRate: '40-60%',
+      retentionRate: '40-60%',
       averageDepositAmount: '€10-€100',
+      depositFrequency: '1-2 раза в месяц',
+      ltv: '€500-€1,500',
+      conversionRate: '40-60%',
       bonusActivationRate: '70-80%',
-      depositFrequency: '1-2 раза',
-      ltv: '€100-€500',
-      retentionRate: '30-40%'
+      activePlayersRatio: '45%',
+      referralRate: '5%'
     },
     recommendations: [
-      'Агрессивный Welcome-бонус',
-      'Обучающие материалы',
-      'Быстрая верификация',
-      'Бесплатные спины для знакомства'
+      'Улучшенный онбординг',
+      'Приветственные бонусы',
+      'Обучающие материалы'
     ]
   },
   {
@@ -363,65 +377,88 @@ export const segmentMetricsData: SegmentMetrics[] = [
       retentionRate: '70-80%',
       averageDepositAmount: '€10-€50',
       depositFrequency: '4-8 раз в месяц',
-      ltv: '€1,000-€3,000',
+      ltv: '€2,000-€4,000',
+      conversionRate: '65%',
+      bonusActivationRate: '60%',
+      activePlayersRatio: '75%',
+      referralRate: '15%'
     },
     recommendations: [
-      'Низкие минимальные ставки',
-      'Кэшбек программы',
-      'Лимиты на депозиты',
-      'Игры с низкой волатильностью'
+      'Низкорисковые игры',
+      'Кешбэк программы',
+      'Длительные акции'
     ]
   },
   {
     segmentName: 'Игроки выходного дня',
     segmentId: 'weekend',
     metrics: {
-      activePlayersRatio: '70-85%',
+      retentionRate: '50-65%',
       averageDepositAmount: '€50-€200',
       depositFrequency: 'раз в неделю',
-      ltv: '€2,000-€5,000',
-      retentionRate: '50-65%'
+      ltv: '€3,000-€6,000',
+      activePlayersRatio: '70-85%',
+      bonusActivationRate: '75%',
+      conversionRate: '55%',
+      referralRate: '10%'
     },
     recommendations: [
-      'Специальные акции на выходные',
-      'Турниры по пятницам и субботам',
-      'Happy hours с повышенными бонусами',
-      'Push-уведомления в пятницу вечером'
+      'Выходные турниры',
+      'Пятничные бонусы',
+      'Специальные акции на выходные'
     ]
   },
   {
     segmentName: 'Игроки от стримеров',
-    segmentId: 'streamers',
+    segmentId: 'streamer',
     metrics: {
+      retentionRate: '45-60%',
+      averageDepositAmount: '€30-€150',
+      depositFrequency: '2-3 раза в месяц',
+      ltv: '€1,500-€3,500',
       conversionRate: '50-70%',
       bonusActivationRate: '60-80%',
-      referralRate: '20-30%',
-      averageDepositAmount: '€50-€300',
-      depositFrequency: '2-3 раза в месяц',
-      ltv: '€1,000-€5,000',
-      retentionRate: '45-60%'
+      activePlayersRatio: '65%',
+      referralRate: '20-30%'
     },
     recommendations: [
-      'Специальные промокоды стримеров',
-      'Эксклюзивные турниры для подписчиков',
-      'Интеграция с Twitch/YouTube',
-      'Реферальная программа для стримеров'
+      'Эксклюзивные промокоды стримеров',
+      'Совместные турниры',
+      'Интеграция с платформами стриминга'
     ]
   }
 ];
 
-// Регламент мониторинга метрик
-export const monitoringSchedule = {
-  daily: ['Retention Rate', 'Churn Rate', 'Average Session Duration', 'Active Players Ratio', 'Conversion Rate', 'Withdrawal Success Rate'],
-  weekly: ['ARPU', 'Average Deposit Amount', 'Frequency of Deposits', 'Bonus Activation Rate', 'Player Reactivation Rate', 'ROI of Campaigns'],
-  monthly: ['LTV', 'VIP Conversion Rate', 'Customer Satisfaction Score', 'Net Promoter Score', 'Referral Rate']
-};
-
-// Система оповещений
-export const alertThresholds = {
-  retentionRate: { critical: 60, warning: 65 },
-  arpu: { criticalDrop: 15 }, // процент падения
-  bonusUtilizationRate: { critical: 50, warning: 60 },
-  churnRate: { critical: 5, warning: 4 },
-  withdrawalSuccessRate: { critical: 95, warning: 97 }
+// Регламент мониторинга
+export const monitoringSchedule: MonitoringSchedule = {
+  daily: [
+    'Retention Rate',
+    'Churn Rate',
+    'Average Session Duration',
+    'Active Players Ratio',
+    'Withdrawal Success Rate',
+    'Average Bet Size'
+  ],
+  weekly: [
+    'ARPU',
+    'Average Deposit Amount',
+    'Frequency of Deposits',
+    'Bonus Activation Rate',
+    'Player Reactivation Rate',
+    'Conversion Rate',
+    'Bonus Utilization Rate',
+    'Customer Support Interaction Rate',
+    'Session Frequency',
+    'First Deposit Time',
+    'Re-deposit Rate',
+    'Average Time Between Deposits',
+    'ROI of Campaigns'
+  ],
+  monthly: [
+    'LTV',
+    'VIP Conversion Rate',
+    'Customer Satisfaction Score',
+    'Net Promoter Score',
+    'Referral Rate'
+  ]
 };

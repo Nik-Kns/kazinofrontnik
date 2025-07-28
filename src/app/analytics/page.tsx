@@ -4,8 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KpiGrid } from "@/components/dashboard/kpi-grid";
 import { AnalyticsCharts } from "@/components/dashboard/analytics-charts";
-import { AnalyticsFilters } from "@/components/analytics/analytics-filters";
-import { HandCoins, TrendingUp, Users, BarChart3 } from "lucide-react";
+import { EnhancedFilters } from "@/components/ui/enhanced-filters";
+import { KPISummary } from "@/components/dashboard/kpi-summary";
+import { FlexibleCharts } from "@/components/analytics/flexible-charts";
+import { SegmentMetricsTable } from "@/components/analytics/segment-metrics-table";
+import { AlertsAndSignals } from "@/components/analytics/alerts-and-signals";
+import { CampaignDeepAnalytics } from "@/components/analytics/campaign-deep-analytics";
+import { HandCoins, TrendingUp, Users, BarChart3, Activity } from "lucide-react";
 import { CampaignPerformanceTable } from "@/components/analytics/campaign-performance-table";
 import { RetentionMetricsDashboard } from "@/components/analytics/retention-metrics-dashboard";
 import { useState } from "react";
@@ -21,23 +26,45 @@ export default function AnalyticsPage() {
     console.log('Фильтры аналитики обновлены:', filters);
   };
 
+  const handleExport = (format: 'pdf' | 'excel') => {
+    // TODO: Реализовать экспорт
+    console.log(`Экспорт в ${format}`);
+  };
+
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold tracking-tight">Аналитика</h1>
         <p className="text-muted-foreground">
-          Раздел с метриками по Retention, CRM, финансам. Здесь будут настраиваемые дашборды, сравнение периодов и экспорт отчетов.
+          Полный контроль над метриками казино. Настраиваемые дашборды, глубокая аналитика и экспорт отчетов.
         </p>
-        <AnalyticsFilters onFiltersChange={handleFiltersChange} />
       </div>
 
-      <Tabs defaultValue="retention">
-        <TabsList className="mb-4">
+      {/* Расширенные фильтры с экспортом */}
+      <EnhancedFilters 
+        onApply={handleFiltersChange} 
+        onExport={handleExport}
+        defaultFilters={activeFilters}
+      />
+
+      <Tabs defaultValue="kpi-summary">
+        <TabsList className="mb-4 grid w-full grid-cols-5">
+          <TabsTrigger value="kpi-summary"><Activity className="mr-2 h-4 w-4" />KPI Summary</TabsTrigger>
           <TabsTrigger value="retention"><TrendingUp className="mr-2 h-4 w-4" />Retention</TabsTrigger>
           <TabsTrigger value="crm"><Users className="mr-2 h-4 w-4" />CRM</TabsTrigger>
           <TabsTrigger value="finance"><HandCoins className="mr-2 h-4 w-4" />Финансы</TabsTrigger>
-          <TabsTrigger value="detailed"><BarChart3 className="mr-2 h-4 w-4" />Подробная аналитика</TabsTrigger>
+          <TabsTrigger value="detailed"><BarChart3 className="mr-2 h-4 w-4" />25 метрик</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="kpi-summary" className="space-y-6">
+          <KPISummary 
+            filters={activeFilters}
+            segment={activeFilters.segments?.[0]}
+          />
+          <AlertsAndSignals />
+          <FlexibleCharts filters={activeFilters} />
+          <SegmentMetricsTable />
+        </TabsContent>
 
         <TabsContent value="retention" className="space-y-6">
             <Card>
@@ -54,7 +81,8 @@ export default function AnalyticsPage() {
 
         <TabsContent value="crm" className="space-y-6">
             <CampaignPerformanceTable />
-            <AnalyticsCharts />
+            <CampaignDeepAnalytics />
+            <AlertsAndSignals />
         </TabsContent>
 
         <TabsContent value="finance" className="space-y-6">
