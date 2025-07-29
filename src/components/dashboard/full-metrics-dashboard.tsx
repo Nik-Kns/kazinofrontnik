@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PeriodFilter } from "@/components/ui/period-filter";
 import { 
   TrendingUp, TrendingDown, AlertCircle, Target, Euro, Users, 
   Activity, Heart, ArrowRight, AlertTriangle, CheckCircle2,
@@ -13,6 +15,7 @@ import {
 import Link from "next/link";
 import { retentionMetrics, segmentMetricsData, monitoringSchedule } from "@/lib/retention-metrics-data";
 import type { RetentionMetric } from "@/lib/types";
+import { addDays } from "date-fns";
 
 // Группировка метрик по категориям
 const getMetricsByCategory = () => {
@@ -94,6 +97,11 @@ function MetricCard({ metric, isCompact = false }: { metric: RetentionMetric; is
 
 // Основной компонент дашборда
 export function FullMetricsDashboard() {
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
+    from: addDays(new Date(), -30),
+    to: new Date()
+  });
+  
   const metricsByCategory = getMetricsByCategory();
   
   // Критические метрики
@@ -126,6 +134,12 @@ export function FullMetricsDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Фильтр по периоду времени */}
+      <PeriodFilter 
+        dateRange={dateRange}
+        onDateChange={setDateRange}
+      />
+
       {/* Критические алерты - самое важное сверху */}
       {criticalMetrics.length > 0 && (
         <Card className="border-red-200 bg-red-50">
