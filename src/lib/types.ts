@@ -192,6 +192,21 @@ export type PlayerGameActivity = {
         other: string[];
     };
     engagementLevel: 'active' | 'sleeping' | 'at_risk' | 'churned';
+    // Новые метрики времени на сайте
+    totalTimeOnSite: string; // Общее время на сайте
+    averageTimePerDay: string; // Среднее время в день
+    activityByDayOfWeek: {
+        monday: number; // минуты
+        tuesday: number;
+        wednesday: number;
+        thursday: number;
+        friday: number;
+        saturday: number;
+        sunday: number;
+    };
+    activityByHour: { [hour: number]: number }; // активность по часам (0-23)
+    mostActiveDay: string; // День недели с максимальной активностью
+    mostActiveTimeSlot: string; // Время суток с максимальной активностью
 };
 
 // Выигрыш в игре
@@ -423,6 +438,9 @@ export type FilterConfig = {
   
   // Фильтр по сегментам
   segments?: SegmentType[];     // Все сегменты из списка
+  
+  // Фильтр по кампаниям
+  campaigns?: string[];         // Выбранные кампании
   
   // Фильтры по источнику
   sourceType?: 'url' | 'streamer' | 'organic' | 'promo' | 'other'; // Тип источника

@@ -183,7 +183,7 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
       
       <CardContent>
         {/* Основные фильтры - всегда видимы */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-4">
           {/* Название казино и логотип */}
           <div className="space-y-2">
             <Label>Казино</Label>
@@ -252,6 +252,12 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
                 <SelectItem value="custom">Выбрать период</SelectItem>
               </SelectContent>
             </Select>
+            {filters.datePreset === 'custom' && (
+              <DatePickerWithRange
+                date={filters.dateRange}
+                onDateChange={(date) => setFilters(prev => ({ ...prev, dateRange: date }))}
+              />
+            )}
           </div>
 
           {/* Сегменты */}
@@ -262,6 +268,28 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
               selected={filters.segments || []}
               onChange={(selected) => setFilters(prev => ({ ...prev, segments: selected as SegmentType[] }))}
               placeholder="Выберите сегменты"
+            />
+          </div>
+
+          {/* Кампании */}
+          <div className="space-y-2">
+            <Label>Кампании</Label>
+            <MultiSelect
+              options={[
+                { value: 'welcome_bonus', label: 'Welcome Bonus' },
+                { value: 'vip_rewards', label: 'VIP Rewards' },
+                { value: 'weekend_promo', label: 'Weekend Promo' },
+                { value: 'birthday_campaign', label: 'Birthday Campaign' },
+                { value: 'reactivation_1', label: 'Reactivation Stage 1' },
+                { value: 'reactivation_2', label: 'Reactivation Stage 2' },
+                { value: 'cashback_tuesday', label: 'Cashback Tuesday' },
+                { value: 'loyalty_program', label: 'Loyalty Program' },
+                { value: 'tournament_invite', label: 'Tournament Invites' },
+                { value: 'deposit_bonus', label: 'Deposit Bonuses' }
+              ]}
+              selected={filters.campaigns || []}
+              onChange={(selected) => setFilters(prev => ({ ...prev, campaigns: selected }))}
+              placeholder="Выберите кампании"
             />
           </div>
         </div>

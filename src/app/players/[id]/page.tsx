@@ -94,7 +94,25 @@ const mockPlayerData: PlayerFullProfile = {
       aviator: true,
       other: ["Турниры", "Дропы"]
     },
-    engagementLevel: "active"
+    engagementLevel: "active",
+    totalTimeOnSite: "342 ч 15 мин",
+    averageTimePerDay: "1 ч 45 мин",
+    activityByDayOfWeek: {
+      monday: 85,
+      tuesday: 120,
+      wednesday: 95,
+      thursday: 140,
+      friday: 180,
+      saturday: 220,
+      sunday: 160
+    },
+    activityByHour: {
+      0: 10, 1: 5, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 15, 9: 20,
+      10: 25, 11: 30, 12: 35, 13: 30, 14: 25, 15: 20, 16: 30, 17: 40,
+      18: 55, 19: 75, 20: 120, 21: 140, 22: 100, 23: 60
+    },
+    mostActiveDay: "Суббота",
+    mostActiveTimeSlot: "20:00-23:00"
   },
   marketing: {
     bonusParticipation: true,
@@ -571,6 +589,94 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Пиковое время активности</p>
                   <p className="font-medium">{player.gaming.peakActivityTime}</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Время на сайте</h4>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Общее время на сайте</p>
+                    <p className="text-xl font-bold">{player.gaming.totalTimeOnSite}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Среднее время в день</p>
+                    <p className="text-xl font-bold">{player.gaming.averageTimePerDay}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Самый активный день</p>
+                    <p className="text-xl font-bold">{player.gaming.mostActiveDay}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Активность по дням недели</h4>
+                <div className="grid grid-cols-7 gap-2">
+                  {Object.entries(player.gaming.activityByDayOfWeek).map(([day, minutes]) => (
+                    <div key={day} className="text-center">
+                      <p className="text-xs text-muted-foreground capitalize">{day.slice(0, 3)}</p>
+                      <div className="mt-1 relative">
+                        <div className="h-20 bg-secondary rounded" />
+                        <div 
+                          className="absolute bottom-0 left-0 right-0 bg-primary rounded transition-all"
+                          style={{ height: `${Math.min((minutes / 220) * 100, 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-xs mt-1 font-medium">{Math.floor(minutes / 60)}ч {minutes % 60}м</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Активность по времени суток</h4>
+                <div className="space-y-3">
+                  {/* График по часам */}
+                  <div className="grid grid-cols-24 gap-0.5">
+                    {Object.entries(player.gaming.activityByHour).map(([hour, minutes]) => (
+                      <div key={hour} className="relative group">
+                        <div 
+                          className="w-full bg-primary/20 hover:bg-primary/30 transition-colors rounded-t"
+                          style={{ 
+                            height: `${Math.max((minutes / 140) * 60, 4)}px`,
+                            backgroundColor: minutes > 100 ? 'rgb(var(--primary))' : undefined
+                          }}
+                        >
+                          <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-popover text-popover-foreground px-2 py-1 rounded text-xs whitespace-nowrap z-10">
+                            {hour}:00 - {minutes} мин
+                          </div>
+                        </div>
+                        {Number(hour) % 3 === 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">{hour}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Легенда времени суток */}
+                  <div className="grid grid-cols-4 gap-2 mt-4">
+                    <div className="text-center p-2 rounded bg-secondary/50">
+                      <p className="text-xs text-muted-foreground">Ночь</p>
+                      <p className="text-sm font-medium">00:00 - 06:00</p>
+                      <p className="text-xs">{Object.entries(player.gaming.activityByHour).slice(0, 6).reduce((sum, [_, min]) => sum + min, 0)} мин</p>
+                    </div>
+                    <div className="text-center p-2 rounded bg-secondary/50">
+                      <p className="text-xs text-muted-foreground">Утро</p>
+                      <p className="text-sm font-medium">06:00 - 12:00</p>
+                      <p className="text-xs">{Object.entries(player.gaming.activityByHour).slice(6, 12).reduce((sum, [_, min]) => sum + min, 0)} мин</p>
+                    </div>
+                    <div className="text-center p-2 rounded bg-secondary/50">
+                      <p className="text-xs text-muted-foreground">День</p>
+                      <p className="text-sm font-medium">12:00 - 18:00</p>
+                      <p className="text-xs">{Object.entries(player.gaming.activityByHour).slice(12, 18).reduce((sum, [_, min]) => sum + min, 0)} мин</p>
+                    </div>
+                    <div className="text-center p-2 rounded bg-primary/20 border-2 border-primary">
+                      <p className="text-xs text-muted-foreground">Вечер</p>
+                      <p className="text-sm font-medium">18:00 - 00:00</p>
+                      <p className="text-xs font-bold">{Object.entries(player.gaming.activityByHour).slice(18, 24).reduce((sum, [_, min]) => sum + min, 0)} мин</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>

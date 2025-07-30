@@ -79,6 +79,22 @@ export const kpiData: KpiCardData[] = [
     icon: "MailWarning",
     aiHint: "Процент получателей, отписавшихся от рассылки. Рост этого показателя - признак усталости базы.",
   },
+  {
+    title: "GGR (Gross Gaming Revenue)",
+    value: "€125,340",
+    change: "+18.2%",
+    changeType: "increase",
+    icon: "Euro",
+    aiHint: "Валовый игровой доход - общая сумма ставок минус выплаты. Ключевая метрика прибыльности казино.",
+  },
+  {
+    title: "Total Bet",
+    value: "€1,842,560",
+    change: "+22.5%",
+    changeType: "increase",
+    icon: "DollarSign",
+    aiHint: "Общая сумма ставок игроков за период. Показывает общий объем игровой активности на платформе.",
+  },
 ];
 
 export const scenariosData: ScenarioData[] = [
