@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FullMetricsDashboard } from "@/components/dashboard/full-metrics-dashboard";
 import { RisksAndWarnings } from "@/components/dashboard/risks-and-warnings";
+import { DataAccessLevels } from "@/components/dashboard/data-access-levels";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,9 @@ export default function CommandCenterPage() {
 
       {/* Полный дашборд метрик - главный блок */}
       <FullMetricsDashboard />
+
+      {/* Блок с уровнями доступа к данным */}
+      <DataAccessLevels />
 
       {/* AI Инсайты и быстрые действия */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
