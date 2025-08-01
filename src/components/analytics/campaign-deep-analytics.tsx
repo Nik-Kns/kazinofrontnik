@@ -8,9 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePickerWithRange } from "@/components/ui/date-picker-with-range";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   ArrowUpDown, ArrowUp, ArrowDown, Download, Filter,
-  Mail, MessageSquare, Euro, TrendingUp, Users, Target
+  Mail, MessageSquare, Euro, TrendingUp, Users, Target, AlertCircle
 } from "lucide-react";
 
 interface CampaignData {
