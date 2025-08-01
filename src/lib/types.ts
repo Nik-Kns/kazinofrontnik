@@ -167,7 +167,10 @@ export type Transaction = {
     currency: string;
     status: 'pending' | 'completed' | 'failed' | 'cancelled';
     method: string;
+    processor: string; // Платежный процессор (CloudPayments, PayOP, Paysafe и т.д.)
     type: 'deposit' | 'withdrawal';
+    commission?: number; // Комиссия в валюте транзакции
+    commissionRate?: number; // Процент комиссии
 };
 
 // Игровая активность

@@ -62,9 +62,66 @@ const mockPlayerData: PlayerFullProfile = {
     reDepositFrequency: "Стабильная",
     accountCurrency: "EUR",
     depositHistory: [
-      { id: "1", date: new Date("2024-07-25"), amount: 500, currency: "EUR", status: "completed", method: "Visa", type: "deposit" },
-      { id: "2", date: new Date("2024-07-22"), amount: 200, currency: "EUR", status: "completed", method: "Skrill", type: "deposit" },
-      { id: "3", date: new Date("2024-07-20"), amount: 1500, currency: "EUR", status: "completed", method: "Bank Transfer", type: "withdrawal" }
+      { 
+        id: "1", 
+        date: new Date("2024-07-25"), 
+        amount: 500, 
+        currency: "EUR", 
+        status: "completed", 
+        method: "Visa", 
+        processor: "CloudPayments",
+        type: "deposit",
+        commission: 15,
+        commissionRate: 3
+      },
+      { 
+        id: "2", 
+        date: new Date("2024-07-22"), 
+        amount: 200, 
+        currency: "EUR", 
+        status: "completed", 
+        method: "Skrill", 
+        processor: "PayOP",
+        type: "deposit",
+        commission: 4,
+        commissionRate: 2
+      },
+      { 
+        id: "3", 
+        date: new Date("2024-07-20"), 
+        amount: 1500, 
+        currency: "EUR", 
+        status: "completed", 
+        method: "Bank Transfer", 
+        processor: "Paysafe",
+        type: "withdrawal",
+        commission: 25,
+        commissionRate: 1.67
+      },
+      {
+        id: "4",
+        date: new Date("2024-07-18"),
+        amount: 300,
+        currency: "EUR",
+        status: "completed",
+        method: "Mastercard",
+        processor: "Stripe",
+        type: "deposit",
+        commission: 8.7,
+        commissionRate: 2.9
+      },
+      {
+        id: "5",
+        date: new Date("2024-07-15"),
+        amount: 1000,
+        currency: "EUR",
+        status: "completed",
+        method: "Bitcoin",
+        processor: "CoinGate",
+        type: "deposit",
+        commission: 10,
+        commissionRate: 1
+      }
     ],
     withdrawalHistory: [],
     successfulTransactions: 108,
@@ -500,33 +557,69 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               <CardContent>
                 <div className="space-y-4">
                   {player.financial.depositHistory.map(transaction => (
-                    <div key={transaction.id} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${transaction.type === 'deposit' ? 'bg-green-100' : 'bg-red-100'}`}>
-                          {transaction.type === 'deposit' ? 
-                            <TrendingUp className="h-4 w-4 text-green-600" /> : 
-                            <TrendingDown className="h-4 w-4 text-red-600" />
-                          }
+                    <div key={transaction.id} className="p-4 rounded-lg border hover:border-primary/50 transition-colors">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-full mt-1 ${transaction.type === 'deposit' ? 'bg-green-100' : 'bg-red-100'}`}>
+                            {transaction.type === 'deposit' ? 
+                              <TrendingUp className="h-4 w-4 text-green-600" /> : 
+                              <TrendingDown className="h-4 w-4 text-red-600" />
+                            }
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-medium">
+                              {transaction.type === 'deposit' ? 'Депозит' : 'Вывод'}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                              <span>{transaction.date.toLocaleDateString('ru-RU')}</span>
+                              <span>•</span>
+                              <span>{transaction.method}</span>
+                              <span>•</span>
+                              <span className="font-medium">{transaction.processor}</span>
+                            </div>
+                            {transaction.commission && (
+                              <p className="text-xs text-muted-foreground">
+                                Комиссия: €{transaction.commission.toFixed(2)} ({transaction.commissionRate}%)
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">
-                            {transaction.type === 'deposit' ? 'Депозит' : 'Вывод'}
+                        <div className="text-right space-y-1">
+                          <p className={`font-bold text-lg ${transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}`}>
+                            {transaction.type === 'deposit' ? '+' : '-'}€{transaction.amount}
                           </p>
-                          <p className="text-sm text-muted-foreground">
-                            {transaction.date.toLocaleDateString('ru-RU')} • {transaction.method}
-                          </p>
+                          <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
+                            {transaction.status}
+                          </Badge>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className={`font-bold ${transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}`}>
-                          {transaction.type === 'deposit' ? '+' : '-'}€{transaction.amount}
-                        </p>
-                        <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
-                          {transaction.status}
-                        </Badge>
                       </div>
                     </div>
                   ))}
+                </div>
+                
+                {/* Сводка по комиссиям */}
+                <div className="mt-6 p-4 rounded-lg bg-secondary/50 border">
+                  <h5 className="font-medium text-sm mb-2">Анализ комиссий</h5>
+                  <div className="grid gap-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Всего комиссий:</span>
+                      <span className="font-medium">
+                        €{player.financial.depositHistory
+                          .reduce((sum, t) => sum + (t.commission || 0), 0)
+                          .toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Средняя комиссия:</span>
+                      <span className="font-medium">
+                        {(player.financial.depositHistory
+                          .filter(t => t.commissionRate)
+                          .reduce((sum, t) => sum + (t.commissionRate || 0), 0) / 
+                          player.financial.depositHistory.filter(t => t.commissionRate).length)
+                          .toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
