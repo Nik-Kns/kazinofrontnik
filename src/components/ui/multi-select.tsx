@@ -32,18 +32,21 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
+  // Безопасно приводим selected к массиву строк
+  const safeSelected = Array.isArray(selected) ? selected : [];
+
   const handleSelect = (value: string) => {
-    if (selected.includes(value)) {
-      onChange(selected.filter((item) => item !== value));
+    if (safeSelected.includes(value)) {
+      onChange(safeSelected.filter((item) => item !== value));
     } else {
-      if (maxSelected && selected.length >= maxSelected) {
+      if (maxSelected && safeSelected.length >= maxSelected) {
         return;
       }
-      onChange([...selected, value]);
+      onChange([...safeSelected, value]);
     }
   };
 
-  const selectedOptions = options.filter((option) => selected.includes(option.value));
+  const selectedOptions = options.filter((option) => safeSelected.includes(option.value));
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -54,11 +57,11 @@ export function MultiSelect({
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
         >
-          {selected.length > 0 ? (
+          {safeSelected.length > 0 ? (
             <div className="flex gap-1 flex-wrap">
-              {selected.length > 2 ? (
+              {safeSelected.length > 2 ? (
                 <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-                  {selected.length} выбрано
+                  {safeSelected.length} выбрано
                 </Badge>
               ) : (
                 selectedOptions.map((option) => (
@@ -86,24 +89,35 @@ export function MultiSelect({
               <CommandItem
                 key={option.value}
                 onSelect={() => handleSelect(option.value)}
+                role="option"
+                aria-selected={safeSelected.includes(option.value)}
+                tabIndex={0}
+                className={cn(
+                  "flex items-center cursor-pointer",
+                  safeSelected.includes(option.value) && "bg-accent"
+                )}
               >
                 <div
                   className={cn(
-                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                    selected.includes(option.value)
-                      ? "bg-primary text-primary-foreground"
-                      : "opacity-50 [&_svg]:invisible"
+                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary transition-colors bg-white",
+                    safeSelected.includes(option.value)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-white border-gray-300"
                   )}
+                  aria-checked={safeSelected.includes(option.value)}
+                  role="checkbox"
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  {safeSelected.includes(option.value) && (
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
                 </div>
                 <span>{option.label}</span>
               </CommandItem>
