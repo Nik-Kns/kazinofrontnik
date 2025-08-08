@@ -13,7 +13,13 @@ export const retentionMetrics: RetentionMetric[] = [
     frequency: 'daily',
     targetValue: 75,
     trend: 'down',
-    trendValue: '-2.1%'
+    trendValue: '-2.1%',
+    sparkline: [65, 64.5, 64, 63.5, 63, 62.8, 62.3],
+    breakdown: [
+      { label: 'VIP', value: 80, color: '#f59e42' },
+      { label: 'Active', value: 70, color: '#60a5fa' },
+      { label: 'New', value: 50, color: '#34d399' }
+    ]
   },
   {
     id: 'churn_rate',
@@ -25,7 +31,13 @@ export const retentionMetrics: RetentionMetric[] = [
     frequency: 'daily',
     targetValue: 2.5,
     trend: 'up',
-    trendValue: '+0.5%'
+    trendValue: '+0.5%',
+    sparkline: [2.8, 2.9, 3.0, 3.1, 3.1, 3.2, 3.2],
+    breakdown: [
+      { label: 'VIP', value: 1.5, color: '#f59e42' },
+      { label: 'Active', value: 2.8, color: '#60a5fa' },
+      { label: 'New', value: 5.5, color: '#34d399' }
+    ]
   },
   {
     id: 'player_reactivation_rate',
@@ -42,6 +54,30 @@ export const retentionMetrics: RetentionMetric[] = [
   
   // Revenue метрики
   {
+    id: 'ggr',
+    name: 'GGR',
+    description: 'Gross Gaming Revenue — валовый игровой доход (ставки минус выигрыши)',
+    value: 125340,
+    unit: '€',
+    category: 'revenue',
+    frequency: 'daily',
+    targetValue: 140000,
+    trend: 'up',
+    trendValue: '+18.2%'
+  },
+  {
+    id: 'ngr',
+    name: 'NGR',
+    description: 'Net Gaming Revenue — чистый игровой доход (GGR минус бонусы/комиссии)',
+    value: 71200,
+    unit: '€',
+    category: 'revenue',
+    frequency: 'daily',
+    targetValue: 80000,
+    trend: 'up',
+    trendValue: '+9.6%'
+  },
+  {
     id: 'ltv',
     name: 'Lifetime Value (LTV)',
     description: 'Общий доход от игрока',
@@ -51,7 +87,13 @@ export const retentionMetrics: RetentionMetric[] = [
     frequency: 'monthly',
     targetValue: 10000,
     trend: 'up',
-    trendValue: '+€12.3'
+    trendValue: '+€12.3',
+    sparkline: [8200, 8250, 8300, 8350, 8400, 8430, 8450],
+    breakdown: [
+      { label: 'VIP', value: 50000, color: '#f59e42' },
+      { label: 'Active', value: 8000, color: '#60a5fa' },
+      { label: 'New', value: 1200, color: '#34d399' }
+    ]
   },
   {
     id: 'arpu',
@@ -63,11 +105,17 @@ export const retentionMetrics: RetentionMetric[] = [
     frequency: 'weekly',
     targetValue: 150,
     trend: 'up',
-    trendValue: '+€0.2'
+    trendValue: '+€0.2',
+    sparkline: [120, 121, 122, 123, 124, 124.5, 125],
+    breakdown: [
+      { label: 'VIP', value: 350, color: '#f59e42' },
+      { label: 'Active', value: 140, color: '#60a5fa' },
+      { label: 'New', value: 30, color: '#34d399' }
+    ]
   },
   {
     id: 'average_deposit',
-    name: 'Average Deposit Amount',
+    name: 'AVG DEP',
     description: 'Средний размер депозита',
     value: 85,
     unit: '€',

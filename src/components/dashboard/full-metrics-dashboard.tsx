@@ -116,9 +116,9 @@ export function FullMetricsDashboard() {
   // Топ метрики для быстрого обзора
   const topMetrics = [
     retentionMetrics.find(m => m.name === 'Retention Rate'),
-    retentionMetrics.find(m => m.name === 'Churn Rate'),
-    retentionMetrics.find(m => m.name === 'Lifetime Value (LTV)'),
-    retentionMetrics.find(m => m.name === 'Average Revenue Per User (ARPU)'),
+    retentionMetrics.find(m => m.name === 'GGR'),
+    retentionMetrics.find(m => m.name === 'NGR'),
+    retentionMetrics.find(m => m.name === 'AVG DEP'),
   ].filter(Boolean) as RetentionMetric[];
 
   const getCategoryIcon = (category: string) => {
