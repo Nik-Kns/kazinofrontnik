@@ -20,9 +20,29 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import SidebarNav from "./sidebar-nav";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [brandEnabled, setBrandEnabled] = React.useState<boolean>(true);
+  const [brand, setBrand] = React.useState<string>("aigaming");
+
+  React.useEffect(() => {
+    try {
+      const savedBrand = localStorage.getItem("brandSelection");
+      const savedEnabled = localStorage.getItem("brandEnabled");
+      if (savedBrand) setBrand(savedBrand);
+      if (savedEnabled) setBrandEnabled(savedEnabled === "true");
+    } catch {}
+  }, []);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem("brandSelection", brand);
+      localStorage.setItem("brandEnabled", String(brandEnabled));
+    } catch {}
+  }, [brand, brandEnabled]);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -61,8 +81,28 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             <span className="sr-only">Toggle sidebar</span>
           </Button>
 
-          <div className="relative ml-auto flex-1 md:grow-0">
-            {/* Optional search bar can go here */}
+          <div className="relative ml-auto flex-1 md:grow-0" />
+
+          {/* Бренд-выбор (чекбокс + селектор) */}
+          <div className="hidden items-center gap-2 md:flex">
+            <Checkbox
+              id="brand-enabled"
+              checked={brandEnabled}
+              onCheckedChange={(v) => setBrandEnabled(Boolean(v))}
+            />
+            <label htmlFor="brand-enabled" className="text-sm text-muted-foreground">
+              Бренд
+            </label>
+            <Select value={brand} onValueChange={setBrand} disabled={!brandEnabled}>
+              <SelectTrigger className="w-[170px]">
+                <SelectValue placeholder="Выбрать бренд" />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="aigaming">AIGAMING.BOT</SelectItem>
+                <SelectItem value="luckywheel">LuckyWheel</SelectItem>
+                <SelectItem value="goldenplay">GoldenPlay</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Button variant="ghost" size="icon" className="rounded-full">
             <Bell className="h-5 w-5" />

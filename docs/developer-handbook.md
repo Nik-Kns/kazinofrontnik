@@ -59,6 +59,22 @@
 
 ---
 
+#### Хедер: бренд и профиль
+
+Файл: `src/components/layout/main-layout.tsx`
+
+- В правом верхнем углу добавлены:
+  - Чекбокс "Бренд" (`Checkbox`) — включает/выключает выбор бренда
+  - Селектор бренда (`Select`) — значения: `AIGAMING.BOT`, `LuckyWheel`, `GoldenPlay`
+  - Выбор сохраняется в `localStorage` ключами `brandSelection`, `brandEnabled`
+  - Рядом — иконка уведомлений и аватар профиля с меню аккаунта
+
+Как изменить список брендов:
+
+В `main-layout.tsx` обновить элементы `SelectItem` в блоке Select.
+
+---
+
 #### Как добавить/изменить метрику
 
 1) Добавьте/измените объект в `src/lib/retention-metrics-data.ts`
