@@ -65,13 +65,12 @@
 
 - В правом верхнем углу добавлены:
   - Чекбокс "Бренд" (`Checkbox`) — включает/выключает выбор бренда
-  - Селектор бренда (`Select`) — значения: `AIGAMING.BOT`, `LuckyWheel`, `GoldenPlay`
+  - Селектор бренда (`Select`) — значения: `AIGAMING.BOT`, `LuckyWheel`, `GoldenPlay` с логотипами
   - Выбор сохраняется в `localStorage` ключами `brandSelection`, `brandEnabled`
   - Рядом — иконка уведомлений и аватар профиля с меню аккаунта
 
 Как изменить список брендов:
-
-В `main-layout.tsx` обновить элементы `SelectItem` в блоке Select.
+В `main-layout.tsx` обновить массив `BRAND_OPTIONS` (id, label, logo). Логотип выбранного бренда отображается в триггере селектора.
 
 ---
 

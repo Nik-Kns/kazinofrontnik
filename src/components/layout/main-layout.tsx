@@ -27,6 +27,26 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [brandEnabled, setBrandEnabled] = React.useState<boolean>(true);
   const [brand, setBrand] = React.useState<string>("aigaming");
+  const BRAND_OPTIONS = React.useMemo(
+    () => [
+      {
+        id: "aigaming",
+        label: "AIGAMING.BOT",
+        logo: "https://placehold.co/24x24?text=AG",
+      },
+      {
+        id: "luckywheel",
+        label: "LuckyWheel",
+        logo: "https://placehold.co/24x24?text=LW",
+      },
+      {
+        id: "goldenplay",
+        label: "GoldenPlay",
+        logo: "https://placehold.co/24x24?text=GP",
+      },
+    ],
+    []
+  );
 
   React.useEffect(() => {
     try {
@@ -94,13 +114,30 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               Бренд
             </label>
             <Select value={brand} onValueChange={setBrand} disabled={!brandEnabled}>
-              <SelectTrigger className="w-[170px]">
-                <SelectValue placeholder="Выбрать бренд" />
+              <SelectTrigger className="w-[190px]">
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-5 w-5">
+                    <AvatarImage
+                      src={BRAND_OPTIONS.find((b) => b.id === brand)?.logo}
+                      alt={BRAND_OPTIONS.find((b) => b.id === brand)?.label || "brand"}
+                    />
+                    <AvatarFallback>BR</AvatarFallback>
+                  </Avatar>
+                  <SelectValue placeholder="Выбрать бренд" />
+                </div>
               </SelectTrigger>
               <SelectContent align="end">
-                <SelectItem value="aigaming">AIGAMING.BOT</SelectItem>
-                <SelectItem value="luckywheel">LuckyWheel</SelectItem>
-                <SelectItem value="goldenplay">GoldenPlay</SelectItem>
+                {BRAND_OPTIONS.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-5 w-5">
+                        <AvatarImage src={b.logo} alt={b.label} />
+                        <AvatarFallback>{b.label.slice(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <span>{b.label}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
