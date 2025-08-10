@@ -20,29 +20,27 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import SidebarNav from "./sidebar-nav";
 import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+ 
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [brandEnabled, setBrandEnabled] = React.useState<boolean>(true);
   const [brand, setBrand] = React.useState<string>("aigaming");
   const BRAND_OPTIONS = React.useMemo(
     () => [
       {
         id: "aigaming",
         label: "AIGAMING.BOT",
-        logo: "https://placehold.co/24x24?text=AG",
+        logo: "https://placehold.co/24x24/7C3AED/FFFFFF?text=AG",
       },
       {
         id: "luckywheel",
         label: "LuckyWheel",
-        logo: "https://placehold.co/24x24?text=LW",
+        logo: "https://placehold.co/24x24/10B981/FFFFFF?text=LW",
       },
       {
         id: "goldenplay",
         label: "GoldenPlay",
-        logo: "https://placehold.co/24x24?text=GP",
+        logo: "https://placehold.co/24x24/F59E0B/FFFFFF?text=GP",
       },
     ],
     []
@@ -51,18 +49,15 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     try {
       const savedBrand = localStorage.getItem("brandSelection");
-      const savedEnabled = localStorage.getItem("brandEnabled");
       if (savedBrand) setBrand(savedBrand);
-      if (savedEnabled) setBrandEnabled(savedEnabled === "true");
     } catch {}
   }, []);
 
   React.useEffect(() => {
     try {
       localStorage.setItem("brandSelection", brand);
-      localStorage.setItem("brandEnabled", String(brandEnabled));
     } catch {}
-  }, [brand, brandEnabled]);
+  }, [brand]);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -103,44 +98,37 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
           <div className="relative ml-auto flex-1 md:grow-0" />
 
-          {/* Бренд-выбор (чекбокс + селектор) */}
-          <div className="hidden items-center gap-2 md:flex">
-            <Checkbox
-              id="brand-enabled"
-              checked={brandEnabled}
-              onCheckedChange={(v) => setBrandEnabled(Boolean(v))}
-            />
-            <label htmlFor="brand-enabled" className="text-sm text-muted-foreground">
-              Бренд
-            </label>
-            <Select value={brand} onValueChange={setBrand} disabled={!brandEnabled}>
-              <SelectTrigger className="w-[190px]">
-                <div className="flex items-center gap-2">
+          {/* Бренд: одна иконка с выбором по клику */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full hidden md:flex">
+                <Avatar className="h-7 w-7">
+                  <AvatarImage
+                    src={BRAND_OPTIONS.find((b) => b.id === brand)?.logo}
+                    alt={BRAND_OPTIONS.find((b) => b.id === brand)?.label || "brand"}
+                  />
+                  <AvatarFallback>BR</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Выбрать бренд</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {BRAND_OPTIONS.map((b) => (
+                <DropdownMenuItem
+                  key={b.id}
+                  onClick={() => setBrand(b.id)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
                   <Avatar className="h-5 w-5">
-                    <AvatarImage
-                      src={BRAND_OPTIONS.find((b) => b.id === brand)?.logo}
-                      alt={BRAND_OPTIONS.find((b) => b.id === brand)?.label || "brand"}
-                    />
-                    <AvatarFallback>BR</AvatarFallback>
+                    <AvatarImage src={b.logo} alt={b.label} />
+                    <AvatarFallback>{b.label.slice(0, 2)}</AvatarFallback>
                   </Avatar>
-                  <SelectValue placeholder="Выбрать бренд" />
-                </div>
-              </SelectTrigger>
-              <SelectContent align="end">
-                {BRAND_OPTIONS.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-5 w-5">
-                        <AvatarImage src={b.logo} alt={b.label} />
-                        <AvatarFallback>{b.label.slice(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <span>{b.label}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                  <span>{b.label}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="ghost" size="icon" className="rounded-full">
             <Bell className="h-5 w-5" />
             <span className="sr-only">Уведомления</span>
