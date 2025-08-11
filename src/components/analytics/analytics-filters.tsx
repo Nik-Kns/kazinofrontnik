@@ -1,8 +1,96 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { retentionMetrics } from "@/lib/retention-metrics-data";
+import type { RetentionMetric } from "@/lib/types";
+import { TrendingDown, TrendingUp, Settings } from "lucide-react";
 import { CollapsibleFilters } from "@/components/ui/collapsible-filters";
 import type { FilterConfig, FilterGroup } from "@/lib/types";
+
+const DEFAULT_IDS = ["ggr", "retention_rate", "ngr", "crm_spend", "arpu", "conversion_rate"];
+
+export function SelectedKpiTile() {
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("analyticsSelectedTile");
+      return saved ? JSON.parse(saved) : DEFAULT_IDS;
+    } catch {
+      return DEFAULT_IDS;
+    }
+  });
+
+  const metricsMap = useMemo(() => {
+    const map: Record<string, RetentionMetric> = {} as any;
+    for (const m of retentionMetrics) map[m.id] = m as any;
+    return map;
+  }, []);
+
+  const apply = () => {
+    try { localStorage.setItem("analyticsSelectedTile", JSON.stringify(selected)); } catch {}
+    setOpen(false);
+  };
+
+  const toggle = (id: string, checked: boolean) => {
+    setSelected(prev => checked ? Array.from(new Set([...prev, id])).slice(0, 6) : prev.filter(x => x !== id));
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Избранные метрики</CardTitle>
+          <CardDescription>Быстрый доступ к важным KPI. До 6 метрик.</CardDescription>
+        </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm"><Settings className="h-4 w-4 mr-2"/>Настроить</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Выберите метрики (до 6)</DialogTitle>
+            </DialogHeader>
+            <div className="grid md:grid-cols-2 gap-3 mt-2 max-h-[60vh] overflow-y-auto">
+              {retentionMetrics.map(m => (
+                <label key={m.id} className="flex items-start gap-2">
+                  <Checkbox checked={selected.includes(m.id)} onCheckedChange={(v) => toggle(m.id, Boolean(v))} />
+                  <span className="text-sm">{m.name}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end mt-4">
+              <Button onClick={apply}>Сохранить</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
+          {selected.map((id) => {
+            const m = metricsMap[id];
+            if (!m) return null;
+            const up = m.trend === 'up';
+            return (
+              <div key={id} className={`rounded-lg border p-3 ${up ? 'bg-green-50 border-green-200' : m.trend === 'down' ? 'bg-red-50 border-red-200' : 'bg-background'}`}>
+                <div className="text-xs text-muted-foreground mb-1 truncate">{m.name}</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-xl font-bold">{m.value}{m.unit}</div>
+                  {up ? <TrendingUp className="h-4 w-4 text-green-600"/> : m.trend === 'down' ? <TrendingDown className="h-4 w-4 text-red-600"/> : null}
+                </div>
+                {m.trendValue && <div className={`text-xs mt-1 ${up ? 'text-green-600' : m.trend === 'down' ? 'text-red-600' : 'text-muted-foreground'}`}>{m.trendValue}</div>}
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 // Конфигурация фильтров для страницы аналитики
 const ANALYTICS_FILTER_GROUPS: FilterGroup[] = [

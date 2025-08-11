@@ -88,6 +88,18 @@ export const retentionMetrics: RetentionMetric[] = [
     trendValue: '+9.6%'
   },
   {
+    id: 'crm_spend',
+    name: 'CRM Spend',
+    description: 'Деньги, потраченные на рассылки и CRM‑коммуникации',
+    value: 5400,
+    unit: '€',
+    category: 'revenue',
+    frequency: 'weekly',
+    targetValue: 5000,
+    trend: 'up',
+    trendValue: '+8%'
+  },
+  {
     id: 'ltv',
     name: 'Lifetime Value (LTV)',
     description: 'Общий доход от игрока',

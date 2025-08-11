@@ -15,6 +15,7 @@ import { CampaignPerformanceTable } from "@/components/analytics/campaign-perfor
 import { RetentionMetricsDashboard } from "@/components/analytics/retention-metrics-dashboard";
 import { useState } from "react";
 import type { FilterConfig } from "@/lib/types";
+import { SelectedKpiTile } from "@/components/analytics/selected-kpi-tile";
 
 export default function AnalyticsPage() {
   const [activeFilters, setActiveFilters] = useState<FilterConfig>({});
@@ -46,6 +47,9 @@ export default function AnalyticsPage() {
         onExport={handleExport}
         defaultFilters={activeFilters}
       />
+
+      {/* Пользовательская плитка KPI */}
+      <SelectedKpiTile />
 
       <Tabs defaultValue="kpi-summary">
         <TabsList className="mb-4 grid w-full grid-cols-5">
