@@ -15,7 +15,7 @@ import { CampaignPerformanceTable } from "@/components/analytics/campaign-perfor
 import { RetentionMetricsDashboard } from "@/components/analytics/retention-metrics-dashboard";
 import { useState } from "react";
 import type { FilterConfig } from "@/lib/types";
-import { SelectedKpiTile } from "@/components/analytics/selected-kpi-tile";
+import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
 
 export default function AnalyticsPage() {
   const [activeFilters, setActiveFilters] = useState<FilterConfig>({});

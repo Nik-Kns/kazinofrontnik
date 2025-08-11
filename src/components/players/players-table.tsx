@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+
 import Link from "next/link";
 import { playersData } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
