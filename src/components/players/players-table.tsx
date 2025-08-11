@@ -1,25 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { playersData } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { 
-  ArrowUpRight, 
-  Euro, 
-  Clock, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle,
-  Star,
-  Activity,
-  Calendar
-} from "lucide-react";
+import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FilterConfig } from "@/lib/types";
-import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const statusColors = {
     'Активен': 'bg-success/20 text-success-foreground',
@@ -41,6 +29,10 @@ export function PlayersTable({ filters }: PlayersTableProps) {
     // Здесь можно добавить логику фильтрации данных на основе filters
     // Пока используем все данные
     const filteredPlayers = playersData;
+    const [visibleCols, setVisibleCols] = React.useState<string[]>(() => {
+      try { return JSON.parse(localStorage.getItem('playersVisibleCols') || '[]'); } catch { return []; }
+    });
+    const [configOpen, setConfigOpen] = React.useState(false);
     
     // Функция для определения цвета прогресс-бара риска
     const getRiskProgressColor = (risk: string) => {
@@ -62,125 +54,115 @@ export function PlayersTable({ filters }: PlayersTableProps) {
         }
     };
 
+    const toggleCol = (id: string, checked: boolean) => {
+      setVisibleCols(prev => {
+        const next = checked ? Array.from(new Set([...prev, id])) : prev.filter(c => c !== id);
+        try { localStorage.setItem('playersVisibleCols', JSON.stringify(next)); } catch {}
+        return next;
+      });
+    };
+
+    const has = (id: string) => visibleCols.includes(id);
+
     return (
-        <div className="space-y-6">
+      <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <div>
                     <h2 className="text-xl font-semibold">Найдено игроков: {filteredPlayers.length}</h2>
-                    <p className="text-sm text-muted-foreground">Кликните на карточку для просмотра профиля</p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
-                        <Activity className="mr-2 h-4 w-4" />
-                        Экспорт
-                    </Button>
-                </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {filteredPlayers.map((player) => {
-                    const riskValue = getRiskValue(player.churnRisk);
-                    const isVip = player.ltv > 5000; // Простая логика VIP для демо
-                    
-                    return (
-                        <Link 
-                            key={player.id} 
-                            href={`/players/${player.id}`}
-                            className="block group"
-                        >
-                            <Card className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 hover:border-primary/50 h-full">
-                                <CardContent className="p-6">
-                                    {/* Заголовок карточки */}
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-offset-background ring-border group-hover:ring-primary transition-all">
-                                                <AvatarImage 
-                                                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
-                                                    alt={player.name} 
-                                                />
-                                                <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-semibold truncate">{player.name}</p>
-                                                <p className="text-xs text-muted-foreground">ID: usr_{player.id.padStart(8, '0')}</p>
-                                            </div>
-                                        </div>
-                                        {isVip && (
-                                            <Badge variant="default" className="bg-gradient-to-r from-yellow-500 to-yellow-600">
-                                                <Star className="mr-1 h-3 w-3" />
-                                                VIP
-                                            </Badge>
-                                        )}
-                                    </div>
-
-                                    {/* Основные метрики */}
-                                    <div className="space-y-4">
-                                        {/* LTV */}
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <Euro className="h-4 w-4" />
-                                                <span>LTV</span>
-                                            </div>
-                                            <span className="font-bold text-lg">€{player.ltv.toLocaleString()}</span>
-                                        </div>
-
-                                        {/* Последняя активность */}
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <Clock className="h-4 w-4" />
-                                                <span>Активность</span>
-                                            </div>
-                                            <span className="text-sm">{player.lastSeen}</span>
-                                        </div>
-
-                                        {/* Риск оттока с прогресс-баром */}
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                    <AlertTriangle className="h-4 w-4" />
-                                                    <span>Риск оттока</span>
-                                                </div>
-                                                <span className={cn("text-sm font-medium", riskColors[player.churnRisk])}>
-                                                    {player.churnRisk}
+          <Dialog open={configOpen} onOpenChange={setConfigOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm"><Settings className="h-4 w-4 mr-2"/>Настроить отображение</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Выберите дополнительные столбцы</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {['balance','currency','geo','depositsCount','depositsSum','avgDeposit','lastDeposit','withdrawalsCount','withdrawalsSum','retention','loginFrequency','gamesCount','topGame','vip','bonuses','lastCampaign'].map((id) => (
+                  <label key={id} className="flex items-center gap-2">
+                    <input type="checkbox" checked={has(id)} onChange={(e) => toggleCol(id, e.target.checked)} />
+                    <span>
+                      {id === 'balance' && 'Баланс'}
+                      {id === 'currency' && 'Валюта'}
+                      {id === 'geo' && 'GEO / язык'}
+                      {id === 'depositsCount' && 'Кол-во депозитов'}
+                      {id === 'depositsSum' && 'Сумма депозитов'}
+                      {id === 'avgDeposit' && 'Средний депозит'}
+                      {id === 'lastDeposit' && 'Последняя сумма депозита'}
+                      {id === 'withdrawalsCount' && 'Кол-во выводов'}
+                      {id === 'withdrawalsSum' && 'Сумма выводов'}
+                      {id === 'retention' && 'Retention D1/D7/D30'}
+                      {id === 'loginFrequency' && 'Частота входов'}
+                      {id === 'gamesCount' && 'Кол-во игр'}
+                      {id === 'topGame' && 'Популярная игра'}
+                      {id === 'vip' && 'VIP статус'}
+                      {id === 'bonuses' && 'Применённые бонусы'}
+                      {id === 'lastCampaign' && 'Реакция на кампанию'}
                                                 </span>
+                  </label>
+                ))}
                                             </div>
-                                            <Progress 
-                                                value={riskValue} 
-                                                className="h-2"
-                                                indicatorClassName={getRiskProgressColor(player.churnRisk)}
-                                            />
+            </DialogContent>
+          </Dialog>
                                         </div>
 
-                                        {/* Статус */}
-                                        <div className="flex items-center justify-between pt-2 border-t">
-                                            <span className="text-sm text-muted-foreground">Статус</span>
-                                            <Badge 
-                                                variant="outline" 
-                                                className={cn("transition-all group-hover:scale-110", statusColors[player.status])}
-                                            >
-                                                {player.status}
-                                            </Badge>
-                                        </div>
-                                    </div>
-
-                                    {/* Индикатор перехода */}
-                                    <div className="mt-4 pt-4 border-t flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <span className="text-sm text-primary flex items-center gap-1">
-                                            Открыть профиль
-                                            <ArrowUpRight className="h-4 w-4" />
-                                        </span>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    );
-                })}
-            </div>
-
-            {/* Пагинация (заготовка) */}
-            <div className="flex items-center justify-center pt-4">
-                <p className="text-sm text-muted-foreground">Показаны все {filteredPlayers.length} игроков</p>
-            </div>
+        <div className="overflow-auto rounded-md border">
+          <table className="min-w-[1000px] w-full text-sm">
+            <thead className="sticky top-0 bg-background">
+              <tr className="border-b">
+                <th className="px-3 py-2 text-left">ID игрока</th>
+                <th className="px-3 py-2 text-left">Имя</th>
+                <th className="px-3 py-2 text-left">Статус</th>
+                <th className="px-3 py-2 text-left">LTV</th>
+                <th className="px-3 py-2 text-left">Последняя активность</th>
+                <th className="px-3 py-2 text-left">Риск оттока</th>
+                {has('balance') && <th className="px-3 py-2 text-left">Баланс</th>}
+                {has('currency') && <th className="px-3 py-2 text-left">Валюта</th>}
+                {has('geo') && <th className="px-3 py-2 text-left">GEO/Язык</th>}
+                {has('depositsCount') && <th className="px-3 py-2 text-left">Депозиты</th>}
+                {has('depositsSum') && <th className="px-3 py-2 text-left">Сумма деп.</th>}
+                {has('avgDeposit') && <th className="px-3 py-2 text-left">Ср. депозит</th>}
+                {has('lastDeposit') && <th className="px-3 py-2 text-left">Послед. деп.</th>}
+                {has('withdrawalsCount') && <th className="px-3 py-2 text-left">Выводы</th>}
+                {has('withdrawalsSum') && <th className="px-3 py-2 text-left">Сумма выводов</th>}
+                {has('retention') && <th className="px-3 py-2 text-left">Retention</th>}
+                {has('loginFrequency') && <th className="px-3 py-2 text-left">Частота входов</th>}
+                {has('gamesCount') && <th className="px-3 py-2 text-left">Кол-во игр</th>}
+                {has('topGame') && <th className="px-3 py-2 text-left">Популярная игра</th>}
+                {has('vip') && <th className="px-3 py-2 text-left">VIP</th>}
+                {has('bonuses') && <th className="px-3 py-2 text-left">Бонусы</th>}
+                {has('lastCampaign') && <th className="px-3 py-2 text-left">Реакция</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPlayers.map((p) => (
+                <tr key={p.id} className="border-b hover:bg-muted/40 cursor-pointer" onClick={() => window.location.assign(`/players/${p.id}`)}>
+                  <td className="px-3 py-2">usr_{p.id.padStart(8,'0')}</td>
+                  <td className="px-3 py-2">{p.name}</td>
+                  <td className="px-3 py-2"><Badge variant="outline" className={cn(statusColors[p.status])}>{p.status}</Badge></td>
+                  <td className="px-3 py-2">€{p.ltv.toLocaleString()}</td>
+                  <td className="px-3 py-2">{p.lastSeen}</td>
+                  <td className={cn("px-3 py-2 font-medium", riskColors[p.churnRisk])}>{p.churnRisk}</td>
+                  {has('balance') && <td className="px-3 py-2">€{Math.round(p.ltv/10)}</td>}
+                  {has('currency') && <td className="px-3 py-2">EUR</td>}
+                  {has('geo') && <td className="px-3 py-2">DE / DE</td>}
+                  {has('depositsCount') && <td className="px-3 py-2">{Math.floor(p.ltv/50)}</td>}
+                  {has('depositsSum') && <td className="px-3 py-2">€{Math.round(p.ltv*0.8)}</td>}
+                  {has('avgDeposit') && <td className="px-3 py-2">€{Math.round((p.ltv*0.8)/Math.max(1,Math.floor(p.ltv/50)))}</td>}
+                  {has('lastDeposit') && <td className="px-3 py-2">€{Math.round((p.ltv%200)+20)}</td>}
+                  {has('withdrawalsCount') && <td className="px-3 py-2">{Math.floor(p.ltv/400)}</td>}
+                  {has('withdrawalsSum') && <td className="px-3 py-2">€{Math.round(p.ltv*0.2)}</td>}
+                  {has('retention') && <td className="px-3 py-2">D1 35% · D7 20% · D30 12%</td>}
+                  {has('loginFrequency') && <td className="px-3 py-2">{Math.max(1,Math.floor(7 - p.id.length))}/нед</td>}
+                  {has('gamesCount') && <td className="px-3 py-2">{Math.floor(p.ltv/25)}</td>}
+                  {has('topGame') && <td className="px-3 py-2">Book of Dead</td>}
+                  {has('vip') && <td className="px-3 py-2">{p.ltv>5000 ? 'VIP' : '-'}</td>}
+                  {has('bonuses') && <td className="px-3 py-2">{p.ltv>1000 ? 'Welcome, Cashback' : 'Welcome'}</td>}
+                  {has('lastCampaign') && <td className="px-3 py-2">Open 45% / CTR 12%</td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         </div>
     );
 }

@@ -7,91 +7,34 @@ import { PlusCircle } from "lucide-react";
 import { AdvancedFilters } from "@/components/ui/advanced-filters";
 import type { FilterConfig, FilterGroup } from "@/lib/types";
 
-// Конфигурация фильтров для страницы игроков
+// Конфигурация фильтров для страницы игроков (соответствует ТЗ)
 const PLAYERS_FILTER_GROUPS: FilterGroup[] = [
-  {
-    id: 'playerId',
-    label: 'ID игрока',
-    type: 'text',
-    placeholder: 'Введите ID игрока'
-  },
-  {
-    id: 'registrationDate',
-    label: 'Дата регистрации',
-    type: 'daterange'
-  },
-  {
-    id: 'segments',
-    label: 'Сегмент',
-    type: 'multiselect',
-    options: [
-      { value: 'active', label: 'Актив' },
-      { value: 'reactivated', label: 'Реактив' },
-      { value: 'churning', label: 'Предотток' },
-      { value: 'new', label: 'Новорег' },
-      { value: 'firstdeposit', label: 'Перводеп' },
-    ]
-  },
-  {
-    id: 'vipLevels',
-    label: 'VIP уровень',
-    type: 'multiselect',
-    options: [
-      { value: 'previp1', label: 'ПреVIP 1' },
-      { value: 'previp2', label: 'ПреVIP 2' },
-      { value: 'previp3', label: 'ПреVIP 3' },
-      { value: 'vip', label: 'VIP' },
-    ]
-  },
-  {
-    id: 'depositAmount',
-    label: 'Сумма депозита',
-    type: 'range'
-  },
-  {
-    id: 'minDeposit',
-    label: 'Минимальный депозит',
-    type: 'number',
-    placeholder: '0'
-  },
-  {
-    id: 'sources',
-    label: 'Источник',
-    type: 'multiselect',
-    options: [
-      { value: 'google', label: 'Google' },
-      { value: 'facebook', label: 'Facebook' },
-      { value: 'instagram', label: 'Instagram' },
-      { value: 'tiktok', label: 'TikTok' },
-      { value: 'organic', label: 'Органика' },
-      { value: 'referral', label: 'Реферальная программа' },
-    ]
-  },
-  {
-    id: 'channels',
-    label: 'Подключенные каналы',
-    type: 'multiselect',
-    options: [
-      { value: 'sms', label: 'SMS' },
-      { value: 'email', label: 'Email' },
-      { value: 'telegram', label: 'Telegram' },
-      { value: 'whatsapp', label: 'WhatsApp' },
-      { value: 'push', label: 'Push' },
-    ]
-  },
-  {
-    id: 'lastInteractionChannel',
-    label: 'Последний канал взаимодействия',
-    type: 'select',
-    options: [
-      { value: 'sms', label: 'SMS' },
-      { value: 'email', label: 'Email' },
-      { value: 'telegram', label: 'Telegram' },
-      { value: 'whatsapp', label: 'WhatsApp' },
-      { value: 'push', label: 'Push' },
-    ],
-    placeholder: 'Выберите канал'
-  }
+  { id: 'playerId', label: 'ID игрока', type: 'text', placeholder: 'Введите ID игрока' },
+  { id: 'status', label: 'Статус', type: 'multiselect', options: [
+    { value: 'Активен', label: 'Активен' },
+    { value: 'Спящий', label: 'Спящий' },
+    { value: 'Отток', label: 'Отток' },
+  ] },
+  { id: 'churnRisk', label: 'Риск оттока', type: 'multiselect', options: [
+    { value: 'Низкий', label: 'Низкий' },
+    { value: 'Средний', label: 'Средний' },
+    { value: 'Высокий', label: 'Высокий' },
+  ] },
+  { id: 'vipLevels', label: 'VIP уровень', type: 'multiselect', options: [
+    { value: 'previp1', label: 'ПреVIP 1' },
+    { value: 'previp2', label: 'ПреVIP 2' },
+    { value: 'previp3', label: 'ПреVIP 3' },
+    { value: 'vip', label: 'VIP' },
+  ] },
+  { id: 'language', label: 'Язык', type: 'multiselect', options: [
+    { value: 'EN', label: 'EN' },
+    { value: 'DE', label: 'DE' },
+    { value: 'RU', label: 'RU' },
+    { value: 'ES', label: 'ES' },
+  ] },
+  { id: 'ltvRange', label: 'LTV', type: 'range' },
+  { id: 'lastActivity', label: 'Последняя активность', type: 'daterange' },
+  { id: 'depositAmount', label: 'Сумма депозитов', type: 'range' },
 ];
 
 export default function PlayersPage() {
