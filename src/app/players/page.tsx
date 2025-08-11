@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PlayersTable } from "@/components/players/players-table";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Upload, Download } from "lucide-react";
 import { AdvancedFilters } from "@/components/ui/advanced-filters";
 import type { FilterConfig, FilterGroup } from "@/lib/types";
 
@@ -55,10 +55,20 @@ export default function PlayersPage() {
                         Поиск, фильтрация и просмотр профилей игроков.
                     </p>
                 </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Добавить игрока
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Импортировать
+                    </Button>
+                    <Button variant="outline">
+                        <Download className="mr-2 h-4 w-4" />
+                        Экспортировать
+                    </Button>
+                    <Button>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Добавить игрока
+                    </Button>
+                </div>
             </div>
             <AdvancedFilters
                 filters={filters}
