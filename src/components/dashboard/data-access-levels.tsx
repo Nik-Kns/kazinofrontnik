@@ -78,6 +78,7 @@ const dataLevels = [
 
 export function DataAccessLevels() {
   const [unlockedLevel5, setUnlockedLevel5] = useState(false);
+  const completedPercent = 80; // пример прогресса интеграции
 
   const handleUnlock = () => {
     setUnlockedLevel5(true);
@@ -93,10 +94,18 @@ export function DataAccessLevels() {
               Чем больше данных — тем точнее AI-рекомендации и выше ROI
             </CardDescription>
           </div>
-          <Badge variant="secondary" className="px-3 py-1">
-            <Database className="mr-1 h-3 w-3" />
-            Уровень 4/5
-          </Badge>
+          <div className="flex items-center gap-3">
+            <div className="w-36">
+              <div className="h-2 w-full rounded-full bg-muted">
+                <div className="h-2 rounded-full bg-primary" style={{ width: `${completedPercent}%` }} />
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">Прогресс {completedPercent}%</div>
+            </div>
+            <Badge variant="secondary" className="px-3 py-1">
+              <Database className="mr-1 h-3 w-3" />
+              Уровень 4/5
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -111,7 +120,7 @@ export function DataAccessLevels() {
                 key={item.level}
                 className={cn(
                   "relative rounded-lg border p-4 transition-all",
-                  isLocked ? "border-muted bg-muted/30" : "border-primary/20 bg-primary/5",
+                  isLocked ? "border-muted bg-muted/30" : "border-primary/5 bg-gradient-to-r from-primary/5 to-background",
                   isLevel5 && unlockedLevel5 && "border-green-500 bg-green-50 animate-pulse-once"
                 )}
               >

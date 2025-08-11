@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DatePickerWithRange } from "@/components/ui/date-picker-with-range";
-import { Calendar, Filter } from "lucide-react";
+import { Filter } from "lucide-react";
 import { addDays } from "date-fns";
 
 interface PeriodFilterProps {
@@ -11,13 +11,17 @@ interface PeriodFilterProps {
   onDateChange: (range: { from?: Date; to?: Date }) => void;
   title?: string;
   subtitle?: string;
+  compareMode?: 'none' | 'yoy' | 'mom';
+  onCompareChange?: (mode: 'none' | 'yoy' | 'mom') => void;
 }
 
 export function PeriodFilter({ 
   dateRange, 
   onDateChange, 
   title = "Фильтр по периоду времени",
-  subtitle = "во всех вкладках"
+  subtitle = "во всех вкладках",
+  compareMode = 'none',
+  onCompareChange,
 }: PeriodFilterProps) {
   const presets = [
     { label: "Сегодня", days: 0 },
@@ -29,7 +33,7 @@ export function PeriodFilter({
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-md border p-3 flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-muted-foreground" />
             <h3 className="text-lg font-semibold">{title}</h3>
@@ -62,14 +66,26 @@ export function PeriodFilter({
                 </Button>
               ))}
             </div>
+            <div className="flex gap-1 rounded-md border p-1">
+              {[{ key: 'none', label: 'None' }, { key: 'yoy', label: 'YoY' }, { key: 'mom', label: 'MoM' }].map(opt => (
+                <Button
+                  key={opt.key}
+                  variant={compareMode === (opt.key as any) ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => onCompareChange && onCompareChange(opt.key as any)}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
         {dateRange.from && dateRange.to && (
-          <div className="mt-4 flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              Показаны данные за период: {dateRange.from.toLocaleDateString('ru-RU')} - {dateRange.to.toLocaleDateString('ru-RU')}
-            </p>
+          <div className="mt-4 text-sm text-muted-foreground">
+            Показаны данные за период: {dateRange.from.toLocaleDateString('ru-RU')} - {dateRange.to.toLocaleDateString('ru-RU')}
+            {compareMode !== 'none' && (
+              <span className="ml-2">(сравнение: {compareMode === 'yoy' ? 'год к году' : 'месяц к месяцу'})</span>
+            )}
           </div>
         )}
       </CardContent>

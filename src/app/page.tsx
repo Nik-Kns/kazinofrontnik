@@ -74,30 +74,33 @@ export default function CommandCenterPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <p className="text-sm font-medium mb-1">
-                  Срочно: Запустить кампанию реактивации
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Retention Rate упал ниже 65% - требуются меры
-                </p>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <p className="text-sm font-medium mb-1">
-                  Оптимизировать бонусную программу
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Bonus Utilization Rate 71% - есть потенциал роста
-                </p>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <p className="text-sm font-medium mb-1">
-                  Усилить работу с VIP-сегментом
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  VIP Conversion Rate 8.3% ниже целевых 10%
-                </p>
-              </div>
+              {[{
+                title: 'Срочно: Запустить кампанию реактивации',
+                desc: 'Retention Rate упал ниже 65% - требуются меры',
+                priority: 'urgent',
+                impact: '+2.5% Retention'
+              }, {
+                title: 'Оптимизировать бонусную программу',
+                desc: 'Bonus Utilization Rate 71% - есть потенциал роста',
+                priority: 'recommended',
+                impact: '+3% GGR'
+              }, {
+                title: 'Усилить работу с VIP-сегментом',
+                desc: 'VIP Conversion Rate 8.3% ниже целевых 10%',
+                priority: 'optional',
+                impact: '+1% NGR'
+              }].map((rec, i) => (
+                <button key={i} className="w-full text-left p-3 rounded-lg border bg-background hover:bg-muted transition">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{rec.title}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded ${rec.priority === 'urgent' ? 'bg-destructive/10 text-destructive' : rec.priority === 'recommended' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                      {rec.priority === 'urgent' ? 'Срочно' : rec.priority === 'recommended' ? 'Рекомендуется' : 'Можно отложить'}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">{rec.desc}</div>
+                  <div className="mt-2 text-xs font-medium text-green-600">Ожидаемый эффект: {rec.impact}</div>
+                </button>
+              ))}
               <Button variant="default" size="sm" className="w-full" asChild>
                 <Link href="/builder">
                   Создать сценарий
@@ -188,12 +191,21 @@ export default function CommandCenterPage() {
                   Создать кампанию
                 </Link>
               </Button>
+              <Button variant="secondary" size="sm" className="w-full justify-start" asChild>
+                <Link href="/builder?template=reactivation">
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  Создать по шаблону: Реактивация
+                </Link>
+              </Button>
               <Button variant="outline" size="sm" className="w-full justify-start" asChild>
                 <Link href="/reports">
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Экспорт отчетов
                 </Link>
               </Button>
+              <div className="text-xs text-muted-foreground mt-2">
+                AI-подсказка: Создать сегмент «VIP 80% активности» для бонусной кампании.
+              </div>
             </div>
           </CardContent>
         </Card>

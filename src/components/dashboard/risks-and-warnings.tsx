@@ -35,6 +35,12 @@ const riskMeta = {
 };
 
 export function RisksAndWarnings() {
+  // сортировка: critical -> warning -> info
+  const sorted = [...risksData].sort((a, b) => {
+    const weight = { critical: 0, warning: 1, info: 2 } as const;
+    return weight[a.type] - weight[b.type];
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -45,8 +51,8 @@ export function RisksAndWarnings() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {risksData.length > 0 ? (
-          risksData.map((risk, index) => {
+        {sorted.length > 0 ? (
+          sorted.map((risk, index) => {
             const meta = riskMeta[risk.type];
             const Icon = meta.icon;
             return (
@@ -77,9 +83,14 @@ export function RisksAndWarnings() {
                     </p>
                   </div>
                 </div>
-                <Button asChild variant="secondary" size="sm" className="mt-2 md:mt-0 self-start md:self-center">
-                  <Link href={risk.action.link}>{risk.action.text}</Link>
-                </Button>
+                <div className="flex items-center gap-2 self-start md:self-center">
+                  <span className={cn("text-xs font-medium px-2 py-1 rounded", meta.bgColor, meta.borderColor)}>
+                    {risk.type === 'critical' ? 'Критично' : risk.type === 'warning' ? 'Предупреждение' : 'Возможность'}
+                  </span>
+                  <Button asChild variant="secondary" size="sm">
+                    <Link href={risk.action.link}>Исправить сразу</Link>
+                  </Button>
+                </div>
               </div>
             );
           })

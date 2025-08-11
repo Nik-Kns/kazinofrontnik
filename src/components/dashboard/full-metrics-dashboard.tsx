@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,14 @@ import Link from "next/link";
 import { retentionMetrics, segmentMetricsData, monitoringSchedule } from "@/lib/retention-metrics-data";
 import type { RetentionMetric } from "@/lib/types";
 import { addDays } from "date-fns";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+} from "recharts";
 
 // Группировка метрик по категориям
 const getMetricsByCategory = () => {
@@ -29,7 +37,7 @@ const getMetricsByCategory = () => {
 };
 
 // Компонент для отображения одной метрики
-function MetricCard({ metric, isCompact = false }: { metric: RetentionMetric; isCompact?: boolean }) {
+function MetricCard({ metric, isCompact = false, onOpen }: { metric: RetentionMetric; isCompact?: boolean; onOpen?: (m: RetentionMetric) => void }) {
   const isAlert = (metric.name === 'Retention Rate' && Number(metric.value) < 65) ||
                  (metric.name === 'Churn Rate' && Number(metric.value) > 4) ||
                  (metric.name === 'Withdrawal Success Rate' && Number(metric.value) < 95);
@@ -58,12 +66,22 @@ function MetricCard({ metric, isCompact = false }: { metric: RetentionMetric; is
             </div>
           )}
         </div>
+        {/* мини-спарклайн */}
+        {Array.isArray((metric as any).sparkline) && (
+          <div className="mt-2 h-8">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={(metric as any).sparkline.map((v: number, i: number) => ({ i, v }))}>
+                <Line type="monotone" dataKey="v" stroke="#6366F1" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <Card className={isAlert ? 'border-red-500' : ''}>
+    <Card className={`${isAlert ? 'border-red-500' : ''} transition hover:shadow-md cursor-pointer`} onClick={() => onOpen && onOpen(metric)}>
       <CardHeader className="pb-3">
         <CardTitle className="text-base">{metric.name}</CardTitle>
         <CardDescription className="text-xs">{metric.description}</CardDescription>
@@ -90,6 +108,16 @@ function MetricCard({ metric, isCompact = false }: { metric: RetentionMetric; is
             />
           </div>
         )}
+        {/* мини-спарклайн */}
+        {Array.isArray((metric as any).sparkline) && (
+          <div className="mt-3 h-16">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={(metric as any).sparkline.map((v: number, i: number) => ({ i, v }))}>
+                <Line type="monotone" dataKey="v" stroke="#6366F1" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -101,6 +129,8 @@ export function FullMetricsDashboard() {
     from: addDays(new Date(), -30),
     to: new Date()
   });
+  const [compareMode, setCompareMode] = useState<'none' | 'yoy' | 'mom'>('none');
+  const [openedMetric, setOpenedMetric] = useState<RetentionMetric | null>(null);
   
   const metricsByCategory = getMetricsByCategory();
   
@@ -138,6 +168,8 @@ export function FullMetricsDashboard() {
       <PeriodFilter 
         dateRange={dateRange}
         onDateChange={setDateRange}
+        compareMode={compareMode}
+        onCompareChange={setCompareMode}
       />
 
       {/* Критические алерты - самое важное сверху */}
@@ -171,19 +203,29 @@ export function FullMetricsDashboard() {
       {/* Топ-4 ключевые метрики */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {topMetrics.map(metric => (
-          <MetricCard key={metric.id} metric={metric} />
+          <MetricCard key={metric.id} metric={metric} onOpen={setOpenedMetric} />
         ))}
       </div>
 
       {/* Все 25 метрик по категориям */}
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="all">Все метрики</TabsTrigger>
-          <TabsTrigger value="retention">Удержание</TabsTrigger>
-          <TabsTrigger value="revenue">Доход</TabsTrigger>
-          <TabsTrigger value="engagement">Вовлеченность</TabsTrigger>
-          <TabsTrigger value="conversion">Конверсия</TabsTrigger>
-          <TabsTrigger value="satisfaction">Удовлетворенность</TabsTrigger>
+          {[
+            { value: 'all', label: 'Все метрики' },
+            { value: 'retention', label: 'Удержание' },
+            { value: 'revenue', label: 'Доход' },
+            { value: 'engagement', label: 'Вовлеченность' },
+            { value: 'conversion', label: 'Конверсия' },
+            { value: 'satisfaction', label: 'Удовлетворенность' },
+          ].map(t => (
+            <TabsTrigger
+              key={t.value}
+              value={t.value}
+              className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:underline"
+            >
+              {t.label}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="all" className="space-y-6">
@@ -204,7 +246,7 @@ export function FullMetricsDashboard() {
               <CardContent>
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {metrics.map(metric => (
-                    <MetricCard key={metric.id} metric={metric} isCompact />
+                    <MetricCard key={metric.id} metric={metric} isCompact onOpen={setOpenedMetric} />
                   ))}
                 </div>
               </CardContent>
@@ -223,7 +265,7 @@ export function FullMetricsDashboard() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {metricsByCategory.retention.map(metric => (
-                  <MetricCard key={metric.id} metric={metric} />
+                  <MetricCard key={metric.id} metric={metric} onOpen={setOpenedMetric} />
                 ))}
               </div>
             </CardContent>
@@ -241,7 +283,7 @@ export function FullMetricsDashboard() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {metricsByCategory.revenue.map(metric => (
-                  <MetricCard key={metric.id} metric={metric} />
+                  <MetricCard key={metric.id} metric={metric} onOpen={setOpenedMetric} />
                 ))}
               </div>
             </CardContent>
@@ -259,7 +301,7 @@ export function FullMetricsDashboard() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {metricsByCategory.engagement.map(metric => (
-                  <MetricCard key={metric.id} metric={metric} />
+                  <MetricCard key={metric.id} metric={metric} onOpen={setOpenedMetric} />
                 ))}
               </div>
             </CardContent>
@@ -277,7 +319,7 @@ export function FullMetricsDashboard() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {metricsByCategory.conversion.map(metric => (
-                  <MetricCard key={metric.id} metric={metric} />
+                  <MetricCard key={metric.id} metric={metric} onOpen={setOpenedMetric} />
                 ))}
               </div>
             </CardContent>
@@ -295,13 +337,35 @@ export function FullMetricsDashboard() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {metricsByCategory.satisfaction.map(metric => (
-                  <MetricCard key={metric.id} metric={metric} />
+                  <MetricCard key={metric.id} metric={metric} onOpen={setOpenedMetric} />
                 ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Модалка с подробным трендом метрики */}
+      {openedMetric && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40" onClick={() => setOpenedMetric(null)}>
+          <div className="w-full max-w-3xl rounded-lg bg-background p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4">
+              <h3 className="text-xl font-semibold">{openedMetric.name}</h3>
+              <p className="text-sm text-muted-foreground">{openedMetric.description}</p>
+            </div>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={(openedMetric as any).sparkline?.map((v: number, i: number) => ({ label: i + 1, value: v })) ?? []}>
+                  <XAxis dataKey="label" hide />
+                  <YAxis hide />
+                  <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Метрики по сегментам */}
       <Card>
@@ -348,46 +412,54 @@ export function FullMetricsDashboard() {
         </CardContent>
       </Card>
 
-      {/* Регламент мониторинга */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            <CardTitle>Регламент мониторинга</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-medium mb-2 flex items-center gap-2">
-                <Badge variant="secondary">Ежедневно</Badge>
-                <span className="text-sm text-muted-foreground">{monitoringSchedule.daily.length} метрик</span>
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                Retention Rate, Churn Rate, Active Players и другие критические показатели
-              </p>
+      {/* Регламент мониторинга (сворачиваемый) */}
+      <details className="group">
+        <summary className="list-none">
+          <Card className="cursor-pointer">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                <CardTitle>Регламент мониторинга</CardTitle>
+                <span className="ml-auto text-sm text-muted-foreground group-open:hidden">Нажмите, чтобы развернуть</span>
+                <span className="ml-auto text-sm text-muted-foreground hidden group-open:block">Нажмите, чтобы свернуть</span>
+              </div>
+            </CardHeader>
+          </Card>
+        </summary>
+        <Card className="mt-3">
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="p-4 bg-blue-50 rounded-lg" title="Ежедневно следим за краткосрочными изменениями и аномалиями">
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <Badge variant="secondary">Ежедневно</Badge>
+                  <span className="text-sm text-muted-foreground">{monitoringSchedule.daily.length} метрик</span>
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  Retention Rate, Churn Rate, Active Players и другие критические показатели
+                </p>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg" title="Еженедельно анализируем тренды и эффективность кампаний">
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <Badge variant="secondary">Еженедельно</Badge>
+                  <span className="text-sm text-muted-foreground">{monitoringSchedule.weekly.length} метрик</span>
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  ARPU, Frequency of Deposits, ROI Campaigns и финансовые показатели
+                </p>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg" title="Ежемесячно смотрим долгосрочные цели и стратегию">
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <Badge variant="secondary">Ежемесячно</Badge>
+                  <span className="text-sm text-muted-foreground">{monitoringSchedule.monthly.length} метрик</span>
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  LTV, VIP Conversion, NPS и долгосрочные показатели
+                </p>
+              </div>
             </div>
-            <div className="p-4 bg-green-50 rounded-lg">
-              <h4 className="font-medium mb-2 flex items-center gap-2">
-                <Badge variant="secondary">Еженедельно</Badge>
-                <span className="text-sm text-muted-foreground">{monitoringSchedule.weekly.length} метрик</span>
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                ARPU, Frequency of Deposits, ROI Campaigns и финансовые показатели
-              </p>
-            </div>
-            <div className="p-4 bg-purple-50 rounded-lg">
-              <h4 className="font-medium mb-2 flex items-center gap-2">
-                <Badge variant="secondary">Ежемесячно</Badge>
-                <span className="text-sm text-muted-foreground">{monitoringSchedule.monthly.length} метрик</span>
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                LTV, VIP Conversion, NPS и долгосрочные показатели
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </details>
     </div>
   );
 }
