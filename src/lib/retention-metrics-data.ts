@@ -33,6 +33,16 @@ export const retentionMetrics: RetentionMetric[] = [
     trend: 'up',
     trendValue: '+0.5%',
     sparkline: [2.8, 2.9, 3.0, 3.1, 3.1, 3.2, 3.2],
+    // AI прогноз на 30 дней по тренду + сезонности (условно)
+    aiForecast: {
+      horizonDays: 30,
+      baseTrend: 'Рост оттока на +0.2% без действий',
+      scenarios: [
+        { name: 'Текущий тренд', expectedValue: '3.6%', impact: '- (без изменений)' },
+        { name: 'С реактивацией', expectedValue: '3.0%', impact: '−0.6 п.п. через 14 дней' },
+        { name: 'A/B новая бонусная матрица', expectedValue: '2.7%', impact: '−0.9 п.п. через 30 дней' },
+      ]
+    },
     breakdown: [
       { label: 'VIP', value: 1.5, color: '#f59e42' },
       { label: 'Active', value: 2.8, color: '#60a5fa' },

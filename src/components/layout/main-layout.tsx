@@ -6,6 +6,8 @@ import {
   Bell,
   BotMessageSquare,
   PanelLeft,
+  Moon,
+  Sun,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +27,7 @@ import { cn } from "@/lib/utils";
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [brand, setBrand] = React.useState<string>("aigaming");
+  const [theme, setTheme] = React.useState<"light" | "dark">("light");
   const BRAND_OPTIONS = React.useMemo(
     () => [
       {
@@ -50,6 +53,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     try {
       const savedBrand = localStorage.getItem("brandSelection");
       if (savedBrand) setBrand(savedBrand);
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark" || savedTheme === "light") {
+        setTheme(savedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme("dark");
+      }
     } catch {}
   }, []);
 
@@ -58,6 +67,16 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       localStorage.setItem("brandSelection", brand);
     } catch {}
   }, [brand]);
+
+  React.useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    try { localStorage.setItem("theme", theme); } catch {}
+  }, [theme]);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -97,6 +116,18 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           </Button>
 
           <div className="relative ml-auto flex-1 md:grow-0" />
+
+          {/* Переключатель темы */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full hidden md:flex"
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+            aria-label="Toggle theme"
+            title="Переключить тему"
+          >
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
 
           {/* Бренд: одна иконка с выбором по клику */}
           <DropdownMenu>

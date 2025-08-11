@@ -131,8 +131,19 @@ export function FullMetricsDashboard() {
   });
   const [compareMode, setCompareMode] = useState<'none' | 'yoy' | 'mom'>('none');
   const [openedMetric, setOpenedMetric] = useState<RetentionMetric | null>(null);
+  // загрузка порядка табов
+  useState(() => {
+    try {
+      const saved = localStorage.getItem('tabOrder');
+      if (saved) setTabOrder(JSON.parse(saved));
+    } catch {}
+  });
   
   const metricsByCategory = getMetricsByCategory();
+  const [tabOrder, setTabOrder] = useState<string[]>([
+    'all','retention','revenue','engagement','conversion','satisfaction'
+  ]);
+  const [dragging, setDragging] = useState<string | null>(null);
   
   // Критические метрики
   const criticalMetrics = retentionMetrics.filter(metric => {
@@ -210,22 +221,41 @@ export function FullMetricsDashboard() {
       {/* Все 25 метрик по категориям */}
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList className="grid w-full grid-cols-6">
-          {[
-            { value: 'all', label: 'Все метрики' },
-            { value: 'retention', label: 'Удержание' },
-            { value: 'revenue', label: 'Доход' },
-            { value: 'engagement', label: 'Вовлеченность' },
-            { value: 'conversion', label: 'Конверсия' },
-            { value: 'satisfaction', label: 'Удовлетворенность' },
-          ].map(t => (
-            <TabsTrigger
-              key={t.value}
-              value={t.value}
-              className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:underline"
-            >
-              {t.label}
-            </TabsTrigger>
-          ))}
+          {tabOrder.map((value) => {
+            const t = (
+              value === 'all' ? { value, label: 'Все метрики' } :
+              value === 'retention' ? { value, label: 'Удержание' } :
+              value === 'revenue' ? { value, label: 'Доход' } :
+              value === 'engagement' ? { value, label: 'Вовлеченность' } :
+              value === 'conversion' ? { value, label: 'Конверсия' } :
+              { value, label: 'Удовлетворенность' }
+            );
+            return (
+              <div
+                key={t.value}
+                draggable
+                onDragStart={() => setDragging(t.value)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (!dragging || dragging === t.value) return;
+                  const next = [...tabOrder];
+                  const from = next.indexOf(dragging);
+                  const to = next.indexOf(t.value);
+                  next.splice(to, 0, next.splice(from, 1)[0]);
+                  setTabOrder(next);
+                  try { localStorage.setItem('tabOrder', JSON.stringify(next)); } catch {}
+                }}
+                className="cursor-move"
+              >
+                <TabsTrigger
+                  value={t.value}
+                  className="w-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:underline"
+                >
+                  {t.label}
+                </TabsTrigger>
+              </div>
+            );
+          })}
         </TabsList>
 
         <TabsContent value="all" className="space-y-6">
@@ -363,6 +393,21 @@ export function FullMetricsDashboard() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+            {openedMetric.id === 'churn_rate' && (
+              <div className="mt-6 rounded-lg border p-4 bg-muted/30">
+                <h4 className="font-medium mb-2">AI‑прогноз оттока (30 дней)</h4>
+                <p className="text-sm text-muted-foreground mb-3">{(openedMetric as any).aiForecast?.baseTrend}</p>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {(openedMetric as any).aiForecast?.scenarios?.map((s: any, i: number) => (
+                    <div key={i} className="p-3 rounded border bg-background">
+                      <div className="text-sm font-medium">{s.name}</div>
+                      <div className="text-lg font-bold mt-1">{s.expectedValue}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{s.impact}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
