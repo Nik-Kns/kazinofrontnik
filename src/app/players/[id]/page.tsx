@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import type { PlayerFullProfile } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // Моки для истории игр и почасовой активности
 const mockGameHistory = Array.from({ length: 120 }).map((_, i) => ({
   date: new Date(Date.now() - i * 36e5).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
@@ -49,6 +51,47 @@ const mockHourlyGames: Record<number, { time: string; game: string; bet: number;
     result: Math.random() > 0.5 ? 'win' : 'lose'
   })) : []])
 );
+
+// Моки для маркетинга
+const mockBonusHistory = Array.from({ length: 40 }).map((_, i) => ({
+  date: new Date(Date.now() - i*86400000).toLocaleDateString('ru-RU'),
+  name: ['Welcome 100%','Cashback 10%','FreeSpins 50','Reload 50%'][i%4],
+  type: ['приветственный','кешбэк','фриспины','reload'][i%4],
+  source: ['email','sms','push','messenger'][i%4],
+  status: ['активирован','не использован','истёк'][i%3],
+  offer: ['Welcome Chain','VIP Friday','Weekend Spins','Reload Booster'][i%4],
+  result: ['депозит','игра','—'][i%3],
+}));
+
+const mockPromoHistory = Array.from({ length: 10 }).map((_, i) => ({
+  code: ['WELCOME100','RELOAD50','VIP20','SPINS40'][i%4],
+  received: new Date(Date.now()-i*5*86400000).toLocaleDateString('ru-RU'),
+  activated: Math.random()>0.3 ? new Date(Date.now()-i*5*86400000+86400000).toLocaleDateString('ru-RU') : '—',
+  campaign: ['Welcome Chain','Reload Spring','VIP Booster'][i%3],
+  outcome: ['депозит €50','выигрыш €120','активность +'][i%3]
+}));
+
+const mockResponseAnalytics = {
+  offers: 38,
+  responses: 14,
+  topChannel: 'email',
+  avgResponseHours: 9.5,
+  avgDepositAfter: 85,
+};
+
+const mockAiRecs = [
+  { type: 'Кешбэк 15%', channel: 'push', reason: 'Падает активность, реагировал на кешбэк', effect: '+8% депозиты (14д)' },
+  { type: 'Турнир выходного дня', channel: 'email', reason: 'Пик активности в выходные', effect: '+12% GGR (7д)' },
+  { type: 'Промокод VIP20', channel: 'sms', reason: 'Частые депозиты небольшими суммами', effect: '+5% NGR (30д)' },
+];
+
+const mockFavoriteOffers = [
+  { name: 'VIP Friday Cashback', responses: 62, ctr: 18.5 },
+  { name: 'Weekend FreeSpins', responses: 48, ctr: 15.2 },
+  { name: 'Reload 50%', responses: 37, ctr: 12.1 },
+  { name: 'Welcome Chain', responses: 28, ctr: 9.3 },
+  { name: 'Tournament: Summer Slots', responses: 21, ctr: 7.8 },
+];
 
 // Моковые данные для демонстрации
 const mockPlayerData: PlayerFullProfile = {
@@ -967,63 +1010,165 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               <CardTitle>Маркетинговая активность</CardTitle>
               <CardDescription>Взаимодействие с кампаниями и бонусами</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-8">
+              {/* Подсводка */}
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
+                <div className="p-4 rounded-lg border bg-secondary/30">
                   <p className="text-sm text-muted-foreground">Активировано бонусов</p>
                   <p className="text-2xl font-bold">{player.marketing.bonusActivations}</p>
                 </div>
-                <div className="space-y-2">
+                <div className="p-4 rounded-lg border bg-secondary/30">
                   <p className="text-sm text-muted-foreground">Использование бонусов</p>
                   <p className="text-2xl font-bold">{player.marketing.bonusUtilization}%</p>
                 </div>
-                <div className="space-y-2">
+                <div className="p-4 rounded-lg border bg-secondary/30">
                   <p className="text-sm text-muted-foreground">Email open rate</p>
                   <p className="text-2xl font-bold">{player.marketing.campaignMetrics.openRate}%</p>
                 </div>
               </div>
 
-              <div className="border-t pt-4">
-                <h4 className="font-semibold mb-3">Типы бонусов</h4>
-                <div className="flex flex-wrap gap-2">
-                  {player.marketing.bonusTypes.map(type => (
-                    <Badge key={type} variant="outline">{type}</Badge>
-                  ))}
-                </div>
-              </div>
+              {/* Внутренние вкладки маркетинга */}
+              <Tabs defaultValue="history" className="w-full">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="history">История бонусов</TabsTrigger>
+                  <TabsTrigger value="promos">История промокодов</TabsTrigger>
+                  <TabsTrigger value="analytics">Аналитика откликов</TabsTrigger>
+                  <TabsTrigger value="ai">AI рекомендации</TabsTrigger>
+                  <TabsTrigger value="favorites">Любимый оффер</TabsTrigger>
+                </TabsList>
 
-              <div className="border-t pt-4">
-                <h4 className="font-semibold mb-3">Использованные промокоды</h4>
-                <div className="flex flex-wrap gap-2">
-                  {player.marketing.usedPromocodes.map(code => (
-                    <Badge key={code} variant="secondary">{code}</Badge>
-                  ))}
-                </div>
-              </div>
+                {/* История бонусов и CRM-активности */}
+                <TabsContent value="history" className="space-y-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-4">
+                    <Input placeholder="Поиск по офферу/промокоду" />
+                    <Select>
+                      <SelectTrigger><SelectValue placeholder="Тип бонуса" /></SelectTrigger>
+                      <SelectContent>
+                        {['приветственный','кешбэк','фриспины','reload'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Select>
+                      <SelectTrigger><SelectValue placeholder="Источник" /></SelectTrigger>
+                      <SelectContent>
+                        {['email','sms','push','messenger'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Input placeholder="Период: 01.07–31.07" />
+                  </div>
+                  <div className="overflow-auto rounded border">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Дата</th>
+                          <th className="px-3 py-2 text-left">Бонус</th>
+                          <th className="px-3 py-2 text-left">Тип</th>
+                          <th className="px-3 py-2 text-left">Источник</th>
+                          <th className="px-3 py-2 text-left">Статус</th>
+                          <th className="px-3 py-2 text-left">Оффер</th>
+                          <th className="px-3 py-2 text-left">Результат</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {mockBonusHistory.map((row, i) => (
+                          <tr key={i} className="border-t">
+                            <td className="px-3 py-2">{row.date}</td>
+                            <td className="px-3 py-2">{row.name}</td>
+                            <td className="px-3 py-2">{row.type}</td>
+                            <td className="px-3 py-2">{row.source}</td>
+                            <td className="px-3 py-2">{row.status}</td>
+                            <td className="px-3 py-2">{row.offer}</td>
+                            <td className="px-3 py-2">{row.result}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </TabsContent>
 
-              <div className="border-t pt-4">
-                <h4 className="font-semibold mb-3">Участие в программах</h4>
-                <div className="grid gap-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Турниры</span>
-                    <Badge variant={player.marketing.participatesIn.tournaments ? "default" : "outline"}>
-                      {player.marketing.participatesIn.tournaments ? "Участвует" : "Не участвует"}
-                    </Badge>
+                {/* История промокодов */}
+                <TabsContent value="promos" className="space-y-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-4">
+                    <Input placeholder="Поиск по коду/офферу" />
+                    <Input placeholder="С даты" />
+                    <Input placeholder="По дату" />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Кешбэк</span>
-                    <Badge variant={player.marketing.participatesIn.cashback ? "default" : "outline"}>
-                      {player.marketing.participatesIn.cashback ? "Участвует" : "Не участвует"}
-                    </Badge>
+                  <div className="space-y-2">
+                    {mockPromoHistory.map((p, i) => (
+                      <div key={i} className="p-3 rounded-lg border flex items-center justify-between">
+                        <div className="flex-1">
+                          <p className="font-medium">{p.code}</p>
+                          <p className="text-xs text-muted-foreground">Получен: {p.received} • Активирован: {p.activated}</p>
+                          <p className="text-xs text-muted-foreground">Кампания: {p.campaign} • Результат: {p.outcome}</p>
+                        </div>
+                        <Badge variant="secondary">Промокод</Badge>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Реферальная программа</span>
-                    <Badge variant={player.marketing.participatesIn.referral ? "default" : "outline"}>
-                      {player.marketing.participatesIn.referral ? "Участвует" : "Не участвует"}
-                    </Badge>
+                </TabsContent>
+
+                {/* Аналитика откликов */}
+                <TabsContent value="analytics" className="mt-4">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="p-4 rounded-lg border bg-secondary/30">
+                      <p className="text-sm text-muted-foreground">Получено офферов</p>
+                      <p className="text-2xl font-bold">{mockResponseAnalytics.offers}</p>
+                    </div>
+                    <div className="p-4 rounded-lg border bg-secondary/30">
+                      <p className="text-sm text-muted-foreground">Отклики (конверсия)</p>
+                      <p className="text-2xl font-bold">{mockResponseAnalytics.responses} ({((mockResponseAnalytics.responses/mockResponseAnalytics.offers)*100).toFixed(1)}%)</p>
+                    </div>
+                    <div className="p-4 rounded-lg border bg-secondary/30">
+                      <p className="text-sm text-muted-foreground">Топ-канал</p>
+                      <p className="text-2xl font-bold capitalize">{mockResponseAnalytics.topChannel}</p>
+                    </div>
+                    <div className="p-4 rounded-lg border bg-secondary/30">
+                      <p className="text-sm text-muted-foreground">Среднее время отклика</p>
+                      <p className="text-2xl font-bold">{mockResponseAnalytics.avgResponseHours} ч</p>
+                    </div>
+                    <div className="p-4 rounded-lg border bg-secondary/30">
+                      <p className="text-sm text-muted-foreground">Средний депозит после отклика</p>
+                      <p className="text-2xl font-bold">€{mockResponseAnalytics.avgDepositAfter}</p>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </TabsContent>
+
+                {/* AI рекомендации */}
+                <TabsContent value="ai" className="space-y-3 mt-4">
+                  {mockAiRecs.map((r, i) => (
+                    <div key={i} className="p-3 rounded-lg border flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{r.type} • канал: {r.channel}</p>
+                        <p className="text-xs text-muted-foreground">{r.reason}</p>
+                      </div>
+                      <Badge>{r.effect}</Badge>
+                    </div>
+                  ))}
+                </TabsContent>
+
+                {/* Любимый оффер */}
+                <TabsContent value="favorites" className="mt-4">
+                  <div className="overflow-auto rounded border">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Оффер/Кампания</th>
+                          <th className="px-3 py-2 text-right">Отклики</th>
+                          <th className="px-3 py-2 text-right">CTR</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {mockFavoriteOffers.map((o, i) => (
+                          <tr key={i} className="border-t">
+                            <td className="px-3 py-2">{o.name}</td>
+                            <td className="px-3 py-2 text-right">{o.responses}</td>
+                            <td className="px-3 py-2 text-right">{o.ctr}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </TabsContent>
