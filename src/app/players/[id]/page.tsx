@@ -30,6 +30,25 @@ import {
 } from "lucide-react";
 import type { PlayerFullProfile } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+// Моки для истории игр и почасовой активности
+const mockGameHistory = Array.from({ length: 120 }).map((_, i) => ({
+  date: new Date(Date.now() - i * 36e5).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+  game: ['Book of Dead','Sweet Bonanza','Roulette','Aviator','Blackjack'][i % 5],
+  provider: ['Play’n GO','Pragmatic','Evolution','Spribe'][i % 4],
+  bet: Math.round((5 + Math.random() * 45) * 100) / 100,
+  win: Math.round((Math.random() * 120) * 100) / 100,
+  result: Math.random() > 0.5 ? 'win' as const : 'lose' as const,
+}));
+
+const mockHourlyGames: Record<number, { time: string; game: string; bet: number; win: number; result: 'win'|'lose' }[]> = Object.fromEntries(
+  Array.from({ length: 24 }).map((_, h) => [h, Math.random() > 0.4 ? Array.from({ length: Math.floor(Math.random()*4)+1 }).map(() => ({
+    time: `${String(h).padStart(2,'0')}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`,
+    game: ['Book of Dead','Roulette','Aviator','Blackjack'][Math.floor(Math.random()*4)],
+    bet: Math.round((5 + Math.random()*20)*100)/100,
+    win: Math.round((Math.random()*50)*100)/100,
+    result: Math.random() > 0.5 ? 'win' : 'lose'
+  })) : []])
+);
 
 // Моковые данные для демонстрации
 const mockPlayerData: PlayerFullProfile = {
@@ -805,10 +824,22 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                             height: `${Math.max((minutes / 140) * 60, 4)}px`,
                             backgroundColor: minutes > 100 ? 'rgb(var(--primary))' : undefined
                           }}
-                        >
-                          <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-popover text-popover-foreground px-2 py-1 rounded text-xs whitespace-nowrap z-10">
-                            {hour}:00 - {minutes} мин
-                          </div>
+                        />
+                        <div className="opacity-0 pointer-events-none group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground px-3 py-2 rounded text-xs z-10 shadow-lg w-64 max-h-48 overflow-auto">
+                          {mockHourlyGames[Number(hour)] && mockHourlyGames[Number(hour)].length > 0 ? (
+                            <div className="space-y-1">
+                              {mockHourlyGames[Number(hour)].map((g, idx) => (
+                                <div key={idx} className="flex items-center justify-between gap-2">
+                                  <span className="truncate">{g.time} • {g.game}</span>
+                                  <span className={g.result === 'win' ? 'text-green-600' : 'text-red-600'}>
+                                    €{g.bet} / {g.result === 'win' ? `+€${g.win}` : 'проигрыш'}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span>Игровой активности нет</span>
+                          )}
                         </div>
                         {Number(hour) % 3 === 0 && (
                           <p className="text-xs text-muted-foreground mt-1">{hour}</p>
@@ -839,6 +870,53 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                       <p className="text-sm font-medium">18:00 - 00:00</p>
                       <p className="text-xs font-bold">{Object.entries(player.gaming.activityByHour).slice(18, 24).reduce((sum, [_, min]) => sum + min, 0)} мин</p>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* История игр */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">История игр</h4>
+                <div className="grid gap-2 md:grid-cols-4 mb-3">
+                  <input type="date" className="border rounded px-2 py-1" />
+                  <input type="date" className="border rounded px-2 py-1" />
+                  <input placeholder="Название игры" className="border rounded px-2 py-1" />
+                  <select className="border rounded px-2 py-1">
+                    <option>Все провайдеры</option>
+                    {player.gaming.favoriteProviders.map(p => (<option key={p}>{p}</option>))}
+                  </select>
+                </div>
+                <div className="overflow-auto rounded border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="px-3 py-2 text-left cursor-pointer">Дата ▲</th>
+                        <th className="px-3 py-2 text-left">Игра</th>
+                        <th className="px-3 py-2 text-left">Провайдер</th>
+                        <th className="px-3 py-2 text-right cursor-pointer">Ставка €</th>
+                        <th className="px-3 py-2 text-right">Выигрыш €</th>
+                        <th className="px-3 py-2 text-center">Результат</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mockGameHistory.slice(0,20).map((row, i) => (
+                        <tr key={i} className="border-t">
+                          <td className="px-3 py-2">{row.date}</td>
+                          <td className="px-3 py-2">{row.game}</td>
+                          <td className="px-3 py-2">{row.provider}</td>
+                          <td className="px-3 py-2 text-right">{row.bet.toFixed(2)}</td>
+                          <td className="px-3 py-2 text-right">{row.win.toFixed(2)}</td>
+                          <td className={`px-3 py-2 text-center ${row.result==='win'?'text-green-600':'text-red-600'}`}>{row.result==='win'?'Выигрыш':'Проигрыш'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex items-center justify-between mt-3 text-sm">
+                  <span>1–20 из {mockGameHistory.length}</span>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">Назад</Button>
+                    <Button variant="outline" size="sm">Вперёд</Button>
                   </div>
                 </div>
               </div>
