@@ -12,15 +12,26 @@ import { ArrowRight, Filter, TrendingUp, AlertCircle, Lightbulb, BarChart3, User
 import Link from "next/link";
 import type { FilterConfig } from "@/lib/types";
 import { verticalsData, type VerticalKey } from "@/lib/verticals-data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { retentionMetrics } from "@/lib/retention-metrics-data";
+import { Progress } from "@/components/ui/progress";
 
 export default function CommandCenterPage() {
   const [savedFilters, setSavedFilters] = useState<FilterConfig | null>(null);
+  const [goalsOpen, setGoalsOpen] = useState(false);
+  const [metricGoals, setMetricGoals] = useState<Record<string, number>>({});
+  const [tempGoals, setTempGoals] = useState<Record<string, number>>({});
 
   useEffect(() => {
     // Загружаем сохраненные фильтры из localStorage
     const filters = localStorage.getItem('analyticsFilters');
     if (filters) {
       setSavedFilters(JSON.parse(filters));
+    }
+    const storedGoals = localStorage.getItem('metricGoals');
+    if (storedGoals) {
+      setMetricGoals(JSON.parse(storedGoals));
     }
   }, []);
 
@@ -54,6 +65,86 @@ export default function CommandCenterPage() {
           Полный мониторинг 25 ключевых метрик эффективности ретеншена и AI-рекомендации
         </p>
       </div>
+
+      {/* Цели по метрикам */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Цели по ключевым метрикам</CardTitle>
+              <CardDescription>Отслеживайте прогресс по целевым значениям</CardDescription>
+            </div>
+            <Dialog open={goalsOpen} onOpenChange={setGoalsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">Добавить / изменить цели</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Настройка целей</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-3 max-h-[60vh] overflow-y-auto">
+                  {retentionMetrics.map(m => (
+                    <div key={m.id} className="grid grid-cols-3 items-center gap-3">
+                      <label className="col-span-1 text-sm">{m.name}</label>
+                      <Input
+                        type="number"
+                        className="col-span-2"
+                        placeholder={m.unit === '€' ? 'Цель, €' : 'Цель'}
+                        value={tempGoals[m.id] ?? metricGoals[m.id] ?? ''}
+                        onChange={(e) => setTempGoals(prev => ({ ...prev, [m.id]: Number(e.target.value) }))}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" onClick={() => { setTempGoals({}); setGoalsOpen(false); }}>Отмена</Button>
+                  <Button onClick={() => { const next = { ...metricGoals, ...tempGoals }; setMetricGoals(next); localStorage.setItem('metricGoals', JSON.stringify(next)); setGoalsOpen(false); }}>Сохранить цели</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {Object.keys(metricGoals).length === 0 ? (
+            <p className="text-sm text-muted-foreground">Цели ещё не заданы. Нажмите «Добавить / изменить цели», чтобы установить цели по метрикам.</p>
+          ) : (
+            <div className="overflow-auto rounded border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="px-3 py-2 text-left">Метрика</th>
+                    <th className="px-3 py-2 text-right">Текущие</th>
+                    <th className="px-3 py-2 text-right">Цель</th>
+                    <th className="px-3 py-2 text-left">Прогресс</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(metricGoals).map(([id, target]) => {
+                    const m = retentionMetrics.find(x => x.id === id);
+                    if (!m) return null;
+                    const current = Number(m.value);
+                    const progress = Math.min(150, (current / (target || 1)) * 100);
+                    const color = progress >= 100 ? 'text-green-600' : progress >= 80 ? 'text-yellow-600' : 'text-red-600';
+                    return (
+                      <tr key={id} className="border-t">
+                        <td className="px-3 py-2">{m.name}</td>
+                        <td className="px-3 py-2 text-right">{m.unit === '€' ? `€${current.toLocaleString()}` : `${current}${m.unit || ''}`}</td>
+                        <td className="px-3 py-2 text-right">{m.unit === '€' ? `€${Number(target).toLocaleString()}` : `${target}${m.unit || ''}`}</td>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-3">
+                            <Progress value={progress} className="w-56" />
+                            <span className={`font-medium ${color}`}>{progress.toFixed(0)}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Полный дашборд метрик - главный блок */}
       <Card>
