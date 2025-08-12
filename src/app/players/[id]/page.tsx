@@ -25,9 +25,11 @@ import {
   Calendar,
   Smartphone,
   CheckCircle,
-  XCircle
+  XCircle,
+  Settings
 } from "lucide-react";
 import type { PlayerFullProfile } from "@/lib/types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 // Моковые данные для демонстрации
 const mockPlayerData: PlayerFullProfile = {
@@ -326,8 +328,76 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
         </div>
       </div>
 
-      {/* Быстрая статистика */}
-      <div className="grid gap-4 md:grid-cols-5">
+      {/* Roadmap перехода по сегментам */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Дорожная карта сегмента</CardTitle>
+          <CardDescription>Путь апгрейда статуса и условия перехода</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Badge variant="secondary">Текущий</Badge>
+              <span className="font-medium">{player.behavior.customerSegment}</span>
+              <span className="text-muted-foreground">→</span>
+              <Badge variant="default">Следующий</Badge>
+              <span className="font-medium">VIP Silver</span>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Условие: достигните LTV €10 000 и сделайте 5 депозитов за месяц
+            </div>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span>LTV</span>
+                  <span>€{player.behavior.ltv.toLocaleString()} / €10 000</span>
+                </div>
+                <Progress value={Math.min(100, (player.behavior.ltv / 10000) * 100)} />
+              </div>
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span>Депозиты за 30 дней</span>
+                  <span>4 / 5</span>
+                </div>
+                <Progress value={(4 / 5) * 100} />
+              </div>
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span>Частота входов (нед.)</span>
+                  <span>2.3 / 3</span>
+                </div>
+                <Progress value={(2.3 / 3) * 100} />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Быстрая статистика (настраиваемая) */}
+      <div className="grid gap-4 md:grid-cols-5 relative">
+        <div className="absolute right-0 -top-10">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm"><Settings className="h-4 w-4 mr-2"/>Настроить</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Выберите показатели (до 6)</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {['LTV','Баланс','Риск оттока','Статусы','Сегмент','NGR','ARPPU','ROI','Ср. депозит'].map((id) => (
+                  <label key={id} className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked />
+                    {id}
+                  </label>
+                ))}
+              </div>
+              <div className="flex justify-end mt-4">
+                <Button>Сохранить</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">LTV</CardTitle>
@@ -846,55 +916,118 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
         <TabsContent value="behavior">
           <Card>
             <CardHeader>
-              <CardTitle>Поведенческие метрики</CardTitle>
-              <CardDescription>Аналитика поведения и прогнозы</CardDescription>
+              <CardTitle>Поведенческие данные</CardTitle>
+              <CardDescription>Сводная информация по источникам</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">LTV</p>
-                  <p className="text-2xl font-bold">€{player.behavior.ltv.toLocaleString()}</p>
+              {/* Фильтры */}
+              <div className="grid gap-3 md:grid-cols-3">
+                <div>
+                  <label className="text-sm text-muted-foreground">Период</label>
+                  <input type="date" className="w-full border rounded px-2 py-1" />
                 </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">ARPU</p>
-                  <p className="text-2xl font-bold">€{player.behavior.arpu}</p>
+                <div>
+                  <label className="text-sm text-muted-foreground">До</label>
+                  <input type="date" className="w-full border rounded px-2 py-1" />
                 </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Риск оттока</p>
-                  <p className={`text-2xl font-bold ${getRiskColor(player.behavior.churnRisk)}`}>
-                    {player.behavior.churnRisk}%
-                  </p>
+                <div>
+                  <label className="text-sm text-muted-foreground">Тип активности</label>
+                  <select className="w-full border rounded px-2 py-1">
+                    <option>Все</option>
+                    <option>Сессии</option>
+                    <option>Депозиты</option>
+                    <option>Выводы</option>
+                    <option>Кампании/Бонусы</option>
+                    <option>Турниры</option>
+                    <option>Поддержка</option>
+                    <option>Рефералы</option>
+                    <option>Технические</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="border-t pt-4">
-                <h4 className="font-semibold mb-3">Ретеншн по периодам</h4>
-                <div className="grid gap-3 md:grid-cols-5">
-                  {Object.entries(player.behavior.retentionRate).map(([period, rate]) => (
-                    <div key={period} className="text-center">
-                      <p className="text-sm text-muted-foreground uppercase">{period}</p>
-                      <p className="text-xl font-bold">{rate}%</p>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Player Registrations (CRM)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Дата: {player.mainInfo.registrationDate.toLocaleDateString('ru-RU')}</p>
+                      <p>ГЕО / язык: {player.mainInfo.geo} / {player.mainInfo.language.toUpperCase()}</p>
+                      <p>Источник: UTM {player.mainInfo.trafficSource.utm}, Партнер {player.mainInfo.trafficSource.affiliate}</p>
+                      <p>Устройство: {player.mainInfo.platform}</p>
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Session Data (BI)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Последний вход: {new Date().toLocaleString('ru-RU')}</p>
+                      <p>Длительность сессии: {player.gaming.averageSessionDuration}</p>
+                      <p>Сыгранные игры: {player.gaming.favoriteGames.slice(0,3).join(', ')}</p>
+                      <p>Частота входов: {player.behavior.sessionFrequency}/нед</p>
+                      <p>IP/Гео: 178.23.11.3 / {player.mainInfo.geo}</p>
+                      <p>Устройство/соединение: {player.mainInfo.platform} / Wi‑Fi</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Deposits (Finance)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Сумма: €{player.financial.totalDeposit.toLocaleString()} • Ср. депозит: €{player.financial.averageDeposit}</p>
+                      <p>Методы: {player.financial.paymentMethods.join(', ')}</p>
+                      <p>Применен бонус: 35%</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Withdrawals (Finance)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Сумма: €{player.financial.totalWithdrawal.toLocaleString()}</p>
+                      <p>Успешность: 96%</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2 border-t pt-4">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Прогнозируемый CLV</p>
-                  <p className="font-medium">€{player.behavior.predictedCLV.toLocaleString()}</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">ROI от привлечения</p>
-                  <p className="font-medium">{player.behavior.acquisitionROI}%</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">NPS</p>
-                  <p className="font-medium">{player.behavior.nps || 'Н/Д'}</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">CSAT</p>
-                  <p className="font-medium">{player.behavior.csat || 'Н/Д'}/5</p>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Campaigns & Bonuses (CRM/CDP)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Последняя кампания: VIP Weekly Bonus (Email)</p>
+                      <p>Время отправки: вчера, 18:30 • Open 42% • CTR 12%</p>
+                      <p>Промокод: VIP50 • Депозит после коммуникации: €120</p>
+                      <p>A/B тесты: вариант B (+8%)</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">VIP & Loyalty Data (Admin)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>VIP: {player.marketing.vipStatus ? `VIP ${player.marketing.vipLevel}` : '—'}</p>
+                      <p>Дата апгрейда: 2024-05-12</p>
+                      <p>Полученные бонусы: 12</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Tournaments & Events (Promo)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Последний турнир: Summer Slots • Призовые: €5,000 • Результат: 12 место</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Support Interactions (Helpdesk)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Обращений: 4 • Каналы: чат, email</p>
+                      <p>Среднее время ответа: 12 мин</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Referral System (CRM)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Реферер ID: REF-2024-7788 • Приглашенных: 6 • Депозиты: €540</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Device & Technical Data (SDK/API)</h4>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Модель: iPhone 15 Pro • OS: iOS 17 • Соединение: LTE</p>
+                      <p>Средняя скорость загрузки: 1.2s • Ошибки: 0.3%</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
