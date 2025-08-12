@@ -183,55 +183,24 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
       
       <CardContent>
         {/* Основные фильтры - всегда видимы */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-4">
-          {/* Название казино и логотип */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
+          {/* Проекты/Казино (мультивыбор с логотипами) */}
           <div className="space-y-2">
-            <Label>Казино</Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Название казино"
-                value={filters.casinoName || ''}
-                onChange={(e) => setFilters(prev => ({ ...prev, casinoName: e.target.value }))}
-              />
-              <div className="relative">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                  id="logo-upload"
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => document.getElementById('logo-upload')?.click()}
-                >
-                  <Upload className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            {uploadedLogo && (
-              <img src={uploadedLogo} alt="Casino logo" className="h-8 w-auto" />
-            )}
-          </div>
-
-          {/* Проект/Бренд */}
-          <div className="space-y-2">
-            <Label>Проект/Бренд</Label>
-            <Select
-              value={filters.projectBrand || ''}
-              onValueChange={(value) => setFilters(prev => ({ ...prev, projectBrand: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите проект" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="main">Основной проект</SelectItem>
-                <SelectItem value="vip">VIP Casino</SelectItem>
-                <SelectItem value="sport">Sport Betting</SelectItem>
-                <SelectItem value="poker">Poker Room</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>Проекты</Label>
+            <MultiSelect
+              options={[
+                { value: 'main', label: 'Основной проект', icon: 'https://placehold.co/24x24/7C3AED/FFF?text=A' },
+                { value: 'vip', label: 'VIP Casino', icon: 'https://placehold.co/24x24/F59E0B/FFF?text=V' },
+                { value: 'sport', label: 'Sport Betting', icon: 'https://placehold.co/24x24/10B981/FFF?text=S' },
+                { value: 'poker', label: 'Poker Room', icon: 'https://placehold.co/24x24/EF4444/FFF?text=P' },
+              ]}
+              selected={(filters.projects as string[]) || (filters.projectBrand ? [filters.projectBrand] : [])}
+              onChange={(selected) => setFilters(prev => ({ ...prev, projects: selected }))}
+              placeholder="Выбрать проект(ы)"
+              showSelectAll
+              selectAllLabel="Выбрать все"
+              summaryFormatter={(count) => `Выбрано: ${count} проектов`}
+            />
           </div>
 
           {/* Диапазон дат */}
@@ -268,6 +237,7 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
               selected={filters.segments || []}
               onChange={(selected) => setFilters(prev => ({ ...prev, segments: selected as SegmentType[] }))}
               placeholder="Выберите сегменты"
+              showSelectAll
             />
           </div>
 
@@ -581,7 +551,6 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
             variant="outline"
             onClick={() => {
               setFilters({});
-              setUploadedLogo(null);
             }}
           >
             <X className="h-4 w-4 mr-2" />

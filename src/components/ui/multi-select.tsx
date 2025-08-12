@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 export interface Option {
   value: string;
   label: string;
+  icon?: string; // optional logo/icon url
 }
 
 interface MultiSelectProps {
@@ -20,6 +21,9 @@ interface MultiSelectProps {
   placeholder?: string;
   maxSelected?: number;
   className?: string;
+  showSelectAll?: boolean;
+  selectAllLabel?: string;
+  summaryFormatter?: (count: number) => string; // e.g. "Выбрано: X проектов"
 }
 
 export function MultiSelect({
@@ -29,6 +33,9 @@ export function MultiSelect({
   placeholder = "Выберите...",
   maxSelected,
   className,
+  showSelectAll = false,
+  selectAllLabel = "Выбрать все",
+  summaryFormatter,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -59,9 +66,9 @@ export function MultiSelect({
         >
           {safeSelected.length > 0 ? (
             <div className="flex gap-1 flex-wrap">
-              {safeSelected.length > 2 ? (
+              {safeSelected.length > 1 ? (
                 <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-                  {safeSelected.length} выбрано
+                  {summaryFormatter ? summaryFormatter(safeSelected.length) : `${safeSelected.length} выбрано`}
                 </Badge>
               ) : (
                 selectedOptions.map((option) => (
@@ -70,7 +77,12 @@ export function MultiSelect({
                     key={option.value}
                     className="rounded-sm px-1 font-normal"
                   >
-                    {option.label}
+                    <span className="inline-flex items-center gap-1">
+                      {option.icon && (
+                        <img src={option.icon} alt="" className="h-4 w-4 rounded-sm" />
+                      )}
+                      {option.label}
+                    </span>
                   </Badge>
                 ))
               )}
@@ -80,11 +92,27 @@ export function MultiSelect({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-full p-0 bg-white" align="start">
         <Command>
           <CommandInput placeholder="Поиск..." />
           <CommandEmpty>Ничего не найдено.</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
+            {showSelectAll && (
+              <div className="flex items-center justify-between px-2 py-1.5 border-b">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const allValues = options.map(o => o.value);
+                    const isAllSelected = allValues.every(v => safeSelected.includes(v));
+                    onChange(isAllSelected ? [] : allValues);
+                  }}
+                >
+                  {selectAllLabel}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => onChange([])}>Сбросить</Button>
+              </div>
+            )}
             {options.map((option) => (
               <CommandItem
                 key={option.value}
@@ -93,7 +121,7 @@ export function MultiSelect({
                 aria-selected={safeSelected.includes(option.value)}
                 tabIndex={0}
                 className={cn(
-                  "flex items-center cursor-pointer",
+                  "flex items-center cursor-pointer hover:bg-muted",
                   safeSelected.includes(option.value) && "bg-accent"
                 )}
               >
@@ -119,6 +147,9 @@ export function MultiSelect({
                     </svg>
                   )}
                 </div>
+                {option.icon && (
+                  <img src={option.icon} alt="" className="h-6 w-6 mr-2 rounded-sm" />
+                )}
                 <span>{option.label}</span>
               </CommandItem>
             ))}
