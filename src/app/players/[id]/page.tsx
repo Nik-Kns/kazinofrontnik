@@ -638,6 +638,43 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               </CardContent>
             </Card>
 
+            {/* Ключевые финансовые метрики */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ключевые финансовые метрики</CardTitle>
+                <CardDescription>Плитки в стиле «Избранных метрик»</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {[
+                    { title: 'GGR', value: 125340, change: +18.2 },
+                    { title: 'NGR', value: 71200, change: +9.6 },
+                    { title: 'Всего депозитов', value: player.financial.totalDeposit, change: +5.0 },
+                    { title: 'Всего выводов', value: player.financial.totalWithdrawal, change: -2.1 },
+                    { title: 'Чистый доход', value: 125340 - player.financial.totalWithdrawal, change: +7.5 },
+                    { title: 'Средний депозит', value: player.financial.averageDeposit, change: +0.8 },
+                    { title: 'Частота депозитов/нед', value: parseFloat((player.financial.depositFrequency.match(/\d+(\.\d+)?/)||['0'])[0]), change: +1.2 },
+                    { title: 'Средняя ставка', value: player.gaming.averageBetSize, change: -3.9 },
+                    { title: 'Кол-во транзакций', value: player.financial.depositHistory.length + player.financial.withdrawalHistory?.length || player.financial.depositHistory.length, change: +4.0 },
+                    { title: 'Рейтинг прибыльности', value: Math.round((125340 / Math.max(1, player.financial.totalWithdrawal)) * 10) / 10, change: +2.0 },
+                    { title: 'Доля бонусов в депозитах', value: 12.5, suffix: '%', change: -0.5 },
+                    { title: 'ARPU (оценка)', value: Math.round((player.behavior.ltv / 365) * 100) / 100, change: +1.1 },
+                  ].map((m, idx) => (
+                    <div key={idx} className={`p-4 rounded-lg border ${m.change>0?'bg-green-50 border-green-200':m.change<0?'bg-red-50 border-red-200':'bg-muted/30'}`}>
+                      <div className="text-sm text-muted-foreground mb-1">{m.title}</div>
+                      <div className="flex items-baseline justify-between">
+                        <div className="text-2xl font-bold">{typeof m.value === 'number' ? (m.title.includes('депозит') || m.title.includes('вывод') || m.title==='GGR' || m.title==='NGR' || m.title==='Чистый доход' || m.title==='Средняя ставка' ? `€${m.value.toLocaleString()}` : `${m.value}${m.suffix||''}`) : m.value}
+                        </div>
+                        <div className={`text-sm ${m.change>0?'text-green-600':m.change<0?'text-red-600':'text-muted-foreground'}`}>
+                          {m.change>0?'↑':m.change<0?'↓':'→'} {Math.abs(m.change)}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>История транзакций</CardTitle>
