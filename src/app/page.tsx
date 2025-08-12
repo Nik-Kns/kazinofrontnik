@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FullMetricsDashboard } from "@/components/dashboard/full-metrics-dashboard";
+import { KPISummary } from "@/components/dashboard/kpi-summary";
 import { RisksAndWarnings } from "@/components/dashboard/risks-and-warnings";
 import { DataAccessLevels } from "@/components/dashboard/data-access-levels";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,25 @@ export default function CommandCenterPage() {
           Полный мониторинг 25 ключевых метрик эффективности ретеншена и AI-рекомендации
         </p>
       </div>
+
+      {/* Полный дашборд метрик - главный блок */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Избранные метрики</CardTitle>
+              <CardDescription>Быстрый доступ к важным KPI. До 6 метрик.</CardDescription>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/analytics">Настроить</Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Используем существующий компонент KPI Summary внутри главной */}
+          <KPISummary />
+        </CardContent>
+      </Card>
 
       {/* Полный дашборд метрик - главный блок */}
       <FullMetricsDashboard />
