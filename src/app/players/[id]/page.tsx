@@ -1027,6 +1027,31 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                 </div>
               </div>
 
+              {/* Участие в программах */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Участие в программах</h4>
+                <div className="grid gap-2 md:grid-cols-3">
+                  <div className="flex items-center justify-between p-2 rounded-lg border bg-background">
+                    <span className="text-sm">Турниры</span>
+                    <Badge variant={player.marketing.participatesIn.tournaments ? 'default' : 'outline'}>
+                      {player.marketing.participatesIn.tournaments ? 'Участвует' : 'Не участвует'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded-lg border bg-background">
+                    <span className="text-sm">Кешбэк</span>
+                    <Badge variant={player.marketing.participatesIn.cashback ? 'default' : 'outline'}>
+                      {player.marketing.participatesIn.cashback ? 'Участвует' : 'Не участвует'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded-lg border bg-background">
+                    <span className="text-sm">Реферальная программа</span>
+                    <Badge variant={player.marketing.participatesIn.referral ? 'default' : 'outline'}>
+                      {player.marketing.participatesIn.referral ? 'Участвует' : 'Не участвует'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
               {/* Внутренние вкладки маркетинга */}
               <Tabs defaultValue="history" className="w-full">
                 <TabsList className="grid w-full grid-cols-5">
