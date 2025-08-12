@@ -47,7 +47,7 @@ export default function CommandCenterPage() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold tracking-tight">Центр аналитики казино</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Командный центр</h1>
         </div>
         <p className="text-muted-foreground">
           Полный мониторинг 25 ключевых метрик эффективности ретеншена и AI-рекомендации
