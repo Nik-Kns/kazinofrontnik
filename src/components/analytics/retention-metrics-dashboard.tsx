@@ -11,6 +11,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type { RetentionMetric, SegmentMetrics } from "@/lib/types";
 import { retentionMetrics, segmentMetricsData, monitoringSchedule, alertThresholds } from "@/lib/retention-metrics-data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 
 // Компонент для отображения одной метрики
 function MetricCard({ metric }: { metric: RetentionMetric }) {
@@ -106,6 +109,24 @@ function SegmentMetricsCard({ segment }: { segment: SegmentMetrics }) {
 export function RetentionMetricsDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedFrequency, setSelectedFrequency] = useState<string>('all');
+  const [autoReports, setAutoReports] = useState<any[]>(() => {
+    try { return JSON.parse(localStorage.getItem('autoReports') || '[]'); } catch { return []; }
+  });
+  const [history, setHistory] = useState<any[]>(() => {
+    try { return JSON.parse(localStorage.getItem('reportHistory') || '[]'); } catch { return []; }
+  });
+  const [autoReportDialogOpen, setAutoReportDialogOpen] = useState(false);
+  const [newReport, setNewReport] = useState<any>({
+    name: '',
+    schedule: 'daily',
+    projects: [],
+    countries: [],
+    segments: [],
+    metrics: [],
+    time: '10:00',
+    format: 'csv',
+    channel: 'email'
+  });
   
   // Фильтрация метрик
   const filteredMetrics = retentionMetrics.filter(metric => {
@@ -237,6 +258,164 @@ export function RetentionMetricsDashboard() {
                   <li>• Падение ARPU на 15%+: персональные акции и усиленные маркетинговые мероприятия</li>
                   <li>• Снижение Bonus Utilization Rate ниже 50%: пересмотр условий бонусов</li>
                 </ul>
+              </div>
+
+              {/* Настройка автоотчётов */}
+              <div className="mt-6">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Автоотчёты</h4>
+                  <Dialog open={autoReportDialogOpen} onOpenChange={setAutoReportDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline">Создать автоотчёт</Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl">
+                      <DialogHeader>
+                        <DialogTitle>Новый автоотчёт</DialogTitle>
+                      </DialogHeader>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2 md:col-span-2">
+                          <label className="text-sm">Название</label>
+                          <Input value={newReport.name} onChange={(e) => setNewReport({ ...newReport, name: e.target.value })} placeholder="Еженедельный отчёт по ретеншену" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm">Периодичность</label>
+                          <Select value={newReport.schedule} onValueChange={(v) => setNewReport({ ...newReport, schedule: v })}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="daily">Ежедневно</SelectItem>
+                              <SelectItem value="weekly">Еженедельно</SelectItem>
+                              <SelectItem value="monthly">Ежемесячно</SelectItem>
+                              <SelectItem value="custom">Кастом</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm">Время генерации</label>
+                          <Input type="time" value={newReport.time} onChange={(e) => setNewReport({ ...newReport, time: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm">Формат</label>
+                          <Select value={newReport.format} onValueChange={(v) => setNewReport({ ...newReport, format: v })}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="csv">CSV</SelectItem>
+                              <SelectItem value="xlsx">XLSX</SelectItem>
+                              <SelectItem value="pdf">PDF</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm">Канал отправки</label>
+                          <Select value={newReport.channel} onValueChange={(v) => setNewReport({ ...newReport, channel: v })}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="email">Email</SelectItem>
+                              <SelectItem value="telegram">Telegram</SelectItem>
+                              <SelectItem value="inapp">Внутренние уведомления</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <label className="text-sm">Метрики</label>
+                          <div className="grid md:grid-cols-3 gap-2 max-h-48 overflow-auto p-2 border rounded">
+                            {retentionMetrics.map(m => (
+                              <label key={m.id} className="text-sm flex items-center gap-2">
+                                <Checkbox checked={newReport.metrics.includes(m.id)} onCheckedChange={(v) => {
+                                  setNewReport((prev: any) => ({
+                                    ...prev,
+                                    metrics: Boolean(v) ? Array.from(new Set([...prev.metrics, m.id])) : prev.metrics.filter((x: string) => x !== m.id)
+                                  });
+                                }} />
+                                {m.name}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button onClick={() => {
+                          const item = { ...newReport, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+                          const next = [item, ...autoReports];
+                          setAutoReports(next);
+                          localStorage.setItem('autoReports', JSON.stringify(next));
+                          setAutoReportDialogOpen(false);
+                        }}>Сохранить</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {/* Активные автоотчёты */}
+                <div className="mt-3 overflow-auto rounded border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Название</th>
+                        <th className="px-3 py-2 text-left">Периодичность</th>
+                        <th className="px-3 py-2 text-left">Метрики</th>
+                        <th className="px-3 py-2 text-left">Канал</th>
+                        <th className="px-3 py-2 text-left">Создан</th>
+                        <th className="px-3 py-2 text-right">Действия</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {autoReports.length === 0 && (
+                        <tr><td className="px-3 py-2 text-muted-foreground" colSpan={6}>Нет активных автоотчётов</td></tr>
+                      )}
+                      {autoReports.map(r => (
+                        <tr key={r.id} className="border-t">
+                          <td className="px-3 py-2">{r.name || 'Без названия'}</td>
+                          <td className="px-3 py-2">{r.schedule}</td>
+                          <td className="px-3 py-2">{r.metrics.length}</td>
+                          <td className="px-3 py-2">{r.channel}</td>
+                          <td className="px-3 py-2">{new Date(r.createdAt).toLocaleString('ru-RU')}</td>
+                          <td className="px-3 py-2 text-right space-x-2">
+                            <Button size="sm" variant="outline" onClick={() => setNewReport(r) || setAutoReportDialogOpen(true)}>Редактировать</Button>
+                            <Button size="sm" variant="destructive" onClick={() => {
+                              const next = autoReports.filter(x => x.id !== r.id);
+                              setAutoReports(next);
+                              localStorage.setItem('autoReports', JSON.stringify(next));
+                            }}>Удалить</Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* История отчётов */}
+              <div className="mt-6">
+                <h4 className="font-medium mb-2">История созданных отчётов (90 дней)</h4>
+                <div className="overflow-auto rounded border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Дата/время</th>
+                        <th className="px-3 py-2 text-left">Фильтры</th>
+                        <th className="px-3 py-2 text-left">Метрики</th>
+                        <th className="px-3 py-2 text-left">Формат</th>
+                        <th className="px-3 py-2 text-left">Статус</th>
+                        <th className="px-3 py-2 text-left">Скачать</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.length === 0 && (
+                        <tr><td className="px-3 py-2 text-muted-foreground" colSpan={6}>Пока нет записей</td></tr>
+                      )}
+                      {history.map(h => (
+                        <tr key={h.id} className="border-t">
+                          <td className="px-3 py-2">{new Date(h.date).toLocaleString('ru-RU')}</td>
+                          <td className="px-3 py-2">{h.filtersSummary}</td>
+                          <td className="px-3 py-2">{h.metrics?.length}</td>
+                          <td className="px-3 py-2">{h.format?.toUpperCase()}</td>
+                          <td className="px-3 py-2">{h.status}</td>
+                          <td className="px-3 py-2"><Button size="sm" variant="outline">Скачать</Button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </CardContent>
           </Card>

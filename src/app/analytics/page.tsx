@@ -16,6 +16,37 @@ import { RetentionMetricsDashboard } from "@/components/analytics/retention-metr
 import { useState } from "react";
 import type { FilterConfig } from "@/lib/types";
 import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(`analytics_section_${id}`);
+      return saved ? JSON.parse(saved) : true;
+    } catch {
+      return true;
+    }
+  });
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    try { localStorage.setItem(`analytics_section_${id}`, JSON.stringify(next)); } catch {}
+  };
+  return (
+    <Card>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>{title}</CardTitle>
+          {!open && <CardDescription>Секция скрыта</CardDescription>}
+        </div>
+        <button onClick={toggle} className="text-sm px-2 py-1 rounded border hover:bg-muted transition">
+          {open ? <><ChevronUp className="inline h-4 w-4 mr-1"/>Свернуть</> : <><ChevronDown className="inline h-4 w-4 mr-1"/>Развернуть</>}
+        </button>
+      </CardHeader>
+      {open && <CardContent>{children}</CardContent>}
+    </Card>
+  );
+}
 
 export default function AnalyticsPage() {
   const [activeFilters, setActiveFilters] = useState<FilterConfig>(() => {
@@ -68,13 +99,21 @@ export default function AnalyticsPage() {
         </TabsList>
 
         <TabsContent value="kpi-summary" className="space-y-6">
-          <KPISummary 
-            filters={activeFilters}
-            segment={activeFilters.segments?.[0]}
-          />
-          <AlertsAndSignals />
-          <FlexibleCharts filters={activeFilters} />
-          <SegmentMetricsTable />
+          <CollapsibleSection id="kpi-summary-overview" title="KPI Summary">
+            <KPISummary 
+              filters={activeFilters}
+              segment={activeFilters.segments?.[0]}
+            />
+          </CollapsibleSection>
+          <CollapsibleSection id="alerts-signals" title="Сигналы и уведомления">
+            <AlertsAndSignals />
+          </CollapsibleSection>
+          <CollapsibleSection id="flexible-charts" title="Динамика метрик">
+            <FlexibleCharts filters={activeFilters} />
+          </CollapsibleSection>
+          <CollapsibleSection id="segment-metrics" title="Метрики по сегментам">
+            <SegmentMetricsTable />
+          </CollapsibleSection>
         </TabsContent>
 
         <TabsContent value="retention" className="space-y-6">
