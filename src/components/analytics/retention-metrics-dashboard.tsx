@@ -324,7 +324,7 @@ export function RetentionMetricsDashboard() {
                                   setNewReport((prev: any) => ({
                                     ...prev,
                                     metrics: Boolean(v) ? Array.from(new Set([...prev.metrics, m.id])) : prev.metrics.filter((x: string) => x !== m.id)
-                                  });
+                                  }));
                                 }} />
                                 {m.name}
                               </label>
