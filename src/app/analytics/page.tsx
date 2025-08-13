@@ -18,7 +18,14 @@ import type { FilterConfig } from "@/lib/types";
 import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
 
 export default function AnalyticsPage() {
-  const [activeFilters, setActiveFilters] = useState<FilterConfig>({});
+  const [activeFilters, setActiveFilters] = useState<FilterConfig>(() => {
+    try {
+      const saved = localStorage.getItem('analyticsFilters');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
 
   const handleFiltersChange = (filters: FilterConfig) => {
     setActiveFilters(filters);

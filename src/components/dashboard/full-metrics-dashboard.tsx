@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { retentionMetrics, segmentMetricsData, monitoringSchedule } from "@/lib/retention-metrics-data";
-import type { RetentionMetric } from "@/lib/types";
+import type { RetentionMetric, FilterConfig } from "@/lib/types";
 import { addDays } from "date-fns";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import {
@@ -124,7 +124,7 @@ function MetricCard({ metric, isCompact = false, onOpen }: { metric: RetentionMe
 }
 
 // Основной компонент дашборда
-export function FullMetricsDashboard() {
+export function FullMetricsDashboard({ filters }: { filters?: FilterConfig }) {
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
     from: addDays(new Date(), -30),
     to: new Date()

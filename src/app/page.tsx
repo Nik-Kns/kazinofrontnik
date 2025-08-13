@@ -16,6 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { retentionMetrics } from "@/lib/retention-metrics-data";
 import { Progress } from "@/components/ui/progress";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { Label } from "@/components/ui/label";
 
 export default function CommandCenterPage() {
   const [savedFilters, setSavedFilters] = useState<FilterConfig | null>(null);
@@ -34,6 +36,31 @@ export default function CommandCenterPage() {
       setMetricGoals(JSON.parse(storedGoals));
     }
   }, []);
+
+  // Быстрые справочники и синхронизация фильтров
+  const projectOptions = [
+    { value: 'main', label: 'Основной проект', icon: 'https://placehold.co/24x24/7C3AED/FFF?text=A' },
+    { value: 'vip', label: 'VIP Casino', icon: 'https://placehold.co/24x24/F59E0B/FFF?text=V' },
+    { value: 'sport', label: 'Sport Betting', icon: 'https://placehold.co/24x24/10B981/FFF?text=S' },
+    { value: 'poker', label: 'Poker Room', icon: 'https://placehold.co/24x24/EF4444/FFF?text=P' },
+  ];
+  const geoOptions = [
+    { value: 'de', label: 'Германия' },
+    { value: 'fr', label: 'Франция' },
+    { value: 'it', label: 'Италия' },
+    { value: 'es', label: 'Испания' },
+    { value: 'uk', label: 'Великобритания' },
+    { value: 'pl', label: 'Польша' },
+    { value: 'nl', label: 'Нидерланды' },
+    { value: 'pt', label: 'Португалия' },
+    { value: 'ru', label: 'Россия' },
+    { value: 'ua', label: 'Украина' }
+  ];
+
+  const updateSavedFilters = (next: FilterConfig) => {
+    setSavedFilters(next);
+    try { localStorage.setItem('analyticsFilters', JSON.stringify(next)); } catch {}
+  };
 
   const getFilterSummary = (filters: FilterConfig): string => {
     const parts = [];
@@ -150,7 +177,7 @@ export default function CommandCenterPage() {
       <SelectedKpiTile />
 
       {/* Полный дашборд метрик - главный блок */}
-      <FullMetricsDashboard />
+      <FullMetricsDashboard filters={savedFilters || undefined} />
 
       {/* Блок с уровнями доступа к данным */}
       <DataAccessLevels />
@@ -168,6 +195,32 @@ export default function CommandCenterPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Быстрые фильтры: Проект(ы) и ГЕО */}
+            <div className="grid gap-3 md:grid-cols-2 mb-4">
+              <div className="space-y-2">
+                <Label>Проекты</Label>
+                <MultiSelect
+                  options={projectOptions}
+                  selected={(savedFilters?.projects as string[]) || (savedFilters?.projectBrand ? [savedFilters.projectBrand] : [])}
+                  onChange={(selected) => updateSavedFilters({ ...(savedFilters || {}), projects: selected })}
+                  placeholder="Выбрать проект(ы)"
+                  showSelectAll
+                  selectAllLabel="Выбрать все"
+                  summaryFormatter={(count) => `Выбрано: ${count} проектов`}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>ГЕО</Label>
+                <MultiSelect
+                  options={geoOptions}
+                  selected={savedFilters?.countries || []}
+                  onChange={(selected) => updateSavedFilters({ ...(savedFilters || {}), countries: selected })}
+                  placeholder="Выберите страны"
+                  showSelectAll
+                  selectAllLabel="Выбрать все"
+                />
+              </div>
+            </div>
             <div className="space-y-3">
               {[{
                 title: 'Срочно: Запустить кампанию реактивации',
@@ -237,6 +290,18 @@ export default function CommandCenterPage() {
                   ))}
                   {savedFilters.games && savedFilters.games.length > 3 && (
                     <Badge variant="outline">+{savedFilters.games.length - 3}</Badge>
+                  )}
+                  {Array.isArray(savedFilters.projects) && savedFilters.projects.slice(0,3).map((p) => (
+                    <Badge key={p} variant="outline">{p}</Badge>
+                  ))}
+                  {savedFilters.projects && (savedFilters.projects as string[]).length > 3 && (
+                    <Badge variant="outline">+{(savedFilters.projects as string[]).length - 3}</Badge>
+                  )}
+                  {Array.isArray(savedFilters.countries) && savedFilters.countries.slice(0,3).map((c) => (
+                    <Badge key={c} variant="outline">{c.toUpperCase()}</Badge>
+                  ))}
+                  {savedFilters.countries && (savedFilters.countries as string[]).length > 3 && (
+                    <Badge variant="outline">+{(savedFilters.countries as string[]).length - 3}</Badge>
                   )}
                 </div>
                 <Button asChild variant="outline" size="sm" className="w-full">

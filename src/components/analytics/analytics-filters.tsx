@@ -101,6 +101,23 @@ const ANALYTICS_FILTER_GROUPS: FilterGroup[] = [
     placeholder: 'Выберите вертикаль'
   },
   {
+    id: 'countries',
+    label: 'ГЕО',
+    type: 'multiselect',
+    options: [
+      { value: 'de', label: 'Германия' },
+      { value: 'fr', label: 'Франция' },
+      { value: 'it', label: 'Италия' },
+      { value: 'es', label: 'Испания' },
+      { value: 'uk', label: 'Великобритания' },
+      { value: 'pl', label: 'Польша' },
+      { value: 'nl', label: 'Нидерланды' },
+      { value: 'pt', label: 'Португалия' },
+      { value: 'ru', label: 'Россия' },
+      { value: 'ua', label: 'Украина' },
+    ]
+  },
+  {
     id: 'games',
     label: 'Игры',
     type: 'multiselect',

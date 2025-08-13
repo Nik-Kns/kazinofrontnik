@@ -241,6 +241,20 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
             />
           </div>
 
+          {/* GEO / Страны (вынесено в основную панель) */}
+          <div className="space-y-2">
+            <Label>ГЕО</Label>
+            <MultiSelect
+              options={countries}
+              selected={filters.countries || []}
+              onChange={(selected) => setFilters(prev => ({ ...prev, countries: selected }))}
+              placeholder="Выберите страны"
+              showSelectAll
+              selectAllLabel="Выбрать все"
+              summaryFormatter={(count) => `Выбрано: ${count}`}
+            />
+          </div>
+
           {/* Кампании */}
           <div className="space-y-2">
             <Label>Кампании</Label>
