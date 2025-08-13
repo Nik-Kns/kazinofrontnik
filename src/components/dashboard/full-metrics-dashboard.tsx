@@ -181,6 +181,10 @@ export function FullMetricsDashboard({ filters }: { filters?: FilterConfig }) {
         onDateChange={setDateRange}
         compareMode={compareMode}
         onCompareChange={setCompareMode}
+        projects={(filters as any)?.projects}
+        countries={(filters as any)?.countries}
+        onProjectsChange={() => {}}
+        onCountriesChange={() => {}}
       />
 
       {/* Критические алерты - самое важное сверху */}
