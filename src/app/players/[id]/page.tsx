@@ -26,12 +26,14 @@ import {
   Smartphone,
   CheckCircle,
   XCircle,
-  Settings
+  Settings,
+  Download
 } from "lucide-react";
 import type { PlayerFullProfile } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 // Моки для истории игр и почасовой активности
 const mockGameHistory = Array.from({ length: 120 }).map((_, i) => ({
   date: new Date(Date.now() - i * 36e5).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
@@ -389,6 +391,136 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
           </Button>
         </div>
       </div>
+
+      {/* Ключевые показатели игрока (Key Casino KPIs) */}
+      <Card>
+        <CardHeader className="pb-2 flex items-center justify-between">
+          <CardTitle className="text-sm font-medium">Ключевые показатели</CardTitle>
+          <div className="flex gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm"><Settings className="h-4 w-4 mr-2"/>Настроить</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Отображаемые метрики</DialogTitle>
+                </DialogHeader>
+                <div className="grid md:grid-cols-2 gap-2 text-sm">
+                  {[
+                    { key: 'ggr', label: 'GGR' },
+                    { key: 'ngr', label: 'NGR' },
+                    { key: 'hold', label: 'Hold %' },
+                    { key: 'ltv', label: 'LTV' },
+                    { key: 'netDeposits', label: 'Net Deposits' },
+                    { key: 'totalDeposits', label: 'Total Deposits' },
+                    { key: 'totalWithdrawals', label: 'Total Withdrawals' },
+                    { key: 'rtp', label: 'RTP' },
+                    { key: 'avgDeposit', label: 'Avg Deposit' },
+                    { key: 'avgBet', label: 'Avg Bet Size' },
+                    { key: 'depFreq', label: 'Deposit Frequency' },
+                  ].map(opt => (
+                    <label key={opt.key} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        defaultChecked={(typeof window !== 'undefined' && JSON.parse(localStorage.getItem('playerKeyKpis')||'null'))?.includes(opt.key) ?? true}
+                        onChange={(e) => {
+                          try {
+                            const cur = JSON.parse(localStorage.getItem('playerKeyKpis')||'null') || ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq'];
+                            const next = e.target.checked ? Array.from(new Set([...cur, opt.key])) : cur.filter((k: string) => k !== opt.key);
+                            localStorage.setItem('playerKeyKpis', JSON.stringify(next));
+                          } catch {}
+                        }}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const fileName = `player-${player.mainInfo.id}-kpis.csv`;
+                const totalBets = player.gaming.totalWagered;
+                const totalWins = Math.round(totalBets * (player.gaming.playerRTP/100));
+                const ggr = totalBets - totalWins;
+                const bonusCost = Math.round(totalBets * 0.02);
+                const taxes = Math.round(ggr * 0.15);
+                const ngr = ggr - bonusCost - taxes;
+                const hold = totalBets>0 ? (ggr/totalBets)*100 : 0;
+                const rows = [
+                  ['Metric','Value'],
+                  ['GGR', `€${ggr.toLocaleString()}`],
+                  ['NGR', `€${ngr.toLocaleString()}`],
+                  ['Hold %', `${hold.toFixed(2)}%`],
+                  ['LTV', `€${player.behavior.ltv.toLocaleString()}`],
+                  ['Net Deposits', `€${(player.financial.totalDeposit - player.financial.totalWithdrawal).toLocaleString()}`],
+                  ['Total Deposits', `€${player.financial.totalDeposit.toLocaleString()}`],
+                  ['Total Withdrawals', `€${player.financial.totalWithdrawal.toLocaleString()}`],
+                  ['RTP', `${player.gaming.playerRTP}%`],
+                  ['Average Deposit', `€${player.financial.averageDeposit}`],
+                  ['Average Bet Size', `€${player.gaming.averageBetSize}`],
+                  ['Deposit Frequency', `${player.financial.depositFrequency}`],
+                ];
+                const csv = rows.map(r => r.join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = fileName; a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              <Download className="h-4 w-4 mr-2"/>CSV
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const totalBets = player.gaming.totalWagered;
+            const totalWins = Math.round(totalBets * (player.gaming.playerRTP/100));
+            const ggr = totalBets - totalWins;
+            const bonusCost = Math.round(totalBets * 0.02);
+            const taxes = Math.round(ggr * 0.15);
+            const ngr = ggr - bonusCost - taxes;
+            const hold = totalBets>0 ? (ggr/totalBets)*100 : 0;
+            const netDeposits = player.financial.totalDeposit - player.financial.totalWithdrawal;
+            const visible: string[] = (() => { try { return JSON.parse(localStorage.getItem('playerKeyKpis')||'null') || ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq']; } catch { return ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq']; } })();
+            const kpis = [
+              { key:'ggr', name:'GGR', value:`€${ggr.toLocaleString()}`, formula:'GGR = Total Bets – Total Wins', good:ggr>=0 },
+              { key:'ngr', name:'NGR', value:`€${ngr.toLocaleString()}`, formula:'NGR = GGR – Bonus Cost – Taxes', good:ngr>=0 },
+              { key:'hold', name:'Hold %', value:`${hold.toFixed(2)}%`, formula:'Hold = GGR / Total Bets × 100%', good:hold>=3.5 },
+              { key:'ltv', name:'LTV', value:`€${player.behavior.ltv.toLocaleString()}`, formula:'Lifetime Value', good:true },
+              { key:'netDeposits', name:'Net Deposits', value:`€${netDeposits.toLocaleString()}`, formula:'Net Deposits = Total Deposits – Total Withdrawals', good:netDeposits>=0 },
+              { key:'totalDeposits', name:'Total Deposits', value:`€${player.financial.totalDeposit.toLocaleString()}`, formula:'Sum of all deposits', good:true },
+              { key:'totalWithdrawals', name:'Total Withdrawals', value:`€${player.financial.totalWithdrawal.toLocaleString()}`, formula:'Sum of all withdrawals', good:false },
+              { key:'rtp', name:'RTP', value:`${player.gaming.playerRTP}%`, formula:'RTP = Total Wins / Total Bets × 100%', good:player.gaming.playerRTP<=97 },
+              { key:'avgDeposit', name:'Avg Deposit', value:`€${player.financial.averageDeposit}`, formula:'Average deposit amount', good:true },
+              { key:'avgBet', name:'Avg Bet Size', value:`€${player.gaming.averageBetSize}`, formula:'Average bet size', good:true },
+              { key:'depFreq', name:'Deposit Frequency', value:player.financial.depositFrequency, formula:'Deposits per period', good:true },
+            ].filter(k => visible.includes(k.key));
+            return (
+              <TooltipProvider>
+                <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                  {kpis.map((k) => (
+                    <Tooltip key={k.key}>
+                      <TooltipTrigger asChild>
+                        <div className={`p-3 rounded-lg border ${k.good ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                          <div className="text-xs text-muted-foreground mb-1">{k.name}</div>
+                          <div className="text-xl font-bold">{k.value}</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">{k.formula}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
+              </TooltipProvider>
+            );
+          })()}
+        </CardContent>
+      </Card>
 
       {/* Roadmap перехода по сегментам */}
       <Card>
