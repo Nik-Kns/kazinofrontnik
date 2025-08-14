@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -792,6 +793,107 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                     <p className="text-sm text-muted-foreground">Частота депозитов</p>
                     <p className="font-medium">{player.financial.depositFrequency}</p>
                   </div>
+                  {/* Новая метрика: Withdrawal-to-Next-Deposit Interval */}
+                  {(() => {
+                    // Мок: рассчёт на фронте для демо. В проде прийдёт с бэка
+                    const withdrawals = player.financial.depositHistory.filter(t => t.type === 'withdrawal' && t.status === 'completed');
+                    const deposits = player.financial.depositHistory.filter(t => t.type === 'deposit' && t.status === 'completed');
+                    const diffs: number[] = [];
+                    withdrawals.forEach(w => {
+                      const after = deposits
+                        .map(d => d.date)
+                        .filter(d => d > w.date)
+                        .sort((a,b) => +a - +b)[0];
+                      if (after) {
+                        diffs.push((+after - +w.date) / 3600000); // часы
+                      }
+                    });
+                    const avgHours = diffs.length ? diffs.reduce((a,b)=>a+b,0) / diffs.length : 0;
+                    const value = avgHours < 48 ? `${avgHours.toFixed(1)} ч` : `${(avgHours/24).toFixed(1)} дн`;
+                    const color = avgHours < 24 ? 'text-green-600' : avgHours <= 168 ? 'text-yellow-600' : 'text-red-600';
+                    const tooltip = 'Среднее время между успешным выводом и следующим депозитом. Берём все выводы (completed) → ищем ближайший следующий депозит → считаем среднее.';
+                    return (
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">Withdrawal-to-Next-Deposit Interval</p>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <p className={`font-medium ${color} cursor-pointer`}>{value}</p>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-sm text-xs">{tooltip}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <p className="text-xs text-muted-foreground">Средний интервал между выводом и депозитом</p>
+                        {/* Детали по клику */}
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">Показать детали</Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl">
+                            <DialogHeader>
+                              <DialogTitle>Интервалы после выводов</DialogTitle>
+                            </DialogHeader>
+                            <div className="overflow-auto rounded border">
+                              <table className="w-full text-sm">
+                                <thead className="bg-muted">
+                                  <tr>
+                                    <th className="px-3 py-2 text-left">Дата вывода</th>
+                                    <th className="px-3 py-2 text-right">Сумма</th>
+                                    <th className="px-3 py-2 text-left">Следующий депозит</th>
+                                    <th className="px-3 py-2 text-right">Сумма</th>
+                                    <th className="px-3 py-2 text-left">Интервал</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {withdrawals.map((w, i) => {
+                                    const after = deposits.filter(d => d.date > w.date).sort((a,b)=> +a.date - +b.date)[0];
+                                    if (!after) return null;
+                                    const hours = ((+after.date - +w.date)/3600000);
+                                    const txt = hours < 48 ? `${hours.toFixed(1)} ч` : `${(hours/24).toFixed(1)} дн`;
+                                    return (
+                                      <tr key={i} className="border-t">
+                                        <td className="px-3 py-2">{w.date.toLocaleString('ru-RU')}</td>
+                                        <td className="px-3 py-2 text-right">€{w.amount}</td>
+                                        <td className="px-3 py-2">{after.date.toLocaleString('ru-RU')}</td>
+                                        <td className="px-3 py-2 text-right">€{after.amount}</td>
+                                        <td className="px-3 py-2">{txt}</td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                            <div className="flex justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const rows = [['withdrawal_date','withdrawal_amount','deposit_date','deposit_amount','interval']];
+                                  withdrawals.forEach(w => {
+                                    const after = deposits.filter(d => d.date > w.date).sort((a,b)=> +a.date - +b.date)[0];
+                                    if (!after) return;
+                                    const hours = ((+after.date - +w.date)/3600000);
+                                    const txt = hours < 48 ? `${hours.toFixed(1)}h` : `${(hours/24).toFixed(1)}d`;
+                                    rows.push([
+                                      w.date.toISOString(), `${w.amount}`, after.date.toISOString(), `${after.amount}`, txt
+                                    ]);
+                                  });
+                                  const csv = rows.map(r=>r.join(',')).join('\n');
+                                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = url; a.download = `player-${player.mainInfo.id}-withdrawal-to-deposit.csv`; a.click();
+                                  URL.revokeObjectURL(url);
+                                }}
+                              >
+                                Экспорт CSV
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    );
+                  })()}
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">Время между депозитами</p>
                     <p className="font-medium">{player.financial.averageTimeBetweenDeposits}</p>
@@ -1046,7 +1148,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                                   <span className={g.result === 'win' ? 'text-green-600' : 'text-red-600'}>
                                     €{g.bet} / {g.result === 'win' ? `+€${g.win}` : 'проигрыш'}
                                   </span>
-                                </div>
+                          </div>
                               ))}
                             </div>
                           ) : (
@@ -1373,7 +1475,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                       <p>Источник: UTM {player.mainInfo.trafficSource.utm}, Партнер {player.mainInfo.trafficSource.affiliate}</p>
                       <p>Устройство: {player.mainInfo.platform}</p>
                     </div>
-                  </div>
+                </div>
                   <div>
                     <h4 className="text-sm font-medium mb-2">Session Data (BI)</h4>
                     <div className="text-sm text-muted-foreground">
@@ -1383,16 +1485,16 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                       <p>Частота входов: {player.behavior.sessionFrequency}/нед</p>
                       <p>IP/Гео: 178.23.11.3 / {player.mainInfo.geo}</p>
                       <p>Устройство/соединение: {player.mainInfo.platform} / Wi‑Fi</p>
-                    </div>
-                  </div>
+              </div>
+                </div>
                   <div>
                     <h4 className="text-sm font-medium mb-2">Deposits (Finance)</h4>
                     <div className="text-sm text-muted-foreground">
                       <p>Сумма: €{player.financial.totalDeposit.toLocaleString()} • Ср. депозит: €{player.financial.averageDeposit}</p>
                       <p>Методы: {player.financial.paymentMethods.join(', ')}</p>
                       <p>Применен бонус: 35%</p>
-                    </div>
-                  </div>
+                </div>
+                </div>
                   <div>
                     <h4 className="text-sm font-medium mb-2">Withdrawals (Finance)</h4>
                     <div className="text-sm text-muted-foreground">
