@@ -35,6 +35,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis } from "recharts";
 // Моки для истории игр и почасовой активности
 const mockGameHistory = Array.from({ length: 120 }).map((_, i) => ({
   date: new Date(Date.now() - i * 36e5).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
@@ -1698,6 +1699,92 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                 <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
                   <p className="font-medium">{player.ai.recommendedReactivationOffer}</p>
                 </div>
+              </div>
+
+              {/* Новый блок: Бенчмарки (по GEO) и цели */}
+              <div className="border-t pt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold">Бенчмарки (по GEO) и цели</h4>
+                  <div className="text-xs text-muted-foreground">GEO: {player.mainInfo.country.toUpperCase()}</div>
+                </div>
+                {(() => {
+                  // Моки бенчмарков/целей/метрик. В проде — запросы к API, указанные в ТЗ
+                  const geo = player.mainInfo.country.toUpperCase();
+                  const benchmarks = { geo, values: { GGR: 500, Retention_D30: 35, Deposit_Conversion: 85, ARPU: 200, LTV: 1000 } };
+                  const targets = { GGR: 550, Retention_D30: 40, Deposit_Conversion: 90, ARPU: 220, LTV: 1200 };
+                  const playerMetrics = { GGR: 420, Retention_D30: player.behavior.retentionRate.d30, Deposit_Conversion: 78, ARPU: player.behavior.arpu, LTV: player.behavior.ltv } as any;
+                  const rows = Object.keys(benchmarks.values).map(k => {
+                    const cur = playerMetrics[k];
+                    const b = (benchmarks.values as any)[k];
+                    const t = (targets as any)[k];
+                    const pb = b ? (cur / b) * 100 : 0;
+                    const pt = t ? (cur / t) * 100 : 0;
+                    return { id: k, name: k, current: cur, benchmark: b, target: t, pb, pt };
+                  });
+                  const colorFor = (v: number) => (v >= 100 ? 'text-green-600' : v >= 80 ? 'text-yellow-600' : 'text-red-600');
+                  const chartData = Array.from({ length: 12 }).map((_, i) => ({ x: i+1, v: Math.max(0, playerMetrics.GGR*(0.7 + i*0.03)) }));
+                  return (
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      <div className="overflow-auto rounded border">
+                        <table className="w-full text-sm">
+                          <thead className="bg-muted">
+                            <tr>
+                              <th className="px-3 py-2 text-left">Показатель</th>
+                              <th className="px-3 py-2 text-right">Текущее</th>
+                              <th className="px-3 py-2 text-right">Бенчмарк ({geo})</th>
+                              <th className="px-3 py-2 text-right">Цель</th>
+                              <th className="px-3 py-2 text-right">Прогресс к бенчм.</th>
+                              <th className="px-3 py-2 text-right">К цели</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rows.map(r => (
+                              <tr key={r.id} className="border-t">
+                                <td className="px-3 py-2">{r.name}</td>
+                                <td className="px-3 py-2 text-right">{typeof r.current === 'number' ? (r.name==='GGR' || r.name==='ARPU' || r.name==='LTV' ? `€${r.current.toLocaleString()}` : `${r.current}%`) : r.current}</td>
+                                <td className="px-3 py-2 text-right">{r.name==='GGR' || r.name==='ARPU' || r.name==='LTV' ? `€${r.benchmark}` : `${r.benchmark}%`}</td>
+                                <td className="px-3 py-2 text-right">{r.name==='GGR' || r.name==='ARPU' || r.name==='LTV' ? `€${r.target}` : `${r.target}%`}</td>
+                                <td className={`px-3 py-2 text-right ${colorFor(r.pb)}`}>{Math.round(r.pb)}%</td>
+                                <td className={`px-3 py-2 text-right ${colorFor(r.pt)}`}>{Math.round(r.pt)}%</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="p-3 rounded border bg-secondary/30">
+                          <p className="text-sm font-medium mb-2">Прогресс к бенчмарку/цели (GGR)</p>
+                          <div className="h-48">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={chartData}>
+                                <XAxis dataKey="x" hide />
+                                <YAxis hide />
+                                <Line type="monotone" dataKey="v" stroke="#2563eb" strokeWidth={2} dot={false} />
+                                {/* Линия бенчмарка */}
+                                <Line type="monotone" dataKey={() => benchmarks.values.GGR} stroke="#10b981" strokeDasharray="4 4" dot={false} />
+                                {/* Линия цели */}
+                                <Line type="monotone" dataKey={() => targets.GGR} stroke="#f59e0b" strokeDasharray="2 2" dot={false} />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className="inline-block w-3 h-3 bg-blue-500 rounded-sm" /> Текущее
+                            <span className="inline-block w-3 h-3 bg-emerald-500 rounded-sm" /> Бенчмарк ({geo})
+                            <span className="inline-block w-3 h-3 bg-amber-500 rounded-sm" /> Цель
+                          </div>
+                        </div>
+                        <div className="p-3 rounded border">
+                          <p className="text-sm font-medium">AI рекомендация</p>
+                          <p className="text-sm text-muted-foreground mt-1">Увеличьте средний депозит через персональные офферы и ограниченные по времени бонусы. Оптимизируйте онбординг депозита для GEO {geo}.</p>
+                          <div className="mt-2">
+                            <Button variant="outline" size="sm">Показать подробнее</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>
