@@ -74,6 +74,14 @@ const mockPromoHistory = Array.from({ length: 10 }).map((_, i) => ({
   outcome: ['депозит €50','выигрыш €120','активность +'][i%3]
 }));
 
+// Мок: попытки депозитов (успешные и неуспешные)
+const mockDepositAttempts = Array.from({ length: 14 }).map((_, i) => ({
+  date: new Date(Date.now() - i * 36e5),
+  amount: Math.round((20 + Math.random() * 480) * 100) / 100,
+  method: ['Visa','Skrill','Mastercard','Bitcoin'][i % 4],
+  status: ['completed','failed','failed','completed','pending'][i % 5] as 'completed' | 'failed' | 'pending',
+})).sort((a,b) => +a.date - +b.date);
+
 const mockResponseAnalytics = {
   offers: 38,
   responses: 14,
@@ -793,6 +801,81 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                     <p className="text-sm text-muted-foreground">Частота депозитов</p>
                     <p className="font-medium">{player.financial.depositFrequency}</p>
                   </div>
+                  {/* Метрика: Deposit Conversion Rate */}
+                  {(() => {
+                    const successful = mockDepositAttempts.filter(a => a.status === 'completed').length;
+                    const total = mockDepositAttempts.length;
+                    const rate = total ? Math.round((successful / total) * 100) : null;
+                    const color = rate === null ? 'text-muted-foreground' : rate >= 90 ? 'text-green-600' : rate >= 70 ? 'text-yellow-600' : 'text-red-600';
+                    return (
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">Deposit Conversion Rate</p>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <p className={`font-medium ${color} cursor-pointer`}>
+                                {rate === null ? '—' : `${rate}%`} {rate !== null && <span className="text-xs text-muted-foreground">({successful} из {total})</span>}
+                              </p>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-sm text-xs">
+                              Показывает процент успешных депозитов. Если низкий — возможны технические или UX‑проблемы.
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <p className="text-xs text-muted-foreground">Успешные депозиты / Все попытки</p>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">Подробнее</Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl">
+                            <DialogHeader>
+                              <DialogTitle>Попытки депозита</DialogTitle>
+                            </DialogHeader>
+                            <div className="overflow-auto rounded border">
+                              <table className="w-full text-sm">
+                                <thead className="bg-muted">
+                                  <tr>
+                                    <th className="px-3 py-2 text-left">Дата</th>
+                                    <th className="px-3 py-2 text-right">Сумма</th>
+                                    <th className="px-3 py-2 text-left">Метод</th>
+                                    <th className="px-3 py-2 text-left">Статус</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {mockDepositAttempts.map((a, i) => (
+                                    <tr key={i} className="border-t">
+                                      <td className="px-3 py-2">{a.date.toLocaleString('ru-RU')}</td>
+                                      <td className="px-3 py-2 text-right">€{a.amount.toFixed(2)}</td>
+                                      <td className="px-3 py-2">{a.method}</td>
+                                      <td className={`px-3 py-2 ${a.status==='completed'?'text-green-600':a.status==='failed'?'text-red-600':'text-yellow-600'}`}>{a.status}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                            <div className="flex justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const rows = [['date','amount','method','status']];
+                                  mockDepositAttempts.forEach(a => rows.push([a.date.toISOString(), `${a.amount}`, a.method, a.status]));
+                                  const csv = rows.map(r=>r.join(',')).join('\n');
+                                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                                  const url = URL.createObjectURL(blob);
+                                  const link = document.createElement('a');
+                                  link.href = url; link.download = `player-${player.mainInfo.id}-deposit-attempts.csv`; link.click();
+                                  URL.revokeObjectURL(url);
+                                }}
+                              >
+                                Экспорт CSV
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    );
+                  })()}
                   {/* Новая метрика: Withdrawal-to-Next-Deposit Interval */}
                   {(() => {
                     // Мок: рассчёт на фронте для демо. В проде прийдёт с бэка
