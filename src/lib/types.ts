@@ -59,6 +59,8 @@ export type TemplateData = {
   category: string;
   performance: number; // 1-5 stars
   channel: "Email" | "Push" | "SMS" | "InApp" | "Multi-channel";
+  type: "event" | "basic" | "custom";
+  event?: "first_deposit" | "withdrawal" | "registration" | "inactivity" | "big_win" | "bonus_activation" | "login" | "game_start";
 };
 
 export type ReportData = {

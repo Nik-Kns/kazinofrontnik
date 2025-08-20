@@ -291,11 +291,16 @@ export const segmentsData: SegmentData[] = [
 ];
 
 export const templatesData: TemplateData[] = [
-    { id: '1', name: 'Welcome-цепочка', description: 'Серия из 3 писем для новых игроков для их активации и первого депозита.', category: 'Onboarding', performance: 5, channel: 'Email' },
-    { id: '2', name: 'Реактивация "спящих"', description: 'Push-уведомление с бонусом для игроков, неактивных 30+ дней.', category: 'Reactivation', performance: 4, channel: 'Push' },
-    { id: '3', name: 'Бонус для VIP-игроков', description: 'Еженедельное эксклюзивное предложение для сегмента VIP.', category: 'Retention', performance: 5, channel: 'Multi-channel' },
-    { id: '4', name: 'Запрос обратной связи', description: 'In-app сообщение с просьбой оценить игру после 5 сессий.', category: 'Feedback', performance: 3, channel: 'InApp' },
-    { id: '5', name: 'Напоминание о брошенном депозите', description: 'SMS-напоминание игрокам, которые начали, но не завершили процесс пополнения.', category: 'Conversion', performance: 4, channel: 'SMS' },
+    { id: '1', name: 'Welcome-цепочка', description: 'Серия из 3 писем для новых игроков для их активации и первого депозита.', category: 'Onboarding', performance: 5, channel: 'Email', type: 'event', event: 'registration' },
+    { id: '2', name: 'Реактивация "спящих"', description: 'Push-уведомление с бонусом для игроков, неактивных 30+ дней.', category: 'Reactivation', performance: 4, channel: 'Push', type: 'event', event: 'inactivity' },
+    { id: '3', name: 'Бонус для VIP-игроков', description: 'Еженедельное эксклюзивное предложение для сегмента VIP.', category: 'Retention', performance: 5, channel: 'Multi-channel', type: 'basic' },
+    { id: '4', name: 'Запрос обратной связи', description: 'In-app сообщение с просьбой оценить игру после 5 сессий.', category: 'Feedback', performance: 3, channel: 'InApp', type: 'basic' },
+    { id: '5', name: 'Напоминание о брошенном депозите', description: 'SMS-напоминание игрокам, которые начали, но не завершили процесс пополнения.', category: 'Conversion', performance: 4, channel: 'SMS', type: 'event', event: 'first_deposit' },
+    { id: '6', name: 'Поздравление с крупным выигрышем', description: 'Персональное поздравление при выигрыше свыше €500.', category: 'Engagement', performance: 5, channel: 'Email', type: 'event', event: 'big_win' },
+    { id: '7', name: 'Приглашение в турнир', description: 'Базовый шаблон приглашения на турниры.', category: 'Engagement', performance: 4, channel: 'Push', type: 'basic' },
+    { id: '8', name: 'Индивидуальный сценарий', description: 'Пользовательский шаблон с настраиваемой логикой.', category: 'Custom', performance: 3, channel: 'Multi-channel', type: 'custom' },
+    { id: '9', name: 'Активация бонуса', description: 'Уведомление при активации бонуса игроком.', category: 'Bonus', performance: 4, channel: 'InApp', type: 'event', event: 'bonus_activation' },
+    { id: '10', name: 'Первый логин после регистрации', description: 'Приветственное сообщение при первом входе в систему.', category: 'Onboarding', performance: 5, channel: 'InApp', type: 'event', event: 'login' },
 ];
 
 export const reportsData: ReportData[] = [

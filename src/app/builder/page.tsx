@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PhoneCall, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -147,17 +148,266 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
     </Card>
 );
 
-const TemplatesTab = () => (
+const TemplatesTab = () => {
+  const [selectedTypeFilter, setSelectedTypeFilter] = React.useState<'all' | 'event' | 'basic' | 'custom'>('all');
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
+  const [newTemplate, setNewTemplate] = React.useState({
+    name: '',
+    description: '',
+    type: 'basic' as 'event' | 'basic' | 'custom',
+    event: '' as string,
+    channel: 'Email' as 'Email' | 'Push' | 'SMS' | 'InApp' | 'Multi-channel',
+    category: ''
+  });
+  
+  // Filter templates based on type and search
+  const filteredTemplates = React.useMemo(() => {
+    return templatesData.filter(template => {
+      const matchesType = selectedTypeFilter === 'all' || template.type === selectedTypeFilter;
+      const matchesSearch = searchQuery === '' || 
+        template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        template.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesType && matchesSearch;
+    });
+  }, [selectedTypeFilter, searchQuery]);
+
+  // Calculate statistics for each type
+  const typeStats = React.useMemo(() => {
+    const stats = {
+      all: templatesData.length,
+      event: templatesData.filter(t => t.type === 'event').length,
+      basic: templatesData.filter(t => t.type === 'basic').length,
+      custom: templatesData.filter(t => t.type === 'custom').length,
+    };
+    return stats;
+  }, []);
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'event': return 'Событийный';
+      case 'basic': return 'Базовый'; 
+      case 'custom': return 'Пользовательский';
+      default: return 'Все';
+    }
+  };
+
+  const getTypeBadge = (type: string) => {
+    switch (type) {
+      case 'event': return { emoji: '🟦', color: 'bg-blue-100 text-blue-700 border-blue-200' };
+      case 'basic': return { emoji: '🟩', color: 'bg-green-100 text-green-700 border-green-200' };
+      case 'custom': return { emoji: '🟨', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' };
+      default: return { emoji: '', color: '' };
+    }
+  };
+
+  const getEventLabel = (event?: string) => {
+    switch (event) {
+      case 'first_deposit': return 'Первый депозит';
+      case 'withdrawal': return 'Вывод';
+      case 'registration': return 'Регистрация';
+      case 'inactivity': return 'Неактивность';
+      case 'big_win': return 'Крупный выигрыш';
+      case 'bonus_activation': return 'Активация бонуса';
+      case 'login': return 'Логин';
+      case 'game_start': return 'Начало игры';
+      default: return '';
+    }
+  };
+
+  const handleCreateTemplate = () => {
+    // Here you would typically make an API call to create the template
+    console.log('Creating template:', newTemplate);
+    setIsCreateDialogOpen(false);
+    setNewTemplate({
+      name: '',
+      description: '',
+      type: 'basic',
+      event: '',
+      channel: 'Email',
+      category: ''
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Filter Panel */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Фильтры шаблонов</CardTitle>
+              <CardDescription>Выберите тип шаблонов для отображения</CardDescription>
+            </div>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Создать шаблон
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Создать новый шаблон</DialogTitle>
+                  <DialogDescription>
+                    Создайте новый шаблон сценария для использования в кампаниях.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="template-name">Название шаблона</Label>
+                    <Input
+                      id="template-name"
+                      value={newTemplate.name}
+                      onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Например: Приветственный бонус"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="template-description">Описание</Label>
+                    <Textarea
+                      id="template-description"
+                      value={newTemplate.description}
+                      onChange={(e) => setNewTemplate(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Краткое описание шаблона..."
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="template-type">Тип шаблона</Label>
+                    <Select
+                      value={newTemplate.type}
+                      onValueChange={(value: 'event' | 'basic' | 'custom') => 
+                        setNewTemplate(prev => ({ ...prev, type: value, event: value !== 'event' ? '' : prev.event }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="basic">🟩 Базовый</SelectItem>
+                        <SelectItem value="event">🟦 Событийный</SelectItem>
+                        <SelectItem value="custom">🟨 Пользовательский</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {newTemplate.type === 'event' && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="template-event">Событие</Label>
+                      <Select
+                        value={newTemplate.event}
+                        onValueChange={(value) => setNewTemplate(prev => ({ ...prev, event: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите событие..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="registration">Регистрация</SelectItem>
+                          <SelectItem value="first_deposit">Первый депозит</SelectItem>
+                          <SelectItem value="withdrawal">Вывод</SelectItem>
+                          <SelectItem value="inactivity">Неактивность</SelectItem>
+                          <SelectItem value="big_win">Крупный выигрыш</SelectItem>
+                          <SelectItem value="bonus_activation">Активация бонуса</SelectItem>
+                          <SelectItem value="login">Логин</SelectItem>
+                          <SelectItem value="game_start">Начало игры</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  <div className="grid gap-2">
+                    <Label htmlFor="template-channel">Канал коммуникации</Label>
+                    <Select
+                      value={newTemplate.channel}
+                      onValueChange={(value: 'Email' | 'Push' | 'SMS' | 'InApp' | 'Multi-channel') => 
+                        setNewTemplate(prev => ({ ...prev, channel: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Email">Email</SelectItem>
+                        <SelectItem value="Push">Push</SelectItem>
+                        <SelectItem value="SMS">SMS</SelectItem>
+                        <SelectItem value="InApp">InApp</SelectItem>
+                        <SelectItem value="Multi-channel">Multi-channel</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="template-category">Категория</Label>
+                    <Input
+                      id="template-category"
+                      value={newTemplate.category}
+                      onChange={(e) => setNewTemplate(prev => ({ ...prev, category: e.target.value }))}
+                      placeholder="Например: Onboarding, Retention..."
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    Отмена
+                  </Button>
+                  <Button onClick={handleCreateTemplate} disabled={!newTemplate.name || !newTemplate.description}>
+                    Создать шаблон
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col space-y-4">
+            {/* Search Input */}
+            <div>
+              <Input 
+                placeholder="Поиск шаблонов..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm"
+              />
+            </div>
+            
+            {/* Type Filter Buttons */}
+            <div className="flex flex-wrap gap-2">
+              {(['all', 'event', 'basic', 'custom'] as const).map((type) => (
+                <Button
+                  key={type}
+                  variant={selectedTypeFilter === type ? "default" : "outline"}
+                  onClick={() => setSelectedTypeFilter(type)}
+                  className="flex items-center gap-2"
+                >
+                  {type !== 'all' && <span>{getTypeBadge(type).emoji}</span>}
+                  {getTypeLabel(type)} ({typeStats[type]})
+                </Button>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Templates Grid */}
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {templatesData.map(template => {
+        {filteredTemplates.map(template => {
           const ChannelIcon = channelIconsTemplates[template.channel];
+          const typeBadge = getTypeBadge(template.type);
+          
           return (
             <Card key={template.id} className="flex flex-col">
               <CardHeader>
                 <div className="flex items-start justify-between">
                     <div>
-                        <Badge variant="secondary" className="mb-2">{template.category}</Badge>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary">{template.category}</Badge>
+                          <Badge className={`${typeBadge.color} text-xs`}>
+                            {typeBadge.emoji} {getTypeLabel(template.type)}
+                          </Badge>
+                        </div>
                         <CardTitle>{template.name}</CardTitle>
+                        {template.type === 'event' && template.event && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Событие: {getEventLabel(template.event)}
+                          </p>
+                        )}
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <ChannelIcon className="h-5 w-5"/>
@@ -182,7 +432,20 @@ const TemplatesTab = () => (
           )
         })}
       </div>
+
+      {/* Empty State */}
+      {filteredTemplates.length === 0 && (
+        <Card>
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">
+              Шаблоны не найдены. Попробуйте изменить фильтры или поисковый запрос.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+      </div>
 );
+};
 
 
 // --- Builder Components ---
@@ -565,7 +828,12 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
                 id: getId(),
                 type: 'custom',
                 position,
-                data: { label: elementInfo.name, description: elementInfo.description, icon: elementInfo.icon, configType: elementInfo.type },
+                data: { 
+                    label: (elementInfo as any).name, 
+                    description: (elementInfo as any).description, 
+                    icon: (elementInfo as any).icon, 
+                    configType: (elementInfo as any).type 
+                },
             };
             
             setNodes((nds) => nds.concat(newNode));
@@ -603,7 +871,7 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioD
                     <Button variant="outline" size="sm"> <Sparkles className="mr-2 h-4 w-4" />Prettify</Button>
                     <Button variant="outline">Сохранить как черновик</Button>
                     <Button>Активировать сценарий</Button>
-                    <Button variant="accent" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => setIsCopilotOpen(true)}>
+                    <Button variant="default" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => setIsCopilotOpen(true)}>
                         <BotMessageSquare className="mr-2 h-4 w-4" />
                         AI Co-pilot
                     </Button>
