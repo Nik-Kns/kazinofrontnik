@@ -612,62 +612,7 @@ const originalNames = [
   'Monday Promo',
 ];
 
-function getRandomName(idx: number, offset: number) {
-  return originalNames[(idx * 2 + offset) % originalNames.length];
-}
 
-export const campaignsData: CampaignData[] = [
-  ...Array.from({length: 31}, (_, i) => [
-    {
-      id: `d${i+1}-1`,
-      name: getRandomName(i, 0),
-      date: `2024-07-${String(i+1).padStart(2, '0')}`,
-      type: 'Promo',
-      goal: 'Активность',
-      offer: `${10+i} фриспинов`,
-      channel: i%2===0 ? 'Push' : 'Email',
-      language: i%3===0 ? 'RU' : (i%3===1 ? 'EN' : 'DE'),
-      segment: i%4===0 ? 'VIP' : (i%4===1 ? 'Все' : (i%4===2 ? 'Любители слотов' : 'Спящие')),
-      media: '',
-      texts: `Текст акции ${i+1}`,
-      triggers: 'Промо-акция',
-      status: i%3===0 ? 'active' : (i%3===1 ? 'paused' : 'completed'),
-      typeDetail: 'промо',
-    },
-    {
-      id: `d${i+1}-2`,
-      name: getRandomName(i, 1),
-      date: `2024-07-${String(i+1).padStart(2, '0')}`,
-      type: 'Push',
-      goal: 'Return',
-      offer: `${5+i}€ бонус`,
-      channel: i%2===0 ? 'SMS' : 'InApp',
-      language: i%3===0 ? 'EN' : (i%3===1 ? 'DE' : 'RU'),
-      segment: i%4===0 ? 'Спящие' : (i%4===1 ? 'VIP' : (i%4===2 ? 'Все' : 'Любители слотов')),
-      media: '',
-      texts: `Текст возврата ${i+1}`,
-      triggers: '30+ дней неактивен',
-      status: i%2===0 ? 'active' : 'paused',
-      typeDetail: 'return',
-    },
-    {
-      id: `d${i+1}-3`,
-      name: getRandomName(i, 2),
-      date: `2024-07-${String(i+1).padStart(2, '0')}`,
-      type: 'Push',
-      goal: 'Опрос',
-      offer: '',
-      channel: i%2===0 ? 'InApp' : 'Email',
-      language: i%3===0 ? 'DE' : (i%3===1 ? 'RU' : 'EN'),
-      segment: i%4===0 ? 'Любители слотов' : (i%4===1 ? 'Спящие' : (i%4===2 ? 'VIP' : 'Все')),
-      media: '',
-      texts: `Текст опроса ${i+1}`,
-      triggers: 'Опрос',
-      status: i%2===0 ? 'completed' : 'active',
-      typeDetail: 'опрос',
-    },
-  ]).flat(),
-];
 
 export const webhookLogsData: WebhookLogData[] = [
   { id: '1', timestamp: '2024-07-10 14:01:59', service: 'SendGrid', event: 'email.delivered', status: 'Success', requestId: 'd-12345...' },
