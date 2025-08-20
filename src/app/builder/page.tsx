@@ -13,7 +13,11 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { segmentsData, scenariosData, templatesData, campaignsData } from '@/lib/mock-data';
-import type { CampaignData, FunnelData, ABTestVariant, BenchmarkData, BenchmarkMetric } from '@/lib/types';
+import type { CampaignData, FunnelData, ABTestVariant, BenchmarkData, BenchmarkMetric, ClipboardItem, ClipboardItemType } from '@/lib/types';
+import { ClipboardProvider, useClipboard } from '@/contexts/clipboard-context';
+import { CopyMoveContextMenu, CopyMoveDropdownMenu, useKeyboardShortcuts } from '@/components/ui/copy-move-menu';
+import { PasteTargetDialog } from '@/components/ui/paste-target-dialog';
+import { DragDropWrapper, DropZone } from '@/components/ui/drag-drop-wrapper';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -446,6 +450,11 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
   const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
   const [selectedFunnelCampaign, setSelectedFunnelCampaign] = React.useState<CampaignData | null>(null);
   const [isFunnelDialogOpen, setIsFunnelDialogOpen] = React.useState(false);
+  const [isPasteDialogOpen, setIsPasteDialogOpen] = React.useState(false);
+
+  // Copy/Move functionality
+  const { clipboard, paste } = useClipboard();
+  useKeyboardShortcuts();
 
   // Get available filter options for campaigns
   const availableStatuses = React.useMemo(() => {
@@ -520,6 +529,33 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
     setIsFunnelDialogOpen(true);
   };
 
+  // Copy/Move handlers
+  const handlePasteFromClipboard = React.useCallback(async (targetId: string, targetType: ClipboardItemType) => {
+    if (!clipboard) return;
+    
+    const success = await paste(targetId, targetType);
+    if (success) {
+      // Refresh data or update state as needed
+      console.log(`Successfully pasted ${clipboard.type} into ${targetType} ${targetId}`);
+    }
+  }, [clipboard, paste]);
+
+  const handleDrop = React.useCallback((item: ClipboardItem, targetId: string, targetType: ClipboardItemType) => {
+    console.log(`Dropped ${item.type} ${item.id} into ${targetType} ${targetId}`);
+    // Handle the actual drop operation
+    handlePasteFromClipboard(targetId, targetType);
+  }, [handlePasteFromClipboard]);
+
+  const handleCampaignPaste = React.useCallback((campaignId: string) => {
+    // Refresh campaigns data after paste
+    console.log(`Pasted into campaign ${campaignId}`);
+  }, []);
+
+  const handleScenarioPaste = React.useCallback((scenarioId: string) => {
+    // Refresh scenario data after paste
+    console.log(`Pasted into scenario ${scenarioId}`);
+  }, []);
+
   // Status colors for campaigns
   const campaignStatusColors = {
     active: "bg-success",
@@ -540,10 +576,10 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
   return (
     <div className="space-y-6">
       {/* Filter Panel */}
-      <Card>
-        <CardHeader>
+    <Card>
+      <CardHeader>
           <CardTitle>Фильтры кампаний</CardTitle>
-          <CardDescription>
+        <CardDescription>
             Настройте фильтры для поиска кампаний. Найдено: {filteredCampaigns.length} из {campaignsData.length} кампаний
           </CardDescription>
         </CardHeader>
@@ -687,31 +723,60 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
           <CardTitle>Все кампании</CardTitle>
           <CardDescription>
             Кампании с вложенными сценариями. Нажмите на стрелку для просмотра сценариев или на название для детального просмотра.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
                 <TableHead className="w-8"></TableHead>
                 <TableHead className="w-[300px]">Название кампании</TableHead>
-                <TableHead>Статус</TableHead>
+              <TableHead>Статус</TableHead>
                 <TableHead>GEO</TableHead>
                 <TableHead>Проект</TableHead>
                 <TableHead>Сценариев</TableHead>
                 <TableHead>Бюджет</TableHead>
                 <TableHead>Период</TableHead>
-                <TableHead className="text-right">Действия</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+              <TableHead className="text-right">Действия</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
               {filteredCampaigns.map((campaign) => {
                 const isExpanded = expandedCampaigns.has(campaign.id);
-                return (
-                  <React.Fragment key={campaign.id}>
-                    {/* Campaign Row */}
-                    <TableRow className="hover:bg-muted/50">
-                      <TableCell>
+              return (
+                                              <React.Fragment key={campaign.id}>
+                              {/* Campaign Row */}
+                              <DropZone
+                                dropZone={{
+                                  type: 'campaign',
+                                  id: campaign.id,
+                                  accepts: ['scenario'],
+                                  level: 0
+                                }}
+                                onDrop={handleDrop}
+                                className="relative"
+                              >
+                                <CopyMoveContextMenu
+                                  item={{
+                                    id: campaign.id,
+                                    type: 'campaign',
+                                    data: campaign,
+                                    name: campaign.name
+                                  }}
+                                  showPasteOption={true}
+                                  onPaste={handleCampaignPaste}
+                                >
+                                  <DragDropWrapper
+                                    item={{
+                                      id: campaign.id,
+                                      type: 'campaign',
+                                      data: campaign,
+                                      name: campaign.name
+                                    }}
+                                    draggable={true}
+                                  >
+                                    <TableRow className="hover:bg-muted/50">
+                  <TableCell>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -738,14 +803,14 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                             </p>
                           )}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
                           <span className={cn("h-2.5 w-2.5 rounded-full", campaignStatusColors[campaign.status])} />
                           {campaign.status === 'active' ? 'Активна' : campaign.status === 'paused' ? 'Пауза' : 'Неактивна'}
-                        </div>
-                      </TableCell>
-                      <TableCell>
+                    </div>
+                  </TableCell>
+                  <TableCell>
                         <div className="text-sm">
                           {campaign.geo.join(', ')}
                         </div>
@@ -776,20 +841,35 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => openCampaignDetail(campaign)}>
-                          <Eye className="h-4 w-4" />
+                                        <TableCell className="text-right">
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => openCampaignDetail(campaign)}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {campaign.funnel && (
+                        <Button variant="ghost" size="icon" onClick={() => openFunnelView(campaign)}>
+                          <BarChart3 className="h-4 w-4" />
                         </Button>
-                        {campaign.funnel && (
-                          <Button variant="ghost" size="icon" onClick={() => openFunnelView(campaign)}>
-                            <BarChart3 className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="icon">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+                      )}
+                      <Button variant="ghost" size="icon">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <CopyMoveDropdownMenu
+                        item={{
+                          id: campaign.id,
+                          type: 'campaign',
+                          data: campaign,
+                          name: campaign.name
+                        }}
+                        showPasteOption={true}
+                        onPaste={handleCampaignPaste}
+                      />
+                    </div>
+                  </TableCell>
                     </TableRow>
+                                  </DragDropWrapper>
+                                </CopyMoveContextMenu>
+                              </DropZone>
 
                     {/* Expanded Scenarios */}
                     {isExpanded && campaign.scenarios.map((scenario, index) => {
@@ -797,10 +877,31 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                       const typeBadge = getTypeBadge(scenario.type);
                       
                       return (
-                        <TableRow key={`${campaign.id}-${scenario.id}`} className="bg-muted/20">
+                        <CopyMoveContextMenu
+                          key={`${campaign.id}-${scenario.id}`}
+                          item={{
+                            id: scenario.id || `${campaign.id}-${index}`,
+                            type: 'scenario',
+                            data: scenario,
+                            name: scenario.name
+                          }}
+                          sourceId={campaign.id}
+                          showPasteOption={false}
+                        >
+                          <DragDropWrapper
+                            item={{
+                              id: scenario.id || `${campaign.id}-${index}`,
+                              type: 'scenario',
+                              data: scenario,
+                              name: scenario.name
+                            }}
+                            sourceId={campaign.id}
+                            draggable={true}
+                          >
+                            <TableRow className="bg-muted/20">
                           <TableCell></TableCell>
                           <TableCell className="pl-8">
-                            <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                               <div className="flex items-center gap-2">
                                 <Badge className={`${typeBadge.color} text-xs`}>
                                   {typeBadge.emoji} {scenario.type === 'event' ? 'Событийный' : scenario.type === 'basic' ? 'Базовый' : 'Пользовательский'}
@@ -810,14 +911,14 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">
                               {scenario.segment} • {scenario.goal}
-                            </div>
-                          </TableCell>
-                          <TableCell>
+                    </div>
+                  </TableCell>
+                  <TableCell>
                             <div className="flex items-center gap-2">
                               <span className={cn("h-2 w-2 rounded-full", statusColors[scenario.status])} />
                               <span className="text-sm">{scenario.status}</span>
                             </div>
-                          </TableCell>
+                  </TableCell>
                           <TableCell>
                             <div className="text-xs text-muted-foreground">
                               {scenario.geo?.join(', ') || '—'}
@@ -844,36 +945,51 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                               {scenario.updatedAt && new Date(scenario.updatedAt).toLocaleDateString('ru-RU')}
                             </div>
                           </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
-                              <Pencil className="h-3 w-3" />
-                            </Button>
-                            {scenario.funnel && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => {
-                                  setSelectedFunnelCampaign({
-                                    ...campaign,
-                                    name: scenario.name,
-                                    description: `Сценарий: ${scenario.segment} • ${scenario.goal}`,
-                                    funnel: scenario.funnel
-                                  });
-                                  setIsFunnelDialogOpen(true);
-                                }}
-                              >
-                                <BarChart3 className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
+                  <TableCell className="text-right">
+                    <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
+                        <Pencil className="h-3 w-3" />
+                    </Button>
+                      {scenario.funnel && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => {
+                            setSelectedFunnelCampaign({
+                              ...campaign,
+                              name: scenario.name,
+                              description: `Сценарий: ${scenario.segment} • ${scenario.goal}`,
+                              funnel: scenario.funnel
+                            });
+                            setIsFunnelDialogOpen(true);
+                          }}
+                        >
+                          <BarChart3 className="h-3 w-3" />
+                    </Button>
+                      )}
+                      <CopyMoveDropdownMenu
+                        item={{
+                          id: scenario.id || `${campaign.id}-${index}`,
+                          type: 'scenario',
+                          data: scenario,
+                          name: scenario.name
+                        }}
+                        sourceId={campaign.id}
+                        showPasteOption={false}
+                        className="h-6 w-6"
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+                          </DragDropWrapper>
+                        </CopyMoveContextMenu>
                       );
                     })}
                   </React.Fragment>
-                );
-              })}
-            </TableBody>
-          </Table>
+              );
+            })}
+          </TableBody>
+        </Table>
           
           {filteredCampaigns.length === 0 && (
             <div className="py-8 text-center">
@@ -882,8 +998,8 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+      </CardContent>
+    </Card>
 
       {/* Campaign Detail Dialog */}
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
@@ -1077,6 +1193,13 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Paste Target Dialog */}
+      <PasteTargetDialog
+        open={isPasteDialogOpen}
+        onOpenChange={setIsPasteDialogOpen}
+        onPaste={handlePasteFromClipboard}
+      />
     </div>
   );
 };
@@ -2101,7 +2224,7 @@ const BuilderWrapper = (props: { onExit: () => void; scenario: ScenarioData | nu
 );
 
 
-export default function ScenariosPage() {
+function ScenariosPageContent() {
     const [activeTab, setActiveTab] = React.useState('campaigns');
     const [isBuilderMode, setIsBuilderMode] = React.useState(false);
     const [editingScenario, setEditingScenario] = React.useState<ScenarioData | null>(null);
@@ -2152,5 +2275,13 @@ export default function ScenariosPage() {
 
             {isBuilderMode && <BuilderWrapper onExit={handleExitBuilder} scenario={editingScenario} />}
         </div>
+    );
+}
+
+export default function ScenariosPage() {
+    return (
+        <ClipboardProvider>
+            <ScenariosPageContent />
+        </ClipboardProvider>
     );
 }

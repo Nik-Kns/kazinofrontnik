@@ -92,6 +92,39 @@ export type CampaignData = {
   funnel?: FunnelData;
 };
 
+// Copy/Move system types
+export type ClipboardItemType = "campaign" | "scenario" | "communication" | "ab_test" | "ab_variant";
+
+export type ClipboardItem = {
+  id: string;
+  type: ClipboardItemType;
+  data: CampaignData | ScenarioData | any; // Communication/AB test data
+  sourceId?: string; // Source campaign/scenario ID
+  operation: "copy" | "cut";
+  timestamp: number;
+};
+
+export type DropZoneInfo = {
+  type: ClipboardItemType;
+  id: string;
+  accepts: ClipboardItemType[];
+  level: number; // Hierarchy level (0=campaign, 1=scenario, 2=communication, etc.)
+};
+
+export type PasteTarget = {
+  id: string;
+  name: string;
+  type: ClipboardItemType;
+  level: number;
+  path: string[]; // Breadcrumb path
+};
+
+export type CopyMoveValidation = {
+  allowed: boolean;
+  reason?: string;
+  warnings?: string[];
+};
+
 export type ChartData = {
   date: string;
   value: number | null;
