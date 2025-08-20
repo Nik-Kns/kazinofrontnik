@@ -38,6 +38,28 @@ export type ABTestVariant = {
   delivered?: number;
 };
 
+export type BenchmarkMetric = {
+  benchmark: number;
+  result: number;
+  delta?: number; // Calculated difference
+  status?: "above" | "within" | "below"; // Performance status
+};
+
+export type BenchmarkData = {
+  geo: string;
+  project?: string;
+  metrics: {
+    delivery_rate: BenchmarkMetric;
+    open_rate: BenchmarkMetric;
+    ctr: BenchmarkMetric;
+    click_to_deposit: BenchmarkMetric;
+    conversion_rate: BenchmarkMetric;
+    avg_deposit: BenchmarkMetric;
+    arpu: BenchmarkMetric;
+    roi: BenchmarkMetric;
+  };
+};
+
 export type FunnelData = {
   sent: number;
   delivered: number;
@@ -50,6 +72,7 @@ export type FunnelData = {
     scenario_name: string;
     funnel: FunnelData;
   }[];
+  benchmarks?: BenchmarkData[]; // Benchmarks for different GEOs
 };
 
 export type CampaignData = {

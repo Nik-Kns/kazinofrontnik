@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { segmentsData, scenariosData, templatesData, campaignsData } from '@/lib/mock-data';
-import type { CampaignData, FunnelData, ABTestVariant } from '@/lib/types';
+import type { CampaignData, FunnelData, ABTestVariant, BenchmarkData, BenchmarkMetric } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -81,6 +81,180 @@ const frequencyColors: { [key: string]: string } = {
   Регулярный: "default",
   Разовый: "outline",
 }
+
+// --- BENCHMARK COMPONENT ---
+
+const BenchmarkComparison = ({ benchmarks, selectedGeo }: { 
+  benchmarks: BenchmarkData[]; 
+  selectedGeo?: string; 
+}) => {
+  const [showBenchmarks, setShowBenchmarks] = React.useState(false);
+  const [currentGeo, setCurrentGeo] = React.useState(selectedGeo || benchmarks[0]?.geo || 'DE');
+
+  const currentBenchmark = benchmarks.find(b => b.geo === currentGeo) || benchmarks[0];
+  
+  if (!currentBenchmark) return null;
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'above': return 'text-green-600 bg-green-50';
+      case 'within': return 'text-yellow-600 bg-yellow-50';
+      case 'below': return 'text-red-600 bg-red-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getStatusIcon = (status?: string) => {
+    switch (status) {
+      case 'above': return '🟢';
+      case 'within': return '🟡';
+      case 'below': return '🔴';
+      default: return '⚪';
+    }
+  };
+
+  const formatMetricValue = (key: string, value: number) => {
+    if (key.includes('rate') || key === 'ctr' || key === 'conversion_rate') {
+      return `${value}%`;
+    }
+    if (key.includes('deposit') || key === 'arpu') {
+      return `€${value}`;
+    }
+    if (key === 'roi') {
+      return `${value}x`;
+    }
+    return value.toString();
+  };
+
+  const metricLabels = {
+    delivery_rate: 'Delivery Rate',
+    open_rate: 'Open Rate',
+    ctr: 'CTR',
+    click_to_deposit: 'Click-to-Deposit',
+    conversion_rate: 'Conversion Rate',
+    avg_deposit: 'Avg Deposit',
+    arpu: 'ARPU',
+    roi: 'ROI'
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setShowBenchmarks(!showBenchmarks)}
+          className="flex items-center gap-2"
+        >
+          <BarChart3 className="h-4 w-4" />
+          {showBenchmarks ? 'Скрыть бенчмарки' : 'Показать бенчмарки'}
+          <ChevronDown className={cn(
+            "h-4 w-4 transition-transform",
+            showBenchmarks && "rotate-180"
+          )} />
+        </Button>
+        
+        {showBenchmarks && benchmarks.length > 1 && (
+          <Select value={currentGeo} onValueChange={setCurrentGeo}>
+            <SelectTrigger className="w-24">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {benchmarks.map(benchmark => (
+                <SelectItem key={benchmark.geo} value={benchmark.geo}>
+                  {benchmark.geo}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      {showBenchmarks && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Бенчмарки vs Результаты (GEO: {currentGeo})</CardTitle>
+            <CardDescription>
+              Сравнение фактических показателей с эталонными значениями для региона
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Метрика</TableHead>
+                    <TableHead>Benchmark ({currentGeo})</TableHead>
+                    <TableHead>Result</TableHead>
+                    <TableHead>Δ (отклонение)</TableHead>
+                    <TableHead>Статус</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Object.entries(currentBenchmark.metrics).map(([key, metric]) => (
+                    <TableRow key={key}>
+                      <TableCell className="font-medium">
+                        {metricLabels[key as keyof typeof metricLabels]}
+                      </TableCell>
+                      <TableCell>
+                        {formatMetricValue(key, metric.benchmark)}
+                      </TableCell>
+                      <TableCell className="font-semibold">
+                        {formatMetricValue(key, metric.result)}
+                      </TableCell>
+                      <TableCell className={cn(
+                        "font-medium",
+                        metric.delta! > 0 ? "text-green-600" : 
+                        metric.delta! < 0 ? "text-red-600" : "text-gray-600"
+                      )}>
+                        {metric.delta! > 0 ? '+' : ''}{metric.delta}%
+                      </TableCell>
+                      <TableCell>
+                        <div className={cn(
+                          "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
+                          getStatusColor(metric.status)
+                        )}>
+                          {getStatusIcon(metric.status)}
+                          {metric.status === 'above' ? 'Выше' : 
+                           metric.status === 'within' ? 'Норма' : 'Ниже'}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Summary */}
+            <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+              <h4 className="font-medium mb-2">Краткая сводка</h4>
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <Label className="text-muted-foreground">Выше бенчмарка</Label>
+                  <p className="font-medium text-green-600">
+                    {Object.values(currentBenchmark.metrics).filter(m => m.status === 'above').length} метрик
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">В пределах нормы</Label>
+                  <p className="font-medium text-yellow-600">
+                    {Object.values(currentBenchmark.metrics).filter(m => m.status === 'within').length} метрик
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Ниже бенчмарка</Label>
+                  <p className="font-medium text-red-600">
+                    {Object.values(currentBenchmark.metrics).filter(m => m.status === 'below').length} метрик
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
 
 // --- FUNNEL COMPONENT ---
 
@@ -837,6 +1011,14 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
           
           {selectedFunnelCampaign?.funnel && (
             <div className="space-y-6">
+              {/* Benchmarks Section */}
+              {selectedFunnelCampaign.funnel.benchmarks && (
+                <BenchmarkComparison 
+                  benchmarks={selectedFunnelCampaign.funnel.benchmarks}
+                  selectedGeo={selectedFunnelCampaign.geo?.[0]}
+                />
+              )}
+              
               <FunnelVisualization 
                 funnel={selectedFunnelCampaign.funnel} 
                 isDetailed={true}
@@ -872,12 +1054,24 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
               <div className="flex justify-end gap-2">
                 <Button variant="outline" size="sm">
                   <FileText className="h-4 w-4 mr-2" />
-                  Экспорт PDF
+                  Воронка PDF
                 </Button>
                 <Button variant="outline" size="sm">
                   <FileText className="h-4 w-4 mr-2" />
-                  Экспорт Excel
+                  Воронка Excel
                 </Button>
+                {selectedFunnelCampaign.funnel.benchmarks && (
+                  <>
+                    <Button variant="outline" size="sm">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Бенчмарки PDF
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Бенчмарки Excel
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           )}

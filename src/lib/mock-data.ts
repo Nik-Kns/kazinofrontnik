@@ -1,4 +1,4 @@
-import type { KpiCardData, ScenarioData, ChartData, RiskData, SegmentData, TemplateData, ReportData, CampaignData, WebhookLogData, CampaignPerformanceData, PlayerData, PlayerKpi, PlayerActivityEvent, FunnelData, ABTestVariant } from "@/lib/types";
+import type { KpiCardData, ScenarioData, ChartData, RiskData, SegmentData, TemplateData, ReportData, CampaignData, WebhookLogData, CampaignPerformanceData, PlayerData, PlayerKpi, PlayerActivityEvent, FunnelData, ABTestVariant, BenchmarkData, BenchmarkMetric } from "@/lib/types";
 import {
   Mail,
   TrendingUp,
@@ -252,6 +252,81 @@ export const scenariosData: ScenarioData[] = [
   }
 ];
 
+// Helper function to calculate benchmark status
+const calculateBenchmarkMetric = (benchmark: number, result: number): BenchmarkMetric => {
+  const delta = ((result - benchmark) / benchmark * 100);
+  const status = Math.abs(delta) <= 10 ? "within" : (delta > 0 ? "above" : "below");
+  
+  return {
+    benchmark,
+    result,
+    delta: parseFloat(delta.toFixed(1)),
+    status
+  };
+};
+
+// Benchmark data for different GEOs
+const getBenchmarksForGeo = (geo: string, actualMetrics: any): BenchmarkData => {
+  const benchmarks = {
+    DE: {
+      delivery_rate: 95,
+      open_rate: 40,
+      ctr: 15,
+      click_to_deposit: 7,
+      conversion_rate: 25,
+      avg_deposit: 150,
+      arpu: 85,
+      roi: 1.5
+    },
+    RU: {
+      delivery_rate: 93,
+      open_rate: 35,
+      ctr: 12,
+      click_to_deposit: 6,
+      conversion_rate: 20,
+      avg_deposit: 120,
+      arpu: 65,
+      roi: 1.3
+    },
+    EN: {
+      delivery_rate: 96,
+      open_rate: 45,
+      ctr: 18,
+      click_to_deposit: 8,
+      conversion_rate: 28,
+      avg_deposit: 200,
+      arpu: 110,
+      roi: 1.8
+    },
+    FR: {
+      delivery_rate: 94,
+      open_rate: 38,
+      ctr: 14,
+      click_to_deposit: 7.5,
+      conversion_rate: 23,
+      avg_deposit: 175,
+      arpu: 95,
+      roi: 1.6
+    }
+  };
+
+  const geoBenchmarks = benchmarks[geo as keyof typeof benchmarks] || benchmarks.DE;
+  
+  return {
+    geo,
+    metrics: {
+      delivery_rate: calculateBenchmarkMetric(geoBenchmarks.delivery_rate, actualMetrics.delivery_rate),
+      open_rate: calculateBenchmarkMetric(geoBenchmarks.open_rate, actualMetrics.open_rate),
+      ctr: calculateBenchmarkMetric(geoBenchmarks.ctr, actualMetrics.ctr),
+      click_to_deposit: calculateBenchmarkMetric(geoBenchmarks.click_to_deposit, actualMetrics.click_to_deposit),
+      conversion_rate: calculateBenchmarkMetric(geoBenchmarks.conversion_rate, actualMetrics.conversion_rate),
+      avg_deposit: calculateBenchmarkMetric(geoBenchmarks.avg_deposit, actualMetrics.avg_deposit),
+      arpu: calculateBenchmarkMetric(geoBenchmarks.arpu, actualMetrics.arpu),
+      roi: calculateBenchmarkMetric(geoBenchmarks.roi, actualMetrics.roi)
+    }
+  };
+};
+
 // Campaigns data with nested scenarios
 export const campaignsData: CampaignData[] = [
   {
@@ -286,6 +361,28 @@ export const campaignsData: CampaignData[] = [
           opens: 1750,
           delivered: 2400
         }
+      ],
+      benchmarks: [
+        getBenchmarksForGeo("DE", {
+          delivery_rate: 96.0,
+          open_rate: 72.9,
+          ctr: 34.3,
+          click_to_deposit: 25.0,
+          conversion_rate: 25.0,
+          avg_deposit: 167,
+          arpu: 100,
+          roi: 1.7
+        }),
+        getBenchmarksForGeo("RU", {
+          delivery_rate: 96.0,
+          open_rate: 72.9,
+          ctr: 34.3,
+          click_to_deposit: 25.0,
+          conversion_rate: 25.0,
+          avg_deposit: 134,
+          arpu: 80,
+          roi: 1.4
+        })
       ]
     },
     scenarios: [
