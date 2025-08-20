@@ -27,6 +27,29 @@ export type ScenarioData = {
   project?: string[]; // Supported projects/brands
   type?: "event" | "basic" | "custom"; // Scenario type
   updatedAt?: string; // Last update timestamp
+  funnel?: FunnelData; // Funnel metrics for scenario
+};
+
+export type ABTestVariant = {
+  variant: string;
+  clicks: number;
+  deposits: number;
+  opens?: number;
+  delivered?: number;
+};
+
+export type FunnelData = {
+  sent: number;
+  delivered: number;
+  opens: number;
+  clicks: number;
+  deposits: number;
+  ab_tests?: ABTestVariant[];
+  scenarios?: {
+    scenario_id: string;
+    scenario_name: string;
+    funnel: FunnelData;
+  }[];
 };
 
 export type CampaignData = {
@@ -43,6 +66,7 @@ export type CampaignData = {
   scenarios: ScenarioData[];
   createdAt: string;
   updatedAt: string;
+  funnel?: FunnelData;
 };
 
 export type ChartData = {

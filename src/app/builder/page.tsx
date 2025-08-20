@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PhoneCall, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap, ChevronDown, ChevronRight, Eye, Calendar, Euro, Users } from "lucide-react";
+import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PhoneCall, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap, ChevronDown, ChevronRight, Eye, Calendar, Euro, Users, BarChart3, Filter, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { segmentsData, scenariosData, templatesData, campaignsData } from '@/lib/mock-data';
-import type { CampaignData } from '@/lib/types';
+import type { CampaignData, FunnelData, ABTestVariant } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -82,6 +82,184 @@ const frequencyColors: { [key: string]: string } = {
   Разовый: "outline",
 }
 
+// --- FUNNEL COMPONENT ---
+
+const FunnelVisualization = ({ funnel, title, isDetailed = false }: { 
+  funnel: FunnelData; 
+  title?: string; 
+  isDetailed?: boolean; 
+}) => {
+  const [expandedStep, setExpandedStep] = React.useState<string | null>(null);
+
+  // Calculate conversion rates
+  const deliveryRate = funnel.sent > 0 ? (funnel.delivered / funnel.sent * 100).toFixed(1) : '0';
+  const openRate = funnel.delivered > 0 ? (funnel.opens / funnel.delivered * 100).toFixed(1) : '0';
+  const ctr = funnel.opens > 0 ? (funnel.clicks / funnel.opens * 100).toFixed(1) : '0';
+  const conversionRate = funnel.clicks > 0 ? (funnel.deposits / funnel.clicks * 100).toFixed(1) : '0';
+
+  // Color coding based on performance
+  const getColorByRate = (rate: number, step: string) => {
+    if (step === 'delivery') return rate >= 95 ? 'bg-green-500' : rate >= 90 ? 'bg-yellow-500' : 'bg-red-500';
+    if (step === 'open') return rate >= 30 ? 'bg-green-500' : rate >= 20 ? 'bg-yellow-500' : 'bg-red-500';
+    if (step === 'click') return rate >= 15 ? 'bg-green-500' : rate >= 10 ? 'bg-yellow-500' : 'bg-red-500';
+    if (step === 'conversion') return rate >= 20 ? 'bg-green-500' : rate >= 10 ? 'bg-yellow-500' : 'bg-red-500';
+    return 'bg-gray-400';
+  };
+
+  const steps = [
+    {
+      id: 'sent',
+      label: 'Отправлено',
+      value: funnel.sent,
+      rate: '100%',
+      color: 'bg-blue-500',
+      width: '100%'
+    },
+    {
+      id: 'delivered',
+      label: 'Доставлено',
+      value: funnel.delivered,
+      rate: `${deliveryRate}%`,
+      color: getColorByRate(parseFloat(deliveryRate), 'delivery'),
+      width: `${(funnel.delivered / funnel.sent * 100)}%`
+    },
+    {
+      id: 'opens',
+      label: 'Открыто',
+      value: funnel.opens,
+      rate: `${openRate}%`,
+      color: getColorByRate(parseFloat(openRate), 'open'),
+      width: `${(funnel.opens / funnel.sent * 100)}%`
+    },
+    {
+      id: 'clicks',
+      label: 'Клики',
+      value: funnel.clicks,
+      rate: `${ctr}%`,
+      color: getColorByRate(parseFloat(ctr), 'click'),
+      width: `${(funnel.clicks / funnel.sent * 100)}%`
+    },
+    {
+      id: 'deposits',
+      label: 'Депозиты',
+      value: funnel.deposits,
+      rate: `${conversionRate}%`,
+      color: getColorByRate(parseFloat(conversionRate), 'conversion'),
+      width: `${(funnel.deposits / funnel.sent * 100)}%`
+    }
+  ];
+
+  return (
+    <div className="space-y-4">
+      {title && <h3 className="text-lg font-medium">{title}</h3>}
+      
+      {/* Funnel Steps */}
+      <div className="space-y-2">
+        {steps.map((step, index) => (
+          <div key={step.id} className="space-y-2">
+            <div 
+              className={cn(
+                "relative p-4 rounded-lg border transition-all cursor-pointer",
+                expandedStep === step.id ? "bg-muted/50" : "hover:bg-muted/30"
+              )}
+              onClick={() => setExpandedStep(expandedStep === step.id ? null : step.id)}
+              style={{ 
+                width: step.width,
+                marginLeft: `${(100 - parseFloat(step.width)) / 2}%`,
+                minWidth: '300px'
+              }}
+            >
+              {/* Step Header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={cn("w-3 h-3 rounded-full", step.color)}></div>
+                  <div>
+                    <h4 className="font-medium">{step.label}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {step.value.toLocaleString()} ({step.rate})
+                    </p>
+                  </div>
+                </div>
+                {funnel.ab_tests && step.id === 'clicks' && (
+                  <Button variant="ghost" size="sm">
+                    <ChevronDown className={cn(
+                      "h-4 w-4 transition-transform",
+                      expandedStep === step.id && "rotate-180"
+                    )} />
+                  </Button>
+                )}
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className={cn("h-2 rounded-full transition-all", step.color)}
+                  style={{ width: step.rate }}
+                ></div>
+              </div>
+            </div>
+
+            {/* A/B Test Details */}
+            {expandedStep === step.id && funnel.ab_tests && step.id === 'clicks' && (
+              <div className="ml-8 space-y-2">
+                {funnel.ab_tests.map((variant) => (
+                  <div key={variant.variant} className="p-3 bg-muted/30 rounded-lg border-l-4 border-blue-400">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h5 className="font-medium">Вариант {variant.variant}</h5>
+                        <div className="text-sm text-muted-foreground">
+                          Клики: {variant.clicks.toLocaleString()} | 
+                          Депозиты: {variant.deposits.toLocaleString()} | 
+                          CR: {((variant.deposits / variant.clicks) * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                      <Badge variant={variant.variant === 'B' ? 'default' : 'secondary'}>
+                        {variant.variant === 'B' ? 'Лучший' : 'Базовый'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Connection Line */}
+            {index < steps.length - 1 && (
+              <div className="flex justify-center">
+                <TrendingDown className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Summary Stats */}
+      {isDetailed && (
+        <div className="p-4 bg-muted/20 rounded-lg">
+          <h4 className="font-medium mb-2">Ключевые показатели</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <Label className="text-muted-foreground">Delivery Rate</Label>
+              <p className="font-medium">{deliveryRate}%</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Open Rate</Label>
+              <p className="font-medium">{openRate}%</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">CTR</Label>
+              <p className="font-medium">{ctr}%</p>
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Conversion Rate</Label>
+              <p className="font-medium">{conversionRate}%</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // --- TAB COMPONENTS ---
 
 const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void }) => {
@@ -92,6 +270,8 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
   const [expandedCampaigns, setExpandedCampaigns] = React.useState<Set<string>>(new Set());
   const [selectedCampaign, setSelectedCampaign] = React.useState<CampaignData | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
+  const [selectedFunnelCampaign, setSelectedFunnelCampaign] = React.useState<CampaignData | null>(null);
+  const [isFunnelDialogOpen, setIsFunnelDialogOpen] = React.useState(false);
 
   // Get available filter options for campaigns
   const availableStatuses = React.useMemo(() => {
@@ -158,6 +338,12 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
   const openCampaignDetail = (campaign: CampaignData) => {
     setSelectedCampaign(campaign);
     setIsDetailDialogOpen(true);
+  };
+
+  // Handle funnel view
+  const openFunnelView = (campaign: CampaignData) => {
+    setSelectedFunnelCampaign(campaign);
+    setIsFunnelDialogOpen(true);
   };
 
   // Status colors for campaigns
@@ -420,6 +606,11 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                         <Button variant="ghost" size="icon" onClick={() => openCampaignDetail(campaign)}>
                           <Eye className="h-4 w-4" />
                         </Button>
+                        {campaign.funnel && (
+                          <Button variant="ghost" size="icon" onClick={() => openFunnelView(campaign)}>
+                            <BarChart3 className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon">
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -483,6 +674,23 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                             <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
                               <Pencil className="h-3 w-3" />
                             </Button>
+                            {scenario.funnel && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => {
+                                  setSelectedFunnelCampaign({
+                                    ...campaign,
+                                    name: scenario.name,
+                                    description: `Сценарий: ${scenario.segment} • ${scenario.goal}`,
+                                    funnel: scenario.funnel
+                                  });
+                                  setIsFunnelDialogOpen(true);
+                                }}
+                              >
+                                <BarChart3 className="h-3 w-3" />
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       );
@@ -608,6 +816,68 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                     );
                   })}
                 </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Funnel Dialog */}
+      <Dialog open={isFunnelDialogOpen} onOpenChange={setIsFunnelDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Воронка конверсии: {selectedFunnelCampaign?.name}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedFunnelCampaign?.description}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedFunnelCampaign?.funnel && (
+            <div className="space-y-6">
+              <FunnelVisualization 
+                funnel={selectedFunnelCampaign.funnel} 
+                isDetailed={true}
+              />
+              
+              {/* Additional Campaign Info */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/20 rounded-lg">
+                <div>
+                  <Label className="text-xs text-muted-foreground">GEO</Label>
+                  <p className="font-medium">{selectedFunnelCampaign.geo?.join(', ') || '—'}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Проекты</Label>
+                  <p className="font-medium">{selectedFunnelCampaign.project?.join(', ') || '—'}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Статус</Label>
+                  <p className="font-medium">
+                    {selectedFunnelCampaign.status === 'active' ? 'Активна' : 
+                     selectedFunnelCampaign.status === 'paused' ? 'Пауза' : 'Неактивна'}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Период</Label>
+                  <p className="font-medium text-xs">
+                    {new Date(selectedFunnelCampaign.startDate).toLocaleDateString('ru-RU')}
+                    {selectedFunnelCampaign.endDate && ` - ${new Date(selectedFunnelCampaign.endDate).toLocaleDateString('ru-RU')}`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Export Options */}
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" size="sm">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Экспорт PDF
+                </Button>
+                <Button variant="outline" size="sm">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Экспорт Excel
+                </Button>
               </div>
             </div>
           )}

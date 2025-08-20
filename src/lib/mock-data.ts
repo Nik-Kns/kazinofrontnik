@@ -1,4 +1,4 @@
-import type { KpiCardData, ScenarioData, ChartData, RiskData, SegmentData, TemplateData, ReportData, CampaignData, WebhookLogData, CampaignPerformanceData, PlayerData, PlayerKpi, PlayerActivityEvent } from "@/lib/types";
+import type { KpiCardData, ScenarioData, ChartData, RiskData, SegmentData, TemplateData, ReportData, CampaignData, WebhookLogData, CampaignPerformanceData, PlayerData, PlayerKpi, PlayerActivityEvent, FunnelData, ABTestVariant } from "@/lib/types";
 import {
   Mail,
   TrendingUp,
@@ -265,6 +265,29 @@ export const campaignsData: CampaignData[] = [
     endDate: "2024-03-31T23:59:59Z",
     budget: 50000,
     currency: "EUR",
+    funnel: {
+      sent: 5000,
+      delivered: 4800,
+      opens: 3500,
+      clicks: 1200,
+      deposits: 300,
+      ab_tests: [
+        {
+          variant: "A",
+          clicks: 600,
+          deposits: 120,
+          opens: 1750,
+          delivered: 2400
+        },
+        {
+          variant: "B", 
+          clicks: 600,
+          deposits: 180,
+          opens: 1750,
+          delivered: 2400
+        }
+      ]
+    },
     scenarios: [
       {
         id: "sc101",
@@ -283,7 +306,30 @@ export const campaignsData: CampaignData[] = [
         geo: ["DE"],
         project: ["CasinoX"],
         type: "event",
-        updatedAt: "2024-01-20T10:30:00Z"
+        updatedAt: "2024-01-20T10:30:00Z",
+        funnel: {
+          sent: 2500,
+          delivered: 2380,
+          opens: 1750,
+          clicks: 600,
+          deposits: 200,
+          ab_tests: [
+            {
+              variant: "A",
+              clicks: 280,
+              deposits: 85,
+              opens: 875,
+              delivered: 1190
+            },
+            {
+              variant: "B",
+              clicks: 320,
+              deposits: 115,
+              opens: 875,
+              delivered: 1190
+            }
+          ]
+        }
       },
       {
         id: "sc102",
@@ -302,7 +348,14 @@ export const campaignsData: CampaignData[] = [
         geo: ["RU"],
         project: ["CasinoX"],
         type: "custom",
-        updatedAt: "2024-01-19T16:00:00Z"
+        updatedAt: "2024-01-19T16:00:00Z",
+        funnel: {
+          sent: 2500,
+          delivered: 2420,
+          opens: 1750,
+          clicks: 600,
+          deposits: 100
+        }
       }
     ],
     createdAt: "2024-01-01T00:00:00Z",
@@ -318,6 +371,13 @@ export const campaignsData: CampaignData[] = [
     startDate: "2024-01-15T00:00:00Z",
     budget: 75000,
     currency: "EUR",
+    funnel: {
+      sent: 12000,
+      delivered: 11600,
+      opens: 8200,
+      clicks: 2450,
+      deposits: 850
+    },
     scenarios: [
       {
         id: "sc201",
