@@ -10,6 +10,7 @@ export type KpiCardData = {
 };
 
 export type ScenarioData = {
+  id?: string;
   name: string;
   category: string;
   frequency: "Регулярный" | "Разовый" | "Триггерный";
@@ -24,6 +25,24 @@ export type ScenarioData = {
   churnImpact: string;
   geo?: string[]; // Supported countries/regions
   project?: string[]; // Supported projects/brands
+  type?: "event" | "basic" | "custom"; // Scenario type
+  updatedAt?: string; // Last update timestamp
+};
+
+export type CampaignData = {
+  id: string;
+  name: string;
+  description?: string;
+  geo: string[];
+  project: string[];
+  status: "active" | "inactive" | "paused";
+  startDate: string;
+  endDate?: string;
+  budget?: number;
+  currency?: string;
+  scenarios: ScenarioData[];
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type ChartData = {

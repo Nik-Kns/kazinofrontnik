@@ -5,14 +5,15 @@ import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PhoneCall, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap } from "lucide-react";
+import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PhoneCall, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap, ChevronDown, ChevronRight, Eye, Calendar, Euro, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { segmentsData, scenariosData, templatesData } from '@/lib/mock-data';
+import { segmentsData, scenariosData, templatesData, campaignsData } from '@/lib/mock-data';
+import type { CampaignData } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -84,101 +85,106 @@ const frequencyColors: { [key: string]: string } = {
 // --- TAB COMPONENTS ---
 
 const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void }) => {
-  const [selectedFrequencyFilters, setSelectedFrequencyFilters] = React.useState<string[]>(['all']);
   const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<string[]>([]);
-  const [selectedChannelFilters, setSelectedChannelFilters] = React.useState<string[]>([]);
   const [selectedGeoFilters, setSelectedGeoFilters] = React.useState<string[]>([]);
   const [selectedProjectFilters, setSelectedProjectFilters] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [expandedCampaigns, setExpandedCampaigns] = React.useState<Set<string>>(new Set());
+  const [selectedCampaign, setSelectedCampaign] = React.useState<CampaignData | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
 
-  // Get available filter options
-  const availableFrequencies = React.useMemo(() => {
-    return Array.from(new Set(scenariosData.map(s => s.frequency))).sort();
-  }, []);
-
+  // Get available filter options for campaigns
   const availableStatuses = React.useMemo(() => {
-    return Array.from(new Set(scenariosData.map(s => s.status))).sort();
-  }, []);
-
-  const availableChannels = React.useMemo(() => {
-    return Array.from(new Set(scenariosData.map(s => s.channel))).sort();
+    return Array.from(new Set(campaignsData.map(c => c.status))).sort();
   }, []);
 
   const availableGeos = React.useMemo(() => {
     const geos = new Set<string>();
-    scenariosData.forEach(scenario => {
-      scenario.geo?.forEach(geo => geos.add(geo));
+    campaignsData.forEach(campaign => {
+      campaign.geo.forEach(geo => geos.add(geo));
     });
     return Array.from(geos).sort();
   }, []);
 
   const availableProjects = React.useMemo(() => {
     const projects = new Set<string>();
-    scenariosData.forEach(scenario => {
-      scenario.project?.forEach(project => projects.add(project));
+    campaignsData.forEach(campaign => {
+      campaign.project.forEach(project => projects.add(project));
     });
     return Array.from(projects).sort();
   }, []);
 
-  // Filter scenarios based on multiple criteria
-  const filteredScenarios = React.useMemo(() => {
-    return scenariosData.filter(scenario => {
-      // Frequency filter
-      const matchesFrequency = selectedFrequencyFilters.includes('all') || 
-        selectedFrequencyFilters.includes(scenario.frequency);
-
+  // Filter campaigns based on multiple criteria
+  const filteredCampaigns = React.useMemo(() => {
+    return campaignsData.filter(campaign => {
       // Status filter
       const matchesStatus = selectedStatusFilters.length === 0 || 
-        selectedStatusFilters.includes(scenario.status);
-
-      // Channel filter
-      const matchesChannel = selectedChannelFilters.length === 0 || 
-        selectedChannelFilters.includes(scenario.channel);
+        selectedStatusFilters.includes(campaign.status);
 
       // GEO filter
       const matchesGeo = selectedGeoFilters.length === 0 || 
-        selectedGeoFilters.some(geo => scenario.geo?.includes(geo));
+        selectedGeoFilters.some(geo => campaign.geo.includes(geo));
 
       // Project filter
       const matchesProject = selectedProjectFilters.length === 0 || 
-        selectedProjectFilters.some(project => scenario.project?.includes(project));
+        selectedProjectFilters.some(project => campaign.project.includes(project));
 
       // Search filter
       const matchesSearch = searchQuery === '' || 
-        scenario.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        scenario.segment.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        scenario.goal.toLowerCase().includes(searchQuery.toLowerCase());
+        campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        campaign.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        campaign.scenarios.some(scenario => 
+          scenario.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
-      return matchesFrequency && matchesStatus && matchesChannel && matchesGeo && matchesProject && matchesSearch;
+      return matchesStatus && matchesGeo && matchesProject && matchesSearch;
     });
-  }, [selectedFrequencyFilters, selectedStatusFilters, selectedChannelFilters, selectedGeoFilters, selectedProjectFilters, searchQuery]);
+  }, [selectedStatusFilters, selectedGeoFilters, selectedProjectFilters, searchQuery]);
 
-  // Calculate dynamic statistics
-  const filterStats = React.useMemo(() => {
-    const baseFiltered = scenariosData.filter(scenario => {
-      const matchesStatus = selectedStatusFilters.length === 0 || selectedStatusFilters.includes(scenario.status);
-      const matchesChannel = selectedChannelFilters.length === 0 || selectedChannelFilters.includes(scenario.channel);
-      const matchesGeo = selectedGeoFilters.length === 0 || selectedGeoFilters.some(geo => scenario.geo?.includes(geo));
-      const matchesProject = selectedProjectFilters.length === 0 || selectedProjectFilters.some(project => scenario.project?.includes(project));
-      return matchesStatus && matchesChannel && matchesGeo && matchesProject;
+  // Handle campaign expansion
+  const toggleCampaignExpansion = (campaignId: string) => {
+    setExpandedCampaigns(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(campaignId)) {
+        newSet.delete(campaignId);
+      } else {
+        newSet.add(campaignId);
+      }
+      return newSet;
     });
+  };
 
-    return {
-      all: baseFiltered.length,
-      "Триггерный": baseFiltered.filter(s => s.frequency === 'Триггерный').length,
-      "Регулярный": baseFiltered.filter(s => s.frequency === 'Регулярный').length,
-      "Разовый": baseFiltered.filter(s => s.frequency === 'Разовый').length,
-    };
-  }, [selectedStatusFilters, selectedChannelFilters, selectedGeoFilters, selectedProjectFilters]);
+  // Handle campaign detail view
+  const openCampaignDetail = (campaign: CampaignData) => {
+    setSelectedCampaign(campaign);
+    setIsDetailDialogOpen(true);
+  };
+
+  // Status colors for campaigns
+  const campaignStatusColors = {
+    active: "bg-success",
+    inactive: "bg-muted-foreground",
+    paused: "bg-warning",
+  };
+
+  // Type badge helper for scenarios
+  const getTypeBadge = (type?: string) => {
+    switch (type) {
+      case 'event': return { emoji: '🟦', color: 'bg-blue-100 text-blue-700 border-blue-200' };
+      case 'basic': return { emoji: '🟩', color: 'bg-green-100 text-green-700 border-green-200' };
+      case 'custom': return { emoji: '🟨', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' };
+      default: return { emoji: '', color: '' };
+    }
+  };
 
   return (
     <div className="space-y-6">
       {/* Filter Panel */}
       <Card>
         <CardHeader>
-          <CardTitle>Фильтры сценариев</CardTitle>
+          <CardTitle>Фильтры кампаний</CardTitle>
           <CardDescription>
-            Настройте фильтры для поиска кампаний. Найдено: {filteredScenarios.length} из {scenariosData.length} сценариев
+            Настройте фильтры для поиска кампаний. Найдено: {filteredCampaigns.length} из {campaignsData.length} кампаний
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -187,47 +193,16 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
             <div>
               <Label className="text-sm font-medium mb-2 block">Поиск</Label>
               <Input 
-                placeholder="Поиск по названию, сегменту или цели..."
+                placeholder="Поиск по названию кампании или сценария..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="max-w-sm"
               />
             </div>
 
-            {/* Frequency Filter */}
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Тип сценария</Label>
-              <div className="flex flex-wrap gap-2">
-                {(['all', ...availableFrequencies] as const).map((frequency) => (
-                  <Button
-                    key={frequency}
-                    variant={selectedFrequencyFilters.includes(frequency) ? "default" : "outline"}
-                    onClick={() => {
-                      if (frequency === 'all') {
-                        setSelectedFrequencyFilters(['all']);
-                      } else {
-                        setSelectedFrequencyFilters(prev => {
-                          const newFilters = prev.filter(f => f !== 'all');
-                          if (newFilters.includes(frequency)) {
-                            const filtered = newFilters.filter(f => f !== frequency);
-                            return filtered.length === 0 ? ['all'] : filtered;
-                          } else {
-                            return [...newFilters, frequency];
-                          }
-                        });
-                      }
-                    }}
-                    size="sm"
-                  >
-                    {frequency === 'all' ? 'Все' : frequency} ({frequency === 'all' ? filterStats.all : filterStats[frequency as keyof typeof filterStats] || 0})
-                  </Button>
-                ))}
-              </div>
-            </div>
-
             {/* Status Filter */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">Статус</Label>
+              <Label className="text-sm font-medium mb-2 block">Статус кампании</Label>
               <div className="flex flex-wrap gap-2">
                 {availableStatuses.map((status) => (
                   <Button
@@ -240,50 +215,14 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                     )}
                     size="sm"
                   >
-                    <span className={cn("h-2 w-2 rounded-full mr-2", statusColors[status])} />
-                    {status} ({scenariosData.filter(s => s.status === status).length})
+                    <span className={cn("h-2 w-2 rounded-full mr-2", campaignStatusColors[status as keyof typeof campaignStatusColors])} />
+                    {status === 'active' ? 'Активна' : status === 'paused' ? 'Пауза' : 'Неактивна'} ({campaignsData.filter(c => c.status === status).length})
                   </Button>
                 ))}
                 {selectedStatusFilters.length > 0 && (
                   <Button
                     variant="ghost"
                     onClick={() => setSelectedStatusFilters([])}
-                    size="sm"
-                    className="text-muted-foreground"
-                  >
-                    Очистить
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Channel Filter */}
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Канал</Label>
-              <div className="flex flex-wrap gap-2">
-                {availableChannels.map((channel) => {
-                  const ChannelIcon = channelIconsScenarios[channel];
-                  return (
-                    <Button
-                      key={channel}
-                      variant={selectedChannelFilters.includes(channel) ? "default" : "outline"}
-                      onClick={() => setSelectedChannelFilters(prev => 
-                        prev.includes(channel) 
-                          ? prev.filter(c => c !== channel)
-                          : [...prev, channel]
-                      )}
-                      size="sm"
-                      className="flex items-center gap-2"
-                    >
-                      <ChannelIcon className="h-3 w-3" />
-                      {channel} ({scenariosData.filter(s => s.channel === channel).length})
-                    </Button>
-                  );
-                })}
-                {selectedChannelFilters.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => setSelectedChannelFilters([])}
                     size="sm"
                     className="text-muted-foreground"
                   >
@@ -308,7 +247,7 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                     )}
                     size="sm"
                   >
-                    {geo} ({scenariosData.filter(s => s.geo?.includes(geo)).length})
+                    {geo} ({campaignsData.filter(c => c.geo.includes(geo)).length})
                   </Button>
                 ))}
                 {selectedGeoFilters.length > 0 && (
@@ -339,7 +278,7 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                     )}
                     size="sm"
                   >
-                    {project} ({scenariosData.filter(s => s.project?.includes(project)).length})
+                    {project} ({campaignsData.filter(c => c.project.includes(project)).length})
                   </Button>
                 ))}
                 {selectedProjectFilters.length > 0 && (
@@ -356,25 +295,13 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
             </div>
 
             {/* Active Filters Summary */}
-            {(selectedFrequencyFilters.length > 1 || !selectedFrequencyFilters.includes('all') || 
-              selectedStatusFilters.length > 0 || selectedChannelFilters.length > 0 ||
-              selectedGeoFilters.length > 0 || selectedProjectFilters.length > 0) && (
+            {(selectedStatusFilters.length > 0 || selectedGeoFilters.length > 0 || selectedProjectFilters.length > 0) && (
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-sm font-medium mb-2">Активные фильтры:</p>
                 <div className="flex flex-wrap gap-1 text-xs">
-                  {!selectedFrequencyFilters.includes('all') && selectedFrequencyFilters.length > 0 && (
-                    <Badge variant="secondary">
-                      Типы: {selectedFrequencyFilters.join(', ')}
-                    </Badge>
-                  )}
                   {selectedStatusFilters.length > 0 && (
                     <Badge variant="secondary">
-                      Статус: {selectedStatusFilters.join(', ')}
-                    </Badge>
-                  )}
-                  {selectedChannelFilters.length > 0 && (
-                    <Badge variant="secondary">
-                      Каналы: {selectedChannelFilters.join(', ')}
+                      Статус: {selectedStatusFilters.map(s => s === 'active' ? 'Активна' : s === 'paused' ? 'Пауза' : 'Неактивна').join(', ')}
                     </Badge>
                   )}
                   {selectedGeoFilters.length > 0 && (
@@ -394,89 +321,298 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
         </CardContent>
       </Card>
 
-      {/* Scenarios Table */}
+      {/* Campaigns Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Все сценарии и кампании</CardTitle>
+          <CardTitle>Все кампании</CardTitle>
           <CardDescription>
-            Сводная таблица всех CRM-сценариев с ключевыми показателями эффективности.
+            Кампании с вложенными сценариями. Нажмите на стрелку для просмотра сценариев или на название для детального просмотра.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[250px]">Название сценария</TableHead>
-                <TableHead>Тип</TableHead>
-                <TableHead>Канал</TableHead>
+                <TableHead className="w-8"></TableHead>
+                <TableHead className="w-[300px]">Название кампании</TableHead>
                 <TableHead>Статус</TableHead>
-                <TableHead>Сегмент</TableHead>
-                <TableHead>Цель</TableHead>
                 <TableHead>GEO</TableHead>
                 <TableHead>Проект</TableHead>
-                <TableHead className="text-right">CR</TableHead>
+                <TableHead>Сценариев</TableHead>
+                <TableHead>Бюджет</TableHead>
+                <TableHead>Период</TableHead>
                 <TableHead className="text-right">Действия</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredScenarios.map((scenario) => {
-                const ChannelIcon = channelIconsScenarios[scenario.channel];
+              {filteredCampaigns.map((campaign) => {
+                const isExpanded = expandedCampaigns.has(campaign.id);
                 return (
-                  <TableRow key={scenario.name}>
-                    <TableCell className="font-medium">{scenario.name}</TableCell>
-                    <TableCell>
-                       <Badge variant={frequencyColors[scenario.frequency] as "secondary" | "default" | "outline"}>{scenario.frequency}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <ChannelIcon className="h-4 w-4 text-muted-foreground" />
-                        {scenario.channel}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className={cn("h-2.5 w-2.5 rounded-full", statusColors[scenario.status])} />
-                        {scenario.status}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{scenario.segment}</Badge>
-                    </TableCell>
-                    <TableCell>{scenario.goal}</TableCell>
-                    <TableCell>
-                      <div className="text-xs text-muted-foreground">
-                        {scenario.geo?.join(', ') || '—'}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-xs text-muted-foreground">
-                        {scenario.project?.join(', ') || '—'}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right text-success font-semibold">{scenario.cr}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                  <React.Fragment key={campaign.id}>
+                    {/* Campaign Row */}
+                    <TableRow className="hover:bg-muted/50">
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toggleCampaignExpansion(campaign.id)}
+                          className="h-6 w-6"
+                        >
+                          {isExpanded ? 
+                            <ChevronDown className="h-4 w-4" /> : 
+                            <ChevronRight className="h-4 w-4" />
+                          }
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <button
+                            onClick={() => openCampaignDetail(campaign)}
+                            className="font-medium text-left hover:underline"
+                          >
+                            {campaign.name}
+                          </button>
+                          {campaign.description && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {campaign.description}
+                            </p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className={cn("h-2.5 w-2.5 rounded-full", campaignStatusColors[campaign.status])} />
+                          {campaign.status === 'active' ? 'Активна' : campaign.status === 'paused' ? 'Пауза' : 'Неактивна'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {campaign.geo.join(', ')}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {campaign.project.join(', ')}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {campaign.scenarios.length} сценар{campaign.scenarios.length === 1 ? 'ий' : campaign.scenarios.length < 5 ? 'ия' : 'иев'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {campaign.budget && campaign.currency && (
+                          <div className="flex items-center gap-1">
+                            <Euro className="h-3 w-3 text-muted-foreground" />
+                            <span>{campaign.budget.toLocaleString()}</span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs text-muted-foreground">
+                          <div>{new Date(campaign.startDate).toLocaleDateString('ru-RU')}</div>
+                          {campaign.endDate && (
+                            <div>до {new Date(campaign.endDate).toLocaleDateString('ru-RU')}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => openCampaignDetail(campaign)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+
+                    {/* Expanded Scenarios */}
+                    {isExpanded && campaign.scenarios.map((scenario, index) => {
+                      const ChannelIcon = channelIconsScenarios[scenario.channel];
+                      const typeBadge = getTypeBadge(scenario.type);
+                      
+                      return (
+                        <TableRow key={`${campaign.id}-${scenario.id}`} className="bg-muted/20">
+                          <TableCell></TableCell>
+                          <TableCell className="pl-8">
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2">
+                                <Badge className={`${typeBadge.color} text-xs`}>
+                                  {typeBadge.emoji} {scenario.type === 'event' ? 'Событийный' : scenario.type === 'basic' ? 'Базовый' : 'Пользовательский'}
+                                </Badge>
+                                <span className="font-medium">{scenario.name}</span>
+                              </div>
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {scenario.segment} • {scenario.goal}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <span className={cn("h-2 w-2 rounded-full", statusColors[scenario.status])} />
+                              <span className="text-sm">{scenario.status}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-xs text-muted-foreground">
+                              {scenario.geo?.join(', ') || '—'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-xs text-muted-foreground">
+                              {scenario.project?.join(', ') || '—'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <ChannelIcon className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs">{scenario.channel}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs text-muted-foreground">
+                              CR: {scenario.cr}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-xs text-muted-foreground">
+                              {scenario.updatedAt && new Date(scenario.updatedAt).toLocaleDateString('ru-RU')}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </React.Fragment>
                 );
               })}
             </TableBody>
           </Table>
           
-          {filteredScenarios.length === 0 && (
+          {filteredCampaigns.length === 0 && (
             <div className="py-8 text-center">
               <p className="text-muted-foreground">
-                Сценарии не найдены. Попробуйте изменить фильтры или поисковый запрос.
+                Кампании не найдены. Попробуйте изменить фильтры или поисковый запрос.
               </p>
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Campaign Detail Dialog */}
+      <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <span>{selectedCampaign?.name}</span>
+              {selectedCampaign && (
+                <div className="flex items-center gap-2">
+                  <span className={cn("h-2.5 w-2.5 rounded-full", campaignStatusColors[selectedCampaign.status])} />
+                  <span className="text-sm font-normal">
+                    {selectedCampaign.status === 'active' ? 'Активна' : selectedCampaign.status === 'paused' ? 'Пауза' : 'Неактивна'}
+                  </span>
+                </div>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedCampaign?.description}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedCampaign && (
+            <div className="space-y-6">
+              {/* Campaign Info */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
+                <div>
+                  <Label className="text-xs text-muted-foreground">GEO</Label>
+                  <p className="font-medium">{selectedCampaign.geo.join(', ')}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Проекты</Label>
+                  <p className="font-medium">{selectedCampaign.project.join(', ')}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Бюджет</Label>
+                  <p className="font-medium">
+                    {selectedCampaign.budget && selectedCampaign.currency ? 
+                      `€${selectedCampaign.budget.toLocaleString()}` : '—'}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Период</Label>
+                  <p className="font-medium text-xs">
+                    {new Date(selectedCampaign.startDate).toLocaleDateString('ru-RU')}
+                    {selectedCampaign.endDate && ` - ${new Date(selectedCampaign.endDate).toLocaleDateString('ru-RU')}`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Scenarios in Campaign */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">Сценарии кампании ({selectedCampaign.scenarios.length})</h3>
+                  <Button size="sm">
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Добавить сценарий
+                  </Button>
+                </div>
+                
+                <div className="grid gap-3">
+                  {selectedCampaign.scenarios.map((scenario) => {
+                    const ChannelIcon = channelIconsScenarios[scenario.channel];
+                    const typeBadge = getTypeBadge(scenario.type);
+                    
+                    return (
+                      <div key={scenario.id} className="border rounded-lg p-4 hover:bg-muted/50">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Badge className={`${typeBadge.color} text-xs`}>
+                                {typeBadge.emoji} {scenario.type === 'event' ? 'Событийный' : scenario.type === 'basic' ? 'Базовый' : 'Пользовательский'}
+                              </Badge>
+                              <h4 className="font-medium">{scenario.name}</h4>
+                              <div className="flex items-center gap-2">
+                                <span className={cn("h-2 w-2 rounded-full", statusColors[scenario.status])} />
+                                <span className="text-sm text-muted-foreground">{scenario.status}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <ChannelIcon className="h-3 w-3" />
+                                {scenario.channel}
+                              </div>
+                              <div>{scenario.segment}</div>
+                              <div>Цель: {scenario.goal}</div>
+                              <div>CR: {scenario.cr}</div>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                              <div>GEO: {scenario.geo?.join(', ') || '—'}</div>
+                              <div>Проекты: {scenario.project?.join(', ') || '—'}</div>
+                              {scenario.updatedAt && <div>Обновлено: {new Date(scenario.updatedAt).toLocaleDateString('ru-RU')}</div>}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

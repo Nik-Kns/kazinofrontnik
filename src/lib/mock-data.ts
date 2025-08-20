@@ -99,6 +99,7 @@ export const kpiData: KpiCardData[] = [
 
 export const scenariosData: ScenarioData[] = [
   {
+    id: "sc1",
     name: "Welcome Chain",
     category: "Onboarding",
     frequency: "Триггерный",
@@ -112,9 +113,12 @@ export const scenariosData: ScenarioData[] = [
     cr: "8.1%",
     churnImpact: "-2.5%",
     geo: ["DE", "RU", "EN"],
-    project: ["CasinoX", "LuckyWheel"]
+    project: ["CasinoX", "LuckyWheel"],
+    type: "event",
+    updatedAt: "2024-01-15T10:30:00Z"
   },
   {
+    id: "sc2",
     name: "Churn Reactivation",
     category: "Reactivation",
     frequency: "Триггерный",
@@ -128,9 +132,12 @@ export const scenariosData: ScenarioData[] = [
     cr: "2.3%",
     churnImpact: "-15.0%",
     geo: ["DE", "EN"],
-    project: ["CasinoX", "GoldenPlay"]
+    project: ["CasinoX", "GoldenPlay"],
+    type: "event",
+    updatedAt: "2024-01-14T16:20:00Z"
   },
   {
+    id: "sc3",
     name: "VIP Weekly Bonus",
     category: "Retention",
     frequency: "Регулярный",
@@ -144,9 +151,12 @@ export const scenariosData: ScenarioData[] = [
     cr: "18.9%",
     churnImpact: "-0.5%",
     geo: ["DE", "RU", "EN", "FR"],
-    project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"]
+    project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"],
+    type: "basic",
+    updatedAt: "2024-01-13T12:45:00Z"
   },
   {
+    id: "sc4",
     name: "Summer Promo",
     category: "Promotion",
     frequency: "Разовый",
@@ -160,9 +170,12 @@ export const scenariosData: ScenarioData[] = [
     cr: "4.5%",
     churnImpact: "N/A",
     geo: ["DE", "FR"],
-    project: ["CasinoX", "GoldenPlay"]
+    project: ["CasinoX", "GoldenPlay"],
+    type: "basic",
+    updatedAt: "2024-01-12T09:15:00Z"
   },
   {
+    id: "sc5",
     name: "Q2 Survey",
     category: "Feedback",
     frequency: "Триггерный",
@@ -176,9 +189,12 @@ export const scenariosData: ScenarioData[] = [
     cr: "30.1%",
     churnImpact: "N/A",
     geo: ["RU", "EN"],
-    project: ["AIGAMING.BOT", "LuckyWheel"]
+    project: ["AIGAMING.BOT", "LuckyWheel"],
+    type: "custom",
+    updatedAt: "2024-01-11T14:30:00Z"
   },
   {
+    id: "sc6",
     name: "German VIP Exclusive",
     category: "VIP",
     frequency: "Регулярный",
@@ -192,9 +208,12 @@ export const scenariosData: ScenarioData[] = [
     cr: "22.1%",
     churnImpact: "-1.2%",
     geo: ["DE"],
-    project: ["CasinoX"]
+    project: ["CasinoX"],
+    type: "custom",
+    updatedAt: "2024-01-10T11:00:00Z"
   },
   {
+    id: "sc7",
     name: "Multi-Brand Welcome",
     category: "Onboarding",
     frequency: "Триггерный",
@@ -208,9 +227,12 @@ export const scenariosData: ScenarioData[] = [
     cr: "9.3%",
     churnImpact: "-3.1%",
     geo: ["DE", "RU", "EN", "FR"],
-    project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"]
+    project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"],
+    type: "event",
+    updatedAt: "2024-01-09T08:45:00Z"
   },
   {
+    id: "sc8",
     name: "Russian Slots Promo",
     category: "Promotion",
     frequency: "Разовый",
@@ -224,7 +246,209 @@ export const scenariosData: ScenarioData[] = [
     cr: "6.7%",
     churnImpact: "N/A",
     geo: ["RU"],
-    project: ["AIGAMING.BOT", "LuckyWheel"]
+    project: ["AIGAMING.BOT", "LuckyWheel"],
+    type: "basic",
+    updatedAt: "2024-01-08T15:20:00Z"
+  }
+];
+
+// Campaigns data with nested scenarios
+export const campaignsData: CampaignData[] = [
+  {
+    id: "camp1",
+    name: "Реактивация High Rollers",
+    description: "Комплексная кампания для возвращения VIP игроков",
+    geo: ["DE", "RU"],
+    project: ["CasinoX"],
+    status: "active",
+    startDate: "2024-01-01T00:00:00Z",
+    endDate: "2024-03-31T23:59:59Z",
+    budget: 50000,
+    currency: "EUR",
+    scenarios: [
+      {
+        id: "sc101",
+        name: "Push — бонус на депозит",
+        category: "Reactivation",
+        frequency: "Триггерный",
+        channel: "Push",
+        status: "Активен",
+        segment: "VIP неактивные",
+        goal: "Депозит",
+        deliveryRate: "95.2%",
+        openRate: "28.4%",
+        ctr: "8.5%",
+        cr: "12.3%",
+        churnImpact: "-18.0%",
+        geo: ["DE"],
+        project: ["CasinoX"],
+        type: "event",
+        updatedAt: "2024-01-20T10:30:00Z"
+      },
+      {
+        id: "sc102",
+        name: "Email — VIP предложение",
+        category: "VIP",
+        frequency: "Регулярный",
+        channel: "Email",
+        status: "Пауза",
+        segment: "VIP DE",
+        goal: "Retention",
+        deliveryRate: "98.7%",
+        openRate: "42.1%",
+        ctr: "15.2%",
+        cr: "8.9%",
+        churnImpact: "-5.2%",
+        geo: ["RU"],
+        project: ["CasinoX"],
+        type: "custom",
+        updatedAt: "2024-01-19T16:00:00Z"
+      }
+    ],
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-20T10:30:00Z"
+  },
+  {
+    id: "camp2",
+    name: "Welcome Journey Multi-Brand",
+    description: "Приветственная кампания для новых игроков всех брендов",
+    geo: ["DE", "RU", "EN", "FR"],
+    project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"],
+    status: "active",
+    startDate: "2024-01-15T00:00:00Z",
+    budget: 75000,
+    currency: "EUR",
+    scenarios: [
+      {
+        id: "sc201",
+        name: "Приветственное письмо",
+        category: "Onboarding",
+        frequency: "Триггерный",
+        channel: "Email",
+        status: "Активен",
+        segment: "Новые регистрации",
+        goal: "Активация",
+        deliveryRate: "99.1%",
+        openRate: "52.3%",
+        ctr: "18.7%",
+        cr: "14.2%",
+        churnImpact: "-8.5%",
+        geo: ["DE", "RU", "EN", "FR"],
+        project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"],
+        type: "event",
+        updatedAt: "2024-01-18T14:20:00Z"
+      },
+      {
+        id: "sc202",
+        name: "Push через 24ч",
+        category: "Onboarding",
+        frequency: "Триггерный",
+        channel: "Push",
+        status: "Активен",
+        segment: "Без депозита 24ч",
+        goal: "Первый депозит",
+        deliveryRate: "87.5%",
+        openRate: "34.2%",
+        ctr: "11.8%",
+        cr: "9.7%",
+        churnImpact: "-12.3%",
+        geo: ["DE", "RU", "EN"],
+        project: ["CasinoX", "LuckyWheel", "GoldenPlay"],
+        type: "event",
+        updatedAt: "2024-01-17T09:45:00Z"
+      },
+      {
+        id: "sc203",
+        name: "SMS финальное напоминание",
+        category: "Onboarding",
+        frequency: "Триггерный",
+        channel: "SMS",
+        status: "Активен",
+        segment: "Без депозита 72ч",
+        goal: "Конверсия",
+        deliveryRate: "92.8%",
+        openRate: "N/A",
+        ctr: "6.3%",
+        cr: "4.1%",
+        churnImpact: "-25.0%",
+        geo: ["DE", "FR"],
+        project: ["CasinoX", "GoldenPlay"],
+        type: "basic",
+        updatedAt: "2024-01-16T11:30:00Z"
+      }
+    ],
+    createdAt: "2024-01-15T00:00:00Z",
+    updatedAt: "2024-01-18T14:20:00Z"
+  },
+  {
+    id: "camp3",
+    name: "Russian Market Expansion",
+    description: "Специальная кампания для российского рынка",
+    geo: ["RU"],
+    project: ["AIGAMING.BOT", "LuckyWheel"],
+    status: "active",
+    startDate: "2024-02-01T00:00:00Z",
+    endDate: "2024-04-30T23:59:59Z",
+    budget: 30000,
+    currency: "EUR",
+    scenarios: [
+      {
+        id: "sc301",
+        name: "Слоты для России",
+        category: "Promotion",
+        frequency: "Разовый",
+        channel: "Push",
+        status: "Активен",
+        segment: "Слот-игроки RU",
+        goal: "Активность",
+        deliveryRate: "94.2%",
+        openRate: "32.1%",
+        ctr: "11.8%",
+        cr: "6.7%",
+        churnImpact: "N/A",
+        geo: ["RU"],
+        project: ["AIGAMING.BOT", "LuckyWheel"],
+        type: "basic",
+        updatedAt: "2024-02-08T15:20:00Z"
+      }
+    ],
+    createdAt: "2024-02-01T00:00:00Z",
+    updatedAt: "2024-02-08T15:20:00Z"
+  },
+  {
+    id: "camp4",
+    name: "Summer Promotion 2024",
+    description: "Летняя промо-кампания для активных игроков",
+    geo: ["DE", "FR"],
+    project: ["CasinoX", "GoldenPlay"],
+    status: "paused",
+    startDate: "2024-06-01T00:00:00Z",
+    endDate: "2024-08-31T23:59:59Z",
+    budget: 25000,
+    currency: "EUR",
+    scenarios: [
+      {
+        id: "sc401",
+        name: "Летняя SMS-акция",
+        category: "Promotion",
+        frequency: "Разовый",
+        channel: "SMS",
+        status: "Пауза",
+        segment: "Все активные",
+        goal: "Депозит",
+        deliveryRate: "97.4%",
+        openRate: "N/A",
+        ctr: "8.9%",
+        cr: "4.5%",
+        churnImpact: "N/A",
+        geo: ["DE", "FR"],
+        project: ["CasinoX", "GoldenPlay"],
+        type: "basic",
+        updatedAt: "2024-01-12T09:15:00Z"
+      }
+    ],
+    createdAt: "2024-01-10T00:00:00Z",
+    updatedAt: "2024-01-12T09:15:00Z"
   }
 ];
 
