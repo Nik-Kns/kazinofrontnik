@@ -22,6 +22,8 @@ export type ScenarioData = {
   ctr: string;
   cr: string;
   churnImpact: string;
+  geo?: string[]; // Supported countries/regions
+  project?: string[]; // Supported projects/brands
 };
 
 export type ChartData = {

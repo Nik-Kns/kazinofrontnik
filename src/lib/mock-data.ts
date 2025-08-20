@@ -111,6 +111,8 @@ export const scenariosData: ScenarioData[] = [
     ctr: "12.3%",
     cr: "8.1%",
     churnImpact: "-2.5%",
+    geo: ["DE", "RU", "EN"],
+    project: ["CasinoX", "LuckyWheel"]
   },
   {
     name: "Churn Reactivation",
@@ -125,6 +127,8 @@ export const scenariosData: ScenarioData[] = [
     ctr: "5.2%",
     cr: "2.3%",
     churnImpact: "-15.0%",
+    geo: ["DE", "EN"],
+    project: ["CasinoX", "GoldenPlay"]
   },
   {
     name: "VIP Weekly Bonus",
@@ -139,6 +143,8 @@ export const scenariosData: ScenarioData[] = [
     ctr: "25.1%",
     cr: "18.9%",
     churnImpact: "-0.5%",
+    geo: ["DE", "RU", "EN", "FR"],
+    project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"]
   },
   {
     name: "Summer Promo",
@@ -153,6 +159,8 @@ export const scenariosData: ScenarioData[] = [
     ctr: "8.9%",
     cr: "4.5%",
     churnImpact: "N/A",
+    geo: ["DE", "FR"],
+    project: ["CasinoX", "GoldenPlay"]
   },
   {
     name: "Q2 Survey",
@@ -167,7 +175,57 @@ export const scenariosData: ScenarioData[] = [
     ctr: "35.6%",
     cr: "30.1%",
     churnImpact: "N/A",
+    geo: ["RU", "EN"],
+    project: ["AIGAMING.BOT", "LuckyWheel"]
   },
+  {
+    name: "German VIP Exclusive",
+    category: "VIP",
+    frequency: "Регулярный",
+    channel: "Email",
+    status: "Активен",
+    segment: "VIP DE",
+    goal: "Retention",
+    deliveryRate: "99.9%",
+    openRate: "72.3%",
+    ctr: "28.5%",
+    cr: "22.1%",
+    churnImpact: "-1.2%",
+    geo: ["DE"],
+    project: ["CasinoX"]
+  },
+  {
+    name: "Multi-Brand Welcome",
+    category: "Onboarding",
+    frequency: "Триггерный",
+    channel: "Multi-channel",
+    status: "Активен",
+    segment: "Новые регистрации",
+    goal: "Первый депозит",
+    deliveryRate: "98.7%",
+    openRate: "48.1%",
+    ctr: "14.2%",
+    cr: "9.3%",
+    churnImpact: "-3.1%",
+    geo: ["DE", "RU", "EN", "FR"],
+    project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"]
+  },
+  {
+    name: "Russian Slots Promo",
+    category: "Promotion",
+    frequency: "Разовый",
+    channel: "Push",
+    status: "Активен",
+    segment: "Слот-игроки RU",
+    goal: "Активность",
+    deliveryRate: "94.2%",
+    openRate: "32.1%",
+    ctr: "11.8%",
+    cr: "6.7%",
+    churnImpact: "N/A",
+    geo: ["RU"],
+    project: ["AIGAMING.BOT", "LuckyWheel"]
+  }
 ];
 
 export const analyticsChartsData: { title: string; type: "line" | "area" | "bar", icon: any, data: ChartData[] }[] = [

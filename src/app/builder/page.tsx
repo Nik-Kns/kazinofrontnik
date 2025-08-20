@@ -83,70 +83,403 @@ const frequencyColors: { [key: string]: string } = {
 
 // --- TAB COMPONENTS ---
 
-const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void }) => (
-    <Card>
-      <CardHeader>
-        <CardTitle>Все сценарии и кампании</CardTitle>
-        <CardDescription>
-          Сводная таблица всех CRM-сценариев с ключевыми показателями эффективности.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[250px]">Название сценария</TableHead>
-              <TableHead>Тип</TableHead>
-              <TableHead>Канал</TableHead>
-              <TableHead>Статус</TableHead>
-              <TableHead>Сегмент</TableHead>
-              <TableHead>Цель</TableHead>
-              <TableHead className="text-right">CR</TableHead>
-              <TableHead className="text-right">Действия</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {scenariosData.map((scenario) => {
-              const ChannelIcon = channelIconsScenarios[scenario.channel];
-              return (
-                <TableRow key={scenario.name}>
-                  <TableCell className="font-medium">{scenario.name}</TableCell>
-                  <TableCell>
-                     <Badge variant={frequencyColors[scenario.frequency] as "secondary" | "default" | "outline"}>{scenario.frequency}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <ChannelIcon className="h-4 w-4 text-muted-foreground" />
-                      {scenario.channel}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className={cn("h-2.5 w-2.5 rounded-full", statusColors[scenario.status])} />
-                      {scenario.status}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{scenario.segment}</Badge>
-                  </TableCell>
-                  <TableCell>{scenario.goal}</TableCell>
-                  <TableCell className="text-right text-success font-semibold">{scenario.cr}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
-                      <Pencil className="h-4 w-4" />
+const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void }) => {
+  const [selectedFrequencyFilters, setSelectedFrequencyFilters] = React.useState<string[]>(['all']);
+  const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<string[]>([]);
+  const [selectedChannelFilters, setSelectedChannelFilters] = React.useState<string[]>([]);
+  const [selectedGeoFilters, setSelectedGeoFilters] = React.useState<string[]>([]);
+  const [selectedProjectFilters, setSelectedProjectFilters] = React.useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  // Get available filter options
+  const availableFrequencies = React.useMemo(() => {
+    return Array.from(new Set(scenariosData.map(s => s.frequency))).sort();
+  }, []);
+
+  const availableStatuses = React.useMemo(() => {
+    return Array.from(new Set(scenariosData.map(s => s.status))).sort();
+  }, []);
+
+  const availableChannels = React.useMemo(() => {
+    return Array.from(new Set(scenariosData.map(s => s.channel))).sort();
+  }, []);
+
+  const availableGeos = React.useMemo(() => {
+    const geos = new Set<string>();
+    scenariosData.forEach(scenario => {
+      scenario.geo?.forEach(geo => geos.add(geo));
+    });
+    return Array.from(geos).sort();
+  }, []);
+
+  const availableProjects = React.useMemo(() => {
+    const projects = new Set<string>();
+    scenariosData.forEach(scenario => {
+      scenario.project?.forEach(project => projects.add(project));
+    });
+    return Array.from(projects).sort();
+  }, []);
+
+  // Filter scenarios based on multiple criteria
+  const filteredScenarios = React.useMemo(() => {
+    return scenariosData.filter(scenario => {
+      // Frequency filter
+      const matchesFrequency = selectedFrequencyFilters.includes('all') || 
+        selectedFrequencyFilters.includes(scenario.frequency);
+
+      // Status filter
+      const matchesStatus = selectedStatusFilters.length === 0 || 
+        selectedStatusFilters.includes(scenario.status);
+
+      // Channel filter
+      const matchesChannel = selectedChannelFilters.length === 0 || 
+        selectedChannelFilters.includes(scenario.channel);
+
+      // GEO filter
+      const matchesGeo = selectedGeoFilters.length === 0 || 
+        selectedGeoFilters.some(geo => scenario.geo?.includes(geo));
+
+      // Project filter
+      const matchesProject = selectedProjectFilters.length === 0 || 
+        selectedProjectFilters.some(project => scenario.project?.includes(project));
+
+      // Search filter
+      const matchesSearch = searchQuery === '' || 
+        scenario.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        scenario.segment.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        scenario.goal.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesFrequency && matchesStatus && matchesChannel && matchesGeo && matchesProject && matchesSearch;
+    });
+  }, [selectedFrequencyFilters, selectedStatusFilters, selectedChannelFilters, selectedGeoFilters, selectedProjectFilters, searchQuery]);
+
+  // Calculate dynamic statistics
+  const filterStats = React.useMemo(() => {
+    const baseFiltered = scenariosData.filter(scenario => {
+      const matchesStatus = selectedStatusFilters.length === 0 || selectedStatusFilters.includes(scenario.status);
+      const matchesChannel = selectedChannelFilters.length === 0 || selectedChannelFilters.includes(scenario.channel);
+      const matchesGeo = selectedGeoFilters.length === 0 || selectedGeoFilters.some(geo => scenario.geo?.includes(geo));
+      const matchesProject = selectedProjectFilters.length === 0 || selectedProjectFilters.some(project => scenario.project?.includes(project));
+      return matchesStatus && matchesChannel && matchesGeo && matchesProject;
+    });
+
+    return {
+      all: baseFiltered.length,
+      "Триггерный": baseFiltered.filter(s => s.frequency === 'Триггерный').length,
+      "Регулярный": baseFiltered.filter(s => s.frequency === 'Регулярный').length,
+      "Разовый": baseFiltered.filter(s => s.frequency === 'Разовый').length,
+    };
+  }, [selectedStatusFilters, selectedChannelFilters, selectedGeoFilters, selectedProjectFilters]);
+
+  return (
+    <div className="space-y-6">
+      {/* Filter Panel */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Фильтры сценариев</CardTitle>
+          <CardDescription>
+            Настройте фильтры для поиска кампаний. Найдено: {filteredScenarios.length} из {scenariosData.length} сценариев
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col space-y-4">
+            {/* Search */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Поиск</Label>
+              <Input 
+                placeholder="Поиск по названию, сегменту или цели..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm"
+              />
+            </div>
+
+            {/* Frequency Filter */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Тип сценария</Label>
+              <div className="flex flex-wrap gap-2">
+                {(['all', ...availableFrequencies] as const).map((frequency) => (
+                  <Button
+                    key={frequency}
+                    variant={selectedFrequencyFilters.includes(frequency) ? "default" : "outline"}
+                    onClick={() => {
+                      if (frequency === 'all') {
+                        setSelectedFrequencyFilters(['all']);
+                      } else {
+                        setSelectedFrequencyFilters(prev => {
+                          const newFilters = prev.filter(f => f !== 'all');
+                          if (newFilters.includes(frequency)) {
+                            const filtered = newFilters.filter(f => f !== frequency);
+                            return filtered.length === 0 ? ['all'] : filtered;
+                          } else {
+                            return [...newFilters, frequency];
+                          }
+                        });
+                      }
+                    }}
+                    size="sm"
+                  >
+                    {frequency === 'all' ? 'Все' : frequency} ({frequency === 'all' ? filterStats.all : filterStats[frequency as keyof typeof filterStats] || 0})
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Статус</Label>
+              <div className="flex flex-wrap gap-2">
+                {availableStatuses.map((status) => (
+                  <Button
+                    key={status}
+                    variant={selectedStatusFilters.includes(status) ? "default" : "outline"}
+                    onClick={() => setSelectedStatusFilters(prev => 
+                      prev.includes(status) 
+                        ? prev.filter(s => s !== status)
+                        : [...prev, status]
+                    )}
+                    size="sm"
+                  >
+                    <span className={cn("h-2 w-2 rounded-full mr-2", statusColors[status])} />
+                    {status} ({scenariosData.filter(s => s.status === status).length})
+                  </Button>
+                ))}
+                {selectedStatusFilters.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedStatusFilters([])}
+                    size="sm"
+                    className="text-muted-foreground"
+                  >
+                    Очистить
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Channel Filter */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Канал</Label>
+              <div className="flex flex-wrap gap-2">
+                {availableChannels.map((channel) => {
+                  const ChannelIcon = channelIconsScenarios[channel];
+                  return (
+                    <Button
+                      key={channel}
+                      variant={selectedChannelFilters.includes(channel) ? "default" : "outline"}
+                      onClick={() => setSelectedChannelFilters(prev => 
+                        prev.includes(channel) 
+                          ? prev.filter(c => c !== channel)
+                          : [...prev, channel]
+                      )}
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <ChannelIcon className="h-3 w-3" />
+                      {channel} ({scenariosData.filter(s => s.channel === channel).length})
                     </Button>
-                    <Button variant="ghost" size="icon">
-                      <FileText className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-);
+                  );
+                })}
+                {selectedChannelFilters.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedChannelFilters([])}
+                    size="sm"
+                    className="text-muted-foreground"
+                  >
+                    Очистить
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* GEO Filter */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">География (GEO)</Label>
+              <div className="flex flex-wrap gap-2">
+                {availableGeos.map((geo) => (
+                  <Button
+                    key={geo}
+                    variant={selectedGeoFilters.includes(geo) ? "default" : "outline"}
+                    onClick={() => setSelectedGeoFilters(prev => 
+                      prev.includes(geo) 
+                        ? prev.filter(g => g !== geo)
+                        : [...prev, geo]
+                    )}
+                    size="sm"
+                  >
+                    {geo} ({scenariosData.filter(s => s.geo?.includes(geo)).length})
+                  </Button>
+                ))}
+                {selectedGeoFilters.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedGeoFilters([])}
+                    size="sm"
+                    className="text-muted-foreground"
+                  >
+                    Очистить
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Project Filter */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Проект</Label>
+              <div className="flex flex-wrap gap-2">
+                {availableProjects.map((project) => (
+                  <Button
+                    key={project}
+                    variant={selectedProjectFilters.includes(project) ? "default" : "outline"}
+                    onClick={() => setSelectedProjectFilters(prev => 
+                      prev.includes(project) 
+                        ? prev.filter(p => p !== project)
+                        : [...prev, project]
+                    )}
+                    size="sm"
+                  >
+                    {project} ({scenariosData.filter(s => s.project?.includes(project)).length})
+                  </Button>
+                ))}
+                {selectedProjectFilters.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedProjectFilters([])}
+                    size="sm"
+                    className="text-muted-foreground"
+                  >
+                    Очистить
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Active Filters Summary */}
+            {(selectedFrequencyFilters.length > 1 || !selectedFrequencyFilters.includes('all') || 
+              selectedStatusFilters.length > 0 || selectedChannelFilters.length > 0 ||
+              selectedGeoFilters.length > 0 || selectedProjectFilters.length > 0) && (
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm font-medium mb-2">Активные фильтры:</p>
+                <div className="flex flex-wrap gap-1 text-xs">
+                  {!selectedFrequencyFilters.includes('all') && selectedFrequencyFilters.length > 0 && (
+                    <Badge variant="secondary">
+                      Типы: {selectedFrequencyFilters.join(', ')}
+                    </Badge>
+                  )}
+                  {selectedStatusFilters.length > 0 && (
+                    <Badge variant="secondary">
+                      Статус: {selectedStatusFilters.join(', ')}
+                    </Badge>
+                  )}
+                  {selectedChannelFilters.length > 0 && (
+                    <Badge variant="secondary">
+                      Каналы: {selectedChannelFilters.join(', ')}
+                    </Badge>
+                  )}
+                  {selectedGeoFilters.length > 0 && (
+                    <Badge variant="secondary">
+                      GEO: {selectedGeoFilters.join(', ')}
+                    </Badge>
+                  )}
+                  {selectedProjectFilters.length > 0 && (
+                    <Badge variant="secondary">
+                      Проекты: {selectedProjectFilters.join(', ')}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Scenarios Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Все сценарии и кампании</CardTitle>
+          <CardDescription>
+            Сводная таблица всех CRM-сценариев с ключевыми показателями эффективности.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[250px]">Название сценария</TableHead>
+                <TableHead>Тип</TableHead>
+                <TableHead>Канал</TableHead>
+                <TableHead>Статус</TableHead>
+                <TableHead>Сегмент</TableHead>
+                <TableHead>Цель</TableHead>
+                <TableHead>GEO</TableHead>
+                <TableHead>Проект</TableHead>
+                <TableHead className="text-right">CR</TableHead>
+                <TableHead className="text-right">Действия</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredScenarios.map((scenario) => {
+                const ChannelIcon = channelIconsScenarios[scenario.channel];
+                return (
+                  <TableRow key={scenario.name}>
+                    <TableCell className="font-medium">{scenario.name}</TableCell>
+                    <TableCell>
+                       <Badge variant={frequencyColors[scenario.frequency] as "secondary" | "default" | "outline"}>{scenario.frequency}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <ChannelIcon className="h-4 w-4 text-muted-foreground" />
+                        {scenario.channel}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className={cn("h-2.5 w-2.5 rounded-full", statusColors[scenario.status])} />
+                        {scenario.status}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{scenario.segment}</Badge>
+                    </TableCell>
+                    <TableCell>{scenario.goal}</TableCell>
+                    <TableCell>
+                      <div className="text-xs text-muted-foreground">
+                        {scenario.geo?.join(', ') || '—'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-xs text-muted-foreground">
+                        {scenario.project?.join(', ') || '—'}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right text-success font-semibold">{scenario.cr}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          
+          {filteredScenarios.length === 0 && (
+            <div className="py-8 text-center">
+              <p className="text-muted-foreground">
+                Сценарии не найдены. Попробуйте изменить фильтры или поисковый запрос.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 const TemplatesTab = () => {
   const [selectedTypeFilters, setSelectedTypeFilters] = React.useState<string[]>(['all']);
