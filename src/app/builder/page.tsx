@@ -149,7 +149,9 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
 );
 
 const TemplatesTab = () => {
-  const [selectedTypeFilter, setSelectedTypeFilter] = React.useState<'all' | 'event' | 'basic' | 'custom'>('all');
+  const [selectedTypeFilters, setSelectedTypeFilters] = React.useState<string[]>(['all']);
+  const [selectedGeoFilters, setSelectedGeoFilters] = React.useState<string[]>([]);
+  const [selectedProjectFilters, setSelectedProjectFilters] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
   const [newTemplate, setNewTemplate] = React.useState({
@@ -158,30 +160,72 @@ const TemplatesTab = () => {
     type: 'basic' as 'event' | 'basic' | 'custom',
     event: '' as string,
     channel: 'Email' as 'Email' | 'Push' | 'SMS' | 'InApp' | 'Multi-channel',
-    category: ''
+    category: '',
+    geo: [] as string[],
+    project: [] as string[]
   });
   
-  // Filter templates based on type and search
+  // Get available filter options
+  const availableGeos = React.useMemo(() => {
+    const geos = new Set<string>();
+    templatesData.forEach(template => {
+      template.geo?.forEach(geo => geos.add(geo));
+    });
+    return Array.from(geos).sort();
+  }, []);
+
+  const availableProjects = React.useMemo(() => {
+    const projects = new Set<string>();
+    templatesData.forEach(template => {
+      template.project?.forEach(project => projects.add(project));
+    });
+    return Array.from(projects).sort();
+  }, []);
+
+  // Filter templates based on multiple criteria
   const filteredTemplates = React.useMemo(() => {
     return templatesData.filter(template => {
-      const matchesType = selectedTypeFilter === 'all' || template.type === selectedTypeFilter;
+      // Type filter
+      const matchesType = selectedTypeFilters.includes('all') || 
+        selectedTypeFilters.some(type => template.type === type);
+
+      // GEO filter
+      const matchesGeo = selectedGeoFilters.length === 0 || 
+        selectedGeoFilters.some(geo => template.geo?.includes(geo));
+
+      // Project filter
+      const matchesProject = selectedProjectFilters.length === 0 || 
+        selectedProjectFilters.some(project => template.project?.includes(project));
+
+      // Search filter (works within selected filters)
       const matchesSearch = searchQuery === '' || 
         template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         template.description.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesType && matchesSearch;
-    });
-  }, [selectedTypeFilter, searchQuery]);
 
-  // Calculate statistics for each type
-  const typeStats = React.useMemo(() => {
+      return matchesType && matchesGeo && matchesProject && matchesSearch;
+    });
+  }, [selectedTypeFilters, selectedGeoFilters, selectedProjectFilters, searchQuery]);
+
+  // Calculate dynamic statistics based on current filters
+  const filterStats = React.useMemo(() => {
+    // First apply geo and project filters
+    const baseFiltered = templatesData.filter(template => {
+      const matchesGeo = selectedGeoFilters.length === 0 || 
+        selectedGeoFilters.some(geo => template.geo?.includes(geo));
+      const matchesProject = selectedProjectFilters.length === 0 || 
+        selectedProjectFilters.some(project => template.project?.includes(project));
+      return matchesGeo && matchesProject;
+    });
+
+    // Then calculate type stats within those constraints
     const stats = {
-      all: templatesData.length,
-      event: templatesData.filter(t => t.type === 'event').length,
-      basic: templatesData.filter(t => t.type === 'basic').length,
-      custom: templatesData.filter(t => t.type === 'custom').length,
+      all: baseFiltered.length,
+      event: baseFiltered.filter(t => t.type === 'event').length,
+      basic: baseFiltered.filter(t => t.type === 'basic').length,
+      custom: baseFiltered.filter(t => t.type === 'custom').length,
     };
     return stats;
-  }, []);
+  }, [selectedGeoFilters, selectedProjectFilters]);
 
   const getTypeLabel = (type: string) => {
     switch (type) {
@@ -215,6 +259,41 @@ const TemplatesTab = () => {
     }
   };
 
+  // Handle multi-select for type filters
+  const handleTypeFilterToggle = (type: string) => {
+    if (type === 'all') {
+      setSelectedTypeFilters(['all']);
+    } else {
+      setSelectedTypeFilters(prev => {
+        const newFilters = prev.filter(f => f !== 'all');
+        if (newFilters.includes(type)) {
+          const filtered = newFilters.filter(f => f !== type);
+          return filtered.length === 0 ? ['all'] : filtered;
+        } else {
+          return [...newFilters, type];
+        }
+      });
+    }
+  };
+
+  // Handle GEO filter toggle
+  const handleGeoFilterToggle = (geo: string) => {
+    setSelectedGeoFilters(prev => 
+      prev.includes(geo) 
+        ? prev.filter(g => g !== geo)
+        : [...prev, geo]
+    );
+  };
+
+  // Handle Project filter toggle
+  const handleProjectFilterToggle = (project: string) => {
+    setSelectedProjectFilters(prev => 
+      prev.includes(project) 
+        ? prev.filter(p => p !== project)
+        : [...prev, project]
+    );
+  };
+
   const handleCreateTemplate = () => {
     // Here you would typically make an API call to create the template
     console.log('Creating template:', newTemplate);
@@ -225,7 +304,9 @@ const TemplatesTab = () => {
       type: 'basic',
       event: '',
       channel: 'Email',
-      category: ''
+      category: '',
+      geo: [],
+      project: []
     });
   };
 
@@ -237,7 +318,9 @@ const TemplatesTab = () => {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Фильтры шаблонов</CardTitle>
-              <CardDescription>Выберите тип шаблонов для отображения</CardDescription>
+              <CardDescription>
+                Настройте фильтры по типу, географии и проектам. Найдено: {filteredTemplates.length} из {templatesData.length} шаблонов
+              </CardDescription>
             </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
@@ -342,6 +425,48 @@ const TemplatesTab = () => {
                       placeholder="Например: Onboarding, Retention..."
                     />
                   </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="template-geo">География (GEO)</Label>
+                    <div className="flex flex-wrap gap-1">
+                      {availableGeos.map(geo => (
+                        <Button
+                          key={geo}
+                          type="button"
+                          variant={newTemplate.geo.includes(geo) ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setNewTemplate(prev => ({
+                            ...prev,
+                            geo: prev.geo.includes(geo) 
+                              ? prev.geo.filter(g => g !== geo)
+                              : [...prev.geo, geo]
+                          }))}
+                        >
+                          {geo}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="template-project">Проекты</Label>
+                    <div className="flex flex-wrap gap-1">
+                      {availableProjects.map(project => (
+                        <Button
+                          key={project}
+                          type="button"
+                          variant={newTemplate.project.includes(project) ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setNewTemplate(prev => ({
+                            ...prev,
+                            project: prev.project.includes(project) 
+                              ? prev.project.filter(p => p !== project)
+                              : [...prev.project, project]
+                          }))}
+                        >
+                          {project}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
@@ -356,31 +481,120 @@ const TemplatesTab = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-6">
             {/* Search Input */}
             <div>
+              <Label className="text-sm font-medium mb-2 block">Поиск</Label>
               <Input 
-                placeholder="Поиск шаблонов..."
+                placeholder="Поиск по названию или описанию..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="max-w-sm"
               />
+              {searchQuery && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Поиск работает в рамках выбранных фильтров
+                </p>
+              )}
             </div>
             
             {/* Type Filter Buttons */}
-            <div className="flex flex-wrap gap-2">
-              {(['all', 'event', 'basic', 'custom'] as const).map((type) => (
-                <Button
-                  key={type}
-                  variant={selectedTypeFilter === type ? "default" : "outline"}
-                  onClick={() => setSelectedTypeFilter(type)}
-                  className="flex items-center gap-2"
-                >
-                  {type !== 'all' && <span>{getTypeBadge(type).emoji}</span>}
-                  {getTypeLabel(type)} ({typeStats[type]})
-                </Button>
-              ))}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Тип шаблона</Label>
+              <div className="flex flex-wrap gap-2">
+                {(['all', 'event', 'basic', 'custom'] as const).map((type) => (
+                  <Button
+                    key={type}
+                    variant={selectedTypeFilters.includes(type) ? "default" : "outline"}
+                    onClick={() => handleTypeFilterToggle(type)}
+                    className="flex items-center gap-2"
+                    size="sm"
+                  >
+                    {type !== 'all' && <span>{getTypeBadge(type).emoji}</span>}
+                    {getTypeLabel(type)} ({filterStats[type]})
+                  </Button>
+                ))}
+              </div>
             </div>
+
+            {/* GEO Filter */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">География (GEO)</Label>
+              <div className="flex flex-wrap gap-2">
+                {availableGeos.map((geo) => (
+                  <Button
+                    key={geo}
+                    variant={selectedGeoFilters.includes(geo) ? "default" : "outline"}
+                    onClick={() => handleGeoFilterToggle(geo)}
+                    size="sm"
+                  >
+                    {geo} ({templatesData.filter(t => t.geo?.includes(geo)).length})
+                  </Button>
+                ))}
+                {selectedGeoFilters.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedGeoFilters([])}
+                    size="sm"
+                    className="text-muted-foreground"
+                  >
+                    Очистить
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Project Filter */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Проект</Label>
+              <div className="flex flex-wrap gap-2">
+                {availableProjects.map((project) => (
+                  <Button
+                    key={project}
+                    variant={selectedProjectFilters.includes(project) ? "default" : "outline"}
+                    onClick={() => handleProjectFilterToggle(project)}
+                    size="sm"
+                  >
+                    {project} ({templatesData.filter(t => t.project?.includes(project)).length})
+                  </Button>
+                ))}
+                {selectedProjectFilters.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedProjectFilters([])}
+                    size="sm"
+                    className="text-muted-foreground"
+                  >
+                    Очистить
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Active Filters Summary */}
+            {(selectedTypeFilters.length > 1 || !selectedTypeFilters.includes('all') || 
+              selectedGeoFilters.length > 0 || selectedProjectFilters.length > 0) && (
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm font-medium mb-2">Активные фильтры:</p>
+                <div className="flex flex-wrap gap-1 text-xs">
+                  {!selectedTypeFilters.includes('all') && selectedTypeFilters.length > 0 && (
+                    <Badge variant="secondary">
+                      Типы: {selectedTypeFilters.map(t => getTypeLabel(t)).join(', ')}
+                    </Badge>
+                  )}
+                  {selectedGeoFilters.length > 0 && (
+                    <Badge variant="secondary">
+                      GEO: {selectedGeoFilters.join(', ')}
+                    </Badge>
+                  )}
+                  {selectedProjectFilters.length > 0 && (
+                    <Badge variant="secondary">
+                      Проекты: {selectedProjectFilters.join(', ')}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -406,6 +620,16 @@ const TemplatesTab = () => {
                         {template.type === 'event' && template.event && (
                           <p className="text-xs text-muted-foreground mt-1">
                             Событие: {getEventLabel(template.event)}
+                          </p>
+                        )}
+                        {template.geo && template.geo.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            GEO: {template.geo.join(', ')}
+                          </p>
+                        )}
+                        {template.project && template.project.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Проекты: {template.project.join(', ')}
                           </p>
                         )}
                     </div>

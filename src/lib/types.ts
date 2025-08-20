@@ -61,6 +61,8 @@ export type TemplateData = {
   channel: "Email" | "Push" | "SMS" | "InApp" | "Multi-channel";
   type: "event" | "basic" | "custom";
   event?: "first_deposit" | "withdrawal" | "registration" | "inactivity" | "big_win" | "bonus_activation" | "login" | "game_start";
+  geo?: string[]; // Supported countries/regions
+  project?: string[]; // Supported projects/brands
 };
 
 export type ReportData = {
