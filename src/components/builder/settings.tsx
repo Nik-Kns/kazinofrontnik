@@ -54,7 +54,7 @@ export const NodeConfigPanel = ({ node, isOpen, onOpenChange }: NodeConfigPanelP
                             </Select>
                         </div>
                     </div>
-                )
+                );
             case 'emailAction':
                 return (
                     <div className="space-y-4">
@@ -76,7 +76,7 @@ export const NodeConfigPanel = ({ node, isOpen, onOpenChange }: NodeConfigPanelP
                             <Input id="email-subject" defaultValue={`Специальное предложение для вас, {player_name}!`} />
                         </div>
                     </div>
-                )
+                );
             case 'ifElseLogic':
                 return (
                     <div className="space-y-4">
@@ -88,7 +88,8 @@ export const NodeConfigPanel = ({ node, isOpen, onOpenChange }: NodeConfigPanelP
                                     <SelectContent>
                                         <SelectItem value="lifetime_spend">Lifetime Spend</SelectItem>
                                         <SelectItem value="last_activity">Последняя активность</SelectItem>
-                                        <SelectItem value="balance">Баланс</SelectContent>
+                                        <SelectItem value="balance">Баланс</SelectItem>
+                                    </SelectContent>
                                 </Select>
                                 <Select defaultValue="gt">
                                     <SelectTrigger><SelectValue /></SelectTrigger>
@@ -103,7 +104,7 @@ export const NodeConfigPanel = ({ node, isOpen, onOpenChange }: NodeConfigPanelP
                         </div>
                         <p className="text-xs text-muted-foreground">Создайте условие для разделения игроков на ветки "Да" и "Нет".</p>
                     </div>
-                )
+                );
             case 'abTestLogic':
                 return (
                     <div className="space-y-4">
@@ -119,7 +120,7 @@ export const NodeConfigPanel = ({ node, isOpen, onOpenChange }: NodeConfigPanelP
                         </div>
                         <p className="text-xs text-muted-foreground">Аудитория будет случайным образом разделена в указанной пропорции для отправки разных версий сообщения.</p>
                     </div>
-                )
+                );
             case 'bonusAction':
                 return (
                     <div className="space-y-4">
@@ -149,7 +150,7 @@ export const NodeConfigPanel = ({ node, isOpen, onOpenChange }: NodeConfigPanelP
                             <Input id="bonus-ttl" type="number" defaultValue="72" />
                         </div>
                     </div>
-                )
+                );
             default:
                 return <p className="text-muted-foreground">Для этого элемента нет дополнительных настроек.</p>
         }
