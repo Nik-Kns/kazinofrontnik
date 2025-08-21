@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PhoneCall, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap, ChevronDown, ChevronRight, Eye, Calendar, Euro, Users, BarChart3, Filter, TrendingDown } from "lucide-react";
+import { Activity, ArrowLeft, Bot, BotMessageSquare, CheckCircle, ClipboardCopy, Clock, FileText, GitBranch, Gift, Lightbulb, Mail, MessageSquare, Pencil, PhoneCall, PlusCircle, Smartphone, Sparkles, Star, Trash2, Zap, ChevronDown, ChevronRight, Eye, Calendar, Euro, Users, BarChart3, Filter, TrendingDown, XCircle, Power, Settings, MoreHorizontal, Target, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { segmentsData, scenariosData, templatesData, campaignsData } from '@/lib/mock-data';
-import type { CampaignData, FunnelData, ABTestVariant, BenchmarkData, BenchmarkMetric, ClipboardItem, ClipboardItemType } from '@/lib/types';
+import type { CampaignData, FunnelData, ABTestVariant, BenchmarkData, BenchmarkMetric, ClipboardItem, ClipboardItemType, ScenarioStatusFilter, UserRole } from '@/lib/types';
 import { ClipboardProvider, useClipboard } from '@/contexts/clipboard-context';
 import { CopyMoveContextMenu, CopyMoveDropdownMenu, useKeyboardShortcuts } from '@/components/ui/copy-move-menu';
 import { PasteTargetDialog } from '@/components/ui/paste-target-dialog';
@@ -21,6 +21,7 @@ import { DragDropWrapper, DropZone } from '@/components/ui/drag-drop-wrapper';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ScenarioData } from '@/lib/types';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
@@ -451,6 +452,11 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
   const [selectedFunnelCampaign, setSelectedFunnelCampaign] = React.useState<CampaignData | null>(null);
   const [isFunnelDialogOpen, setIsFunnelDialogOpen] = React.useState(false);
   const [isPasteDialogOpen, setIsPasteDialogOpen] = React.useState(false);
+  
+  // Scenario status filter
+  const [scenarioStatusFilter, setScenarioStatusFilter] = React.useState<ScenarioStatusFilter>('all');
+  const [selectedScenarios, setSelectedScenarios] = React.useState<Set<string>>(new Set());
+  const [userRole] = React.useState<UserRole>('admin'); // Mock user role
 
   // Copy/Move functionality
   const { clipboard, paste } = useClipboard();
@@ -501,8 +507,20 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
         );
 
       return matchesStatus && matchesGeo && matchesProject && matchesSearch;
-    });
-  }, [selectedStatusFilters, selectedGeoFilters, selectedProjectFilters, searchQuery]);
+    }).map(campaign => ({
+      ...campaign,
+      scenarios: campaign.scenarios.filter(scenario => {
+        // Apply scenario status filter
+        if (scenarioStatusFilter === 'active' && scenario.isActive !== true) {
+          return false;
+        }
+        if (scenarioStatusFilter === 'inactive' && scenario.isActive !== false) {
+          return false;
+        }
+        return true;
+      })
+    }));
+  }, [selectedStatusFilters, selectedGeoFilters, selectedProjectFilters, searchQuery, scenarioStatusFilter]);
 
   // Handle campaign expansion
   const toggleCampaignExpansion = (campaignId: string) => {
@@ -556,6 +574,59 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
     console.log(`Pasted into scenario ${scenarioId}`);
   }, []);
 
+  // Scenario status management
+  const toggleScenarioStatus = React.useCallback((scenarioId: string, currentStatus: boolean) => {
+    if (userRole === 'viewer') {
+      console.warn('Viewer role cannot modify scenario status');
+      return;
+    }
+    
+    // Mock API call to toggle scenario status
+    console.log(`Toggling scenario ${scenarioId} from ${currentStatus ? 'active' : 'inactive'} to ${!currentStatus ? 'active' : 'inactive'}`);
+    
+    // Update local state (in real app, would refetch data)
+    // For demo purposes, we'll just log the action
+  }, [userRole]);
+
+  const handleMassStatusChange = React.useCallback((newStatus: boolean) => {
+    if (userRole === 'viewer') {
+      console.warn('Viewer role cannot modify scenario status');
+      return;
+    }
+    
+    if (selectedScenarios.size === 0) {
+      console.warn('No scenarios selected');
+      return;
+    }
+    
+    console.log(`Mass ${newStatus ? 'activating' : 'deactivating'} scenarios:`, Array.from(selectedScenarios));
+    setSelectedScenarios(new Set());
+  }, [selectedScenarios, userRole]);
+
+  const toggleScenarioSelection = React.useCallback((scenarioId: string) => {
+    setSelectedScenarios(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(scenarioId)) {
+        newSet.delete(scenarioId);
+      } else {
+        newSet.add(scenarioId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const getPermissions = React.useCallback((scenarioId: string) => {
+    const canEdit = userRole === 'admin' || userRole === 'crm_manager';
+    const canToggleStatus = userRole === 'admin' || userRole === 'crm_manager';
+    
+    return {
+      canEdit,
+      canToggleStatus,
+      canView: true,
+      canDelete: userRole === 'admin'
+    };
+  }, [userRole]);
+
   // Status colors for campaigns
   const campaignStatusColors = {
     active: "bg-success",
@@ -596,7 +667,41 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
               />
             </div>
 
-            {/* Status Filter */}
+            {/* Scenario Status Filter */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Статус сценариев</Label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={scenarioStatusFilter === 'all' ? "default" : "outline"}
+                  onClick={() => setScenarioStatusFilter('all')}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle className="h-3 w-3" />
+                  Все сценарии
+                </Button>
+                <Button
+                  variant={scenarioStatusFilter === 'active' ? "default" : "outline"}
+                  onClick={() => setScenarioStatusFilter('active')}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle className="h-3 w-3 text-green-600" />
+                  Только активные
+                </Button>
+                <Button
+                  variant={scenarioStatusFilter === 'inactive' ? "default" : "outline"}
+                  onClick={() => setScenarioStatusFilter('inactive')}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <XCircle className="h-3 w-3 text-gray-400" />
+                  Только неактивные
+                </Button>
+              </div>
+            </div>
+
+            {/* Campaign Status Filter */}
             <div>
               <Label className="text-sm font-medium mb-2 block">Статус кампании</Label>
               <div className="flex flex-wrap gap-2">
@@ -716,6 +821,52 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
           </div>
         </CardContent>
       </Card>
+
+      {/* Mass Actions Panel */}
+      {selectedScenarios.size > 0 && userRole !== 'viewer' && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-sm text-orange-800">
+                  Массовые операции
+                </CardTitle>
+                <CardDescription className="text-orange-600">
+                  Выбрано сценариев: {selectedScenarios.size}
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => handleMassStatusChange(true)}
+                  size="sm"
+                  variant="outline"
+                  className="border-green-200 text-green-700 hover:bg-green-50"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Активировать все
+                </Button>
+                <Button
+                  onClick={() => handleMassStatusChange(false)}
+                  size="sm"
+                  variant="outline"
+                  className="border-red-200 text-red-700 hover:bg-red-50"
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Деактивировать все
+                </Button>
+                <Button
+                  onClick={() => setSelectedScenarios(new Set())}
+                  size="sm"
+                  variant="ghost"
+                  className="text-gray-600"
+                >
+                  Отменить выбор
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
 
       {/* Campaigns Table */}
       <Card>
@@ -899,7 +1050,34 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                             draggable={true}
                           >
                             <TableRow className="bg-muted/20">
-                          <TableCell></TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2 pl-4">
+                              {userRole !== 'viewer' && (
+                                <input
+                                  type="checkbox"
+                                  checked={selectedScenarios.has(scenario.id || `${campaign.id}-${index}`)}
+                                  onChange={() => toggleScenarioSelection(scenario.id || `${campaign.id}-${index}`)}
+                                  className="rounded border-gray-300 focus:ring-primary"
+                                />
+                              )}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="cursor-help">
+                                      {scenario.isActive ? (
+                                        <CheckCircle className="h-4 w-4 text-green-600" />
+                                      ) : (
+                                        <XCircle className="h-4 w-4 text-gray-400" />
+                                      )}
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{scenario.isActive ? 'Активный сценарий' : 'Неактивный сценарий'}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
+                          </TableCell>
                           <TableCell className="pl-8">
                     <div className="flex items-center gap-2">
                               <div className="flex items-center gap-2">
@@ -947,26 +1125,92 @@ const AllCampaignsTab = ({ onEdit }: { onEdit: (scenario: ScenarioData) => void 
                           </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)}>
-                        <Pencil className="h-3 w-3" />
-                    </Button>
-                      {scenario.funnel && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => {
-                            setSelectedFunnelCampaign({
-                              ...campaign,
-                              name: scenario.name,
-                              description: `Сценарий: ${scenario.segment} • ${scenario.goal}`,
-                              funnel: scenario.funnel
-                            });
-                            setIsFunnelDialogOpen(true);
-                          }}
-                        >
-                          <BarChart3 className="h-3 w-3" />
-                    </Button>
+                      {/* Status Toggle Button */}
+                      {getPermissions(scenario.id || `${campaign.id}-${index}`).canToggleStatus && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => toggleScenarioStatus(scenario.id || `${campaign.id}-${index}`, scenario.isActive || false)}
+                                className={cn(
+                                  "h-6 w-6",
+                                  scenario.isActive 
+                                    ? "text-green-600 hover:text-green-700" 
+                                    : "text-gray-400 hover:text-gray-600"
+                                )}
+                              >
+                                <Power className="h-3 w-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{scenario.isActive ? 'Деактивировать сценарий' : 'Активировать сценарий'}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )}
+
+                      {/* Edit Rules Button */}
+                      {getPermissions(scenario.id || `${campaign.id}-${index}`).canEdit && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)} className="h-6 w-6">
+                                <Settings className="h-3 w-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Редактировать правила</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+
+                      {/* Standard Edit Button */}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={() => onEdit(scenario)} className="h-6 w-6">
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Редактировать сценарий</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      {/* Funnel Button */}
+                      {scenario.funnel && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => {
+                                  setSelectedFunnelCampaign({
+                                    ...campaign,
+                                    name: scenario.name,
+                                    description: `Сценарий: ${scenario.segment} • ${scenario.goal}`,
+                                    funnel: scenario.funnel
+                                  });
+                                  setIsFunnelDialogOpen(true);
+                                }}
+                                className="h-6 w-6"
+                              >
+                                <BarChart3 className="h-3 w-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Просмотреть воронку</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+
+                      {/* Copy/Move Menu */}
                       <CopyMoveDropdownMenu
                         item={{
                           id: scenario.id || `${campaign.id}-${index}`,

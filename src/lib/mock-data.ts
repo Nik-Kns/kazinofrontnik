@@ -115,7 +115,8 @@ export const scenariosData: ScenarioData[] = [
     geo: ["DE", "RU", "EN"],
     project: ["CasinoX", "LuckyWheel"],
     type: "event",
-    updatedAt: "2024-01-15T10:30:00Z"
+    updatedAt: "2024-01-15T10:30:00Z",
+    isActive: true
   },
   {
     id: "sc2",
@@ -134,7 +135,8 @@ export const scenariosData: ScenarioData[] = [
     geo: ["DE", "EN"],
     project: ["CasinoX", "GoldenPlay"],
     type: "event",
-    updatedAt: "2024-01-14T16:20:00Z"
+    updatedAt: "2024-01-14T16:20:00Z",
+    isActive: false
   },
   {
     id: "sc3",
@@ -153,7 +155,8 @@ export const scenariosData: ScenarioData[] = [
     geo: ["DE", "RU", "EN", "FR"],
     project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"],
     type: "basic",
-    updatedAt: "2024-01-13T12:45:00Z"
+    updatedAt: "2024-01-13T12:45:00Z",
+    isActive: true
   },
   {
     id: "sc4",
@@ -172,7 +175,8 @@ export const scenariosData: ScenarioData[] = [
     geo: ["DE", "FR"],
     project: ["CasinoX", "GoldenPlay"],
     type: "basic",
-    updatedAt: "2024-01-12T09:15:00Z"
+    updatedAt: "2024-01-12T09:15:00Z",
+    isActive: false
   },
   {
     id: "sc5",
@@ -191,7 +195,8 @@ export const scenariosData: ScenarioData[] = [
     geo: ["RU", "EN"],
     project: ["AIGAMING.BOT", "LuckyWheel"],
     type: "custom",
-    updatedAt: "2024-01-11T14:30:00Z"
+    updatedAt: "2024-01-11T14:30:00Z",
+    isActive: false
   },
   {
     id: "sc6",
@@ -210,7 +215,8 @@ export const scenariosData: ScenarioData[] = [
     geo: ["DE"],
     project: ["CasinoX"],
     type: "custom",
-    updatedAt: "2024-01-10T11:00:00Z"
+    updatedAt: "2024-01-10T11:00:00Z",
+    isActive: true
   },
   {
     id: "sc7",
@@ -229,7 +235,8 @@ export const scenariosData: ScenarioData[] = [
     geo: ["DE", "RU", "EN", "FR"],
     project: ["AIGAMING.BOT", "CasinoX", "LuckyWheel", "GoldenPlay"],
     type: "event",
-    updatedAt: "2024-01-09T08:45:00Z"
+    updatedAt: "2024-01-09T08:45:00Z",
+    isActive: true
   },
   {
     id: "sc8",
@@ -248,7 +255,8 @@ export const scenariosData: ScenarioData[] = [
     geo: ["RU"],
     project: ["AIGAMING.BOT", "LuckyWheel"],
     type: "basic",
-    updatedAt: "2024-01-08T15:20:00Z"
+    updatedAt: "2024-01-08T15:20:00Z",
+    isActive: true
   }
 ];
 

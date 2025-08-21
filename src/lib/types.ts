@@ -28,6 +28,7 @@ export type ScenarioData = {
   type?: "event" | "basic" | "custom"; // Scenario type
   updatedAt?: string; // Last update timestamp
   funnel?: FunnelData; // Funnel metrics for scenario
+  isActive?: boolean; // Active/inactive status for scenarios
 };
 
 export type ABTestVariant = {
@@ -249,6 +250,17 @@ export type SavedAnalyticsView = {
   selectedKpis: string[];
   createdAt: string;
   userId: string;
+};
+
+// Scenario Status Filter Types
+export type ScenarioStatusFilter = "all" | "active" | "inactive";
+
+export type UserRole = "admin" | "crm_manager" | "viewer";
+
+export type ScenarioAction = {
+  type: "toggle_status" | "edit_rules" | "view_details" | "delete";
+  allowed: boolean;
+  reason?: string;
 };
 
 export type ChartData = {
