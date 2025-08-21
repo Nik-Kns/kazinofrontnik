@@ -125,6 +125,132 @@ export type CopyMoveValidation = {
   warnings?: string[];
 };
 
+// Campaign Analytics Types
+export type AnalyticsTimeRange = "D7" | "D30" | "QTD" | "MTD" | "YTD" | "custom";
+
+export type AnalyticsFilters = {
+  period: {
+    type: AnalyticsTimeRange;
+    startDate?: string;
+    endDate?: string;
+  };
+  projects: string[];
+  geo: string[];
+  channels: string[];
+  devices: string[];
+  vipLevels: string[];
+  languages: string[];
+  gameProviders: string[];
+};
+
+export type CampaignKPI = {
+  id: string;
+  name: string;
+  value: number | string;
+  unit: string;
+  change: number;
+  trend: "up" | "down" | "stable";
+  status: "good" | "warning" | "critical";
+  benchmark?: number;
+  target?: number;
+  description?: string;
+};
+
+export type FunnelStep = {
+  id: string;
+  name: string;
+  value: number;
+  rate: number;
+  benchmark?: number;
+  target?: number;
+};
+
+export type CampaignFunnel = {
+  id: string;
+  name: string;
+  steps: FunnelStep[];
+  totalUsers: number;
+  conversionRate: number;
+};
+
+export type CohortData = {
+  period: string;
+  totalUsers: number;
+  retention: number[];
+  periods: string[];
+};
+
+export type BreakdownItem = {
+  id: string;
+  name: string;
+  value: number;
+  percentage: number;
+  change?: number;
+  trend?: "up" | "down" | "stable";
+};
+
+export type CompanyAnalytics = {
+  kpis: CampaignKPI[];
+  funnels: CampaignFunnel[];
+  trends: ChartData[];
+  breakdowns: {
+    geo: BreakdownItem[];
+    devices: BreakdownItem[];
+    channels: BreakdownItem[];
+  };
+  insights: string[];
+};
+
+export type SegmentAnalytics = {
+  segmentId: string;
+  segmentName: string;
+  totalUsers: number;
+  kpis: CampaignKPI[];
+  funnels: CampaignFunnel[];
+  cohorts: CohortData[];
+  comparison: {
+    segment: CampaignKPI[];
+    base: CampaignKPI[];
+  };
+  topPlayers: any[];
+  abResults: any[];
+};
+
+export type TemplateVersion = {
+  id: string;
+  version: string;
+  createdAt: string;
+  performance: CampaignKPI[];
+};
+
+export type TemplateAnalytics = {
+  templateId: string;
+  templateName: string;
+  type: "basic" | "event" | "custom";
+  currentVersion: string;
+  kpis: CampaignKPI[];
+  funnel: CampaignFunnel;
+  breakdowns: {
+    geo: BreakdownItem[];
+    channels: BreakdownItem[];
+    devices: BreakdownItem[];
+    projects: BreakdownItem[];
+  };
+  versions: TemplateVersion[];
+  topCampaigns: any[];
+  insights: string[];
+};
+
+export type SavedAnalyticsView = {
+  id: string;
+  name: string;
+  type: "company" | "segment" | "template";
+  filters: AnalyticsFilters;
+  selectedKpis: string[];
+  createdAt: string;
+  userId: string;
+};
+
 export type ChartData = {
   date: string;
   value: number | null;

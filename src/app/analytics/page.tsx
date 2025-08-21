@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { KpiGrid } from "@/components/dashboard/kpi-grid";
 import { AnalyticsCharts } from "@/components/dashboard/analytics-charts";
 import { EnhancedFilters } from "@/components/ui/enhanced-filters";
@@ -10,7 +11,8 @@ import { FlexibleCharts } from "@/components/analytics/flexible-charts";
 import { SegmentMetricsTable } from "@/components/analytics/segment-metrics-table";
 import { AlertsAndSignals } from "@/components/analytics/alerts-and-signals";
 import { CampaignDeepAnalytics } from "@/components/analytics/campaign-deep-analytics";
-import { HandCoins, TrendingUp, Users, BarChart3, Activity } from "lucide-react";
+import { HandCoins, TrendingUp, Users, BarChart3, Activity, Target } from "lucide-react";
+import Link from "next/link";
 import { CampaignPerformanceTable } from "@/components/analytics/campaign-performance-table";
 import { RetentionMetricsDashboard } from "@/components/analytics/retention-metrics-dashboard";
 import { useState } from "react";
@@ -73,10 +75,20 @@ export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
       <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">Аналитика</h1>
-        <p className="text-muted-foreground">
-          Полный контроль над метриками казино. Настраиваемые дашборды, глубокая аналитика и экспорт отчетов.
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Аналитика</h1>
+            <p className="text-muted-foreground">
+              Полный контроль над метриками казино. Настраиваемые дашборды, глубокая аналитика и экспорт отчетов.
+            </p>
+          </div>
+          <Link href="/analytics/campaigns">
+            <Button className="flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              Аналитика кампаний
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Расширенные фильтры с экспортом */}
