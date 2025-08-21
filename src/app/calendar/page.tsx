@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { campaignsData } from "@/lib/mock-data";
-import { ChevronLeft, ChevronRight, PlusCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, PlusCircle, ArrowLeft } from "lucide-react";
 import { useState, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import dynamic from "next/dynamic";
+
+// Динамически импортируем конструктор сценариев для избежания SSR проблем
+const ScenariosBuilder = dynamic(() => import("@/app/builder/page"), { ssr: false });
 
 // Helper to generate days of the month for the calendar grid
 const generateCalendarDays = (year: number, month: number) => {
@@ -41,6 +45,51 @@ const monthName = "Июль";
 
 const calendarDays = generateCalendarDays(currentYear, currentMonth);
 
+// Преобразование данных кампаний для календаря
+const adaptCampaignsForCalendar = () => {
+  const calendarCampaigns = [];
+  
+  // Создаем события из сценариев внутри кампаний
+  campaignsData.forEach(campaign => {
+    campaign.scenarios.forEach(scenario => {
+      // Генерируем даты для сценариев в текущем месяце
+      const dates = [
+        `2024-07-05`, `2024-07-08`, `2024-07-12`, `2024-07-15`, 
+        `2024-07-18`, `2024-07-22`, `2024-07-25`, `2024-07-28`
+      ];
+      
+      dates.forEach((date, index) => {
+        if (Math.random() > 0.6) { // Случайное распределение
+          calendarCampaigns.push({
+            id: `${scenario.id}_${index}`,
+            name: scenario.name,
+            date: date,
+            type: scenario.channel,
+            typeDetail: scenario.category,
+            channel: scenario.channel,
+            status: scenario.status === 'Активен' ? 'active' : scenario.status === 'Пауза' ? 'paused' : 'completed',
+            segment: scenario.segment,
+            goal: scenario.goal,
+            language: scenario.geo?.[0] || 'RU',
+            offer: campaign.description || 'Специальное предложение',
+            triggers: scenario.frequency,
+            texts: `Контент для ${scenario.name}`,
+            media: scenario.channel === 'Email' ? 'Banner 1200x400' : null,
+            deliveryRate: scenario.deliveryRate,
+            openRate: scenario.openRate,
+            ctr: scenario.ctr,
+            cr: scenario.cr
+          });
+        }
+      });
+    });
+  });
+  
+  return calendarCampaigns;
+};
+
+const calendarCampaignsData = adaptCampaignsForCalendar();
+
 const campaignColors: Record<string, string> = {
     Email: "bg-blue-200 border-blue-400",
     Push: "bg-purple-200 border-purple-400",
@@ -60,9 +109,13 @@ export default function CalendarPage() {
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{x: number, y: number} | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+  
+  // Состояния для конструктора сценариев
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [editingScenario, setEditingScenario] = useState<any | null>(null);
 
   // Фильтрация кампаний
-  const filteredCampaigns = campaignsData.filter(c => {
+  const filteredCampaigns = calendarCampaignsData.filter(c => {
     if (selectedType.length && !selectedType.includes(c.typeDetail)) return false;
     if (selectedChannel.length && !selectedChannel.includes(c.channel)) return false;
     if (selectedLang.length && !selectedLang.includes(c.language)) return false;
@@ -71,13 +124,13 @@ export default function CalendarPage() {
     return true;
   });
 
-  // campaignsByDate теперь строится по filteredCampaigns
+  // campaignsByDate строится по filteredCampaigns
   const campaignsByDate = filteredCampaigns.reduce((acc, campaign) => {
     const date = new Date(campaign.date).getDate();
     if (!acc[date]) acc[date] = [];
     acc[date].push(campaign);
     return acc;
-  }, {} as Record<number, typeof campaignsData>);
+  }, {} as Record<number, typeof calendarCampaignsData>);
 
   // Helper для цвета бейджа по типу
   const badgeColor = (type: string) => {
@@ -89,6 +142,18 @@ export default function CalendarPage() {
       case 'SMS': return 'bg-pink-200 border-pink-400 text-pink-900';
       default: return 'bg-gray-200 border-gray-400 text-gray-900';
     }
+  };
+
+  // Обработчики для работы с конструктором
+  const handleEditClick = (campaign: any) => {
+    setEditingScenario(campaign);
+    setIsBuilderOpen(true);
+    setDialogOpen(false); // Закрываем диалог
+  };
+
+  const handleBuilderClose = () => {
+    setIsBuilderOpen(false);
+    setEditingScenario(null);
   };
 
   return (
@@ -177,18 +242,49 @@ export default function CalendarPage() {
                         <span className={`font-medium ${dayInfo.isCurrentMonth ? '' : 'text-muted-foreground'}`}>{dayInfo.day.getDate()}</span>
                         <div className="mt-1 flex flex-col gap-1">
                           {events.slice(0, 4).map((campaign, i) => (
-                            <div
-                              key={campaign.id}
-                              className={`rounded px-1 py-0.5 text-xs border truncate cursor-pointer ${badgeColor(campaign.type)}`}
-                              onClick={() => { setSelectedCampaign(campaign); setDialogOpen(true); }}
-                              title={campaign.name}
-                              style={{ zIndex: 2 + i }}
-                            >
-                              {campaign.name}
-                            </div>
+                            <Tooltip key={campaign.id}>
+                              <TooltipTrigger asChild>
+                                <div
+                                  className={`rounded px-1 py-0.5 text-xs border truncate cursor-pointer hover:shadow-sm transition-shadow ${badgeColor(campaign.type)}`}
+                                  onClick={() => { setSelectedCampaign(campaign); setDialogOpen(true); }}
+                                  style={{ zIndex: 2 + i }}
+                                >
+                                  {campaign.name}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-xs">
+                                <div className="space-y-1">
+                                  <p className="font-medium">{campaign.name}</p>
+                                  <p className="text-xs"><span className="font-medium">Канал:</span> {campaign.channel}</p>
+                                  <p className="text-xs"><span className="font-medium">Сегмент:</span> {campaign.segment}</p>
+                                  <p className="text-xs"><span className="font-medium">Статус:</span> <span className={`${campaign.status === 'active' ? 'text-green-600' : campaign.status === 'paused' ? 'text-yellow-600' : 'text-gray-600'}`}>{campaign.status}</span></p>
+                                  <p className="text-xs"><span className="font-medium">Цель:</span> {campaign.goal}</p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
                           ))}
                           {events.length > 4 && (
-                            <div className="text-xs text-muted-foreground">+{events.length - 4} ещё</div>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div 
+                                  className="text-xs text-blue-600 font-semibold cursor-pointer mt-1 hover:text-blue-800 transition-colors"
+                                  onClick={() => {
+                                    // TODO: Открыть диалог со всеми событиями за день
+                                    console.log('Показать все события за день:', events);
+                                  }}
+                                >
+                                  +{events.length - 4} ещё
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-sm">
+                                <div className="space-y-1">
+                                  <p className="font-medium">Остальные события ({events.length - 4}):</p>
+                                  {events.slice(4).map(event => (
+                                    <p key={event.id} className="text-xs">• {event.name}</p>
+                                  ))}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
                           )}
                         </div>
                         {/* Оверлей при наведении */}
@@ -242,18 +338,49 @@ export default function CalendarPage() {
                         <span className={`font-medium ${dayInfo.isCurrentMonth ? '' : 'text-muted-foreground'}`}>{dayInfo.day.getDate()}</span>
                         <div className="mt-1 flex flex-col gap-1">
                           {events.slice(0, 4).map((campaign, i) => (
-                            <div
-                              key={campaign.id}
-                              className={`rounded px-1 py-0.5 text-xs border truncate cursor-pointer ${badgeColor(campaign.type)}`}
-                              onClick={() => { setSelectedCampaign(campaign); setDialogOpen(true); }}
-                              title={campaign.name}
-                              style={{ zIndex: 2 + i }}
-                            >
-                              {campaign.name}
-                            </div>
+                            <Tooltip key={campaign.id}>
+                              <TooltipTrigger asChild>
+                                <div
+                                  className={`rounded px-1 py-0.5 text-xs border truncate cursor-pointer hover:shadow-sm transition-shadow ${badgeColor(campaign.type)}`}
+                                  onClick={() => { setSelectedCampaign(campaign); setDialogOpen(true); }}
+                                  style={{ zIndex: 2 + i }}
+                                >
+                                  {campaign.name}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-xs">
+                                <div className="space-y-1">
+                                  <p className="font-medium">{campaign.name}</p>
+                                  <p className="text-xs"><span className="font-medium">Канал:</span> {campaign.channel}</p>
+                                  <p className="text-xs"><span className="font-medium">Сегмент:</span> {campaign.segment}</p>
+                                  <p className="text-xs"><span className="font-medium">Статус:</span> <span className={`${campaign.status === 'active' ? 'text-green-600' : campaign.status === 'paused' ? 'text-yellow-600' : 'text-gray-600'}`}>{campaign.status}</span></p>
+                                  <p className="text-xs"><span className="font-medium">Цель:</span> {campaign.goal}</p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
                           ))}
                           {events.length > 4 && (
-                            <div className="text-xs text-muted-foreground">+{events.length - 4} ещё</div>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div 
+                                  className="text-xs text-blue-600 font-semibold cursor-pointer mt-1 hover:text-blue-800 transition-colors"
+                                  onClick={() => {
+                                    // TODO: Открыть диалог со всеми событиями за день
+                                    console.log('Показать все события за день:', events);
+                                  }}
+                                >
+                                  +{events.length - 4} ещё
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-sm">
+                                <div className="space-y-1">
+                                  <p className="font-medium">Остальные события ({events.length - 4}):</p>
+                                  {events.slice(4).map(event => (
+                                    <p key={event.id} className="text-xs">• {event.name}</p>
+                                  ))}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
                           )}
                         </div>
                         {/* Оверлей при наведении */}
@@ -284,13 +411,13 @@ export default function CalendarPage() {
           </TooltipProvider>
           {/* Диалог карточки кампании */}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               {selectedCampaign && (
                 <>
                   <DialogHeader>
                     <DialogTitle>{selectedCampaign.name}</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <div className="flex flex-wrap gap-2">
                       <Badge>{selectedCampaign.typeDetail}</Badge>
                       <Badge>{selectedCampaign.status}</Badge>
@@ -303,10 +430,83 @@ export default function CalendarPage() {
                     <div><b>Триггер:</b> {selectedCampaign.triggers}</div>
                     <div><b>Тексты:</b> {selectedCampaign.texts}</div>
                     {selectedCampaign.media && <div><b>Медиа:</b> {selectedCampaign.media}</div>}
+
+                    {/* === СТАТИСТИКА ЭФФЕКТИВНОСТИ === */}
+                    <div className="mt-6 pt-4 border-t">
+                      <h4 className="font-semibold text-lg mb-4">Статистика эффективности</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="p-3 bg-muted rounded-lg">
+                          <div className="text-muted-foreground mb-1">Delivery Rate</div>
+                          <div className="font-bold text-xl text-green-600">98.5%</div>
+                        </div>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <div className="text-muted-foreground mb-1">Open Rate</div>
+                          <div className="font-bold text-xl">42.1%</div>
+                        </div>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <div className="text-muted-foreground mb-1">Click-Through Rate (CTR)</div>
+                          <div className="font-bold text-xl">15.8%</div>
+                        </div>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <div className="text-muted-foreground mb-1">Conversion Rate (CR)</div>
+                          <div className="font-bold text-xl text-green-600">9.2%</div>
+                        </div>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <div className="text-muted-foreground mb-1">Доход (Revenue)</div>
+                          <div className="font-bold text-xl">€1,230</div>
+                        </div>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <div className="text-muted-foreground mb-1">ROI</div>
+                          <div className="font-bold text-xl text-green-600">185%</div>
+                        </div>
+                      </div>
+                      
+                      {/* Дополнительные метрики */}
+                      <div className="mt-4">
+                        <h5 className="font-medium mb-2">Детальные показатели</h5>
+                        <div className="grid grid-cols-3 gap-3 text-sm">
+                          <div className="p-2 bg-slate-50 rounded">
+                            <div className="text-muted-foreground">Отправлено</div>
+                            <div className="font-semibold">2,450</div>
+                          </div>
+                          <div className="p-2 bg-slate-50 rounded">
+                            <div className="text-muted-foreground">Доставлено</div>
+                            <div className="font-semibold">2,413</div>
+                          </div>
+                          <div className="p-2 bg-slate-50 rounded">
+                            <div className="text-muted-foreground">Открыто</div>
+                            <div className="font-semibold">1,016</div>
+                          </div>
+                          <div className="p-2 bg-slate-50 rounded">
+                            <div className="text-muted-foreground">Кликов</div>
+                            <div className="font-semibold">381</div>
+                          </div>
+                          <div className="p-2 bg-slate-50 rounded">
+                            <div className="text-muted-foreground">Конверсий</div>
+                            <div className="font-semibold">35</div>
+                          </div>
+                          <div className="p-2 bg-slate-50 rounded">
+                            <div className="text-muted-foreground">Средний депозит</div>
+                            <div className="font-semibold">€35.14</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Влияние на retention */}
+                      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Влияние на Retention:</span>
+                          <span className="font-bold text-blue-600">+12.5%</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Игроки, получившие эту коммуникацию, на 12.5% чаще возвращаются в течение 7 дней
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <DialogFooter className="flex flex-row gap-2 justify-end">
+                  <DialogFooter className="flex flex-row gap-2 justify-end pt-4">
                     <Button variant="outline" onClick={() => {/* TODO: клон */}}>Клонировать</Button>
-                    <Button variant="outline" onClick={() => {/* TODO: edit */}}>Редактировать</Button>
+                    <Button variant="outline" onClick={() => handleEditClick(selectedCampaign)}>Редактировать</Button>
                     <Button variant="destructive" onClick={() => {/* TODO: pause/stop */}}>{selectedCampaign.status === 'active' ? 'Приостановить' : 'Активировать'}</Button>
                   </DialogFooter>
                 </>
@@ -315,6 +515,24 @@ export default function CalendarPage() {
           </Dialog>
         </CardContent>
       </Card>
+
+      {/* Конструктор сценариев в полноэкранном режиме */}
+      {isBuilderOpen && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <div className="flex items-center gap-2 p-4 border-b">
+            <Button variant="ghost" size="sm" onClick={handleBuilderClose}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Вернуться в календарь
+            </Button>
+            <div className="text-sm text-muted-foreground">
+              Редактирование сценария: <span className="font-medium">{editingScenario?.name}</span>
+            </div>
+          </div>
+          <div className="h-[calc(100vh-64px)]">
+            <ScenariosBuilder />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
