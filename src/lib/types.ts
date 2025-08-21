@@ -263,6 +263,89 @@ export type ScenarioAction = {
   reason?: string;
 };
 
+// Advanced Segment Builder Types
+export type SegmentOperator = 
+  | "equals" | "not_equals" 
+  | "greater_than" | "less_than" 
+  | "greater_than_or_equal" | "less_than_or_equal"
+  | "between" | "not_between"
+  | "in_list" | "not_in_list"
+  | "contains" | "not_contains"
+  | "starts_with" | "ends_with"
+  | "is_null" | "is_not_null";
+
+export type SegmentParameterType = 
+  | "number" | "string" | "date" | "boolean" 
+  | "list" | "range" | "currency" | "percentage";
+
+export type SegmentParameterGroup = 
+  | "financial" | "gaming" | "marketing" 
+  | "profile" | "risk" | "ai_predictive";
+
+export type SegmentParameter = {
+  id: string;
+  name: string;
+  description: string;
+  group: SegmentParameterGroup;
+  type: SegmentParameterType;
+  unit?: string;
+  options?: string[]; // For list-type parameters
+  min?: number;
+  max?: number;
+};
+
+export type SegmentConditionValue = 
+  | string | number | boolean | Date 
+  | string[] | number[] 
+  | { min: number; max: number }
+  | { start: Date; end: Date };
+
+export type SegmentCondition = {
+  id: string;
+  parameter: string; // Parameter ID
+  operator: SegmentOperator;
+  value: SegmentConditionValue;
+  isNegated?: boolean; // For NOT conditions
+};
+
+export type SegmentConditionGroup = {
+  id: string;
+  type: "AND" | "OR";
+  conditions: (SegmentCondition | SegmentConditionGroup)[];
+  isNegated?: boolean;
+};
+
+export type SegmentBuilder = {
+  id?: string;
+  name: string;
+  description?: string;
+  rootGroup: SegmentConditionGroup;
+  estimatedCount?: number;
+  isTemplate?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+};
+
+export type SegmentPreview = {
+  count: number;
+  percentage: number;
+  samplePlayers?: any[];
+  breakdown?: {
+    [key: string]: number;
+  };
+};
+
+export type SegmentTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  builder: SegmentBuilder;
+  usageCount: number;
+  createdAt: string;
+};
+
 export type ChartData = {
   date: string;
   value: number | null;
