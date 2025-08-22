@@ -82,9 +82,7 @@ export default function SegmentsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Здесь будут расширенные фильтры для поиска сегментов
-          </p>
+          <SegmentFilters />
         </CardContent>
       </Card>
 
@@ -1031,4 +1029,332 @@ function countConditions(group: SegmentConditionGroup): number {
     }
     return count + 1;
   }, 0);
+}
+
+// Segment Filters Component
+function SegmentFilters() {
+  const [filters, setFilters] = React.useState({
+    search: '',
+    author: '',
+    dateFrom: '',
+    dateTo: '',
+    minPlayers: '',
+    maxPlayers: '',
+    categories: [] as string[],
+    projects: [] as string[],
+    countries: [] as string[],
+    status: '',
+    source: ''
+  });
+
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
+  const authorOptions = [
+    { value: 'all', label: 'Все авторы' },
+    { value: 'user', label: 'Пользователь' },
+    { value: 'ai', label: 'AI' }
+  ];
+
+  const categoryOptions = [
+    { value: 'vip', label: 'VIP' },
+    { value: 'retention', label: 'Retention' },
+    { value: 'churn', label: 'Churn' },
+    { value: 'reactivation', label: 'Реактивация' },
+    { value: 'onboarding', label: 'Онбординг' },
+    { value: 'engagement', label: 'Вовлечение' },
+    { value: 'conversion', label: 'Конверсия' }
+  ];
+
+  const projectOptions = [
+    { value: 'AIGAMING.BOT', label: 'AIGAMING.BOT' },
+    { value: 'CasinoX', label: 'CasinoX' },
+    { value: 'LuckyWheel', label: 'LuckyWheel' },
+    { value: 'GoldenPlay', label: 'GoldenPlay' }
+  ];
+
+  const countryOptions = [
+    { value: 'de', label: 'Германия' },
+    { value: 'fr', label: 'Франция' },
+    { value: 'it', label: 'Италия' },
+    { value: 'es', label: 'Испания' },
+    { value: 'uk', label: 'Великобритания' },
+    { value: 'pl', label: 'Польша' },
+    { value: 'nl', label: 'Нидерланды' },
+    { value: 'pt', label: 'Португалия' },
+    { value: 'ru', label: 'Россия' },
+    { value: 'ua', label: 'Украина' }
+  ];
+
+  const statusOptions = [
+    { value: 'all', label: 'Все статусы' },
+    { value: 'active', label: 'Активные' },
+    { value: 'inactive', label: 'Неактивные' },
+    { value: 'draft', label: 'Черновики' }
+  ];
+
+  const sourceOptions = [
+    { value: 'all', label: 'Все источники' },
+    { value: 'manual', label: 'Ручное создание' },
+    { value: 'template', label: 'Из шаблона' },
+    { value: 'import', label: 'Импорт' },
+    { value: 'ai_generated', label: 'AI генерация' }
+  ];
+
+  const handleInputChange = (field: string, value: any) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleMultiSelectChange = (field: string, values: string[]) => {
+    setFilters(prev => ({ ...prev, [field]: values }));
+  };
+
+  const applyFilters = () => {
+    console.log('Applied filters:', filters);
+    // Здесь будет логика применения фильтров
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      search: '',
+      author: '',
+      dateFrom: '',
+      dateTo: '',
+      minPlayers: '',
+      maxPlayers: '',
+      categories: [],
+      projects: [],
+      countries: [],
+      status: '',
+      source: ''
+    });
+  };
+
+  const activeFiltersCount = Object.values(filters).filter(value => 
+    Array.isArray(value) ? value.length > 0 : value !== ''
+  ).length;
+
+  return (
+    <div className="space-y-4">
+      {/* Основные фильтры - всегда видимы */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Поиск */}
+        <div className="space-y-2">
+          <Label htmlFor="search">Поиск по названию</Label>
+          <Input
+            id="search"
+            placeholder="Введите название сегмента..."
+            value={filters.search}
+            onChange={(e) => handleInputChange('search', e.target.value)}
+          />
+        </div>
+
+        {/* Автор */}
+        <div className="space-y-2">
+          <Label>Автор</Label>
+          <Select value={filters.author} onValueChange={(value) => handleInputChange('author', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Выберите автора" />
+            </SelectTrigger>
+            <SelectContent>
+              {authorOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  <div className="flex items-center gap-2">
+                    {option.value === 'ai' && <Bot className="h-4 w-4" />}
+                    {option.value === 'user' && <Users className="h-4 w-4" />}
+                    {option.label}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Категория */}
+        <div className="space-y-2">
+          <Label>Категории</Label>
+          <div className="flex flex-wrap gap-1">
+            {categoryOptions.map(option => (
+              <Badge
+                key={option.value}
+                variant={filters.categories.includes(option.value) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => {
+                  const newCategories = filters.categories.includes(option.value)
+                    ? filters.categories.filter(c => c !== option.value)
+                    : [...filters.categories, option.value];
+                  handleMultiSelectChange('categories', newCategories);
+                }}
+              >
+                {option.label}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {/* Количество игроков */}
+        <div className="space-y-2">
+          <Label>Количество игроков</Label>
+          <div className="flex gap-2">
+            <Input
+              placeholder="От"
+              type="number"
+              value={filters.minPlayers}
+              onChange={(e) => handleInputChange('minPlayers', e.target.value)}
+            />
+            <Input
+              placeholder="До"
+              type="number"
+              value={filters.maxPlayers}
+              onChange={(e) => handleInputChange('maxPlayers', e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Кнопка развернуть/свернуть */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <Filter className="mr-2 h-4 w-4" />
+          {isExpanded ? 'Скрыть' : 'Показать'} расширенные фильтры
+          <Badge variant="secondary" className="ml-2">
+            {activeFiltersCount}
+          </Badge>
+        </Button>
+        
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={resetFilters}>
+            Сброс
+          </Button>
+          <Button size="sm" onClick={applyFilters}>
+            Применить фильтры
+          </Button>
+        </div>
+      </div>
+
+      {/* Расширенные фильтры */}
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <CollapsibleContent className="space-y-4">
+          <Separator />
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* Дата создания */}
+            <div className="space-y-2">
+              <Label>Дата создания</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) => handleInputChange('dateFrom', e.target.value)}
+                />
+                <Input
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(e) => handleInputChange('dateTo', e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Проекты */}
+            <div className="space-y-2">
+              <Label>Проекты</Label>
+              <div className="flex flex-wrap gap-1">
+                {projectOptions.map(option => (
+                  <Badge
+                    key={option.value}
+                    variant={filters.projects.includes(option.value) ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      const newProjects = filters.projects.includes(option.value)
+                        ? filters.projects.filter(p => p !== option.value)
+                        : [...filters.projects, option.value];
+                      handleMultiSelectChange('projects', newProjects);
+                    }}
+                  >
+                    {option.label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Страны */}
+            <div className="space-y-2">
+              <Label>Геолокация</Label>
+              <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                {countryOptions.map(option => (
+                  <Badge
+                    key={option.value}
+                    variant={filters.countries.includes(option.value) ? "default" : "outline"}
+                    className="cursor-pointer text-xs"
+                    onClick={() => {
+                      const newCountries = filters.countries.includes(option.value)
+                        ? filters.countries.filter(c => c !== option.value)
+                        : [...filters.countries, option.value];
+                      handleMultiSelectChange('countries', newCountries);
+                    }}
+                  >
+                    {option.label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Статус */}
+            <div className="space-y-2">
+              <Label>Статус</Label>
+              <Select value={filters.status} onValueChange={(value) => handleInputChange('status', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите статус" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Источник создания */}
+            <div className="space-y-2">
+              <Label>Источник создания</Label>
+              <Select value={filters.source} onValueChange={(value) => handleInputChange('source', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите источник" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sourceOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        {option.value === 'ai_generated' && <Brain className="h-4 w-4" />}
+                        {option.value === 'template' && <Copy className="h-4 w-4" />}
+                        {option.value === 'import' && <Download className="h-4 w-4" />}
+                        {option.value === 'manual' && <Settings className="h-4 w-4" />}
+                        {option.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={resetFilters}>
+              <X className="mr-2 h-4 w-4" />
+              Сбросить все
+            </Button>
+            <Button onClick={applyFilters}>
+              <Filter className="mr-2 h-4 w-4" />
+              Применить фильтры
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
+  );
 }
