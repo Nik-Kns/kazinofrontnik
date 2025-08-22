@@ -107,7 +107,7 @@ export default function AnalyticsPage() {
           <TabsTrigger value="retention"><TrendingUp className="mr-2 h-4 w-4" />Retention</TabsTrigger>
           <TabsTrigger value="crm"><Users className="mr-2 h-4 w-4" />CRM</TabsTrigger>
           <TabsTrigger value="finance"><HandCoins className="mr-2 h-4 w-4" />Финансы</TabsTrigger>
-          <TabsTrigger value="detailed"><BarChart3 className="mr-2 h-4 w-4" />25 метрик</TabsTrigger>
+          <TabsTrigger value="detailed"><BarChart3 className="mr-2 h-4 w-4" />Отчеты</TabsTrigger>
         </TabsList>
 
         <TabsContent value="kpi-summary" className="space-y-6">
