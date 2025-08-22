@@ -1,190 +1,143 @@
 "use client";
 
-import React from 'react';
-import {
-    Node,
-    Edge,
-    OnConnect,
-    useNodesState,
-    useEdgesState,
-    addEdge,
-    ReactFlowProvider,
-} from 'reactflow';
-import {
-    ResizableHandle,
-    ResizablePanel,
-    ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import {
-    Activity,
-    GitBranch,
-    CheckCircle,
-    Mail,
-    Gift,
-    Sparkles,
-    ArrowLeft,
-    BotMessageSquare
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ScenarioBuilderSidebar, elementLibrary } from '@/components/builder/sidebar';
-import { ScenarioBuilderCanvas } from '@/components/builder/canvas';
-import { NodeConfigPanel } from '@/components/builder/settings';
-import { AiCopilotChat } from '@/components/ai/ai-copilot-chat';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { FunnelOverlay } from '@/components/builder/funnel-overlay';
+import * as React from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlusCircle, Zap, Settings } from "lucide-react";
+import { TemplatesGrid } from '@/components/builder/templates-grid';
+import { TemplateData } from '@/lib/types';
 
-// Mock data, to be replaced with API calls
-const initialNodes: Node[] = [
-    { id: '1', type: 'custom', position: { x: 250, y: 5 }, data: { label: 'Триггер: Попал в сегмент', description: 'Сегмент: Риск оттока (предиктивный)', icon: GitBranch, configType: 'segmentTrigger', stats: { entered: 5000, exited: 4500, conversion: 90 } } },
-    { id: '2', type: 'custom', position: { x: 250, y: 155 }, data: { label: 'Условие: VIP игрок?', description: 'Если Lifetime Spend > €1000', icon: GitBranch, configType: 'ifElseLogic', stats: { entered: 4500, exited: 4500, conversion: 100 } } },
-    { id: '3', type: 'custom', position: { x: 50, y: 305 }, data: { label: 'Действие: Начислить бонус', description: 'Тип: Кэшбек, Кол-во: 10%', icon: Gift, configType: 'bonusAction', stats: { entered: 500, exited: 480, conversion: 96 } } },
-    { id: '4', type: 'custom', position: { x: 450, y: 305 }, data: { label: 'Логика: A/B тест', description: 'Разделение 50% / 50%', icon: Activity, configType: 'abTestLogic', stats: { entered: 4000, exited: 4000, conversion: 100 } } },
-    { id: '5', type: 'custom', position: { x: 350, y: 455 }, data: { label: 'Действие: Email (Скидка)', description: 'Шаблон: "Скидка 15%"', icon: Mail, configType: 'emailAction', stats: { entered: 2000, exited: 500, conversion: 25 } } },
-    { id: '6', type: 'custom', position: { x: 550, y: 455 }, data: { label: 'Действие: Email (Бонус)', description: 'Шаблон: "Бонус 25 FS"', icon: Mail, configType: 'emailAction', stats: { entered: 2000, exited: 800, conversion: 40 } } },
-];
+// Динамический импорт Builder компонента для избежания SSR проблем
+const BuilderWrapper = React.lazy(() => import('./builder-standalone'));
 
-const initialEdges: Edge[] = [
-    { id: 'e1-2', source: '1', target: '2', animated: true, type: 'custom' },
-    { id: 'e2-3', source: '2', target: '3', label: 'Да', type: 'custom' },
-    { id: 'e2-4', source: '2', target: '4', label: 'Нет', type: 'custom' },
-    { id: 'e4-5', source: '4', target: '5', label: 'Ветка A', type: 'custom' },
-    { id: 'e4-6', source: '4', target: '6', label: 'Ветка B', type: 'custom' },
-];
+export default function ScenariosPage() {
+    const [isBuilderMode, setIsBuilderMode] = React.useState(false);
+    const [editingScenario, setEditingScenario] = React.useState<TemplateData | null>(null);
 
-interface ScenarioData {
-    id: string;
-    name: string;
-}
+    const handleEditTemplate = (templateData: TemplateData) => {
+        setEditingScenario(templateData); // Передаем данные шаблона для редактирования
+        setIsBuilderMode(true);
+    };
+    
+    const handleCloneTemplate = (templateData: TemplateData) => {
+        // Клонируем шаблон (создаем копию с новым ID)
+        const clonedTemplate = {
+            ...templateData,
+            id: `${templateData.id}_clone_${Date.now()}`,
+            name: `${templateData.name} (копия)`
+        };
+        setEditingScenario(clonedTemplate);
+        setIsBuilderMode(true);
+    };
+    
+    const handleCreateNew = () => {
+        setEditingScenario(null); // Создаем новый сценарий
+        setIsBuilderMode(true);
+    };
 
-const BuilderHeader = ({ onExit, scenario, onCopilotOpen }: { onExit: () => void; scenario: ScenarioData | null; onCopilotOpen: () => void }) => (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background/95 px-6 flex-wrap gap-2 z-10">
-        <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon" onClick={onExit}>
-                <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-                <h1 className="text-xl font-bold tracking-tight">{scenario?.name || "Новый сценарий"}</h1>
-                <p className="text-sm text-muted-foreground">Создавайте автоматизированные CRM-цепочки</p>
-            </div>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" size="sm"> <Sparkles className="mr-2 h-4 w-4" />Prettify</Button>
-            <Button variant="outline">Сохранить как черновик</Button>
-            <Button>Активировать сценарий</Button>
-            <Button variant="default" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={onCopilotOpen}>
-                <BotMessageSquare className="mr-2 h-4 w-4" />
-                AI Co-pilot
-            </Button>
-        </div>
-    </header>
-);
+    const handleBuilderExit = () => {
+        setIsBuilderMode(false);
+        setEditingScenario(null);
+    };
 
-const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: ScenarioData | null }) => {
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-    const [selectedNode, setSelectedNode] = React.useState<Node | null>(null);
-    const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-    const [isCopilotOpen, setIsCopilotOpen] = React.useState(false);
-
-    const onConnect: OnConnect = React.useCallback(
-        (params) => setEdges((eds) => addEdge({ ...params, animated: true, type: 'custom' }, eds)),
-        [setEdges]
-    );
-
-    const handleNodeClick = React.useCallback((event: React.MouseEvent, node: Node) => {
-        setSelectedNode(node);
-        setIsSheetOpen(true);
-    }, []);
-
-    const funnelStats = React.useMemo(() => {
-        const sourceNodeIds = new Set(edges.map(e => e.source));
-        const terminalNodes = nodes.filter(n => !sourceNodeIds.has(n.id));
-
-        const totalEntered = nodes[0]?.data.stats.entered || 0;
-        const totalCompleted = terminalNodes.reduce((sum, node) => sum + (node.data.stats?.exited || 0), 0);
-        const totalConversion = totalEntered > 0 ? (totalCompleted / totalEntered) * 100 : 0;
-        
-        return { totalEntered, totalCompleted, totalConversion };
-    }, [nodes, edges]);
-
-    return (
-        <div className="fixed inset-0 bg-background z-50 flex flex-col">
-            <BuilderHeader onExit={onExit} scenario={scenario} onCopilotOpen={() => setIsCopilotOpen(true)} />
-            <div className="flex flex-1 flex-row overflow-hidden">
-                <ScenarioBuilderSidebar />
-                <main className="flex-1 relative">
-                    <ScenarioBuilderCanvas
-                        nodes={nodes}
-                        edges={edges}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        onConnect={onConnect}
-                        onNodeClick={handleNodeClick}
-                        setNodes={setNodes}
-                    />
-                    <FunnelOverlay stats={funnelStats} />
-                </main>
-            </div>
-            <NodeConfigPanel node={selectedNode} isOpen={isSheetOpen} onOpenChange={setIsSheetOpen} />
-            <Sheet open={isCopilotOpen} onOpenChange={setIsCopilotOpen}>
-                <SheetContent className="sm:max-w-lg">
-                    <SheetHeader>
-                        <SheetTitle className="flex items-center gap-2"><BotMessageSquare /> AI Co-pilot</SheetTitle>
-                        <SheetDescription>
-                            Ваш помощник в создании эффективных сценариев. Опишите задачу, и AI предложит решение.
-                        </SheetDescription>
-                    </SheetHeader>
-                    <div className="py-4 h-[calc(100%-80px)]">
-                        <AiCopilotChat copilotType="scenario_builder" />
+    if (isBuilderMode) {
+        return (
+            <React.Suspense fallback={
+                <div className="flex items-center justify-center h-screen">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                        <p className="text-muted-foreground">Загружаем конструктор...</p>
                     </div>
-                </SheetContent>
-            </Sheet>
-        </div>
-    );
-};
-
-
-const BuilderWrapper = (props: { onExit: () => void; scenario: ScenarioData | null }) => (
-    <ReactFlowProvider>
-        <Builder {...props} />
-    </ReactFlowProvider>
-);
-
-const scenarios: ScenarioData[] = [
-    { id: '1', name: 'Событие: Первый депозит' },
-    { id: '2', name: 'Условие: VIP игрок' },
-    { id: '3', name: 'Логика: A/B тест' },
-];
-
-export default function BuilderPage() {
-    const [activeScenario, setActiveScenario] = React.useState<ScenarioData | null>(scenarios[0]);
-    const [isBuilderActive, setIsBuilderActive] = React.useState(false);
-
-    if (isBuilderActive) {
-        return <BuilderWrapper onExit={() => setIsBuilderActive(false)} scenario={activeScenario} />;
+                </div>
+            }>
+                <BuilderWrapper onExit={handleBuilderExit} scenario={editingScenario} />
+            </React.Suspense>
+        );
     }
 
     return (
-        <div className="container mx-auto py-8">
-            <h1 className="text-3xl font-bold mb-6">Конструктор сценариев</h1>
-            <div className="space-y-4">
-                {scenarios.map(s => (
-                    <div key={s.id} className="p-4 border rounded-lg flex justify-between items-center">
-                        <div>
-                            <h2 className="font-semibold">{s.name}</h2>
-                        </div>
-                        <Button onClick={() => {
-                            setActiveScenario(s);
-                            setIsBuilderActive(true);
-                        }}>Редактировать</Button>
-                    </div>
-                ))}
+        <div className="p-4 md:p-6 lg:p-8 space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">Сценарии</h1>
+                    <p className="text-muted-foreground">
+                        Создавайте, управляйте и анализируйте ваши CRM-кампании и сценарии.
+                    </p>
+                </div>
             </div>
-            <div className="mt-6">
-                <Button onClick={() => {
-                    setActiveScenario(null);
-                    setIsBuilderActive(true);
-                }}>Создать новый сценарий</Button>
+            
+            {/* Раздел с шаблонами */}
+            <div id="templates-section">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 className="text-xl font-semibold">Библиотека шаблонов</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Готовые сценарии для быстрого старта. Клонируйте или редактируйте под свои нужды.
+                        </p>
+                    </div>
+                    <Button onClick={handleCreateNew}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Создать пустой сценарий
+                    </Button>
+                </div>
+                
+                <TemplatesGrid 
+                    onClone={handleCloneTemplate} 
+                    onEdit={handleEditTemplate}
+                />
+            </div>
+
+            {/* Раздел с конструктором */}
+            <div id="constructor-section" className="pt-8 mt-8 border-t">
+                <div className="grid gap-6 md:grid-cols-2">
+                    <Card className="relative overflow-hidden border-2 border-dashed hover:border-primary/50 transition-colors group">
+                        <CardHeader>
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                                    <Zap className="h-6 w-6 text-primary" />
+                                </div>
+                                <div>
+                                    <CardTitle>Быстрое создание</CardTitle>
+                                    <CardDescription>Создайте сценарий с нуля</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                                Используйте drag&drop конструктор для создания сложных многошаговых кампаний 
+                                с условной логикой, A/B тестами и персонализацией.
+                            </p>
+                            <Button size="lg" onClick={handleCreateNew} className="w-full">
+                                Перейти в конструктор
+                            </Button>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="relative overflow-hidden border-2 border-dashed hover:border-primary/50 transition-colors group">
+                        <CardHeader>
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                                    <Settings className="h-6 w-6 text-primary" />
+                                </div>
+                                <div>
+                                    <CardTitle>Расширенные функции</CardTitle>
+                                    <CardDescription>Мощные возможности для экспертов</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <ul className="text-sm text-muted-foreground space-y-2">
+                                <li>• Условная логика и ветвления</li>
+                                <li>• A/B тестирование кампаний</li>
+                                <li>• Интеграция с сегментами и метриками</li>
+                                <li>• AI-ассистент для оптимизации</li>
+                            </ul>
+                            <Button size="lg" variant="outline" onClick={handleCreateNew} className="w-full">
+                                Создать продвинутый сценарий
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     );
