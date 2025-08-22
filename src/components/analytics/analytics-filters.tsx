@@ -11,7 +11,7 @@ import { TrendingDown, TrendingUp, Settings } from "lucide-react";
 import { CollapsibleFilters } from "@/components/ui/collapsible-filters";
 import type { FilterConfig, FilterGroup } from "@/lib/types";
 
-const DEFAULT_IDS = ["ggr", "retention_rate", "ngr", "crm_spend", "arpu", "conversion_rate"];
+const DEFAULT_IDS = ["ggr", "retention_rate", "crm_spend", "arpu", "conversion_rate"];
 
 export function SelectedKpiTile() {
   const [open, setOpen] = useState(false);

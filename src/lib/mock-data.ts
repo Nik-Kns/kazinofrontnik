@@ -822,7 +822,7 @@ export const getPlayerDetails = (id: string) => {
             { title: "Средний депозит", value: "€52.50"},
             { title: "Всего депозитов", value: "24"},
             { title: "Всего выводов", value: "5"},
-            { title: "NGR (Net Gaming Revenue)", value: "€820"},
+
             { title: "RTP (Return to Player)", value: "96.5%"},
             { title: "Кол-во сессий (30д)", value: "48"},
             { title: "Сред. длит. сессии", value: "25 мин"},

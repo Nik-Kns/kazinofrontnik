@@ -1009,7 +1009,6 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {[
                     { title: 'GGR', value: 125340, change: +18.2 },
-                    { title: 'NGR', value: 71200, change: +9.6 },
                     { title: 'Всего депозитов', value: player.financial.totalDeposit, change: +5.0 },
                     { title: 'Всего выводов', value: player.financial.totalWithdrawal, change: -2.1 },
                     { title: 'Чистый доход', value: 125340 - player.financial.totalWithdrawal, change: +7.5 },

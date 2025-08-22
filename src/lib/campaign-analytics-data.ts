@@ -26,17 +26,7 @@ export const companyAnalyticsData: CompanyAnalytics = {
       target: 130000,
       description: 'Gross Gaming Revenue'
     },
-    {
-      id: 'ngr',
-      name: 'NGR',
-      value: '€71,200',
-      unit: '€',
-      change: 9.6,
-      trend: 'up',
-      status: 'good',
-      benchmark: 65000,
-      target: 75000
-    },
+
     {
       id: 'retention_d7',
       name: 'Retention D7',
@@ -395,7 +385,7 @@ export const savedAnalyticsViews: SavedAnalyticsView[] = [
       languages: [],
       gameProviders: []
     },
-    selectedKpis: ['ggr', 'ngr', 'retention_d7', 'arpu'],
+    selectedKpis: ['ggr', 'retention_d7', 'arpu'],
     createdAt: '2024-01-15T10:00:00Z',
     userId: 'user1'
   },

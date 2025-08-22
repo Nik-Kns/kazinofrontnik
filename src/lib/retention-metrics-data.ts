@@ -75,18 +75,7 @@ export const retentionMetrics: RetentionMetric[] = [
     trend: 'up',
     trendValue: '+18.2%'
   },
-  {
-    id: 'ngr',
-    name: 'NGR',
-    description: 'Net Gaming Revenue — чистый игровой доход (GGR минус бонусы/комиссии)',
-    value: 71200,
-    unit: '€',
-    category: 'revenue',
-    frequency: 'daily',
-    targetValue: 80000,
-    trend: 'up',
-    trendValue: '+9.6%'
-  },
+
   {
     id: 'crm_spend',
     name: 'CRM Spend',

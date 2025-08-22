@@ -60,7 +60,7 @@ export default function CampaignAnalyticsPage() {
   const [activeTab, setActiveTab] = React.useState("company");
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
   const [isKpiConfigOpen, setIsKpiConfigOpen] = React.useState(false);
-  const [selectedKpis, setSelectedKpis] = React.useState<string[]>(['ggr', 'ngr', 'retention_d7', 'arpu', 'conversion_rate', 'ltv']);
+  const [selectedKpis, setSelectedKpis] = React.useState<string[]>(['ggr', 'retention_d7', 'arpu', 'conversion_rate', 'ltv']);
   const [savedViews, setSavedViews] = React.useState<SavedAnalyticsView[]>(savedAnalyticsViews);
   
   const [filters, setFilters] = React.useState<AnalyticsFilters>({

@@ -72,16 +72,7 @@ export const segmentParameters: SegmentParameter[] = [
     min: 0,
     max: 500000
   },
-  {
-    id: 'ngr',
-    name: 'NGR игрока',
-    description: 'Net Gaming Revenue',
-    group: 'financial',
-    type: 'currency',
-    unit: '€',
-    min: -50000,
-    max: 500000
-  },
+
   {
     id: 'arpu',
     name: 'ARPU',
