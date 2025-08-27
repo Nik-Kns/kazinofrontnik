@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bot, Users, TrendingDown, TrendingUp, Euro, Calendar, Star, Lightbulb } from "lucide-react";
+import type { SegmentBuilder, SegmentCondition, SegmentConditionGroup } from '@/lib/types';
 
 // Типы для AI-сегментов
-interface AISegment {
+export interface AISegment {
   id: string;
   name: string;
   description: string;
@@ -106,7 +107,13 @@ const aiSegments: AISegment[] = [
   }
 ];
 
-export function AiSegmentsTab() {
+export function AiSegmentsTab({ 
+  onCreateSegment, 
+  onViewDetails 
+}: { 
+  onCreateSegment?: (segment: AISegment) => void;
+  onViewDetails?: (segment: AISegment) => void;
+}) {
   const [selectedSegment, setSelectedSegment] = React.useState<AISegment | null>(null);
 
   const getPriorityColor = (priority: string) => {
@@ -267,11 +274,26 @@ export function AiSegmentsTab() {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <Button size="sm" className="flex-1 h-8 text-xs">
+                <Button 
+                  size="sm" 
+                  className="flex-1 h-8 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCreateSegment?.(segment);
+                  }}
+                >
                   <Star className="mr-1 h-3 w-3" />
                   Создать сегмент
                 </Button>
-                <Button size="sm" variant="outline" className="h-8 text-xs">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="h-8 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewDetails?.(segment);
+                  }}
+                >
                   Подробнее
                 </Button>
               </div>
@@ -321,4 +343,104 @@ export function AiSegmentsTab() {
       </Card>
     </div>
   );
+}
+
+// Функция для конвертации AI-сегмента в данные конструктора
+export function convertAISegmentToBuilder(aiSegment: AISegment): SegmentBuilder {
+  // Создаем условия на основе AI-сегмента
+  const conditions: SegmentCondition[] = [];
+
+  // Базовые условия на основе типа сегмента
+  switch (aiSegment.id) {
+    case 'ai-churn-risk':
+      conditions.push({
+        id: 'condition_1',
+        parameter: 'last_deposit_days',
+        operator: 'greater_than',
+        value: 14
+      });
+      conditions.push({
+        id: 'condition_2',
+        parameter: 'total_deposits',
+        operator: 'greater_than',
+        value: 0
+      });
+      break;
+    case 'ai-vip-low-activity':
+      conditions.push({
+        id: 'condition_1',
+        parameter: 'ltv',
+        operator: 'greater_than',
+        value: 5000
+      });
+      conditions.push({
+        id: 'condition_2',
+        parameter: 'activity_change_7d',
+        operator: 'less_than',
+        value: -30
+      });
+      break;
+    case 'ai-new-no-deposit':
+      conditions.push({
+        id: 'condition_1',
+        parameter: 'registration_days',
+        operator: 'less_than_or_equal',
+        value: 7
+      });
+      conditions.push({
+        id: 'condition_2',
+        parameter: 'total_deposits',
+        operator: 'equals',
+        value: 0
+      });
+      break;
+    case 'ai-high-value-top10':
+      conditions.push({
+        id: 'condition_1',
+        parameter: 'avg_deposit_amount',
+        operator: 'greater_than',
+        value: 500
+      });
+      conditions.push({
+        id: 'condition_2',
+        parameter: 'total_deposit_amount',
+        operator: 'greater_than',
+        value: 5000
+      });
+      break;
+    case 'ai-no-deposit-active':
+      conditions.push({
+        id: 'condition_1',
+        parameter: 'session_count',
+        operator: 'greater_than_or_equal',
+        value: 10
+      });
+      conditions.push({
+        id: 'condition_2',
+        parameter: 'total_deposits',
+        operator: 'equals',
+        value: 0
+      });
+      break;
+    default:
+      // Базовое условие для неизвестных сегментов
+      conditions.push({
+        id: 'condition_1',
+        parameter: 'total_deposits',
+        operator: 'greater_than_or_equal',
+        value: 0
+      });
+  }
+
+  const rootGroup: SegmentConditionGroup = {
+    id: 'root',
+    type: 'AND',
+    conditions: conditions
+  };
+
+  return {
+    name: aiSegment.name,
+    description: `${aiSegment.description}\n\nУсловие: ${aiSegment.condition}\n\nAI рекомендация: ${aiSegment.aiRecommendation}`,
+    rootGroup
+  };
 }

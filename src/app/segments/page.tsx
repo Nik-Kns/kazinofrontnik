@@ -32,7 +32,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import { AiSegmentsTab } from "@/components/segments/ai-segments-tab";
+import { AiSegmentsTab, convertAISegmentToBuilder, type AISegment } from "@/components/segments/ai-segments-tab";
 
 import type { 
   SegmentData, 
@@ -58,6 +58,27 @@ export default function SegmentsPage() {
   const [selectedSegment, setSelectedSegment] = React.useState<SegmentData | null>(null);
   const [defaultTab, setDefaultTab] = React.useState("builder");
   const [activeMainTab, setActiveMainTab] = React.useState("all-segments");
+
+  // Обработчики для AI-сегментов
+  const handleCreateAISegment = (aiSegment: AISegment) => {
+    const segmentBuilder = convertAISegmentToBuilder(aiSegment);
+    setSelectedSegment(null);
+    setDefaultTab("builder");
+    setIsAdvancedBuilderOpen(true);
+    // Устанавливаем предзаполненные данные через ref или состояние
+    setPredefinedSegment(segmentBuilder);
+  };
+
+  const handleViewAISegmentDetails = (aiSegment: AISegment) => {
+    const segmentBuilder = convertAISegmentToBuilder(aiSegment);
+    setSelectedSegment(null);
+    setDefaultTab("builder");
+    setIsAdvancedBuilderOpen(true);
+    // Устанавливаем предзаполненные данные
+    setPredefinedSegment(segmentBuilder);
+  };
+
+  const [predefinedSegment, setPredefinedSegment] = React.useState<SegmentBuilder | null>(null);
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
@@ -215,7 +236,10 @@ export default function SegmentsPage() {
         </TabsContent>
 
         <TabsContent value="ai-segments">
-          <AiSegmentsTab />
+          <AiSegmentsTab 
+            onCreateSegment={handleCreateAISegment}
+            onViewDetails={handleViewAISegmentDetails}
+          />
         </TabsContent>
       </Tabs>
 
@@ -225,6 +249,8 @@ export default function SegmentsPage() {
         onOpenChange={setIsAdvancedBuilderOpen}
         segment={selectedSegment}
         defaultTab={defaultTab}
+        predefinedSegment={predefinedSegment}
+        onClearPredefined={() => setPredefinedSegment(null)}
       />
     </div>
   );
@@ -235,12 +261,16 @@ function AdvancedSegmentBuilder({
   open, 
   onOpenChange, 
   segment,
-  defaultTab
+  defaultTab,
+  predefinedSegment,
+  onClearPredefined
 }: { 
   open: boolean; 
   onOpenChange: (open: boolean) => void; 
   segment: SegmentData | null; 
   defaultTab: string;
+  predefinedSegment?: SegmentBuilder | null;
+  onClearPredefined?: () => void;
 }) {
   const [segmentBuilder, setSegmentBuilder] = React.useState<SegmentBuilder>({
     name: segment?.name || '',
@@ -260,7 +290,11 @@ function AdvancedSegmentBuilder({
   React.useEffect(() => {
     if (open) {
       setActiveTab(defaultTab);
-      if (!segment) {
+      if (predefinedSegment) {
+        // Используем предзаполненные данные из AI-сегмента
+        setSegmentBuilder(predefinedSegment);
+        setPreview({ count: 0, percentage: 0 });
+      } else if (!segment) {
         setSegmentBuilder({
           name: '',
           description: '',
@@ -272,8 +306,11 @@ function AdvancedSegmentBuilder({
         });
         setPreview({ count: 0, percentage: 0 });
       }
+    } else {
+      // Очищаем предзаполненные данные при закрытии
+      onClearPredefined?.();
     }
-  }, [open, segment, defaultTab]);
+  }, [open, segment, defaultTab, predefinedSegment, onClearPredefined]);
 
   const updateSegmentName = (name: string) => {
     setSegmentBuilder(prev => ({ ...prev, name }));
@@ -442,7 +479,18 @@ function AdvancedSegmentBuilder({
 
           <TabsContent value="ai-templates" className="flex-1 overflow-hidden">
             <ScrollArea className="h-[500px]">
-              <AiSegmentsTab />
+              <AiSegmentsTab 
+                onCreateSegment={(aiSegment) => {
+                  const segmentBuilder = convertAISegmentToBuilder(aiSegment);
+                  setSegmentBuilder(segmentBuilder);
+                  setActiveTab("builder");
+                }}
+                onViewDetails={(aiSegment) => {
+                  const segmentBuilder = convertAISegmentToBuilder(aiSegment);
+                  setSegmentBuilder(segmentBuilder);
+                  setActiveTab("builder");
+                }}
+              />
             </ScrollArea>
           </TabsContent>
 
