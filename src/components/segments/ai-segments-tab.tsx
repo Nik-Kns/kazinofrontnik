@@ -177,13 +177,13 @@ export function AiSegmentsTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-1">
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <Bot className="h-6 w-6 text-blue-600" />
-          <h3 className="text-xl font-semibold">Сегменты рекомендованные ИИ</h3>
-          <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+          <Bot className="h-5 w-5 text-blue-600" />
+          <h3 className="text-lg font-semibold">Сегменты рекомендованные ИИ</h3>
+          <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50 text-xs">
             Powered by AI
           </Badge>
         </div>
@@ -193,67 +193,60 @@ export function AiSegmentsTab() {
       </div>
 
       {/* AI Segments Grid */}
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-3 grid-cols-1">
         {aiSegments.map((segment) => (
           <Card 
             key={segment.id} 
             className="hover:shadow-md transition-shadow cursor-pointer"
             onClick={() => setSelectedSegment(segment)}
           >
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div className="space-y-1 flex-1">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-lg leading-tight">{segment.name}</CardTitle>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <CardTitle className="text-base leading-tight">{segment.name}</CardTitle>
                     <Badge 
                       variant="outline" 
-                      className={getPriorityColor(segment.priority)}
+                      className={`text-xs ${getPriorityColor(segment.priority)}`}
                     >
                       {getPriorityLabel(segment.priority)}
                     </Badge>
+                    <Badge variant="secondary" className="text-xs">{segment.category}</Badge>
                   </div>
-                  <CardDescription className="text-sm">
+                  <CardDescription className="text-xs">
                     {segment.description}
                   </CardDescription>
-                </div>
-              </div>
-              
-              {/* Category and Players Count */}
-              <div className="flex items-center justify-between pt-2">
-                <Badge variant="secondary">{segment.category}</Badge>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Users className="h-4 w-4" />
-                  <span className="font-medium">{segment.playersCount.toLocaleString()}</span>
-                  <span>игроков</span>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground pt-1">
+                    <Users className="h-3 w-3" />
+                    <span className="font-medium">{segment.playersCount.toLocaleString()}</span>
+                    <span>игроков</span>
+                  </div>
                 </div>
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 pt-0">
               {/* Condition */}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Условие сегментации
+                  Условие
                 </label>
-                <p className="text-sm bg-muted/30 p-2 rounded text-muted-foreground">
+                <p className="text-xs bg-muted/30 p-1.5 rounded text-muted-foreground">
                   {segment.condition}
                 </p>
               </div>
 
               {/* Metrics */}
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Ключевые метрики
+                  Метрики
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                  {Object.entries(segment.metrics).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-2">
+                <div className="grid grid-cols-3 gap-2">
+                  {Object.entries(segment.metrics).slice(0, 3).map(([key, value]) => (
+                    <div key={key} className="flex items-center gap-1">
                       {typeof getMetricIcon(key) === 'function' ? getMetricIcon(key)(value) : getMetricIcon(key)}
                       <div className="min-w-0 flex-1">
-                        <div className="text-xs text-muted-foreground">
-                          {getMetricLabel(key)}
-                        </div>
-                        <div className="text-sm font-medium truncate">
+                        <div className="text-xs font-medium truncate">
                           {formatMetricValue(key, value)}
                         </div>
                       </div>
@@ -263,26 +256,22 @@ export function AiSegmentsTab() {
               </div>
 
               {/* AI Recommendation */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                  <Lightbulb className="h-3 w-3" />
-                  AI рекомендация
-                </label>
-                <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                  <Bot className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                  <span className="text-sm font-medium text-blue-900">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 p-1.5 bg-blue-50 rounded border border-blue-200">
+                  <Bot className="h-3 w-3 text-blue-600 flex-shrink-0" />
+                  <span className="text-xs font-medium text-blue-900">
                     {segment.aiRecommendation}
                   </span>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2 pt-2">
-                <Button size="sm" className="flex-1">
-                  <Star className="mr-2 h-4 w-4" />
+              <div className="flex gap-2">
+                <Button size="sm" className="flex-1 h-8 text-xs">
+                  <Star className="mr-1 h-3 w-3" />
                   Создать сегмент
                 </Button>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" className="h-8 text-xs">
                   Подробнее
                 </Button>
               </div>
@@ -293,39 +282,39 @@ export function AiSegmentsTab() {
 
       {/* Stats Summary */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5 text-blue-600" />
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Bot className="h-4 w-4 text-blue-600" />
             Сводка по AI-сегментам
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-4 gap-3">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-lg font-bold text-blue-600">
                 {aiSegments.length}
               </div>
-              <div className="text-sm text-muted-foreground">Доступных сегментов</div>
+              <div className="text-xs text-muted-foreground">Сегментов</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-lg font-bold text-orange-600">
                 {aiSegments.filter(s => s.priority === 'high').length}
               </div>
-              <div className="text-sm text-muted-foreground">Высокий приоритет</div>
+              <div className="text-xs text-muted-foreground">Высокий приоритет</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">
-                {aiSegments.reduce((sum, s) => sum + s.playersCount, 0).toLocaleString()}
+              <div className="text-lg font-bold">
+                {Math.round(aiSegments.reduce((sum, s) => sum + s.playersCount, 0) / 1000)}k
               </div>
-              <div className="text-sm text-muted-foreground">Всего игроков</div>
+              <div className="text-xs text-muted-foreground">Игроков</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-lg font-bold text-green-600">
                 {Math.round(
                   aiSegments.reduce((sum, s) => sum + s.playersCount, 0) / 50000 * 100
                 )}%
               </div>
-              <div className="text-sm text-muted-foreground">Покрытие базы</div>
+              <div className="text-xs text-muted-foreground">Покрытие</div>
             </div>
           </div>
         </CardContent>

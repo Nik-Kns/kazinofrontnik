@@ -440,8 +440,10 @@ function AdvancedSegmentBuilder({
             <TabsTrigger value="preview">Предпросмотр</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="ai-templates" className="flex-1">
-            <AiSegmentsTab />
+          <TabsContent value="ai-templates" className="flex-1 overflow-hidden">
+            <ScrollArea className="h-[500px]">
+              <AiSegmentsTab />
+            </ScrollArea>
           </TabsContent>
 
           <TabsContent value="templates" className="flex-1">
