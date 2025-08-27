@@ -32,6 +32,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { AiSegmentsTab } from "@/components/segments/ai-segments-tab";
 
 import type { 
   SegmentData, 
@@ -53,9 +54,10 @@ import {
 } from '@/lib/segment-builder-data';
 
 export default function SegmentsPage() {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
   const [isAdvancedBuilderOpen, setIsAdvancedBuilderOpen] = React.useState(false);
   const [selectedSegment, setSelectedSegment] = React.useState<SegmentData | null>(null);
+  const [defaultTab, setDefaultTab] = React.useState("builder");
+  const [activeMainTab, setActiveMainTab] = React.useState("all-segments");
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
@@ -67,183 +69,162 @@ export default function SegmentsPage() {
             Создание и управление сегментами пользователей для CRM-кампаний.
           </p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
+        <Button onClick={() => {
+          setSelectedSegment(null);
+          setDefaultTab(activeMainTab === "ai-segments" ? "ai-templates" : "builder");
+          setIsAdvancedBuilderOpen(true);
+        }}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Создать сегмент
         </Button>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Filter className="mr-2 h-5 w-5 inline" />
-            Фильтры
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SegmentFilters />
-        </CardContent>
-      </Card>
+      {/* Main Tabs */}
+      <Tabs value={activeMainTab} onValueChange={setActiveMainTab}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="all-segments">Все сегменты</TabsTrigger>
+          <TabsTrigger value="ai-segments">
+            <div className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Сегменты рекомендованные ИИ
+            </div>
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Segments Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Список сегментов</CardTitle>
-          <CardDescription>
-            Все доступные сегменты пользователей.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Название</TableHead>
-                <TableHead>Описание</TableHead>
-                <TableHead>Игроков</TableHead>
-                <TableHead>Дата создания</TableHead>
-                <TableHead>Автор</TableHead>
-                <TableHead>Действия</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {segmentsData.map((segment) => (
-                <TableRow key={segment.id}>
-                  <TableCell className="font-medium">{segment.name}</TableCell>
-                  <TableCell className="max-w-md">
-                    <p className="text-sm text-muted-foreground truncate">
-                      {segment.description}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {segment.playerCount.toLocaleString()}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{segment.createdAt}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {segment.isAIGenerated ? (
-                        <Badge variant="outline" className="text-blue-600">
-                          <Bot className="mr-1 h-3 w-3" />
-                          AI
+        <TabsContent value="all-segments" className="space-y-6">
+          {/* Filters */}
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <Filter className="mr-2 h-5 w-5 inline" />
+                Фильтры
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SegmentFilters />
+            </CardContent>
+          </Card>
+
+          {/* Segments Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Список сегментов</CardTitle>
+              <CardDescription>
+                Все доступные сегменты пользователей.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Название</TableHead>
+                    <TableHead>Описание</TableHead>
+                    <TableHead>Игроков</TableHead>
+                    <TableHead>Дата создания</TableHead>
+                    <TableHead>Автор</TableHead>
+                    <TableHead>Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {segmentsData.map((segment) => (
+                    <TableRow key={segment.id}>
+                      <TableCell className="font-medium">{segment.name}</TableCell>
+                      <TableCell className="max-w-md">
+                        <p className="text-sm text-muted-foreground truncate">
+                          {segment.description}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {segment.playerCount.toLocaleString()}
                         </Badge>
-                      ) : (
-                        <Badge variant="outline">Пользователь</Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Просмотреть</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => {
-                                setSelectedSegment(segment);
-                                setIsAdvancedBuilderOpen(true);
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Редактировать</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      </TableCell>
+                      <TableCell>{segment.createdAt}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {segment.isAIGenerated ? (
+                            <Badge variant="outline" className="text-blue-600">
+                              <Bot className="mr-1 h-3 w-3" />
+                              AI
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline">Пользователь</Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Просмотреть</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => {
+                                    setSelectedSegment(segment);
+                                    setIsAdvancedBuilderOpen(true);
+                                  }}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Редактировать</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
 
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Копировать</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Копировать</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
 
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Удалить</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Удалить</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Simple Create Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Создание сегмента</DialogTitle>
-            <DialogDescription>
-              Создайте сегмент с помощью AI или настройте правила вручную.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex flex-col gap-4">
-            <Button 
-              className="justify-start" 
-              onClick={() => {
-                setIsCreateDialogOpen(false);
-                setSelectedSegment(null);
-                setIsAdvancedBuilderOpen(true);
-              }}
-            >
-              <Bot className="mr-2 h-4 w-4" />
-              Создать с AI
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="justify-start"
-              onClick={() => {
-                setIsCreateDialogOpen(false);
-                setSelectedSegment(null);
-                setIsAdvancedBuilderOpen(true);
-              }}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Ручная настройка
-            </Button>
-          </div>
-
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Отмена</Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <TabsContent value="ai-segments">
+          <AiSegmentsTab />
+        </TabsContent>
+      </Tabs>
 
       {/* Advanced Segment Builder */}
       <AdvancedSegmentBuilder 
         open={isAdvancedBuilderOpen}
         onOpenChange={setIsAdvancedBuilderOpen}
         segment={selectedSegment}
+        defaultTab={defaultTab}
       />
     </div>
   );
@@ -253,11 +234,13 @@ export default function SegmentsPage() {
 function AdvancedSegmentBuilder({ 
   open, 
   onOpenChange, 
-  segment 
+  segment,
+  defaultTab
 }: { 
   open: boolean; 
   onOpenChange: (open: boolean) => void; 
   segment: SegmentData | null; 
+  defaultTab: string;
 }) {
   const [segmentBuilder, setSegmentBuilder] = React.useState<SegmentBuilder>({
     name: segment?.name || '',
@@ -270,24 +253,27 @@ function AdvancedSegmentBuilder({
   });
 
   const [preview, setPreview] = React.useState<SegmentPreview>({ count: 0, percentage: 0 });
-  const [activeTab, setActiveTab] = React.useState('builder');
+  const [activeTab, setActiveTab] = React.useState(defaultTab);
   const [selectedTemplate, setSelectedTemplate] = React.useState<string>('');
 
   // Reset state when dialog opens/closes
   React.useEffect(() => {
-    if (open && !segment) {
-      setSegmentBuilder({
-        name: '',
-        description: '',
-        rootGroup: {
-          id: 'root',
-          type: 'AND',
-          conditions: []
-        }
-      });
-      setPreview({ count: 0, percentage: 0 });
+    if (open) {
+      setActiveTab(defaultTab);
+      if (!segment) {
+        setSegmentBuilder({
+          name: '',
+          description: '',
+          rootGroup: {
+            id: 'root',
+            type: 'AND',
+            conditions: []
+          }
+        });
+        setPreview({ count: 0, percentage: 0 });
+      }
     }
-  }, [open, segment]);
+  }, [open, segment, defaultTab]);
 
   const updateSegmentName = (name: string) => {
     setSegmentBuilder(prev => ({ ...prev, name }));
@@ -441,11 +427,22 @@ function AdvancedSegmentBuilder({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="ai-templates">
+                <div className="flex items-center gap-2">
+                    <Bot className="h-4 w-4" />
+                    <span>Сегменты от ИИ</span>
+                    <Badge variant="secondary" className="text-xs">New</Badge>
+                </div>
+            </TabsTrigger>
             <TabsTrigger value="templates">Шаблоны</TabsTrigger>
             <TabsTrigger value="builder">Конструктор</TabsTrigger>
             <TabsTrigger value="preview">Предпросмотр</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="ai-templates" className="flex-1">
+            <AiSegmentsTab />
+          </TabsContent>
 
           <TabsContent value="templates" className="flex-1">
             <SegmentTemplatesTab 

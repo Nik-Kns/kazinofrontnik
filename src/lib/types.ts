@@ -919,3 +919,25 @@ export type CustomerIOConfig = {
   trackingApiKey?: string;
   region?: 'us' | 'eu';
 };
+
+export type AiSegmentTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  metrics: {
+    playerCount: number;
+    retention: string;
+    avgNgr: string;
+  };
+  source: string;
+  updatedAt: string;
+  details: {
+    rules: {
+      field: string;
+      condition: string;
+      value: string;
+    }[];
+    recommendation: string;
+  };
+};
