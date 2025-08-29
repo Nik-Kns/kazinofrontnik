@@ -3,8 +3,18 @@
 import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Zap, Settings } from "lucide-react";
+import { PlusCircle, Zap, Settings, Bot, Layers, Target } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { TemplatesGrid } from '@/components/builder/templates-grid';
+import { AIScenariosTab, type AIScenario } from '@/components/builder/ai-scenarios-tab';
 import { TemplateData } from '@/lib/types';
 
 // Динамический импорт Builder компонента для избежания SSR проблем
@@ -13,6 +23,7 @@ const BuilderWrapper = React.lazy(() => import('./builder-standalone'));
 export default function ScenariosPage() {
     const [isBuilderMode, setIsBuilderMode] = React.useState(false);
     const [editingScenario, setEditingScenario] = React.useState<TemplateData | null>(null);
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
 
     const handleEditTemplate = (templateData: TemplateData) => {
         setEditingScenario(templateData); // Передаем данные шаблона для редактирования
@@ -33,6 +44,40 @@ export default function ScenariosPage() {
     const handleCreateNew = () => {
         setEditingScenario(null); // Создаем новый сценарий
         setIsBuilderMode(true);
+        setIsCreateDialogOpen(false); // Закрываем диалог
+    };
+
+    const handleCreateAIScenario = (aiScenario: AIScenario) => {
+        // Конвертируем AI-сценарий в TemplateData для передачи в builder
+        const templateData: TemplateData = {
+            id: `ai_${aiScenario.id}_${Date.now()}`,
+            name: aiScenario.name,
+            description: `${aiScenario.description}\n\nЦелевая метрика: ${aiScenario.targetMetric}\nОжидаемое улучшение: ${aiScenario.expectedImprovement}\nКаналы: ${aiScenario.channels.join(', ')}\nТриггеры: ${aiScenario.triggers.join(', ')}`,
+            type: 'ai-generated',
+            category: aiScenario.category.toLowerCase(),
+            channel: aiScenario.channels.length > 1 ? 'multi-channel' : aiScenario.channels[0].toLowerCase(),
+            performance: 5, // AI-сценарии имеют высокую оценку
+            usageCount: 0,
+            createdAt: new Date().toISOString(),
+            builder: {
+                name: aiScenario.name,
+                description: aiScenario.description,
+                rootGroup: {
+                    id: 'root',
+                    type: 'AND',
+                    conditions: []
+                }
+            }
+        };
+        setEditingScenario(templateData);
+        setIsBuilderMode(true);
+        setIsCreateDialogOpen(false);
+    };
+
+    const handleCreateFromScratch = () => {
+        setEditingScenario(null);
+        setIsBuilderMode(true);
+        setIsCreateDialogOpen(false);
     };
 
     const handleBuilderExit = () => {
@@ -41,14 +86,14 @@ export default function ScenariosPage() {
     };
 
     if (isBuilderMode) {
-        return (
+    return (
             <React.Suspense fallback={
                 <div className="flex items-center justify-center h-screen">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                         <p className="text-muted-foreground">Загружаем конструктор...</p>
                     </div>
-                </div>
+        </div>
             }>
                 <BuilderWrapper onExit={handleBuilderExit} scenario={editingScenario} />
             </React.Suspense>
@@ -58,13 +103,13 @@ export default function ScenariosPage() {
     return (
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
             <div className="flex items-center justify-between">
-                <div>
+                        <div>
                     <h1 className="text-2xl font-bold tracking-tight">Сценарии</h1>
                     <p className="text-muted-foreground">
                         Создавайте, управляйте и анализируйте ваши CRM-кампании и сценарии.
                     </p>
                 </div>
-            </div>
+                        </div>
             
             {/* Раздел с шаблонами */}
             <div id="templates-section">
@@ -75,7 +120,7 @@ export default function ScenariosPage() {
                             Готовые сценарии для быстрого старта. Клонируйте или редактируйте под свои нужды.
                         </p>
                     </div>
-                    <Button onClick={handleCreateNew}>
+                    <Button onClick={() => setIsCreateDialogOpen(true)}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Создать пустой сценарий
                     </Button>
@@ -139,6 +184,98 @@ export default function ScenariosPage() {
                     </Card>
                 </div>
             </div>
+
+            {/* Create Scenario Dialog */}
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Target className="h-5 w-5" />
+                            Создание сценария
+                        </DialogTitle>
+                        <DialogDescription>
+                            Выберите способ создания сценария: используйте AI-рекомендации, создайте с нуля или выберите готовый шаблон
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <Tabs defaultValue="ai-scenarios" className="flex-1 flex flex-col">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="ai-scenarios">
+                                <div className="flex items-center gap-2">
+                                    <Bot className="h-4 w-4" />
+                                    <span>ИИ сценарии</span>
+                                </div>
+                            </TabsTrigger>
+                            <TabsTrigger value="from-scratch">
+                                <div className="flex items-center gap-2">
+                                    <Zap className="h-4 w-4" />
+                                    <span>Создать с нуля</span>
+                                </div>
+                            </TabsTrigger>
+                            <TabsTrigger value="templates">
+                                <div className="flex items-center gap-2">
+                                    <Layers className="h-4 w-4" />
+                                    <span>Шаблоны сценариев</span>
+                                </div>
+                            </TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="ai-scenarios" className="flex-1 overflow-hidden">
+                            <ScrollArea className="h-[500px]">
+                                <AIScenariosTab onCreateScenario={handleCreateAIScenario} />
+                            </ScrollArea>
+                        </TabsContent>
+
+                        <TabsContent value="from-scratch" className="flex-1">
+                            <div className="flex items-center justify-center h-[500px]">
+                                <Card className="w-full max-w-md p-6 text-center">
+                                    <CardHeader>
+                                        <div className="p-4 bg-primary/10 rounded-full w-fit mx-auto mb-4">
+                                            <Zap className="h-8 w-8 text-primary" />
+                                        </div>
+                                        <CardTitle>Создать сценарий с нуля</CardTitle>
+                                        <CardDescription>
+                                            Используйте drag&drop конструктор для создания кампаний с условной логикой и персонализацией
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button size="lg" onClick={handleCreateFromScratch} className="w-full">
+                                            <Zap className="mr-2 h-5 w-5" />
+                                            Открыть конструктор
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="templates" className="flex-1 overflow-hidden">
+                            <ScrollArea className="h-[500px]">
+                                <div className="p-1">
+                                    <div className="space-y-2 mb-4">
+                                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                                            <Layers className="h-5 w-5" />
+                                            Шаблоны сценариев
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Готовые шаблоны для быстрого создания кампаний
+                                        </p>
+                                    </div>
+                                    <TemplatesGrid 
+                                        onClone={(template) => {
+                                            handleCloneTemplate(template);
+                                            setIsCreateDialogOpen(false);
+                                        }} 
+                                        onEdit={(template) => {
+                                            handleEditTemplate(template);
+                                            setIsCreateDialogOpen(false);
+                                        }}
+                                    />
+                                </div>
+                            </ScrollArea>
+                        </TabsContent>
+                    </Tabs>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
