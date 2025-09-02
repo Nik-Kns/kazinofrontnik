@@ -49,7 +49,7 @@ export interface PlayerCurrencyData {
   currencies: CurrencyCode[];
   is_multi_currency: boolean;
   primary_currency: CurrencyCode;
-  wallet_balances: Record<CurrencyCode, number>;
+  wallet_balances: Partial<Record<CurrencyCode, number>>;
   financial_metrics: {
     total_deposits: MultiCurrencyAmount;
     total_withdrawals: MultiCurrencyAmount;
