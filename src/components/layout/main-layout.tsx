@@ -8,6 +8,7 @@ import {
   PanelLeft,
   Moon,
   Sun,
+  Settings,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -22,12 +23,18 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import SidebarNav from "./sidebar-nav";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/contexts/currency-context";
+import { CurrencyBadge } from "@/components/ui/currency-badge";
+import { CurrencySettingsDialog } from "@/components/ui/currency-settings-dialog";
  
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [brand, setBrand] = React.useState<string>("aigaming");
   const [theme, setTheme] = React.useState<"light" | "dark">("light");
+  const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = React.useState(false);
+  
+  const { state: currencyState } = useCurrency();
   const BRAND_OPTIONS = React.useMemo(
     () => [
       {
@@ -160,6 +167,19 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          
+          {/* Базовая валюта */}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsCurrencySettingsOpen(true)}
+            className="gap-2 px-3"
+          >
+            <span className="text-xs font-medium text-muted-foreground">BASE:</span>
+            <CurrencyBadge currency={currencyState.base_currency} showFlag />
+            <Settings className="h-3 w-3 opacity-50" />
+          </Button>
+          
           <Button variant="ghost" size="icon" className="rounded-full">
             <Bell className="h-5 w-5" />
             <span className="sr-only">Уведомления</span>
@@ -191,6 +211,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             {children}
         </main>
       </div>
+      
+      {/* Диалог настроек валют */}
+      <CurrencySettingsDialog 
+        open={isCurrencySettingsOpen} 
+        onOpenChange={setIsCurrencySettingsOpen} 
+      />
     </div>
   );
 }
