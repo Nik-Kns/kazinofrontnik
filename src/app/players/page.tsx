@@ -5,6 +5,9 @@ import { PlayersTable } from "@/components/players/players-table";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Upload, Download } from "lucide-react";
 import { AdvancedFilters } from "@/components/ui/advanced-filters";
+import { CurrencyFilters, type CurrencyFiltersState } from "@/components/ui/currency-filters";
+import { CompactCurrencyToggle } from "@/components/ui/currency-toggle";
+import { Separator } from "@/components/ui/separator";
 import type { FilterConfig, FilterGroup } from "@/lib/types";
 
 // Конфигурация фильтров для страницы игроков (соответствует ТЗ)
@@ -39,11 +42,23 @@ const PLAYERS_FILTER_GROUPS: FilterGroup[] = [
 
 export default function PlayersPage() {
     const [filters, setFilters] = useState<FilterConfig>({});
+    const [currencyFilters, setCurrencyFilters] = useState<CurrencyFiltersState>({
+        display_mode: 'native',
+        selected_currencies: [],
+        is_multi_currency: undefined,
+        amount_range: undefined
+    });
 
     const handleFiltersChange = (newFilters: FilterConfig) => {
         setFilters(newFilters);
         // Здесь можно добавить логику фильтрации игроков
         console.log('Применены фильтры для игроков:', newFilters);
+    };
+
+    const handleCurrencyFiltersChange = (newCurrencyFilters: CurrencyFiltersState) => {
+        setCurrencyFilters(newCurrencyFilters);
+        // Здесь можно добавить логику валютной фильтрации
+        console.log('Применены валютные фильтры:', newCurrencyFilters);
     };
 
     return (
@@ -70,12 +85,38 @@ export default function PlayersPage() {
                     </Button>
                 </div>
             </div>
-            <AdvancedFilters
-                filters={filters}
-                onFiltersChange={handleFiltersChange}
-                filterGroups={PLAYERS_FILTER_GROUPS}
-            />
-            <PlayersTable filters={filters} />
+            
+            {/* Компактный переключатель валют в шапке */}
+            <div className="flex items-center justify-between py-2 border-b bg-muted/30 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8">
+                <CompactCurrencyToggle />
+                <div className="text-xs text-muted-foreground">
+                    {currencyFilters.selected_currencies.length > 0 && (
+                        `Фильтр: ${currencyFilters.selected_currencies.join(', ')}`
+                    )}
+                </div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                {/* Основные фильтры */}
+                <div className="lg:col-span-3">
+                    <AdvancedFilters
+                        filters={filters}
+                        onFiltersChange={handleFiltersChange}
+                        filterGroups={PLAYERS_FILTER_GROUPS}
+                    />
+                </div>
+                
+                {/* Валютные фильтры */}
+                <div className="lg:col-span-1">
+                    <CurrencyFilters
+                        value={currencyFilters}
+                        onChange={handleCurrencyFiltersChange}
+                        compact={false}
+                    />
+                </div>
+            </div>
+            
+            <PlayersTable filters={filters} currencyFilters={currencyFilters} />
         </div>
     );
 }

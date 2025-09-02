@@ -11,6 +11,7 @@ import { FlexibleCharts } from "@/components/analytics/flexible-charts";
 import { SegmentMetricsTable } from "@/components/analytics/segment-metrics-table";
 import { AlertsAndSignals } from "@/components/analytics/alerts-and-signals";
 import { CampaignDeepAnalytics } from "@/components/analytics/campaign-deep-analytics";
+import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
 import { HandCoins, TrendingUp, Users, BarChart3, Activity, Target } from "lucide-react";
 import Link from "next/link";
 import { CampaignPerformanceTable } from "@/components/analytics/campaign-performance-table";
@@ -88,6 +89,15 @@ export default function AnalyticsPage() {
               Аналитика кампаний
             </Button>
           </Link>
+        </div>
+      </div>
+
+      {/* Валютный переключатель */}
+      <div className="flex items-center justify-between py-3 border-b bg-muted/20 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8">
+        <CompactCurrencyToggle />
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Быстрое переключение:</span>
+          <CurrencyToggleButton size="sm" />
         </div>
       </div>
 

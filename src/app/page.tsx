@@ -18,6 +18,7 @@ import { retentionMetrics } from "@/lib/retention-metrics-data";
 import { Progress } from "@/components/ui/progress";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Label } from "@/components/ui/label";
+import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
 
 export default function CommandCenterPage() {
   const [savedFilters, setSavedFilters] = useState<FilterConfig | null>(null);
@@ -84,9 +85,15 @@ export default function CommandCenterPage() {
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold tracking-tight">Командный центр</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold tracking-tight">Командный центр</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <CompactCurrencyToggle />
+            <CurrencyToggleButton size="sm" />
+          </div>
         </div>
         <p className="text-muted-foreground">
           Полный мониторинг 25 ключевых метрик эффективности ретеншена и AI-рекомендации
