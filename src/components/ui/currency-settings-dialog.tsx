@@ -16,10 +16,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
-import { RefreshCw, Settings, Info, Calendar } from 'lucide-react';
+import { RefreshCw, Settings, Info, Calendar, AlertTriangle } from 'lucide-react';
 import { useCurrency } from '@/contexts/currency-context';
 import { CurrencyCode, CURRENCY_CONFIGS, RoundingMode, FxSource } from '@/lib/currency-types';
 import { CurrencyBadge } from './currency-badge';
+import { CurrencyErrorHandler } from './currency-error-handler';
 
 interface CurrencySettingsDialogProps {
   open: boolean;
@@ -210,11 +211,17 @@ export function CurrencySettingsDialog({ open, onOpenChange }: CurrencySettingsD
                 </Button>
               </div>
 
-              {state.error && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded text-sm text-destructive">
-                  {state.error}
-                </div>
-              )}
+              <CurrencyErrorHandler
+                error={state.error ? 'conversion_failed' : undefined}
+                fromCurrency="USD"
+                toCurrency={state.base_currency}
+              >
+                {state.error && (
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded text-sm text-destructive">
+                    {state.error}
+                  </div>
+                )}
+              </CurrencyErrorHandler>
             </CardContent>
           </Card>
 

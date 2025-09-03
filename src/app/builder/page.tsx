@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Zap, Settings, Bot, Layers, Target } from "lucide-react";
+import { PlusCircle, Zap, Settings, Bot, Layers, Target, DollarSign } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TemplatesGrid } from '@/components/builder/templates-grid';
 import { AIScenariosTab, type AIScenario } from '@/components/builder/ai-scenarios-tab';
 import { TemplateData } from '@/lib/types';
+import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
+import { CurrencyBadge } from "@/components/ui/currency-badge";
+import { useCurrency } from "@/contexts/currency-context";
 
 // Динамический импорт Builder компонента для избежания SSR проблем
 const BuilderWrapper = React.lazy(() => import('./builder-standalone'));
@@ -24,6 +27,9 @@ export default function ScenariosPage() {
     const [isBuilderMode, setIsBuilderMode] = React.useState(false);
     const [editingScenario, setEditingScenario] = React.useState<TemplateData | null>(null);
     const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
+    
+    // Валютные настройки
+    const { state: currencyState } = useCurrency();
 
     const handleEditTemplate = (templateData: TemplateData) => {
         setEditingScenario(templateData); // Передаем данные шаблона для редактирования
@@ -108,6 +114,12 @@ export default function ScenariosPage() {
                     <p className="text-muted-foreground">
                         Создавайте, управляйте и анализируйте ваши CRM-кампании и сценарии.
                     </p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <CompactCurrencyToggle />
+                    <div className="text-xs text-muted-foreground">
+                        Офферы в: <CurrencyBadge currency={currencyState.settings.base_currency} size="sm" />
+                    </div>
                 </div>
                         </div>
             

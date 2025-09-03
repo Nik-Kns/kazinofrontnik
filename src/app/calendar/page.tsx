@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { campaignsData } from "@/lib/mock-data";
-import { ChevronLeft, ChevronRight, PlusCircle, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, PlusCircle, ArrowLeft, DollarSign, Settings } from "lucide-react";
 import { useState, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
+import { CurrencyBadge, CurrencyAmountDisplay } from "@/components/ui/currency-badge";
+import { useCurrency } from "@/contexts/currency-context";
+import { formatCurrency } from "@/lib/currency-utils";
 import dynamic from "next/dynamic";
 
 // Динамически импортируем конструктор сценариев для избежания SSR проблем
@@ -113,6 +117,9 @@ export default function CalendarPage() {
   // Состояния для конструктора сценариев
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [editingScenario, setEditingScenario] = useState<any | null>(null);
+  
+  // Валютные настройки
+  const { state: currencyState } = useCurrency();
 
   // Фильтрация кампаний
   const filteredCampaigns = calendarCampaignsData.filter(c => {
@@ -165,6 +172,7 @@ export default function CalendarPage() {
             <CardDescription>Визуальный план всех активностей с просмотром по месяцам и неделям.</CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <CompactCurrencyToggle />
             <Tabs value={view} onValueChange={setView} className="mr-4">
               <TabsList>
                 <TabsTrigger value="month">Месяц</TabsTrigger>
@@ -433,7 +441,13 @@ export default function CalendarPage() {
 
                     {/* === СТАТИСТИКА ЭФФЕКТИВНОСТИ === */}
                     <div className="mt-6 pt-4 border-t">
-                      <h4 className="font-semibold text-lg mb-4">Статистика эффективности</h4>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-lg">Статистика эффективности</h4>
+                        <div className="flex items-center gap-2">
+                          <CurrencyToggleButton size="sm" showLabel={false} />
+                          <CurrencyBadge currency={currencyState.settings.base_currency} showFlag size="sm" />
+                        </div>
+                      </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="p-3 bg-muted rounded-lg">
                           <div className="text-muted-foreground mb-1">Delivery Rate</div>
@@ -452,8 +466,20 @@ export default function CalendarPage() {
                           <div className="font-bold text-xl text-green-600">9.2%</div>
                         </div>
                         <div className="p-3 bg-muted rounded-lg">
-                          <div className="text-muted-foreground mb-1">Доход (Revenue)</div>
-                          <div className="font-bold text-xl">€1,230</div>
+                          <div className="text-muted-foreground mb-1">
+                            Доход (Revenue)
+                            {currencyState.settings.display_in_base_currency && (
+                              <span className="ml-1 text-xs">
+                                в {currencyState.settings.base_currency}
+                              </span>
+                            )}
+                          </div>
+                          <div className="font-bold text-xl">
+                            {currencyState.settings.display_in_base_currency 
+                              ? formatCurrency(1230, currencyState.settings.base_currency)
+                              : "€1,230 • $1,340 • £1,080"
+                            }
+                          </div>
                         </div>
                         <div className="p-3 bg-muted rounded-lg">
                           <div className="text-muted-foreground mb-1">ROI</div>
@@ -487,7 +513,12 @@ export default function CalendarPage() {
                           </div>
                           <div className="p-2 bg-slate-50 rounded">
                             <div className="text-muted-foreground">Средний депозит</div>
-                            <div className="font-semibold">€35.14</div>
+                            <div className="font-semibold">
+                              {currencyState.settings.display_in_base_currency 
+                                ? formatCurrency(35.14, currencyState.settings.base_currency)
+                                : "€35.14"
+                              }
+                            </div>
                           </div>
                         </div>
                       </div>

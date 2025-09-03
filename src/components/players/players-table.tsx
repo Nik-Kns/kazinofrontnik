@@ -48,12 +48,12 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
     
     // Фильтрация игроков по валютным критериям
     const filteredPlayers = React.useMemo(() => {
-        let players = extendedPlayersData;
+        let players = extendedPlayersData || [];
         
         // Применяем валютные фильтры
-        if (currencyFilters) {
+        if (currencyFilters && players.length > 0) {
             players = filterPlayersByCurrency(players, {
-                currencies: currencyFilters.selected_currencies,
+                currencies: currencyFilters.selected_currencies || [],
                 isMultiCurrency: currencyFilters.is_multi_currency,
                 amountRange: currencyFilters.amount_range
             });
@@ -99,7 +99,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
     return (
       <div className="space-y-4">
             <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">Найдено игроков: {filteredPlayers.length}</h2>
+                    <h2 className="text-xl font-semibold">Найдено игроков: {filteredPlayers?.length || 0}</h2>
           <Dialog open={configOpen} onOpenChange={setConfigOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm"><Settings className="h-4 w-4 mr-2"/>Настроить отображение</Button>
@@ -109,7 +109,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                 <DialogTitle>Выберите дополнительные столбцы</DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                {['balance','currency','geo','depositsCount','depositsSum','avgDeposit','lastDeposit','withdrawalsCount','withdrawalsSum','retention','loginFrequency','gamesCount','topGame','vip','bonuses','lastCampaign'].map((id) => (
+                {(['balance','currency','geo','depositsCount','depositsSum','avgDeposit','lastDeposit','withdrawalsCount','withdrawalsSum','retention','loginFrequency','gamesCount','topGame','vip','bonuses','lastCampaign'] || []).map((id) => (
                   <label key={id} className="flex items-center gap-2">
                     <input type="checkbox" checked={has(id)} onChange={(e) => toggleCol(id, e.target.checked)} />
                     <span>
@@ -233,7 +233,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
               </tr>
             </thead>
             <tbody>
-              {filteredPlayers.map((p) => (
+              {(filteredPlayers || []).map((p) => (
                 <tr key={p.player_id} className="border-b hover:bg-muted/40 cursor-pointer" onClick={() => window.location.assign(`/players/${p.player_id}`)}>
                   <td className="px-3 py-2">usr_{p.player_id}</td>
                   <td className="px-3 py-2">{p.name}</td>

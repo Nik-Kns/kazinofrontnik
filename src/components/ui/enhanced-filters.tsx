@@ -18,6 +18,8 @@ import {
   Video, Tag, X, Settings, Building2
 } from "lucide-react";
 import type { FilterConfig, SegmentType } from "@/lib/types";
+import { CurrencyFilters, CurrencyFiltersState } from "@/components/ui/currency-filters";
+import type { CurrencyCode } from "@/lib/currency-types";
 
 interface EnhancedFiltersProps {
   onApply: (filters: FilterConfig) => void;
@@ -88,6 +90,11 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
   const [filters, setFilters] = useState<FilterConfig>(defaultFilters);
   const [isExpanded, setIsExpanded] = useState(false);
   const [uploadedLogo, setUploadedLogo] = useState<string | null>(null);
+  const [currencyFilters, setCurrencyFilters] = useState<CurrencyFiltersState>({
+    display_mode: 'native',
+    selected_currencies: [],
+    is_multi_currency: undefined,
+  });
 
   const handleDatePresetChange = (preset: string) => {
     const today = new Date();
@@ -278,14 +285,24 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
           </div>
         </div>
 
+        {/* Валютные фильтры */}
+        <div className="mt-4 p-4 border rounded-lg bg-muted/30">
+          <CurrencyFilters
+            value={currencyFilters}
+            onChange={setCurrencyFilters}
+            compact={true}
+          />
+        </div>
+
         {/* Расширенные фильтры - показываются при разворачивании */}
         {isExpanded && (
           <Tabs defaultValue="source" className="mt-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="source">Источники</TabsTrigger>
               <TabsTrigger value="demographics">Демография</TabsTrigger>
               <TabsTrigger value="behavior">Поведение</TabsTrigger>
               <TabsTrigger value="contacts">Контакты</TabsTrigger>
+              <TabsTrigger value="currency">Валюты</TabsTrigger>
             </TabsList>
 
             <TabsContent value="source" className="space-y-4">
@@ -556,6 +573,17 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
                 </div>
               </div>
             </TabsContent>
+
+            <TabsContent value="currency" className="space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Расширенные валютные настройки</h3>
+                <CurrencyFilters
+                  value={currencyFilters}
+                  onChange={setCurrencyFilters}
+                  compact={false}
+                />
+              </div>
+            </TabsContent>
           </Tabs>
         )}
 
@@ -570,7 +598,7 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
             <X className="h-4 w-4 mr-2" />
             Сбросить
           </Button>
-          <Button onClick={() => onApply(filters)}>
+          <Button onClick={() => onApply({ ...filters, currencyFilters })}>
             Применить фильтры
           </Button>
         </div>

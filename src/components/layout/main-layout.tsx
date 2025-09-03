@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { useCurrency } from "@/contexts/currency-context";
 import { CurrencyBadge } from "@/components/ui/currency-badge";
 import { CurrencySettingsDialog } from "@/components/ui/currency-settings-dialog";
+import { CurrencyErrorsList } from "@/components/ui/currency-error-handler";
  
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
@@ -207,9 +208,10 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex-1 items-start">
-            {children}
-        </main>
+                            <main className="flex-1 items-start">
+                        <CurrencyErrorsList />
+                        {children}
+                    </main>
       </div>
       
       {/* Диалог настроек валют */}

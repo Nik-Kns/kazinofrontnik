@@ -266,6 +266,10 @@ export function filterPlayersByCurrency(
     };
   }
 ): any[] {
+  if (!players || !Array.isArray(players)) {
+    return [];
+  }
+  
   return players.filter(player => {
     // Фильтр по валютам
     if (currencyFilter.currencies && currencyFilter.currencies.length > 0) {
