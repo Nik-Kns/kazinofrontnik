@@ -445,7 +445,7 @@ export default function CalendarPage() {
                         <h4 className="font-semibold text-lg">Статистика эффективности</h4>
                         <div className="flex items-center gap-2">
                           <CurrencyToggleButton size="sm" showLabel={false} />
-                          <CurrencyBadge currency={currencyState.settings.base_currency} showFlag size="sm" />
+                          <CurrencyBadge currency={currencyState.settings?.base_currency || 'EUR'} showFlag size="sm" />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
@@ -468,15 +468,15 @@ export default function CalendarPage() {
                         <div className="p-3 bg-muted rounded-lg">
                           <div className="text-muted-foreground mb-1">
                             Доход (Revenue)
-                            {currencyState.settings.display_in_base_currency && (
+                            {currencyState.settings?.display_in_base_currency && (
                               <span className="ml-1 text-xs">
-                                в {currencyState.settings.base_currency}
+                                в {currencyState.settings?.base_currency || 'EUR'}
                               </span>
                             )}
                           </div>
                           <div className="font-bold text-xl">
-                            {currencyState.settings.display_in_base_currency 
-                              ? formatCurrency(1230, currencyState.settings.base_currency)
+                            {currencyState.settings?.display_in_base_currency 
+                              ? formatCurrency(1230, currencyState.settings?.base_currency || 'EUR')
                               : "€1,230 • $1,340 • £1,080"
                             }
                           </div>
@@ -514,8 +514,8 @@ export default function CalendarPage() {
                           <div className="p-2 bg-slate-50 rounded">
                             <div className="text-muted-foreground">Средний депозит</div>
                             <div className="font-semibold">
-                              {currencyState.settings.display_in_base_currency 
-                                ? formatCurrency(35.14, currencyState.settings.base_currency)
+                              {currencyState.settings?.display_in_base_currency 
+                                ? formatCurrency(35.14, currencyState.settings?.base_currency || 'EUR')
                                 : "€35.14"
                               }
                             </div>

@@ -118,7 +118,7 @@ export default function ScenariosPage() {
                 <div className="flex items-center gap-3">
                     <CompactCurrencyToggle />
                     <div className="text-xs text-muted-foreground">
-                        Офферы в: <CurrencyBadge currency={currencyState.settings.base_currency} size="sm" />
+                        Офферы в: <CurrencyBadge currency={currencyState.settings?.base_currency || 'EUR'} size="sm" />
                     </div>
                 </div>
                         </div>
