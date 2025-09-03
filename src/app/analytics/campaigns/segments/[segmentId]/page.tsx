@@ -1,4 +1,4 @@
-"use client";
+// This page is rendered on the server by default; we don't need client features here
 
 import * as React from "react";
 import Link from "next/link";
@@ -10,14 +10,9 @@ import { ArrowLeft, Users, BarChart3, TrendingUp, Target, Calendar } from "lucid
 import { segmentAnalyticsData } from "@/lib/campaign-analytics-data";
 import { segmentsData } from "@/lib/mock-data";
 
-interface Props {
-  params: {
-    segmentId: string;
-  };
-}
-
-export default function SegmentAnalyticsPage({ params }: Props) {
-  const segment = segmentsData.find(s => s.id === params.segmentId);
+export default async function SegmentAnalyticsPage({ params }: { params: Promise<{ segmentId: string }> }) {
+  const { segmentId } = await params;
+  const segment = segmentsData.find(s => s.id === segmentId);
   const analytics = segmentAnalyticsData; // In real app, would fetch based on segmentId
 
   if (!segment) {
@@ -27,7 +22,7 @@ export default function SegmentAnalyticsPage({ params }: Props) {
           <CardContent className="py-8 text-center">
             <h3 className="text-lg font-semibold mb-2">Сегмент не найден</h3>
             <p className="text-muted-foreground mb-4">
-              Сегмент с ID {params.segmentId} не существует
+              Сегмент с ID {segmentId} не существует
             </p>
             <Link href="/analytics/campaigns/segments">
               <Button>Вернуться к списку</Button>
