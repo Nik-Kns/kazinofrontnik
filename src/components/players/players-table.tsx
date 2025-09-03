@@ -307,7 +307,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                     {has('withdrawalsCount') && <td className="px-3 py-2">{Math.floor(p.ltv/400)}</td>}
                     {has('withdrawalsSum') && <td className="px-3 py-2">€{Math.round(p.ltv*0.2)}</td>}
                     {has('retention') && <td className="px-3 py-2">D1 35% · D7 20% · D30 12%</td>}
-                    {has('loginFrequency') && <td className="px-3 py-2">{Math.max(1,Math.floor(7 - p.id.length))}/нед</td>}
+                    {has('loginFrequency') && <td className="px-3 py-2">{Math.max(1,Math.floor(7 - p.player_id.length))}/нед</td>}
                     {has('gamesCount') && <td className="px-3 py-2">{Math.floor(p.ltv/25)}</td>}
                     {has('topGame') && <td className="px-3 py-2">Book of Dead</td>}
                     {has('vip') && <td className="px-3 py-2">{p.ltv>5000 ? 'VIP' : '-'}</td>}
