@@ -25,6 +25,8 @@ import {
 import { useCurrency } from "@/contexts/currency-context";
 import { type CurrencyFiltersState } from "@/components/ui/currency-filters";
 import { filterPlayersByCurrency } from "@/lib/currency-utils";
+import { useFilteredPlayers } from '@/hooks/use-filtered-players';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const statusColors = {
     'Активен': 'bg-success/20 text-success-foreground',
@@ -39,30 +41,16 @@ const riskColors = {
 };
 
 interface PlayersTableProps {
-    filters?: FilterConfig;
-    currencyFilters?: CurrencyFiltersState;
+    filters: FilterConfig;
+    currencyFilters: CurrencyFiltersState;
 }
 
 export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
     const { state: currencyState } = useCurrency();
-    
-    // Фильтрация игроков по валютным критериям
-    const filteredPlayers = React.useMemo(() => {
-        let players = extendedPlayersData || [];
-        
-        // Применяем валютные фильтры
-        if (currencyFilters && players.length > 0) {
-            players = filterPlayersByCurrency(players, {
-                currencies: currencyFilters.selected_currencies || [],
-                isMultiCurrency: currencyFilters.is_multi_currency,
-                amountRange: currencyFilters.amount_range
-            });
-        }
-        
-        return players;
-    }, [currencyFilters]);
+    const { isLoading, filteredPlayers } = useFilteredPlayers(filters, currencyFilters);
+
     const [visibleCols, setVisibleCols] = React.useState<string[]>(() => {
-      try { return JSON.parse(localStorage.getItem('playersVisibleCols') || '[]'); } catch { return []; }
+        try { return JSON.parse(localStorage.getItem('playersVisibleCols') || '[]'); } catch { return []; }
     });
     const [configOpen, setConfigOpen] = React.useState(false);
     
@@ -99,7 +87,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
     return (
       <div className="space-y-4">
             <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">Найдено игроков: {filteredPlayers?.length || 0}</h2>
+                    <h2 className="text-xl font-semibold">Найдено игроков: {isLoading ? <Skeleton className="h-6 w-12 inline-block" /> : filteredPlayers.length}</h2>
           <Dialog open={configOpen} onOpenChange={setConfigOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm"><Settings className="h-4 w-4 mr-2"/>Настроить отображение</Button>
@@ -165,7 +153,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                 <th className="px-3 py-2 text-left">
                   <div className="flex items-center gap-1">
                     Total Deposits
-                    {!currencyState.show_in_base_currency && (
+                    {!currencyState.settings?.show_in_base_currency && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
@@ -184,7 +172,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                 <th className="px-3 py-2 text-left">
                   <div className="flex items-center gap-1">
                     Net Deposits
-                    {!currencyState.show_in_base_currency && (
+                    {!currencyState.settings?.show_in_base_currency && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
@@ -203,7 +191,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                 <th className="px-3 py-2 text-left">
                   <div className="flex items-center gap-1">
                     GGR
-                    {!currencyState.show_in_base_currency && (
+                    {!currencyState.settings?.show_in_base_currency && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
@@ -233,76 +221,93 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
               </tr>
             </thead>
             <tbody>
-              {(filteredPlayers || []).map((p) => (
-                <tr key={p.player_id} className="border-b hover:bg-muted/40 cursor-pointer" onClick={() => window.location.assign(`/players/${p.player_id}`)}>
-                  <td className="px-3 py-2">usr_{p.player_id}</td>
-                  <td className="px-3 py-2">{p.name}</td>
-                  <td className="px-3 py-2">
-                    <Badge variant="outline" className={cn(statusColors[p.status])}>
-                      {p.status}
-                    </Badge>
-                  </td>
-                  <td className="px-3 py-2">
-                    <Badge variant="outline" className={
-                      p.vip_level === 'VIP' ? 'bg-purple-100 text-purple-800 border-purple-200' :
-                      p.vip_level.startsWith('ПреVIP') ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                      'bg-gray-100 text-gray-800 border-gray-200'
-                    }>
-                      {p.vip_level}
-                    </Badge>
-                  </td>
-                  <td className="px-3 py-2">
-                    <MultiCurrencyBadge 
-                      currencies={p.currencies}
-                      primaryCurrency={p.primary_currency}
-                      walletBalances={p.wallet_balances}
-                      maxVisible={2}
-                      size="sm"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <CurrencyAmountDisplay 
-                      amount={p.financial_metrics.total_deposits}
-                      size="sm"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <CurrencyAmountDisplay 
-                      amount={p.financial_metrics.net_deposits}
-                      size="sm"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <CurrencyAmountDisplay 
-                      amount={p.financial_metrics.ggr}
-                      size="sm"
-                    />
-                  </td>
-                  <td className="px-3 py-2 text-sm text-muted-foreground">
-                    {new Date(p.last_activity).toLocaleDateString('ru-RU', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </td>
-                  <td className={cn("px-3 py-2 font-medium", riskColors[p.churn_risk])}>
-                    {p.churn_risk}
-                  </td>
-                  {has('geo') && <td className="px-3 py-2">{p.country} / {p.language}</td>}
-                  {has('lastDeposit') && <td className="px-3 py-2">€{Math.round((p.ltv%200)+20)}</td>}
-                  {has('withdrawalsCount') && <td className="px-3 py-2">{Math.floor(p.ltv/400)}</td>}
-                  {has('withdrawalsSum') && <td className="px-3 py-2">€{Math.round(p.ltv*0.2)}</td>}
-                  {has('retention') && <td className="px-3 py-2">D1 35% · D7 20% · D30 12%</td>}
-                  {has('loginFrequency') && <td className="px-3 py-2">{Math.max(1,Math.floor(7 - p.id.length))}/нед</td>}
-                  {has('gamesCount') && <td className="px-3 py-2">{Math.floor(p.ltv/25)}</td>}
-                  {has('topGame') && <td className="px-3 py-2">Book of Dead</td>}
-                  {has('vip') && <td className="px-3 py-2">{p.ltv>5000 ? 'VIP' : '-'}</td>}
-                  {has('bonuses') && <td className="px-3 py-2">{p.ltv>1000 ? 'Welcome, Cashback' : 'Welcome'}</td>}
-                  {has('lastCampaign') && <td className="px-3 py-2">Open 45% / CTR 12%</td>}
-                </tr>
-              ))}
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, index) => (
+                  <tr key={index} className="border-b">
+                    <td className="px-3 py-2"><Skeleton className="h-5 w-20" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-5 w-32" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-6 w-24" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-6 w-24" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-6 w-32" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-5 w-40" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-5 w-40" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-5 w-40" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-5 w-24" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-5 w-16" /></td>
+                  </tr>
+                ))
+              ) : (
+                filteredPlayers.map((p) => (
+                  <tr key={p.player_id} className="border-b hover:bg-muted/40 cursor-pointer" onClick={() => window.location.assign(`/players/${p.player_id}`)}>
+                    <td className="px-3 py-2">usr_{p.player_id}</td>
+                    <td className="px-3 py-2">{p.name}</td>
+                    <td className="px-3 py-2">
+                      <Badge variant="outline" className={cn(statusColors[p.status])}>
+                        {p.status}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-2">
+                      <Badge variant="outline" className={
+                        p.vip_level === 'VIP' ? 'bg-purple-100 text-purple-800 border-purple-200' :
+                        p.vip_level.startsWith('ПреVIP') ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                        'bg-gray-100 text-gray-800 border-gray-200'
+                      }>
+                        {p.vip_level}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-2">
+                      <MultiCurrencyBadge 
+                        currencies={p.currencies}
+                        primaryCurrency={p.primary_currency}
+                        walletBalances={p.wallet_balances}
+                        maxVisible={2}
+                        size="sm"
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <CurrencyAmountDisplay 
+                        amount={p.financial_metrics.total_deposits}
+                        size="sm"
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <CurrencyAmountDisplay 
+                        amount={p.financial_metrics.net_deposits}
+                        size="sm"
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <CurrencyAmountDisplay 
+                        amount={p.financial_metrics.ggr}
+                        size="sm"
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-sm text-muted-foreground">
+                      {new Date(p.last_activity).toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </td>
+                    <td className={cn("px-3 py-2 font-medium", riskColors[p.churn_risk])}>
+                      {p.churn_risk}
+                    </td>
+                    {has('geo') && <td className="px-3 py-2">{p.country} / {p.language}</td>}
+                    {has('lastDeposit') && <td className="px-3 py-2">€{Math.round((p.ltv%200)+20)}</td>}
+                    {has('withdrawalsCount') && <td className="px-3 py-2">{Math.floor(p.ltv/400)}</td>}
+                    {has('withdrawalsSum') && <td className="px-3 py-2">€{Math.round(p.ltv*0.2)}</td>}
+                    {has('retention') && <td className="px-3 py-2">D1 35% · D7 20% · D30 12%</td>}
+                    {has('loginFrequency') && <td className="px-3 py-2">{Math.max(1,Math.floor(7 - p.id.length))}/нед</td>}
+                    {has('gamesCount') && <td className="px-3 py-2">{Math.floor(p.ltv/25)}</td>}
+                    {has('topGame') && <td className="px-3 py-2">Book of Dead</td>}
+                    {has('vip') && <td className="px-3 py-2">{p.ltv>5000 ? 'VIP' : '-'}</td>}
+                    {has('bonuses') && <td className="px-3 py-2">{p.ltv>1000 ? 'Welcome, Cashback' : 'Welcome'}</td>}
+                    {has('lastCampaign') && <td className="px-3 py-2">Open 45% / CTR 12%</td>}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

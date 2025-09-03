@@ -49,18 +49,6 @@ export default function PlayersPage() {
         amount_range: undefined
     });
 
-    const handleFiltersChange = (newFilters: FilterConfig) => {
-        setFilters(newFilters);
-        // Здесь можно добавить логику фильтрации игроков
-        console.log('Применены фильтры для игроков:', newFilters);
-    };
-
-    const handleCurrencyFiltersChange = (newCurrencyFilters: CurrencyFiltersState) => {
-        setCurrencyFilters(newCurrencyFilters);
-        // Здесь можно добавить логику валютной фильтрации
-        console.log('Применены валютные фильтры:', newCurrencyFilters);
-    };
-
     return (
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
             <div className="flex items-center justify-between">
@@ -90,7 +78,7 @@ export default function PlayersPage() {
             <div className="flex items-center justify-between py-2 border-b bg-muted/30 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8">
                 <CompactCurrencyToggle />
                 <div className="text-xs text-muted-foreground">
-                    {currencyFilters.selected_currencies.length > 0 && (
+                    {currencyFilters.selected_currencies && currencyFilters.selected_currencies.length > 0 && (
                         `Фильтр: ${currencyFilters.selected_currencies.join(', ')}`
                     )}
                 </div>
@@ -101,7 +89,7 @@ export default function PlayersPage() {
                 <div className="lg:col-span-3">
                     <AdvancedFilters
                         filters={filters}
-                        onFiltersChange={handleFiltersChange}
+                        onFiltersChange={setFilters}
                         filterGroups={PLAYERS_FILTER_GROUPS}
                     />
                 </div>
@@ -110,7 +98,7 @@ export default function PlayersPage() {
                 <div className="lg:col-span-1">
                     <CurrencyFilters
                         value={currencyFilters}
-                        onChange={handleCurrencyFiltersChange}
+                        onChange={setCurrencyFilters}
                         compact={false}
                     />
                 </div>
