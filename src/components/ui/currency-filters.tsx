@@ -68,7 +68,7 @@ export function CurrencyFilters({
   const [isAdvancedOpen, setIsAdvancedOpen] = React.useState(false);
 
   // Популярные валюты для быстрого выбора
-  const popularCurrencies: CurrencyCode[] = ['EUR', 'USD', 'GBP', 'RUB', 'CAD', 'AUD'];
+  const popularCurrencies: CurrencyCode[] = ['EUR', 'USD', 'USDT', 'GBP', 'RUB', 'CAD', 'AUD'];
   
   // Все доступные валюты для мультиселекта
   const allCurrencies = Object.keys(CURRENCY_CONFIGS).map(code => ({

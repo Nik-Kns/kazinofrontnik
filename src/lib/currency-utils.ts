@@ -304,6 +304,10 @@ export function filterPlayersByCurrency(
 export const mockFxRates: Record<string, FxRate> = {
   'USD-EUR': { from: 'USD', to: 'EUR', rate: 0.92, date: '2025-01-20', source: 'backend' },
   'EUR-USD': { from: 'EUR', to: 'USD', rate: 1.09, date: '2025-01-20', source: 'backend' },
+  'USDT-USD': { from: 'USDT', to: 'USD', rate: 1.00, date: '2025-01-20', source: 'backend' },
+  'USD-USDT': { from: 'USD', to: 'USDT', rate: 1.00, date: '2025-01-20', source: 'backend' },
+  'USDT-EUR': { from: 'USDT', to: 'EUR', rate: 0.92, date: '2025-01-20', source: 'backend' },
+  'EUR-USDT': { from: 'EUR', to: 'USDT', rate: 1.09, date: '2025-01-20', source: 'backend' },
   'GBP-EUR': { from: 'GBP', to: 'EUR', rate: 1.19, date: '2025-01-20', source: 'backend' },
   'EUR-GBP': { from: 'EUR', to: 'GBP', rate: 0.84, date: '2025-01-20', source: 'backend' },
   'GBP-USD': { from: 'GBP', to: 'USD', rate: 1.30, date: '2025-01-20', source: 'backend' },

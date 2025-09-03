@@ -1,6 +1,6 @@
 // Типы для работы с валютами
 
-export type CurrencyCode = 'EUR' | 'USD' | 'GBP' | 'RUB' | 'CAD' | 'AUD' | 'JPY' | 'CHF' | 'NOK' | 'SEK' | 'DKK' | 'PLN' | 'CZK' | 'HUF' | 'BGN' | 'RON' | 'HRK' | 'TRY' | 'BRL' | 'MXN' | 'ARS' | 'CLP' | 'COP' | 'PEN' | 'UYU';
+export type CurrencyCode = 'EUR' | 'USD' | 'USDT' | 'GBP' | 'RUB' | 'CAD' | 'AUD' | 'JPY' | 'CHF' | 'NOK' | 'SEK' | 'DKK' | 'PLN' | 'CZK' | 'HUF' | 'BGN' | 'RON' | 'HRK' | 'TRY' | 'BRL' | 'MXN' | 'ARS' | 'CLP' | 'COP' | 'PEN' | 'UYU';
 
 export type RoundingMode = 'banker' | 'up' | 'down' | 'half_up' | 'half_down';
 
@@ -90,6 +90,7 @@ export interface CurrencyConfig {
 export const CURRENCY_CONFIGS: Record<CurrencyCode, CurrencyConfig> = {
   EUR: { code: 'EUR', name: 'Euro', symbol: '€', decimal_places: 2, badge_color: 'bg-blue-100 text-blue-800 border-blue-200', flag_emoji: '🇪🇺' },
   USD: { code: 'USD', name: 'US Dollar', symbol: '$', decimal_places: 2, badge_color: 'bg-green-100 text-green-800 border-green-200', flag_emoji: '🇺🇸' },
+  USDT: { code: 'USDT', name: 'Tether', symbol: '₮', decimal_places: 2, badge_color: 'bg-emerald-100 text-emerald-800 border-emerald-200', flag_emoji: '🪙' },
   GBP: { code: 'GBP', name: 'British Pound', symbol: '£', decimal_places: 2, badge_color: 'bg-purple-100 text-purple-800 border-purple-200', flag_emoji: '🇬🇧' },
   RUB: { code: 'RUB', name: 'Russian Ruble', symbol: '₽', decimal_places: 2, badge_color: 'bg-red-100 text-red-800 border-red-200', flag_emoji: '🇷🇺' },
   CAD: { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', decimal_places: 2, badge_color: 'bg-red-100 text-red-800 border-red-200', flag_emoji: '🇨🇦' },

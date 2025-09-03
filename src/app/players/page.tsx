@@ -99,15 +99,7 @@ export default function PlayersPage() {
                 </div>
             </div>
             
-            {/* Компактный переключатель валют в шапке */}
-            <div className="flex items-center justify-between py-2 border-b bg-muted/30 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8">
-                <CompactCurrencyToggle />
-                <div className="text-xs text-muted-foreground">
-                    {currencyFilters.selected_currencies && currencyFilters.selected_currencies.length > 0 && (
-                        `Фильтр: ${currencyFilters.selected_currencies.join(', ')}`
-                    )}
-                </div>
-            </div>
+            {/* Убрали дублирующий переключатель валют из шапки */}
             
             {/* Горизонтальная панель фильтров */}
             <div className="rounded-lg border bg-card px-4 py-3 flex flex-wrap items-end gap-3">
