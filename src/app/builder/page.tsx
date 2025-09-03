@@ -19,6 +19,7 @@ import { TemplateData } from '@/lib/types';
 import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
 import { CurrencyBadge } from "@/components/ui/currency-badge";
 import { useCurrency } from "@/contexts/currency-context";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Динамический импорт Builder компонента для избежания SSR проблем
 const BuilderWrapper = React.lazy(() => import('./builder-standalone'));
@@ -30,6 +31,17 @@ export default function ScenariosPage() {
     
     // Валютные настройки
     const { state: currencyState } = useCurrency();
+    const router = useRouter();
+    const search = useSearchParams();
+    const initialTab = (search.get('tab') || 'all') as 'all'|'default'|'tournaments'|'event-driven'|'promo-events';
+    const [tab, setTab] = React.useState<typeof initialTab>(initialTab);
+
+    const handleTabChange = (value: string) => {
+        setTab(value as any);
+        const params = new URLSearchParams(window.location.search);
+        params.set('tab', value);
+        router.replace(`/builder?${params.toString()}`);
+    };
 
     const handleEditTemplate = (templateData: TemplateData) => {
         setEditingScenario(templateData); // Передаем данные шаблона для редактирования
@@ -137,11 +149,32 @@ export default function ScenariosPage() {
                         Создать пустой сценарий
                     </Button>
                 </div>
-                
-                <TemplatesGrid 
-                    onClone={handleCloneTemplate} 
-                    onEdit={handleEditTemplate}
-                />
+
+                <Tabs value={tab} onValueChange={handleTabChange} className="space-y-4">
+                    <TabsList className="flex flex-wrap gap-2">
+                        <TabsTrigger value="all">Все</TabsTrigger>
+                        <TabsTrigger value="default">Дефолтные</TabsTrigger>
+                        <TabsTrigger value="tournaments">Турниры</TabsTrigger>
+                        <TabsTrigger value="event-driven">Событийные</TabsTrigger>
+                        <TabsTrigger value="promo-events">Эвенты</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="all">
+                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} />
+                    </TabsContent>
+                    <TabsContent value="default">
+                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> t.type==='basic'} />
+                    </TabsContent>
+                    <TabsContent value="tournaments">
+                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> (t.category||'').toLowerCase().includes('tournament')} />
+                    </TabsContent>
+                    <TabsContent value="event-driven">
+                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> t.type==='event'} />
+                    </TabsContent>
+                    <TabsContent value="promo-events">
+                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> (t.category||'').toLowerCase().includes('promotion') || (t.category||'').toLowerCase().includes('loyalty')} />
+                    </TabsContent>
+                </Tabs>
             </div>
 
             {/* Раздел с конструктором */}

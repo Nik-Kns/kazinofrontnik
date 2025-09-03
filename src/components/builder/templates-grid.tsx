@@ -23,9 +23,10 @@ import { TemplateData } from "@/lib/types";
 interface TemplatesGridProps {
   onClone: (template: TemplateData) => void;
   onEdit: (template: TemplateData) => void;
+  predicate?: (t: TemplateData) => boolean; // доп. фильтр по групповому типу
 }
 
-export function TemplatesGrid({ onClone, onEdit }: TemplatesGridProps) {
+export function TemplatesGrid({ onClone, onEdit, predicate }: TemplatesGridProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState<string>("all");
   const [categoryFilter, setCategoryFilter] = React.useState<string>("all");
@@ -36,8 +37,9 @@ export function TemplatesGrid({ onClone, onEdit }: TemplatesGridProps) {
     
     const matchesType = typeFilter === "all" || template.type === typeFilter;
     const matchesCategory = categoryFilter === "all" || template.category === categoryFilter;
+    const matchesPredicate = predicate ? predicate(template) : true;
     
-    return matchesSearch && matchesType && matchesCategory;
+    return matchesSearch && matchesType && matchesCategory && matchesPredicate;
   });
 
   const getChannelIcon = (channel: string) => {
