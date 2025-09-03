@@ -30,6 +30,7 @@ const navItems = [
   { href: "/analytics", label: "Аналитика", icon: BarChart2 },
   { href: "/reports", label: "Отчёты", icon: FileText },
   { href: "/calendar", label: "Календарь кампаний", icon: Calendar },
+  { href: "/knowledge-base", label: "База знаний", icon: FileText },
   { href: "/settings", label: "Настройки", icon: Settings },
 ];
 
