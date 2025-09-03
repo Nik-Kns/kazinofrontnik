@@ -48,11 +48,19 @@ interface PlayersTableProps {
 export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
     const { state: currencyState } = useCurrency();
     const { isLoading, filteredPlayers } = useFilteredPlayers(filters, currencyFilters);
-
-    const [visibleCols, setVisibleCols] = React.useState<string[]>(() => {
-        try { return JSON.parse(localStorage.getItem('playersVisibleCols') || '[]'); } catch { return []; }
-    });
+ 
+    const [visibleCols, setVisibleCols] = React.useState<string[]>([]);
     const [configOpen, setConfigOpen] = React.useState(false);
+    React.useEffect(() => {
+        try {
+            const savedCols = localStorage.getItem('playersVisibleCols');
+            if (savedCols) {
+                setVisibleCols(JSON.parse(savedCols));
+            }
+        } catch (error) {
+            console.error("Failed to parse visible columns from localStorage", error);
+        }
+    }, []);
     
     // Функция для определения цвета прогресс-бара риска
     const getRiskProgressColor = (risk: string) => {
