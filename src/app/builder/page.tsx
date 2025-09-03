@@ -21,6 +21,14 @@ import { CurrencyBadge } from "@/components/ui/currency-badge";
 import { useCurrency } from "@/contexts/currency-context";
 import { useRouter, useSearchParams } from "next/navigation";
 
+function searchParamsSafe() {
+  // хелпер, возвращаем прокси без SSR обращения
+  const sp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  return {
+    get: (key: string) => sp ? sp.get(key) : null
+  } as unknown as URLSearchParams;
+}
+
 // Динамический импорт Builder компонента для избежания SSR проблем
 const BuilderWrapper = React.lazy(() => import('./builder-standalone'));
 
@@ -32,15 +40,17 @@ export default function ScenariosPage() {
     // Валютные настройки
     const { state: currencyState } = useCurrency();
     const router = useRouter();
-    const search = useSearchParams();
-    const initialTab = (search.get('tab') || 'all') as 'all'|'default'|'tournaments'|'event-driven'|'promo-events';
+    const search = React.use(searchParamsSafe());
+    const initialTab = (search?.get('tab') || 'all') as 'all'|'default'|'tournaments'|'event-driven'|'promo-events';
     const [tab, setTab] = React.useState<typeof initialTab>(initialTab);
 
     const handleTabChange = (value: string) => {
         setTab(value as any);
-        const params = new URLSearchParams(window.location.search);
-        params.set('tab', value);
-        router.replace(`/builder?${params.toString()}`);
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          params.set('tab', value);
+          router.replace(`/builder?${params.toString()}`);
+        }
     };
 
     const handleEditTemplate = (templateData: TemplateData) => {
