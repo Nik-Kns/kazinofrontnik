@@ -466,7 +466,7 @@ export default function CalendarPage() {
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-semibold text-lg">Статистика эффективности</h4>
                         <div className="flex items-center gap-2">
-                          <CurrencyToggleButton size="sm" showLabel={false} />
+                          <CurrencyToggleButton size="sm" />
                           <CurrencyBadge currency={currencyState.base_currency || 'EUR'} showFlag size="sm" />
                         </div>
                       </div>
