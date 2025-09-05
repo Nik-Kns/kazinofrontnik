@@ -770,6 +770,7 @@ export type FilterConfig = {
   
   // Фильтр по кампаниям
   campaigns?: string[];         // Выбранные кампании
+  projects?: string[];          // Выбранные проекты/бренды
   
   // Фильтры по источнику
   sourceType?: 'url' | 'streamer' | 'organic' | 'promo' | 'other'; // Тип источника
