@@ -58,7 +58,6 @@ export function CurrencyToggle({
           id="currency-display-toggle"
           checked={state.show_in_base_currency}
           onCheckedChange={handleToggle}
-          size={size === 'sm' ? 'sm' : 'default'}
         />
         
         {showLabel && (
@@ -137,7 +136,6 @@ export function CompactCurrencyToggle({ className = '' }: CompactCurrencyToggleP
       <Switch
         checked={state.show_in_base_currency}
         onCheckedChange={toggleBaseCurrencyDisplay}
-        size="sm"
       />
       <Label className="text-xs font-medium whitespace-nowrap">
         В базовой валюте
