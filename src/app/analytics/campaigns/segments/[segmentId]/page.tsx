@@ -68,10 +68,8 @@ export default async function SegmentAnalyticsPage({ params }: { params: Promise
               <Badge variant="outline">{segment.createdBy}</Badge>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Статус</p>
-              <Badge variant={segment.isActive ? "default" : "secondary"}>
-                {segment.isActive ? "Активный" : "Неактивный"}
-              </Badge>
+              <p className="text-sm text-muted-foreground">ID сегмента</p>
+              <Badge variant="secondary">{segment.id}</Badge>
             </div>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Создан</p>
