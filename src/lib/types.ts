@@ -784,13 +784,14 @@ export type FilterConfig = {
   device?: 'desktop' | 'mobile' | 'tablet' | 'all'; // Устройство
   gender?: 'male' | 'female' | 'all';              // Пол
   countries?: string[];         // Гео (страны)
-  language?: string;            // Язык
+  language?: string | string[]; // Язык (страница players может передавать список)
   currency?: string;            // Валюта
   emailVerified?: boolean;      // Верифицирован ли email
   email?: string;               // Email
   phoneNumber?: string;         // Номер телефона
   
   // Фильтры по поведению на платформе
+  churnRisk?: string[];         // Риск оттока (players)
   depositAmount?: {             // Сумма депозита
     min?: number;
     max?: number;
