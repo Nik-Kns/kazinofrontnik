@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +12,15 @@ import { ArrowLeft, Zap, BarChart3, TrendingUp, Target, GitBranch, Mail, Smartph
 import { templateAnalyticsData } from "@/lib/campaign-analytics-data";
 import { templatesData } from "@/lib/mock-data";
 
-export default async function TemplateAnalyticsPage({ params, searchParams }: { params: Promise<{ templateId: string }>, searchParams?: { version?: string } }) {
-  const { templateId } = await params;
+export default function TemplateAnalyticsPage() {
+  const params = useParams<{ templateId: string }>();
+  const searchParams = useSearchParams();
+  const templateId = (params?.templateId as string) || "";
   const template = templatesData.find(t => t.id === templateId);
   const analytics = templateAnalyticsData; // In real app, would fetch based on templateId
-  const [selectedVersion, setSelectedVersion] = React.useState(searchParams?.version || analytics.currentVersion);
+  const [selectedVersion, setSelectedVersion] = React.useState<string>(
+    searchParams?.get("version") || analytics.currentVersion
+  );
 
   if (!template) {
     return (
