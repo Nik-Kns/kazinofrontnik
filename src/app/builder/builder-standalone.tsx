@@ -140,7 +140,7 @@ const Builder = ({ onExit, scenario }: { onExit: () => void; scenario: TemplateD
 };
 
 
-const BuilderWrapper = (props: { onExit: () => void; scenario: ScenarioData | null }) => (
+const BuilderWrapper = (props: { onExit: () => void; scenario: TemplateData | null }) => (
     <ReactFlowProvider>
         <Builder {...props} />
     </ReactFlowProvider>
