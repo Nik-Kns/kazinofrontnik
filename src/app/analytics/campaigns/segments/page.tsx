@@ -73,8 +73,8 @@ export default function SegmentsListPage() {
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Тип</span>
-                <Badge variant="outline">{segment.type}</Badge>
+                <span className="text-sm text-muted-foreground">Источник</span>
+                <Badge variant="outline">{segment.createdBy}</Badge>
               </div>
 
               <div className="space-y-2">
