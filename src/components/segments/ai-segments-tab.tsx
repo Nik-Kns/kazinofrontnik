@@ -135,17 +135,19 @@ export function AiSegmentsTab({
   };
 
   const formatMetricValue = (key: string, value: number | string) => {
+    const num = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]/g, ''));
     switch (key) {
       case 'arpu':
       case 'ggr':
       case 'avgDeposit':
-        return `$${typeof value === 'number' ? value.toLocaleString() : value}`;
+        return `$${Number.isFinite(num) ? num.toLocaleString() : value}`;
       case 'conversionRate':
-        return `${value}%`;
+        return `${Number.isFinite(num) ? num : value}%`;
       case 'activityChange':
-        return `${value > 0 ? '+' : ''}${value}%`;
+        if (!Number.isFinite(num)) return `${value}%`;
+        return `${num > 0 ? '+' : ''}${num}%`;
       case 'avgSessions':
-        return `${value} сессий`;
+        return `${Number.isFinite(num) ? num : value} сессий`;
       default:
         return value;
     }
