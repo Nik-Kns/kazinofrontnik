@@ -93,7 +93,6 @@ export default function ScenariosPage() {
             category: aiScenario.category.toLowerCase(),
             channel: aiScenario.channels.length > 1 ? 'Multi-channel' : mapChannel(aiScenario.channels[0] || 'email'),
             performance: 5, // AI-сценарии имеют высокую оценку
-            usageCount: 0,
             createdAt: new Date().toISOString(),
             builder: {
                 name: aiScenario.name,
