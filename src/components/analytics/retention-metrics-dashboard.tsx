@@ -10,7 +10,7 @@ import { AlertCircle, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type { RetentionMetric, SegmentMetrics } from "@/lib/types";
-import { retentionMetrics, segmentMetricsData, monitoringSchedule, alertThresholds } from "@/lib/retention-metrics-data";
+import { retentionMetrics, segmentMetricsData, monitoringSchedule } from "@/lib/retention-metrics-data";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
