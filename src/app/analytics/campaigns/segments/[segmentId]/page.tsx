@@ -64,8 +64,8 @@ export default async function SegmentAnalyticsPage({ params }: { params: Promise
               <p className="text-2xl font-bold">{analytics.totalUsers.toLocaleString()}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Тип сегмента</p>
-              <Badge variant="outline">{segment.type}</Badge>
+              <p className="text-sm text-muted-foreground">Источник</p>
+              <Badge variant="outline">{segment.createdBy}</Badge>
             </div>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Статус</p>
