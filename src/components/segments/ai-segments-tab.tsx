@@ -162,7 +162,14 @@ export function AiSegmentsTab({
       case 'conversionRate':
         return <TrendingUp className="h-4 w-4" />;
       case 'activityChange':
-        return value => value < 0 ? <TrendingDown className="h-4 w-4 text-red-500" /> : <TrendingUp className="h-4 w-4 text-green-500" />;
+        return (value: number | string) => {
+          const n = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]/g, ''));
+          return n < 0 ? (
+            <TrendingDown className="h-4 w-4 text-red-500" />
+          ) : (
+            <TrendingUp className="h-4 w-4 text-green-500" />
+          );
+        };
       case 'avgSessions':
         return <Users className="h-4 w-4" />;
       case 'lastActivity':
