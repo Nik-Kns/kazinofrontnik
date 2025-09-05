@@ -159,6 +159,13 @@ export function KPISummary({ filters, segment }: KPISummaryProps) {
   const criticalMetrics = kpiData.filter(m => m.status === 'red');
   const warningMetrics = kpiData.filter(m => m.status === 'yellow');
 
+  const toNumber = (v: string | number): number => {
+    if (typeof v === 'number') return v;
+    const cleaned = v.replace(/[^0-9.-]/g, '');
+    const n = Number(cleaned);
+    return isNaN(n) ? 0 : n;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -345,8 +352,8 @@ export function KPISummary({ filters, segment }: KPISummaryProps) {
                       <Progress 
                         value={
                           metric.id === 'churn_rate' 
-                            ? (100 - parseFloat(metric.currentValue) * 2) // Инвертируем для churn
-                            : Math.min(100, (parseFloat(metric.currentValue) / parseFloat(metric.benchmark)) * 100)
+                            ? (100 - toNumber(metric.currentValue) * 2)
+                            : Math.min(100, (toNumber(metric.currentValue) / toNumber(metric.benchmark || 0)) * 100)
                         } 
                         className="h-1 mt-1"
                       />
