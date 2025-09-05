@@ -8,7 +8,7 @@ import { AdvancedFilters } from "@/components/ui/advanced-filters";
 import { CurrencyFilters, type CurrencyFiltersState } from "@/components/ui/currency-filters";
 import { CompactCurrencyToggle } from "@/components/ui/currency-toggle";
 import { Separator } from "@/components/ui/separator";
-import type { FilterConfig, FilterGroup } from "@/lib/types";
+import type { FilterConfig, FilterGroup, VipLevel } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
 
