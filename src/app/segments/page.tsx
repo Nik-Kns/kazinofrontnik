@@ -163,7 +163,7 @@ export default function SegmentsPage() {
                       <TableCell>{segment.createdAt}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {segment.isAIGenerated ? (
+                          {segment.createdBy === 'AI' ? (
                             <Badge variant="outline" className="text-blue-600">
                               <Bot className="mr-1 h-3 w-3" />
                               AI
