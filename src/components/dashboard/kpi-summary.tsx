@@ -331,8 +331,8 @@ export function KPISummary({ filters, segment }: KPISummaryProps) {
                   <td className="text-center py-3 px-4">
                     <div className="flex items-center justify-center gap-1">
                       {getTrendIcon(metric.change)}
-                      <span className={metric.change > 0 ? 'text-green-600' : 'text-red-600'}>
-                        {Math.abs(metric.change).toFixed(1)}%
+                      <span className={(metric.change ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}>
+                        {Math.abs(metric.change ?? 0).toFixed(1)}%
                       </span>
                     </div>
                   </td>
