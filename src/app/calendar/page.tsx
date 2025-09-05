@@ -211,35 +211,35 @@ export default function CalendarPage() {
           <div className="flex flex-wrap gap-2 mb-4">
             <MultiSelect
               options={[{label:'Промо',value:'промо'},{label:'Цепочка',value:'цепочка'},{label:'Индивидуальная',value:'индивидуальная'},{label:'Return',value:'return'},{label:'Турнир',value:'турнир'},{label:'Опрос',value:'опрос'}]}
-              value={selectedType}
+              selected={selectedType}
               onChange={setSelectedType}
               placeholder="Тип кампании"
               className="w-40"
             />
             <MultiSelect
               options={[{label:'Email',value:'Email'},{label:'Push',value:'Push'},{label:'InApp',value:'InApp'},{label:'SMS',value:'SMS'}]}
-              value={selectedChannel}
+              selected={selectedChannel}
               onChange={setSelectedChannel}
               placeholder="Канал"
               className="w-32"
             />
             <MultiSelect
               options={[{label:'RU',value:'RU'},{label:'EN',value:'EN'},{label:'DE',value:'DE'}]}
-              value={selectedLang}
+              selected={selectedLang}
               onChange={setSelectedLang}
               placeholder="Язык"
               className="w-24"
             />
             <MultiSelect
               options={[{label:'Новые игроки',value:'Новые игроки'},{label:'Любители слотов',value:'Любители слотов'},{label:'Спящие',value:'Спящие'},{label:'VIP',value:'VIP'},{label:'Все активные',value:'Все активные'},{label:'Активные 90д',value:'Активные 90д'},{label:'Без депозита',value:'Без депозита'},{label:'Все',value:'Все'}]}
-              value={selectedSegment}
+              selected={selectedSegment}
               onChange={setSelectedSegment}
               placeholder="Сегмент"
               className="w-44"
             />
             <MultiSelect
               options={[{label:'Активна',value:'active'},{label:'Пауза',value:'paused'},{label:'Завершена',value:'completed'}]}
-              value={selectedStatus}
+              selected={selectedStatus}
               onChange={setSelectedStatus}
               placeholder="Статус"
               className="w-32"
