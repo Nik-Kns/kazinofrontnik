@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -348,8 +349,9 @@ const getKycIcon = (status: string) => {
   }
 };
 
-export default function PlayerProfilePage({ params }: { params: { id: string } }) {
-  const player = mockPlayerData; // В реальном приложении загружать по ID
+export default function PlayerProfilePage() {
+  const { id } = useParams<{ id: string }>();
+  const player = mockPlayerData; // В реальном приложении загружать по ID (id)
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
