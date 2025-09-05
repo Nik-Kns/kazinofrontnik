@@ -40,7 +40,7 @@ export default function ScenariosPage() {
     // Валютные настройки
     const { state: currencyState } = useCurrency();
     const router = useRouter();
-    const search = React.use(searchParamsSafe());
+    const search = searchParamsSafe();
     const initialTab = (search?.get('tab') || 'all') as 'all'|'default'|'tournaments'|'event-driven'|'promo-events';
     const [tab, setTab] = React.useState<typeof initialTab>(initialTab);
 
