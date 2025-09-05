@@ -267,7 +267,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                       <MultiCurrencyBadge 
                         currencies={p.currencies}
                         primaryCurrency={p.primary_currency}
-                        walletBalances={p.wallet_balances}
+                        walletBalances={p.wallet_balances as Record<any, number>}
                         maxVisible={2}
                         size="sm"
                       />
