@@ -303,9 +303,9 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                       {p.churn_risk}
                     </td>
                     {has('geo') && <td className="px-3 py-2">{p.country} / {p.language}</td>}
-                    {has('lastDeposit') && <td className="px-3 py-2">€{Math.round((p.ltv%200)+20)}</td>}
-                    {has('withdrawalsCount') && <td className="px-3 py-2">{Math.floor(p.ltv/400)}</td>}
-                    {has('withdrawalsSum') && <td className="px-3 py-2">€{Math.round(p.ltv*0.2)}</td>}
+                    {has('lastDeposit') && <td className="px-3 py-2">€{Math.round((p.financial_metrics.ltv.amounts[0]?.amount%200)+20)}</td>}
+                    {has('withdrawalsCount') && <td className="px-3 py-2">{Math.floor((p.financial_metrics.ltv.amounts[0]?.amount||0)/400)}</td>}
+                    {has('withdrawalsSum') && <td className="px-3 py-2">€{Math.round((p.financial_metrics.ltv.amounts[0]?.amount||0)*0.2)}</td>}
                     {has('retention') && <td className="px-3 py-2">D1 35% · D7 20% · D30 12%</td>}
                     {has('loginFrequency') && <td className="px-3 py-2">{Math.max(1,Math.floor(7 - p.player_id.length))}/нед</td>}
                     {has('gamesCount') && <td className="px-3 py-2">{Math.floor(p.ltv/25)}</td>}
