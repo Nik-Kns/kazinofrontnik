@@ -138,7 +138,8 @@ export function KPISummary({ filters, segment }: KPISummaryProps) {
     }
   };
 
-  const getTrendIcon = (change: number) => {
+  const getTrendIcon = (change: number | undefined) => {
+    if (change === undefined || change === null) return <Minus className="h-4 w-4 text-gray-500" />;
     if (Math.abs(change) < 0.5) return <Minus className="h-4 w-4 text-gray-500" />;
     if (change > 0) return <TrendingUp className="h-4 w-4 text-green-600" />;
     return <TrendingDown className="h-4 w-4 text-red-600" />;
