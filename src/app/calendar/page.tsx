@@ -17,6 +17,28 @@ import { useCurrency } from "@/contexts/currency-context";
 import { formatCurrency } from "@/lib/currency-utils";
 import dynamic from "next/dynamic";
 
+// Тип для событий кампаний в календаре
+interface CalendarCampaignEvent {
+  id: string;
+  name: string;
+  date: string; // ISO YYYY-MM-DD
+  type: string; // Email | Push | InApp | SMS | Promo
+  typeDetail: string; // категория сценария
+  channel: string;
+  status: 'active' | 'paused' | 'completed';
+  segment: string;
+  goal: string;
+  language: string; // RU/EN/DE
+  offer: string;
+  triggers: string;
+  texts: string;
+  media: string | null;
+  deliveryRate: string | number;
+  openRate: string | number;
+  ctr: string | number;
+  cr: string | number;
+}
+
 // Динамически импортируем конструктор сценариев для избежания SSR проблем
 const ScenariosBuilder = dynamic(() => import("@/app/builder/page"), { ssr: false });
 
@@ -50,8 +72,8 @@ const monthName = "Июль";
 const calendarDays = generateCalendarDays(currentYear, currentMonth);
 
 // Преобразование данных кампаний для календаря
-const adaptCampaignsForCalendar = () => {
-  const calendarCampaigns = [];
+const adaptCampaignsForCalendar = (): CalendarCampaignEvent[] => {
+  const calendarCampaigns: CalendarCampaignEvent[] = [];
   
   // Создаем события из сценариев внутри кампаний
   campaignsData.forEach(campaign => {
@@ -132,12 +154,12 @@ export default function CalendarPage() {
   });
 
   // campaignsByDate строится по filteredCampaigns
-  const campaignsByDate = filteredCampaigns.reduce((acc, campaign) => {
+  const campaignsByDate: Record<number, CalendarCampaignEvent[]> = filteredCampaigns.reduce((acc, campaign) => {
     const date = new Date(campaign.date).getDate();
     if (!acc[date]) acc[date] = [];
     acc[date].push(campaign);
     return acc;
-  }, {} as Record<number, typeof calendarCampaignsData>);
+  }, {} as Record<number, CalendarCampaignEvent[]>);
 
   // Helper для цвета бейджа по типу
   const badgeColor = (type: string) => {
@@ -445,7 +467,7 @@ export default function CalendarPage() {
                         <h4 className="font-semibold text-lg">Статистика эффективности</h4>
                         <div className="flex items-center gap-2">
                           <CurrencyToggleButton size="sm" showLabel={false} />
-                          <CurrencyBadge currency={currencyState.settings?.base_currency || 'EUR'} showFlag size="sm" />
+                          <CurrencyBadge currency={currencyState.base_currency || 'EUR'} showFlag size="sm" />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
@@ -468,15 +490,15 @@ export default function CalendarPage() {
                         <div className="p-3 bg-muted rounded-lg">
                           <div className="text-muted-foreground mb-1">
                             Доход (Revenue)
-                            {currencyState.settings?.display_in_base_currency && (
+                            {currencyState.show_in_base_currency && (
                               <span className="ml-1 text-xs">
-                                в {currencyState.settings?.base_currency || 'EUR'}
+                                в {currencyState.base_currency || 'EUR'}
                               </span>
                             )}
                           </div>
                           <div className="font-bold text-xl">
-                            {currencyState.settings?.display_in_base_currency 
-                              ? formatCurrency(1230, currencyState.settings?.base_currency || 'EUR')
+                            {currencyState.show_in_base_currency 
+                              ? formatCurrency(1230, currencyState.base_currency || 'EUR')
                               : "€1,230 • $1,340 • £1,080"
                             }
                           </div>
@@ -514,8 +536,8 @@ export default function CalendarPage() {
                           <div className="p-2 bg-slate-50 rounded">
                             <div className="text-muted-foreground">Средний депозит</div>
                             <div className="font-semibold">
-                              {currencyState.settings?.display_in_base_currency 
-                                ? formatCurrency(35.14, currencyState.settings?.base_currency || 'EUR')
+                              {currencyState.show_in_base_currency 
+                                ? formatCurrency(35.14, currencyState.base_currency || 'EUR')
                                 : "€35.14"
                               }
                             </div>
