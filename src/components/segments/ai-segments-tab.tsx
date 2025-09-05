@@ -153,14 +153,14 @@ export function AiSegmentsTab({
     }
   };
 
-  const getMetricIcon = (key: string) => {
+  const getMetricIconRenderer = (key: string) => {
     switch (key) {
       case 'arpu':
       case 'ggr':
       case 'avgDeposit':
-        return <Euro className="h-4 w-4" />;
+        return (_value: number | string) => <Euro className="h-4 w-4" />;
       case 'conversionRate':
-        return <TrendingUp className="h-4 w-4" />;
+        return (_value: number | string) => <TrendingUp className="h-4 w-4" />;
       case 'activityChange':
         return (value: number | string) => {
           const n = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]/g, ''));
@@ -171,11 +171,11 @@ export function AiSegmentsTab({
           );
         };
       case 'avgSessions':
-        return <Users className="h-4 w-4" />;
+        return (_value: number | string) => <Users className="h-4 w-4" />;
       case 'lastActivity':
-        return <Calendar className="h-4 w-4" />;
+        return (_value: number | string) => <Calendar className="h-4 w-4" />;
       default:
-        return <Users className="h-4 w-4" />;
+        return (_value: number | string) => <Users className="h-4 w-4" />;
     }
   };
 
@@ -260,7 +260,7 @@ export function AiSegmentsTab({
                 <div className="grid grid-cols-3 gap-2">
                   {Object.entries(segment.metrics).slice(0, 3).map(([key, value]) => (
                     <div key={key} className="flex items-center gap-1">
-                      {typeof getMetricIcon(key) === 'function' ? getMetricIcon(key)(value) : getMetricIcon(key)}
+                      {getMetricIconRenderer(key)(value)}
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-medium truncate">
                           {formatMetricValue(key, value)}
