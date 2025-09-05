@@ -136,31 +136,30 @@ export function AnalyticsCharts() {
               <TabsContent key={chart.title} value={chart.title}>
                 <div className="cursor-pointer" onClick={() => handleChartClick(chart.title, chart.data)}>
                   <ChartContainer config={chartConfig} className="h-[320px] w-full">
-                    {chart.type === 'line' && (
-                        <LineChart data={chart.data} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
-                            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-                            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                            <Tooltip content={<ChartTooltipContent />} />
-                            <Legend content={<ChartLegendContent />} />
-                            <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} dot={false} name="Actual" />
-                            <Line type="monotone" dataKey="predictedValue" stroke="var(--color-predictedValue)" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Predicted" />
-                        </LineChart>
-                    )}
-                    {chart.type === 'area' && (
-                        <AreaChart data={chart.data} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
-                            <defs>
-                                <linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="var(--color-value)" stopOpacity={0.8}/>
-                                    <stop offset="95%" stopColor="var(--color-value)" stopOpacity={0.1}/>
-                                </linearGradient>
-                            </defs>
-                            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-                            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                            <Tooltip content={<ChartTooltipContent />} />
-                            <Legend content={<ChartLegendContent />} />
-                            <Area type="monotone" dataKey="value" stroke="var(--color-value)" fill="url(#fillValue)" strokeWidth={2} name="Actual" />
-                            <Line type="monotone" dataKey="predictedValue" stroke="var(--color-predictedValue)" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Predicted" />
-                        </AreaChart>
+                    {chart.type === 'line' ? (
+                      <LineChart data={chart.data} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+                        <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
+                        <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                        <Tooltip content={<ChartTooltipContent />} />
+                        <Legend content={<ChartLegendContent />} />
+                        <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} dot={false} name="Actual" />
+                        <Line type="monotone" dataKey="predictedValue" stroke="var(--color-predictedValue)" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Predicted" />
+                      </LineChart>
+                    ) : (
+                      <AreaChart data={chart.data} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="var(--color-value)" stopOpacity={0.8} />
+                            <stop offset="95%" stopColor="var(--color-value)" stopOpacity={0.1} />
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
+                        <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                        <Tooltip content={<ChartTooltipContent />} />
+                        <Legend content={<ChartLegendContent />} />
+                        <Area type="monotone" dataKey="value" stroke="var(--color-value)" fill="url(#fillValue)" strokeWidth={2} name="Actual" />
+                        <Line type="monotone" dataKey="predictedValue" stroke="var(--color-predictedValue)" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Predicted" />
+                      </AreaChart>
                     )}
                   </ChartContainer>
                 </div>
