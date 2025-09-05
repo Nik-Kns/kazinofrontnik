@@ -370,7 +370,7 @@ export function RetentionMetricsDashboard() {
                           <td className="px-3 py-2">{r.channel}</td>
                           <td className="px-3 py-2">{new Date(r.createdAt).toLocaleString('ru-RU')}</td>
                           <td className="px-3 py-2 text-right space-x-2">
-                            <Button size="sm" variant="outline" onClick={() => setNewReport(r) || setAutoReportDialogOpen(true)}>Редактировать</Button>
+                            <Button size="sm" variant="outline" onClick={() => { setNewReport(r); setAutoReportDialogOpen(true); }}>Редактировать</Button>
                             <Button size="sm" variant="destructive" onClick={() => {
                               const next = autoReports.filter(x => x.id !== r.id);
                               setAutoReports(next);
