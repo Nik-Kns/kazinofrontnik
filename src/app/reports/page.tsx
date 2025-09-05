@@ -24,7 +24,7 @@ const statusColors: Record<string, string> = {
 // Компонент для создания отчета с мультивалютными настройками
 function CreateReportDialog() {
   const [currencyFilters, setCurrencyFilters] = useState<CurrencyFiltersState>({
-    display_mode: 'base',
+    display_mode: 'native',
     selected_currencies: [],
     is_multi_currency: undefined,
   });
