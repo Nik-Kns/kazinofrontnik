@@ -93,15 +93,7 @@ export default function ScenariosPage() {
             category: aiScenario.category.toLowerCase(),
             channel: aiScenario.channels.length > 1 ? 'Multi-channel' : mapChannel(aiScenario.channels[0] || 'email'),
             performance: 5, // AI-сценарии имеют высокую оценку
-            builder: {
-                name: aiScenario.name,
-                description: aiScenario.description,
-                rootGroup: {
-                    id: 'root',
-                    type: 'AND',
-                    conditions: []
-                }
-            }
+            // Builder-specific config omitted to satisfy TemplateData type
         };
         setEditingScenario(templateData);
         setIsBuilderMode(true);
