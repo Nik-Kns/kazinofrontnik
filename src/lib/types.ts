@@ -771,6 +771,7 @@ export type FilterConfig = {
   // Фильтр по кампаниям
   campaigns?: string[];         // Выбранные кампании
   projects?: string[];          // Выбранные проекты/бренды
+  status?: string[];            // Статусы игроков/сегментов/кампаний (страница players)
   
   // Фильтры по источнику
   sourceType?: 'url' | 'streamer' | 'organic' | 'promo' | 'other'; // Тип источника
