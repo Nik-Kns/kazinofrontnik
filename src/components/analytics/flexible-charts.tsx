@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -127,25 +127,25 @@ export function FlexibleCharts({ filters }: FlexibleChartsProps) {
           
           {!showSplits ? (
             <>
-              <DataComponent
-                type="monotone"
-                dataKey="value"
-                stroke={currentMetric.color}
-                fill={currentMetric.color}
-                fillOpacity={chartType === 'area' ? 0.6 : 1}
-                name={currentMetric.name}
-                strokeWidth={2}
-              />
-              <DataComponent
-                type="monotone"
-                dataKey="predictedValue"
-                stroke={currentMetric.color}
-                fill={currentMetric.color}
-                fillOpacity={chartType === 'area' ? 0.3 : 0.5}
-                strokeDasharray="5 5"
-                name="Прогноз"
-                strokeWidth={2}
-              />
+              {React.createElement(DataComponent as any, {
+                type: 'monotone',
+                dataKey: 'value',
+                stroke: currentMetric.color,
+                fill: currentMetric.color,
+                fillOpacity: chartType === 'area' ? 0.6 : 1,
+                name: currentMetric.name,
+                strokeWidth: 2,
+              })}
+              {React.createElement(DataComponent as any, {
+                type: 'monotone',
+                dataKey: 'predictedValue',
+                stroke: currentMetric.color,
+                fill: currentMetric.color,
+                fillOpacity: chartType === 'area' ? 0.3 : 0.5,
+                strokeDasharray: '5 5',
+                name: 'Прогноз',
+                strokeWidth: 2,
+              })}
               <Line
                 type="monotone"
                 dataKey={() => avgValue}
@@ -157,10 +157,10 @@ export function FlexibleCharts({ filters }: FlexibleChartsProps) {
             </>
           ) : (
             <>
-              <DataComponent dataKey="vip" stroke="#f59e0b" fill="#f59e0b" name="VIP" stackId="a" />
-              <DataComponent dataKey="active" stroke="#3b82f6" fill="#3b82f6" name="Активные" stackId="a" />
-              <DataComponent dataKey="new" stroke="#10b981" fill="#10b981" name="Новые" stackId="a" />
-              <DataComponent dataKey="sleeping" stroke="#6b7280" fill="#6b7280" name="Спящие" stackId="a" />
+              {React.createElement(DataComponent as any, { dataKey: 'vip', stroke: '#f59e0b', fill: '#f59e0b', name: 'VIP', stackId: 'a' })}
+              {React.createElement(DataComponent as any, { dataKey: 'active', stroke: '#3b82f6', fill: '#3b82f6', name: 'Активные', stackId: 'a' })}
+              {React.createElement(DataComponent as any, { dataKey: 'new', stroke: '#10b981', fill: '#10b981', name: 'Новые', stackId: 'a' })}
+              {React.createElement(DataComponent as any, { dataKey: 'sleeping', stroke: '#6b7280', fill: '#6b7280', name: 'Спящие', stackId: 'a' })}
             </>
           )}
         </ChartComponent>
