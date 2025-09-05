@@ -105,7 +105,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                 <DialogTitle>Выберите дополнительные столбцы</DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                {(['balance','currency','geo','depositsCount','depositsSum','avgDeposit','lastDeposit','withdrawalsCount','withdrawalsSum','retention','loginFrequency','gamesCount','topGame','vip','bonuses','lastCampaign'] || []).map((id) => (
+                {(['balance','currency','geo','depositsCount','depositsSum','avgDeposit','lastDeposit','withdrawalsCount','withdrawalsSum','retention','loginFrequency','gamesCount','topGame','vip','bonuses','lastCampaign'] as const).map((id) => (
                   <label key={id} className="flex items-center gap-2">
                     <input type="checkbox" checked={has(id)} onChange={(e) => toggleCol(id, e.target.checked)} />
                     <span>
