@@ -11,17 +11,9 @@ import { ArrowLeft, Zap, BarChart3, TrendingUp, Target, GitBranch, Mail, Smartph
 import { templateAnalyticsData } from "@/lib/campaign-analytics-data";
 import { templatesData } from "@/lib/mock-data";
 
-interface Props {
-  params: {
-    templateId: string;
-  };
-  searchParams?: {
-    version?: string;
-  };
-}
-
-export default function TemplateAnalyticsPage({ params, searchParams }: Props) {
-  const template = templatesData.find(t => t.id === params.templateId);
+export default async function TemplateAnalyticsPage({ params, searchParams }: { params: Promise<{ templateId: string }>, searchParams?: { version?: string } }) {
+  const { templateId } = await params;
+  const template = templatesData.find(t => t.id === templateId);
   const analytics = templateAnalyticsData; // In real app, would fetch based on templateId
   const [selectedVersion, setSelectedVersion] = React.useState(searchParams?.version || analytics.currentVersion);
 
@@ -32,7 +24,7 @@ export default function TemplateAnalyticsPage({ params, searchParams }: Props) {
           <CardContent className="py-8 text-center">
             <h3 className="text-lg font-semibold mb-2">Шаблон не найден</h3>
             <p className="text-muted-foreground mb-4">
-              Шаблон с ID {params.templateId} не существует
+              Шаблон с ID {templateId} не существует
             </p>
             <Link href="/analytics/campaigns/templates">
               <Button>Вернуться к списку</Button>
