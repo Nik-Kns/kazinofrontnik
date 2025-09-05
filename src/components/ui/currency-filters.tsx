@@ -277,8 +277,8 @@ export function CurrencyFilters({
             <div className="text-xs text-muted-foreground">Все валюты:</div>
             <MultiSelect
               options={allCurrencies}
-              value={value.selected_currencies}
-              onValueChange={handleCurrenciesChange}
+              selected={value.selected_currencies}
+              onChange={handleCurrenciesChange}
               placeholder="Выберите валюты..."
               maxCount={3}
             />
