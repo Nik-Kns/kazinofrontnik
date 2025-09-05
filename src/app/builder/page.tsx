@@ -76,6 +76,14 @@ export default function ScenariosPage() {
     };
 
     const handleCreateAIScenario = (aiScenario: AIScenario) => {
+        const mapChannel = (c: string): 'Email' | 'Push' | 'SMS' | 'InApp' | 'Multi-channel' => {
+            const lc = (c || '').toLowerCase();
+            if (lc === 'email') return 'Email';
+            if (lc === 'push') return 'Push';
+            if (lc === 'sms') return 'SMS';
+            if (lc === 'inapp' || lc === 'in-app' || lc === 'in_app') return 'InApp';
+            return 'Email';
+        };
         // Конвертируем AI-сценарий в TemplateData для передачи в builder
         const templateData: TemplateData = {
             id: `ai_${aiScenario.id}_${Date.now()}`,
@@ -83,7 +91,7 @@ export default function ScenariosPage() {
             description: `${aiScenario.description}\n\nЦелевая метрика: ${aiScenario.targetMetric}\nОжидаемое улучшение: ${aiScenario.expectedImprovement}\nКаналы: ${aiScenario.channels.join(', ')}\nТриггеры: ${aiScenario.triggers.join(', ')}`,
             type: 'custom',
             category: aiScenario.category.toLowerCase(),
-            channel: aiScenario.channels.length > 1 ? 'multi-channel' : aiScenario.channels[0].toLowerCase(),
+            channel: aiScenario.channels.length > 1 ? 'Multi-channel' : mapChannel(aiScenario.channels[0] || 'email'),
             performance: 5, // AI-сценарии имеют высокую оценку
             usageCount: 0,
             createdAt: new Date().toISOString(),
