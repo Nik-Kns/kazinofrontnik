@@ -161,7 +161,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                 <th className="px-3 py-2 text-left">
                   <div className="flex items-center gap-1">
                     Total Deposits
-                    {!currencyState.settings?.show_in_base_currency && (
+                    {!currencyState.show_in_base_currency && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
@@ -180,7 +180,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                 <th className="px-3 py-2 text-left">
                   <div className="flex items-center gap-1">
                     Net Deposits
-                    {!currencyState.settings?.show_in_base_currency && (
+                    {!currencyState.show_in_base_currency && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
@@ -199,7 +199,7 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
                 <th className="px-3 py-2 text-left">
                   <div className="flex items-center gap-1">
                     GGR
-                    {!currencyState.settings?.show_in_base_currency && (
+                    {!currencyState.show_in_base_currency && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
