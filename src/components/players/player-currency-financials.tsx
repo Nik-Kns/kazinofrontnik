@@ -122,7 +122,7 @@ export function PlayerCurrencyFinancials({ player }: PlayerCurrencyFinancialsPro
               <MultiCurrencyBadge 
                 currencies={player.currencies}
                 primaryCurrency={player.primary_currency}
-                walletBalances={player.wallet_balances}
+                walletBalances={player.wallet_balances as Record<CurrencyCode, number>}
                 showFlags
               />
               <CurrencyToggle size="sm" showLabel={false} />
