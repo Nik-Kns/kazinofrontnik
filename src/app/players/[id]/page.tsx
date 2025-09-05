@@ -1567,7 +1567,7 @@ export default function PlayerProfilePage() {
                       <p>Последний вход: {new Date().toLocaleString('ru-RU')}</p>
                       <p>Длительность сессии: {player.gaming.averageSessionDuration}</p>
                       <p>Сыгранные игры: {player.gaming.favoriteGames.slice(0,3).join(', ')}</p>
-                      <p>Частота входов: {player.behavior.sessionFrequency}/нед</p>
+                      <p>Частота входов: {player.gaming.sessionFrequency}/нед</p>
                       <p>IP/Гео: 178.23.11.3 / {player.mainInfo.geo}</p>
                       <p>Устройство/соединение: {player.mainInfo.platform} / Wi‑Fi</p>
               </div>
