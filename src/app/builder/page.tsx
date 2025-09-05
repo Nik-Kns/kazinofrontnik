@@ -81,7 +81,7 @@ export default function ScenariosPage() {
             id: `ai_${aiScenario.id}_${Date.now()}`,
             name: aiScenario.name,
             description: `${aiScenario.description}\n\nЦелевая метрика: ${aiScenario.targetMetric}\nОжидаемое улучшение: ${aiScenario.expectedImprovement}\nКаналы: ${aiScenario.channels.join(', ')}\nТриггеры: ${aiScenario.triggers.join(', ')}`,
-            type: 'ai-generated',
+            type: 'custom',
             category: aiScenario.category.toLowerCase(),
             channel: aiScenario.channels.length > 1 ? 'multi-channel' : aiScenario.channels[0].toLowerCase(),
             performance: 5, // AI-сценарии имеют высокую оценку
