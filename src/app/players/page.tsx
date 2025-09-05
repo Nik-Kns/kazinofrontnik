@@ -137,8 +137,8 @@ export default function PlayersPage() {
                   <label className="text-xs text-muted-foreground">VIP</label>
                   <MultiSelect
                     options={vipOptions}
-                    selected={(filters.vipLevels as string[]) || []}
-                    onChange={(selected) => setFilters(prev => ({ ...prev, vipLevels: selected }))}
+                    selected={(filters.vipLevels as unknown as string[]) || []}
+                    onChange={(selected) => setFilters(prev => ({ ...prev, vipLevels: selected as unknown as VipLevel[] }))}
                     placeholder="Выбрать"
                   />
                 </div>
