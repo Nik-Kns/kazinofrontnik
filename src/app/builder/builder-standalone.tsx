@@ -11,11 +11,6 @@ import {
     ReactFlowProvider,
 } from 'reactflow';
 import {
-    ResizableHandle,
-    ResizablePanel,
-    ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import {
     Activity,
     GitBranch,
     CheckCircle,
