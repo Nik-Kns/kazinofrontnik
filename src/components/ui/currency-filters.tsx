@@ -280,7 +280,6 @@ export function CurrencyFilters({
               selected={value.selected_currencies}
               onChange={handleCurrenciesChange}
               placeholder="Выберите валюты..."
-              maxCount={3}
             />
           </div>
 
