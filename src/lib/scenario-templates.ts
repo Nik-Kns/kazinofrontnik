@@ -22,6 +22,183 @@ export interface ScenarioTemplate {
 }
 
 export const scenarioTemplates: Record<string, ScenarioTemplate> = {
+  'welcome-series': {
+    id: 'welcome-series',
+    name: 'Drip-кампания для новых игроков',
+    description: 'Автоматизированная серия писем для онбординга новых пользователей',
+    category: 'conversion',
+    trigger: {
+      type: 'registration',
+      conditions: {
+        immediate: true
+      }
+    },
+    actions: [
+      {
+        type: 'email',
+        config: {
+          template: 'welcome_email_1',
+          subject: '🎰 Добро пожаловать, {name}! Ваш бонус уже ждет',
+          delay: 0
+        }
+      },
+      {
+        type: 'email',
+        config: {
+          template: 'welcome_email_2',
+          subject: '💰 Как получить максимум от первого депозита',
+          delay: 24
+        }
+      },
+      {
+        type: 'push',
+        config: {
+          message: '🎁 Не забудьте активировать ваш приветственный бонус!',
+          delay: 48
+        }
+      },
+      {
+        type: 'email',
+        config: {
+          template: 'welcome_email_3',
+          subject: '🏆 Ваш первый турнир начинается завтра',
+          delay: 72
+        }
+      },
+      {
+        type: 'sms',
+        config: {
+          message: 'Последний день вашего 200% бонуса! Не упустите шанс',
+          delay: 144
+        }
+      }
+    ],
+    segments: ['new_registrations', 'no_deposit'],
+    expectedMetrics: {
+      conversion: '45%',
+      revenue: '€380,000/мес',
+      roi: '420%'
+    }
+  },
+  
+  'abandoned-cart': {
+    id: 'abandoned-cart',
+    name: 'Возврат брошенных корзин',
+    description: 'Триггерная кампания для возврата игроков с незавершенными депозитами',
+    category: 'conversion',
+    trigger: {
+      type: 'cart_abandoned',
+      conditions: {
+        cartValue: { min: 20 },
+        timeElapsed: { hours: 1 }
+      }
+    },
+    actions: [
+      {
+        type: 'email',
+        config: {
+          template: 'cart_recovery',
+          subject: '🛒 Вы забыли завершить депозит',
+          delay: 1,
+          personalized: true
+        }
+      },
+      {
+        type: 'push',
+        config: {
+          message: '💳 Завершите депозит и получите +10% бонус!',
+          delay: 3
+        }
+      },
+      {
+        type: 'bonus',
+        config: {
+          type: 'deposit',
+          percentage: 10,
+          validHours: 24,
+          autoApply: true
+        }
+      },
+      {
+        type: 'email',
+        config: {
+          template: 'last_chance',
+          subject: '⏰ Последние 2 часа для вашего бонуса 10%',
+          delay: 22
+        }
+      }
+    ],
+    segments: ['abandoned_carts'],
+    expectedMetrics: {
+      conversion: '18%',
+      revenue: '€245,000/мес',
+      roi: '380%'
+    }
+  },
+
+  'tournament-invite': {
+    id: 'tournament-invite',
+    name: 'Персонализированные турниры',
+    description: 'Приглашения на турниры на основе предпочтений игрока',
+    category: 'engagement',
+    trigger: {
+      type: 'scheduled',
+      conditions: {
+        frequency: 'weekly',
+        dayOfWeek: 'thursday',
+        time: '18:00'
+      }
+    },
+    actions: [
+      {
+        type: 'analyze',
+        config: {
+          playerPreferences: true,
+          gameHistory: true,
+          tournamentHistory: true
+        }
+      },
+      {
+        type: 'tournament_create',
+        config: {
+          personalized: true,
+          prizePool: 5000,
+          entryFee: 0,
+          games: 'preferred'
+        }
+      },
+      {
+        type: 'push',
+        config: {
+          message: '🏆 Персональный турнир по вашей любимой игре!',
+          deepLink: 'tournament_lobby'
+        }
+      },
+      {
+        type: 'in_app',
+        config: {
+          type: 'banner',
+          position: 'top',
+          animated: true,
+          cta: 'Участвовать бесплатно'
+        }
+      },
+      {
+        type: 'email',
+        config: {
+          template: 'tournament_reminder',
+          subject: '⚡ Турнир начинается через 1 час',
+          delay: -1
+        }
+      }
+    ],
+    segments: ['active_players', 'non_tournament_players'],
+    expectedMetrics: {
+      conversion: '35%',
+      revenue: '€168,000/мес',
+      roi: '320%'
+    }
+  },
   'dormant-reactivation': {
     id: 'dormant-reactivation',
     name: 'Кампания реактивации спящих игроков',
