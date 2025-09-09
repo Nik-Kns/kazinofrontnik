@@ -29,7 +29,9 @@ import {
   Star,
   ClipboardCheck,
   Search,
-  ArrowUp
+  ArrowUp,
+  MapPin,
+  Send
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -108,9 +110,9 @@ const aiRecommendations: AIRecommendation[] = [
   {
     id: '1',
     title: 'Запустить кампанию реактивации для спящих игроков',
-    description: 'Обнаружено 2,847 игроков без активности 30+ дней с высоким LTV',
+    description: 'Обнаружено 2,847 игроков без активности 30+ дней с высоким LTV в ГЕО DE, AT, CH',
     priority: 'critical',
-    impact: '+12% к Monthly Revenue',
+    impact: '+12% реактивация в ГЕО DE',
     status: 'new',
     category: 'retention',
     actions: {
@@ -121,17 +123,19 @@ const aiRecommendations: AIRecommendation[] = [
       secondary: { label: 'Отложить', action: () => console.log('postponed') }
     },
     metrics: [
-      { name: 'Потенциал', value: '€142,350', trend: 'up' },
-      { name: 'Конверсия', value: '8-12%', trend: 'up' }
+      { name: 'Потенциал', value: '+8-12% конверсия', trend: 'up' },
+      { name: 'Сегмент', value: 'Спящие 30+ дней', trend: 'up' },
+      { name: 'ГЕО', value: 'DE, AT, CH', trend: 'up' },
+      { name: 'Канал', value: 'Email + Push', trend: 'up' }
     ],
     deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
   },
   {
     id: '2',
     title: 'Оптимизировать бонусную программу для VIP сегмента',
-    description: 'VIP игроки используют только 45% доступных бонусов',
+    description: 'VIP игроки используют только 45% доступных бонусов в регионе UK, IE',
     priority: 'high',
-    impact: '+€85,000 GGR в месяц',
+    impact: '+25% использование бонусов VIP в UK',
     status: 'new',
     category: 'revenue',
     actions: {
@@ -143,15 +147,17 @@ const aiRecommendations: AIRecommendation[] = [
     },
     metrics: [
       { name: 'VIP активность', value: '71%', trend: 'down' },
-      { name: 'Bonus ROI', value: '2.3x', trend: 'up' }
+      { name: 'Bonus ROI', value: '2.3x', trend: 'up' },
+      { name: 'ГЕО', value: 'UK, IE', trend: 'up' },
+      { name: 'Канал', value: 'In-App', trend: 'up' }
     ]
   },
   {
     id: '3',
     title: 'Риск оттока: 156 высокоценных игроков',
-    description: 'Алгоритм обнаружил признаки скорого ухода у VIP игроков',
+    description: 'Алгоритм обнаружил признаки скорого ухода у VIP игроков в ГЕО FR, BE',
     priority: 'critical',
-    impact: 'Потенциальная потеря €68,000',
+    impact: '-15% отток VIP в ГЕО FR',
     status: 'in_progress',
     category: 'risk',
     actions: {
@@ -163,7 +169,9 @@ const aiRecommendations: AIRecommendation[] = [
     },
     metrics: [
       { name: 'Risk Score', value: '8.7/10', trend: 'up' },
-      { name: 'Дней до ухода', value: '5-7', trend: 'down' }
+      { name: 'Дней до ухода', value: '5-7', trend: 'down' },
+      { name: 'ГЕО', value: 'FR, BE', trend: 'down' },
+      { name: 'Канал', value: 'SMS + Call', trend: 'up' }
     ],
     deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
   }
@@ -483,7 +491,10 @@ export default function DashboardPage() {
                         status: 'critical',
                         description: 'Отсутствует онбординг для новых пользователей. 67% новых игроков уходят в первые 3 дня.',
                         reason: 'Правильный онбординг увеличивает D1 retention на 35% и конверсию в первый депозит на 40%',
-                        potentialRevenue: '€285,000/мес',
+                        potentialRevenue: '+40% FTD в ГЕО DE, AT',
+                        geo: 'DE, AT, CH',
+                        segment: 'Новые регистрации',
+                        channel: 'Email + Push',
                         icon: Users
                       },
                       {
@@ -491,8 +502,11 @@ export default function DashboardPage() {
                         title: 'VIP программа лояльности',
                         status: 'high',
                         description: 'VIP игроки не получают эксклюзивных преимуществ. Churn rate VIP = 12% (выше среднего)',
-                        reason: 'VIP игроки генерируют 65% всей выручки. Снижение их оттока на 5% = +€420,000/мес',
-                        potentialRevenue: '€420,000/мес',
+                        reason: 'VIP игроки генерируют 65% всей выручки. Снижение их оттока на 5%',
+                        potentialRevenue: '-5% Churn VIP в UK',
+                        geo: 'UK, IE',
+                        segment: 'VIP игроки',
+                        channel: 'Personal Manager',
                         icon: DollarSign
                       },
                       {
@@ -500,8 +514,11 @@ export default function DashboardPage() {
                         title: 'Реактивация спящих',
                         status: 'high',
                         description: '8,450 спящих игроков с LTV > €200 не получают коммуникаций',
-                        reason: 'Каждый реактивированный игрок приносит в среднем €85 в первые 30 дней',
-                        potentialRevenue: '€195,000/мес',
+                        reason: 'Каждый реактивированный игрок возвращается к активности',
+                        potentialRevenue: '+15% реактивация в FR',
+                        geo: 'FR, BE, LU',
+                        segment: 'Спящие 30+ дней',
+                        channel: 'Email + SMS',
                         icon: Activity
                       },
                       {
@@ -509,8 +526,11 @@ export default function DashboardPage() {
                         title: 'Персонализация бонусов',
                         status: 'medium',
                         description: 'Все игроки получают одинаковые офферы без учета предпочтений',
-                        reason: 'Персонализированные бонусы повышают конверсию в депозит на 28%',
-                        potentialRevenue: '€156,000/мес',
+                        reason: 'Персонализированные бонусы повышают конверсию в депозит',
+                        potentialRevenue: '+28% бонус использование ES',
+                        geo: 'ES, PT',
+                        segment: 'Активные игроки',
+                        channel: 'In-App',
                         icon: Target
                       },
                       {
@@ -518,8 +538,11 @@ export default function DashboardPage() {
                         title: 'Win-back кампании',
                         status: 'medium',
                         description: 'Нет систематических кампаний для ушедших игроков',
-                        reason: '15% ушедших игроков можно вернуть в течение 90 дней с правильным оффером',
-                        potentialRevenue: '€112,000/мес',
+                        reason: 'Ушедших игроков можно вернуть с правильным оффером',
+                        potentialRevenue: '+12% возврат через 90 дней IT',
+                        geo: 'IT, GR',
+                        segment: 'Ушедшие 90+ дней',
+                        channel: 'Email',
                         icon: Zap
                       }
                     ]);
@@ -576,9 +599,9 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-5 w-5 text-red-600" />
-                      <span className="font-semibold text-red-900">Обнаружено упущенной выручки:</span>
+                      <span className="font-semibold text-red-900">Обнаружено областей для улучшения:</span>
                     </div>
-                    <span className="text-xl font-bold text-red-600">€1,168,000/мес</span>
+                    <span className="text-xl font-bold text-red-600">5 критичных метрик</span>
                   </div>
                 </div>
                 
@@ -598,13 +621,27 @@ export default function DashboardPage() {
                           <div className="flex items-center justify-between mb-1">
                             <h4 className="font-semibold text-sm">{improvement.title}</h4>
                             <Badge variant="secondary" className="text-xs font-bold">
-                              <ArrowUp className="mr-1 h-3 w-3" />
+                              <TrendingUp className="mr-1 h-3 w-3" />
                               {improvement.potentialRevenue}
                             </Badge>
                           </div>
                           <p className="text-xs text-muted-foreground mb-2">
                             {improvement.description}
                           </p>
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            <Badge variant="outline" className="text-xs">
+                              <MapPin className="mr-1 h-2.5 w-2.5" />
+                              GEO: {improvement.geo}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              <Target className="mr-1 h-2.5 w-2.5" />
+                              {improvement.segment}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              <Send className="mr-1 h-2.5 w-2.5" />
+                              {improvement.channel}
+                            </Badge>
+                          </div>
                           <div className="p-2 bg-white/80 rounded">
                             <p className="text-xs">
                               <span className="font-medium">Почему это важно:</span> {improvement.reason}

@@ -55,7 +55,10 @@ const aiTemplateRecommendations = [
     title: 'Внедрить Drip-кампанию для новых игроков',
     description: '78% новых регистраций не делают депозит в первые 24 часа',
     impact: '+45% конверсия FTD',
-    revenue: '€380,000/мес',
+    metric: '+45% FTD конверсия',
+    geo: ['DE', 'AT', 'CH'],
+    segment: 'Новые регистрации',
+    channels: ['Email', 'Push', 'SMS'],
     templateId: 'welcome-series',
     scenarioParams: {
       type: 'drip-campaign',
@@ -72,7 +75,10 @@ const aiTemplateRecommendations = [
     title: 'Создать триггеры для брошенных корзин',
     description: '4,230 брошенных корзин ежедневно со средней суммой €85',
     impact: '+18% возврат корзин',
-    revenue: '€245,000/мес',
+    metric: '+18% возврат депозитов',
+    geo: ['UK', 'IE'],
+    segment: 'Незавершенные депозиты',
+    channels: ['Email', 'Push'],
     templateId: 'abandoned-cart',
     scenarioParams: {
       type: 'trigger-based',
@@ -89,7 +95,10 @@ const aiTemplateRecommendations = [
     title: 'Запустить персонализированные турниры',
     description: 'Только 12% активных игроков участвуют в турнирах',
     impact: '+25% DAU',
-    revenue: '€168,000/мес',
+    metric: '+13% участников турниров',
+    geo: ['FR', 'BE', 'LU'],
+    segment: 'Активные игроки',
+    channels: ['Push', 'In-App'],
     templateId: 'tournament-invite',
     scenarioParams: {
       type: 'engagement',
@@ -177,7 +186,7 @@ export default function TemplatesPage() {
             </div>
             <Badge variant="secondary">
               <Sparkles className="mr-1 h-3 w-3" />
-              Общий потенциал: €793,000/мес
+              Потенциал: +28% общей конверсии
             </Badge>
           </div>
         </CardHeader>
@@ -218,16 +227,26 @@ export default function TemplatesPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3 text-green-600" />
-                        <span className="font-medium">{rec.impact}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-3 w-3 text-green-600" />
-                        <span className="font-bold text-green-700">{rec.revenue}</span>
-                      </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <TrendingUp className="h-3 w-3 text-green-600" />
+                      <span className="font-bold text-green-700">{rec.metric}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="outline" className="text-xs">
+                        <Target className="mr-1 h-2.5 w-2.5" />
+                        {rec.segment}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        GEO: {rec.geo.join(', ')}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-1">
+                      {rec.channels.map(channel => (
+                        <Badge key={channel} variant="secondary" className="text-xs">
+                          {channel}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
 
