@@ -100,7 +100,7 @@ const kpiData = [
   }
 ];
 
-// Моковые ИИ-рекомендации
+// Моковые ИИ-рекомендации с расширенными параметрами для сценариев
 const aiRecommendations: AIRecommendation[] = [
   {
     id: '1',
@@ -111,7 +111,10 @@ const aiRecommendations: AIRecommendation[] = [
     status: 'new',
     category: 'retention',
     actions: {
-      primary: { label: 'Создать кампанию', href: '/builder?template=reactivation' },
+      primary: { 
+        label: 'Создать кампанию', 
+        href: `/builder?template=dormant-reactivation&audience=2847&segment=dormant_30_days&urgency=critical&expectedRevenue=142350&conversion=8-12` 
+      },
       secondary: { label: 'Отложить', action: () => console.log('postponed') }
     },
     metrics: [
@@ -129,7 +132,10 @@ const aiRecommendations: AIRecommendation[] = [
     status: 'new',
     category: 'revenue',
     actions: {
-      primary: { label: 'Настроить бонусы', href: '/segments?filter=vip' },
+      primary: { 
+        label: 'Настроить бонусы', 
+        href: `/builder?template=vip-bonus-optimization&audience=450&segment=vip_players&bonusUtilization=45&expectedRevenue=85000&urgency=high` 
+      },
       secondary: { label: 'Подробнее', action: () => console.log('details') }
     },
     metrics: [
@@ -146,7 +152,10 @@ const aiRecommendations: AIRecommendation[] = [
     status: 'in_progress',
     category: 'risk',
     actions: {
-      primary: { label: 'Применить стратегию', href: '/builder?template=risk-prevention' },
+      primary: { 
+        label: 'Применить стратегию', 
+        href: `/builder?template=churn-risk-prevention&audience=156&segment=at_risk_vip&riskScore=8.7&potentialLoss=68000&daysToChurn=5-7&urgency=critical` 
+      },
       secondary: { label: 'Игнорировать', action: () => console.log('ignored') }
     },
     metrics: [

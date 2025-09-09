@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Zap, Settings, Bot, Layers, Target, DollarSign } from "lucide-react";
+import { PlusCircle, Zap, Settings, Bot, Layers, Target, DollarSign, Sparkles, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,8 @@ import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/cur
 import { CurrencyBadge } from "@/components/ui/currency-badge";
 import { useCurrency } from "@/contexts/currency-context";
 import { useRouter, useSearchParams } from "next/navigation";
+import { scenarioTemplates, createPersonalizedScenario } from '@/lib/scenario-templates';
+import { Badge } from "@/components/ui/badge";
 
 function searchParamsSafe() {
   // хелпер, возвращаем прокси без SSR обращения
@@ -36,6 +38,8 @@ export default function ScenariosPage() {
     const [isBuilderMode, setIsBuilderMode] = React.useState(false);
     const [editingScenario, setEditingScenario] = React.useState<TemplateData | null>(null);
     const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
+    const [templateLoaded, setTemplateLoaded] = React.useState(false);
+    const [loadedTemplateInfo, setLoadedTemplateInfo] = React.useState<any>(null);
     
     // Валютные настройки
     const { state: currencyState } = useCurrency();
@@ -43,6 +47,46 @@ export default function ScenariosPage() {
     const search = searchParamsSafe();
     const initialTab = (search?.get('tab') || 'all') as 'all'|'default'|'tournaments'|'event-driven'|'promo-events';
     const [tab, setTab] = React.useState<typeof initialTab>(initialTab);
+    
+    // Обработка параметров из URL для загрузки шаблона
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const templateId = params.get('template');
+            
+            if (templateId && !templateLoaded) {
+                // Загружаем шаблон с персонализацией
+                const template = scenarioTemplates[templateId];
+                if (template) {
+                    const personalizationData = {
+                        targetAudience: parseInt(params.get('audience') || '0'),
+                        budget: parseInt(params.get('budget') || '0'),
+                        urgency: (params.get('urgency') || 'medium') as any,
+                        customSegments: params.get('segment')?.split(',') || [],
+                        expectedRevenue: params.get('expectedRevenue'),
+                        conversion: params.get('conversion'),
+                        riskScore: params.get('riskScore'),
+                        potentialLoss: params.get('potentialLoss'),
+                        daysToChurn: params.get('daysToChurn'),
+                        bonusUtilization: params.get('bonusUtilization')
+                    };
+                    
+                    const personalizedScenario = createPersonalizedScenario(template, personalizationData);
+                    
+                    // Сохраняем информацию о загруженном шаблоне
+                    setLoadedTemplateInfo({
+                        ...personalizedScenario,
+                        params: personalizationData
+                    });
+                    
+                    // Открываем редактор с загруженным шаблоном
+                    setEditingScenario(personalizedScenario as any);
+                    setIsBuilderMode(true);
+                    setTemplateLoaded(true);
+                }
+            }
+        }
+    }, [templateLoaded]);
 
     const handleTabChange = (value: string) => {
         setTab(value as any);
@@ -128,6 +172,40 @@ export default function ScenariosPage() {
 
     return (
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
+            {/* Уведомление о загруженном шаблоне из ИИ-рекомендации */}
+            {loadedTemplateInfo && !isBuilderMode && (
+                <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-purple-500/5">
+                    <CardContent className="flex items-center justify-between p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <Sparkles className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <p className="font-semibold">Шаблон из ИИ-рекомендации загружен</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {loadedTemplateInfo.name} • Целевая аудитория: {loadedTemplateInfo.params?.targetAudience || 'N/A'} игроков
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Badge variant="secondary">
+                                <AlertCircle className="mr-1 h-3 w-3" />
+                                {loadedTemplateInfo.params?.urgency || 'medium'}
+                            </Badge>
+                            <Button 
+                                size="sm" 
+                                onClick={() => {
+                                    setEditingScenario(loadedTemplateInfo);
+                                    setIsBuilderMode(true);
+                                }}
+                            >
+                                Открыть в редакторе
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+            
             <div className="flex items-center justify-between">
                         <div>
                     <h1 className="text-2xl font-bold tracking-tight">Сценарии</h1>
