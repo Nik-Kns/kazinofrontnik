@@ -1,5 +1,11 @@
 # Commit History
 
+## d6fe022 - feat: redesign gamification sections with retention audit
+- Renamed 'Active Missions' to 'Improvement Checklist'
+- Renamed 'Achievements' to 'Retention Improvements'
+- Added retention audit functionality with €1,168,000/month lost revenue analysis
+- Shows 5 critical areas for improvement with revenue potential
+
 ## 4f5ac89 - feat: implement AI-driven scenario prefilling from recommendations
 - Created scenario templates for different recommendation types
 - Added URL parameter processing in builder page
