@@ -18,7 +18,7 @@ interface ClipboardContextType {
 const ClipboardContext = createContext<ClipboardContextType | undefined>(undefined);
 
 // Validation rules for copy/move operations
-const COPY_MOVE_RULES = {
+const COPY_MOVE_RULES: Record<ClipboardItemType, { accepts: ClipboardItemType[]; canAccept: ClipboardItemType[] }> = {
   campaign: {
     accepts: [], // Campaigns can't be pasted into anything
     canAccept: ['scenario'], // Campaigns can accept scenarios

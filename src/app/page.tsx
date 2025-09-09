@@ -544,14 +544,14 @@ export default function DashboardPage() {
           {displayedMetrics.map((kpi) => {
             if (!timeRange) {
               return (
-                <Card key={kpi.id}>
+                <Card key={kpi?.id || 'fallback'}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-muted-foreground">
-                        {kpi.name}
+                        {kpi?.name || ''}
                       </CardTitle>
-                      <div className={cn("p-2 rounded-lg", kpi.bgColor)}>
-                        <kpi.icon className={cn("h-4 w-4", kpi.color)} />
+                      <div className={cn("p-2 rounded-lg", kpi?.bgColor || '')}>
+                        {kpi?.icon && <kpi.icon className={cn("h-4 w-4", kpi?.color || '')} />}
                       </div>
                     </div>
                   </CardHeader>
@@ -567,18 +567,18 @@ export default function DashboardPage() {
               );
             }
             
-          const progress = (kpi.value / kpi.target) * 100;
-          const Icon = kpi.icon;
+          const progress = ((kpi?.value || 0) / (kpi?.target || 1)) * 100;
+          const Icon = kpi?.icon;
           
           return (
-            <Card key={kpi.id}>
+            <Card key={kpi?.id || 'fallback'}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {kpi.name}
+                    {kpi?.name || ''}
                   </CardTitle>
-                  <div className={cn("p-2 rounded-lg", kpi.bgColor)}>
-                    <Icon className={cn("h-4 w-4", kpi.color)} />
+                  <div className={cn("p-2 rounded-lg", kpi?.bgColor || '')}>
+                    {Icon && <Icon className={cn("h-4 w-4", kpi?.color || '')} />}
                   </div>
                 </div>
               </CardHeader>
@@ -586,25 +586,25 @@ export default function DashboardPage() {
                 <div className="space-y-2">
                   <div className="flex items-baseline justify-between">
                     <span className="text-2xl font-bold">
-                      {kpi.unit === '€' && '€'}
-                      {kpi.value.toLocaleString()}
-                      {kpi.unit === '%' && '%'}
+                      {kpi?.unit === '€' && '€'}
+                      {(kpi?.value || 0).toLocaleString()}
+                      {kpi?.unit === '%' && '%'}
                     </span>
                     <div className={cn(
                       "flex items-center gap-1 text-sm",
-                      kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                      kpi?.trend === 'up' ? 'text-green-600' : 'text-red-600'
                     )}>
-                      {kpi.trend === 'up' ? (
+                      {kpi?.trend === 'up' ? (
                         <TrendingUp className="h-4 w-4" />
                       ) : (
                         <TrendingDown className="h-4 w-4" />
                       )}
-                      {Math.abs(kpi.change)}%
+                      {Math.abs(kpi?.change || 0)}%
                     </div>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Цель: {kpi.unit === '€' && '€'}{kpi.target.toLocaleString()}{kpi.unit === '%' && '%'}</span>
+                      <span>Цель: {kpi?.unit === '€' && '€'}{(kpi?.target || 0).toLocaleString()}{kpi?.unit === '%' && '%'}</span>
                       <span>{Math.round(progress)}%</span>
                     </div>
                     <Progress value={Math.min(progress, 100)} className="h-2" />

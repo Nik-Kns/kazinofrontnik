@@ -121,7 +121,7 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
     setFilters(prev => ({
       ...prev,
       datePreset: preset as any,
-      dateRange: preset === 'custom' ? prev.dateRange : { from, to }
+      dateRange: preset === 'custom' ? prev.dateRange : (from && to ? { from, to } : undefined)
     }));
   };
 
@@ -231,7 +231,11 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
             {filters.datePreset === 'custom' && (
               <DatePickerWithRange
                 date={filters.dateRange}
-                onDateChange={(date) => setFilters(prev => ({ ...prev, dateRange: date }))}
+                onDateChange={(date) => {
+                  if (date?.from && date?.to) {
+                    setFilters(prev => ({ ...prev, dateRange: { from: date.from as Date, to: date.to as Date } }));
+                  }
+                }}
               />
             )}
           </div>
@@ -421,7 +425,7 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
                 <div className="space-y-2">
                   <Label>Язык</Label>
                   <Select
-                    value={filters.language || ''}
+                    value={typeof filters.language === 'string' ? filters.language : ''}
                     onValueChange={(value) => setFilters(prev => ({ ...prev, language: value }))}
                   >
                     <SelectTrigger>
@@ -495,7 +499,11 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
                     <Label>Дата регистрации</Label>
                     <DatePickerWithRange
                       date={filters.registrationDate}
-                      onDateChange={(date) => setFilters(prev => ({ ...prev, registrationDate: date }))}
+                      onDateChange={(date) => {
+                        if (date?.from && date?.to) {
+                          setFilters(prev => ({ ...prev, registrationDate: { from: date.from as Date, to: date.to as Date } }));
+                        }
+                      }}
                     />
                   </div>
 
@@ -526,7 +534,11 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
                     <Label>Дата последней игры</Label>
                     <DatePickerWithRange
                       date={filters.lastPlayDate}
-                      onDateChange={(date) => setFilters(prev => ({ ...prev, lastPlayDate: date }))}
+                      onDateChange={(date) => {
+                        if (date?.from && date?.to) {
+                          setFilters(prev => ({ ...prev, lastPlayDate: { from: date.from as Date, to: date.to as Date } }));
+                        }
+                      }}
                     />
                   </div>
 
@@ -534,7 +546,11 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
                     <Label>Дата последнего депозита</Label>
                     <DatePickerWithRange
                       date={filters.lastDepositDate}
-                      onDateChange={(date) => setFilters(prev => ({ ...prev, lastDepositDate: date }))}
+                      onDateChange={(date) => {
+                        if (date?.from && date?.to) {
+                          setFilters(prev => ({ ...prev, lastDepositDate: { from: date.from as Date, to: date.to as Date } }));
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -598,7 +614,7 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
             <X className="h-4 w-4 mr-2" />
             Сбросить
           </Button>
-          <Button onClick={() => onApply({ ...filters, currencyFilters })}>
+          <Button onClick={() => onApply(filters)}>
             Применить фильтры
           </Button>
         </div>

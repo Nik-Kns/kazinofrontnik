@@ -516,16 +516,16 @@ export function createPersonalizedScenario(
 
   if (data.budget) {
     // Адаптация бонусов под бюджет
-    scenario.actions.forEach(action => {
+    scenario.actions.forEach((action: any) => {
       if (action.type === 'bonus' && action.config.maxAmount) {
-        action.config.maxAmount = Math.min(action.config.maxAmount, data.budget / 100);
+        action.config.maxAmount = Math.min(action.config.maxAmount, (data.budget || 0) / 100);
       }
     });
   }
 
   if (data.urgency === 'critical') {
     // Ускорение всех задержек для критичных кампаний
-    scenario.actions.forEach(action => {
+    scenario.actions.forEach((action: any) => {
       if (action.config.delay) {
         action.config.delay = Math.floor(action.config.delay / 2);
       }

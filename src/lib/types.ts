@@ -396,7 +396,7 @@ export type ReportData = {
   createdBy: string;
 };
 
-export type CampaignData = {
+export type PlayerCampaignData = {
   id: string;
   name: string;
   date: string; // e.g. "2024-07-15"
@@ -851,6 +851,13 @@ export type RetentionMetric = {
   targetValue?: string | number;
   trend?: 'up' | 'down' | 'stable';
   trendValue?: string;
+  sparkline?: number[];
+  breakdown?: { label: string; value: number; color: string }[];
+  aiForecast?: {
+    horizonDays: number;
+    baseTrend: string;
+    scenarios: { name: string; expectedValue: string; impact: string }[];
+  };
 };
 
 export type SegmentMetrics = {

@@ -150,7 +150,7 @@ export function CompactCurrencyToggle({ className = '' }: CompactCurrencyToggleP
 // Версия с кнопкой для быстрого переключения
 interface CurrencyToggleButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
 }
 
