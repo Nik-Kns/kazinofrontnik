@@ -1,385 +1,613 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FullMetricsDashboard } from "@/components/dashboard/full-metrics-dashboard";
-import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
-import { RisksAndWarnings } from "@/components/dashboard/risks-and-warnings";
-import { DataAccessLevels } from "@/components/dashboard/data-access-levels";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Filter, TrendingUp, AlertCircle, Lightbulb, BarChart3, Users } from "lucide-react";
-import Link from "next/link";
-import type { FilterConfig } from "@/lib/types";
-import { verticalsData, type VerticalKey } from "@/lib/verticals-data";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { retentionMetrics } from "@/lib/retention-metrics-data";
 import { Progress } from "@/components/ui/progress";
-import { MultiSelect } from "@/components/ui/multi-select";
-import { Label } from "@/components/ui/label";
-import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  AlertCircle, 
+  Lightbulb, 
+  BarChart3, 
+  Users,
+  DollarSign,
+  Activity,
+  Target,
+  Award,
+  Zap,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Timer,
+  Sparkles,
+  Brain,
+  ChevronRight,
+  Trophy,
+  Star
+} from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-export default function CommandCenterPage() {
-  const [savedFilters, setSavedFilters] = useState<FilterConfig | null>(null);
-  const [goalsOpen, setGoalsOpen] = useState(false);
-  const [metricGoals, setMetricGoals] = useState<Record<string, number>>({});
-  const [tempGoals, setTempGoals] = useState<Record<string, number>>({});
+// Типы для ИИ-рекомендаций
+interface AIRecommendation {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  impact: string;
+  status: 'new' | 'in_progress' | 'completed' | 'dismissed';
+  category: 'retention' | 'revenue' | 'engagement' | 'risk';
+  actions: {
+    primary: { label: string; href?: string; action?: () => void };
+    secondary?: { label: string; action?: () => void };
+  };
+  metrics?: { name: string; value: string; trend: 'up' | 'down' }[];
+  deadline?: Date;
+}
 
-  useEffect(() => {
-    // Загружаем сохраненные фильтры из localStorage
-    const filters = localStorage.getItem('analyticsFilters');
-    if (filters) {
-      setSavedFilters(JSON.parse(filters));
+// Моковые данные KPI
+const kpiData = [
+  {
+    id: 'churn',
+    name: 'Churn Rate',
+    value: 8.2,
+    target: 5,
+    unit: '%',
+    trend: 'down',
+    change: -1.3,
+    icon: Users,
+    color: 'text-red-600',
+    bgColor: 'bg-red-50'
+  },
+  {
+    id: 'ltv',
+    name: 'LTV',
+    value: 485,
+    target: 500,
+    unit: '€',
+    trend: 'up',
+    change: +23,
+    icon: DollarSign,
+    color: 'text-green-600',
+    bgColor: 'bg-green-50'
+  },
+  {
+    id: 'deposits',
+    name: 'Депозиты',
+    value: 1240000,
+    target: 1500000,
+    unit: '€',
+    trend: 'up',
+    change: +5.2,
+    icon: TrendingUp,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50'
+  },
+  {
+    id: 'retention',
+    name: 'Retention D30',
+    value: 62,
+    target: 70,
+    unit: '%',
+    trend: 'down',
+    change: -3.1,
+    icon: Activity,
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50'
+  }
+];
+
+// Моковые ИИ-рекомендации
+const aiRecommendations: AIRecommendation[] = [
+  {
+    id: '1',
+    title: 'Запустить кампанию реактивации для спящих игроков',
+    description: 'Обнаружено 2,847 игроков без активности 30+ дней с высоким LTV',
+    priority: 'critical',
+    impact: '+12% к Monthly Revenue',
+    status: 'new',
+    category: 'retention',
+    actions: {
+      primary: { label: 'Создать кампанию', href: '/builder?template=reactivation' },
+      secondary: { label: 'Отложить', action: () => console.log('postponed') }
+    },
+    metrics: [
+      { name: 'Потенциал', value: '€142,350', trend: 'up' },
+      { name: 'Конверсия', value: '8-12%', trend: 'up' }
+    ],
+    deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: '2',
+    title: 'Оптимизировать бонусную программу для VIP сегмента',
+    description: 'VIP игроки используют только 45% доступных бонусов',
+    priority: 'high',
+    impact: '+€85,000 GGR в месяц',
+    status: 'new',
+    category: 'revenue',
+    actions: {
+      primary: { label: 'Настроить бонусы', href: '/segments?filter=vip' },
+      secondary: { label: 'Подробнее', action: () => console.log('details') }
+    },
+    metrics: [
+      { name: 'VIP активность', value: '71%', trend: 'down' },
+      { name: 'Bonus ROI', value: '2.3x', trend: 'up' }
+    ]
+  },
+  {
+    id: '3',
+    title: 'Риск оттока: 156 высокоценных игроков',
+    description: 'Алгоритм обнаружил признаки скорого ухода у VIP игроков',
+    priority: 'critical',
+    impact: 'Потенциальная потеря €68,000',
+    status: 'in_progress',
+    category: 'risk',
+    actions: {
+      primary: { label: 'Применить стратегию', href: '/builder?template=risk-prevention' },
+      secondary: { label: 'Игнорировать', action: () => console.log('ignored') }
+    },
+    metrics: [
+      { name: 'Risk Score', value: '8.7/10', trend: 'up' },
+      { name: 'Дней до ухода', value: '5-7', trend: 'down' }
+    ],
+    deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+  }
+];
+
+// Данные геймификации
+const gamificationData = {
+  level: 3,
+  levelName: 'Retention Expert',
+  currentXP: 720,
+  nextLevelXP: 1000,
+  achievements: [
+    { id: '1', name: 'First Campaign', icon: Trophy, unlocked: true },
+    { id: '2', name: 'Revenue Master', icon: DollarSign, unlocked: true },
+    { id: '3', name: 'Retention Guru', icon: Users, unlocked: false },
+    { id: '4', name: 'AI Pioneer', icon: Brain, unlocked: false }
+  ],
+  missions: [
+    { id: '1', title: 'Выполнить 5 рекомендаций ИИ', progress: 3, total: 5, reward: '+100 XP' },
+    { id: '2', title: 'Достичь 70% Retention Rate', progress: 62, total: 70, reward: '+250 XP' },
+    { id: '3', title: 'Создать 3 успешные кампании', progress: 1, total: 3, reward: '+150 XP' }
+  ]
+};
+
+export default function DashboardPage() {
+  const [recommendations, setRecommendations] = useState(aiRecommendations);
+  const [completedToday, setCompletedToday] = useState(2);
+  const [totalRecommendations, setTotalRecommendations] = useState(12);
+
+  const handleRecommendationAction = (id: string, action: 'apply' | 'dismiss' | 'postpone') => {
+    setRecommendations(prev => prev.map(rec => 
+      rec.id === id 
+        ? { ...rec, status: action === 'apply' ? 'in_progress' : action === 'dismiss' ? 'dismissed' : rec.status }
+        : rec
+    ));
+    if (action === 'apply') {
+      setCompletedToday(prev => prev + 1);
     }
-    const storedGoals = localStorage.getItem('metricGoals');
-    if (storedGoals) {
-      setMetricGoals(JSON.parse(storedGoals));
-    }
-  }, []);
-
-  // Быстрые справочники и синхронизация фильтров
-  const projectOptions = [
-    { value: 'main', label: 'Основной проект', icon: 'https://placehold.co/24x24/7C3AED/FFF?text=A' },
-    { value: 'vip', label: 'VIP Casino', icon: 'https://placehold.co/24x24/F59E0B/FFF?text=V' },
-    { value: 'sport', label: 'Sport Betting', icon: 'https://placehold.co/24x24/10B981/FFF?text=S' },
-    { value: 'poker', label: 'Poker Room', icon: 'https://placehold.co/24x24/EF4444/FFF?text=P' },
-  ];
-  const geoOptions = [
-    { value: 'de', label: 'Германия' },
-    { value: 'fr', label: 'Франция' },
-    { value: 'it', label: 'Италия' },
-    { value: 'es', label: 'Испания' },
-    { value: 'uk', label: 'Великобритания' },
-    { value: 'pl', label: 'Польша' },
-    { value: 'nl', label: 'Нидерланды' },
-    { value: 'pt', label: 'Португалия' },
-    { value: 'ru', label: 'Россия' },
-    { value: 'ua', label: 'Украина' }
-  ];
-
-  const updateSavedFilters = (next: FilterConfig) => {
-    setSavedFilters(next);
-    try { localStorage.setItem('analyticsFilters', JSON.stringify(next)); } catch {}
   };
 
-  const getFilterSummary = (filters: FilterConfig): string => {
-    const parts = [];
-    
-    if (filters.vertical) {
-      parts.push(`Вертикаль: ${verticalsData[filters.vertical as VerticalKey]?.label}`);
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'text-red-600 bg-red-100';
+      case 'high': return 'text-orange-600 bg-orange-100';
+      case 'medium': return 'text-blue-600 bg-blue-100';
+      case 'low': return 'text-gray-600 bg-gray-100';
+      default: return 'text-gray-600 bg-gray-100';
     }
-    if (filters.games && filters.games.length > 0) {
-      parts.push(`${filters.games.length} игр`);
+  };
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'Критично';
+      case 'high': return 'Высокий';
+      case 'medium': return 'Средний';
+      case 'low': return 'Низкий';
+      default: return priority;
     }
-    if (filters.segments && filters.segments.length > 0) {
-      parts.push(`${filters.segments.length} сегментов`);
-    }
-    if (filters.dateRange?.from && filters.dateRange?.to) {
-      parts.push('Период задан');
-    }
-    
-    return parts.length > 0 ? parts.join(', ') : 'Фильтры не заданы';
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-6 p-6">
+      {/* Заголовок с геймификацией */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <BarChart3 className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Командный центр</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <CompactCurrencyToggle />
-            <CurrencyToggleButton size="sm" />
-          </div>
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Центр управления с ИИ-рекомендациями и ключевыми метриками
+          </p>
         </div>
-        <p className="text-muted-foreground">
-          Полный мониторинг 25 ключевых метрик эффективности ретеншена и AI-рекомендации
-        </p>
+        <div className="flex items-center gap-4">
+          {/* Профиль с уровнем */}
+          <Card className="border-primary/20">
+            <CardContent className="flex items-center gap-3 p-4">
+              <Avatar className="h-12 w-12 border-2 border-primary">
+                <AvatarImage src="/avatar.png" />
+                <AvatarFallback className="bg-primary text-white">RM</AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold">Level {gamificationData.level}</p>
+                  <Badge variant="secondary" className="text-xs">
+                    {gamificationData.levelName}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Progress value={(gamificationData.currentXP / gamificationData.nextLevelXP) * 100} className="w-24 h-2" />
+                  <span className="text-xs text-muted-foreground">
+                    {gamificationData.currentXP}/{gamificationData.nextLevelXP} XP
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* Цели по метрикам */}
-      <Card>
+      {/* Блок ИИ рекомендует - приоритетные действия */}
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-purple-500/5">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Цели по ключевым метрикам</CardTitle>
-              <CardDescription>Отслеживайте прогресс по целевым значениям</CardDescription>
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Brain className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>ИИ рекомендует</CardTitle>
+                <CardDescription>
+                  Приоритетные действия на основе анализа данных
+                </CardDescription>
+              </div>
             </div>
-            <Dialog open={goalsOpen} onOpenChange={setGoalsOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">Добавить / изменить цели</Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl">
-                <DialogHeader>
-                  <DialogTitle>Настройка целей</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-3 max-h-[60vh] overflow-y-auto">
-                  {retentionMetrics.map(m => (
-                    <div key={m.id} className="grid grid-cols-3 items-center gap-3">
-                      <label className="col-span-1 text-sm">{m.name}</label>
-                      <Input
-                        type="number"
-                        className="col-span-2"
-                        placeholder={m.unit === '€' ? 'Цель, €' : 'Цель'}
-                        value={tempGoals[m.id] ?? metricGoals[m.id] ?? ''}
-                        onChange={(e) => setTempGoals(prev => ({ ...prev, [m.id]: Number(e.target.value) }))}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button variant="outline" onClick={() => { setTempGoals({}); setGoalsOpen(false); }}>Отмена</Button>
-                  <Button onClick={() => { const next = { ...metricGoals, ...tempGoals }; setMetricGoals(next); localStorage.setItem('metricGoals', JSON.stringify(next)); setGoalsOpen(false); }}>Сохранить цели</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">
+                {completedToday}/{totalRecommendations} выполнено сегодня
+              </Badge>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/recommendations">
+                  Все рекомендации
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          {Object.keys(metricGoals).length === 0 ? (
-            <p className="text-sm text-muted-foreground">Цели ещё не заданы. Нажмите «Добавить / изменить цели», чтобы установить цели по метрикам.</p>
-          ) : (
-            <div className="overflow-auto rounded border">
-              <table className="w-full text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="px-3 py-2 text-left">Метрика</th>
-                    <th className="px-3 py-2 text-right">Текущие</th>
-                    <th className="px-3 py-2 text-right">Цель</th>
-                    <th className="px-3 py-2 text-left">Прогресс</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(metricGoals).map(([id, target]) => {
-                    const m = retentionMetrics.find(x => x.id === id);
-                    if (!m) return null;
-                    const current = Number(m.value);
-                    const progress = Math.min(150, (current / (target || 1)) * 100);
-                    const color = progress >= 100 ? 'text-green-600' : progress >= 80 ? 'text-yellow-600' : 'text-red-600';
-                    return (
-                      <tr key={id} className="border-t">
-                        <td className="px-3 py-2">{m.name}</td>
-                        <td className="px-3 py-2 text-right">{m.unit === '€' ? `€${current.toLocaleString()}` : `${current}${m.unit || ''}`}</td>
-                        <td className="px-3 py-2 text-right">{m.unit === '€' ? `€${Number(target).toLocaleString()}` : `${target}${m.unit || ''}`}</td>
-                        <td className="px-3 py-2">
-                          <div className="flex items-center gap-3">
-                            <Progress value={progress} className="w-56" />
-                            <span className={`font-medium ${color}`}>{progress.toFixed(0)}%</span>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div className="space-y-3">
+            {recommendations.slice(0, 3).map((rec) => (
+              <div key={rec.id} className={cn(
+                "p-4 rounded-lg border bg-background",
+                rec.status === 'in_progress' && "border-primary/50 bg-primary/5",
+                rec.status === 'completed' && "opacity-60"
+              )}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Badge className={getPriorityColor(rec.priority)} variant="secondary">
+                        <Sparkles className="mr-1 h-3 w-3" />
+                        {getPriorityLabel(rec.priority)}
+                      </Badge>
+                      {rec.deadline && (
+                        <Badge variant="outline" className="text-xs">
+                          <Clock className="mr-1 h-3 w-3" />
+                          {Math.ceil((rec.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} дней
+                        </Badge>
+                      )}
+                      {rec.status === 'in_progress' && (
+                        <Badge className="bg-blue-100 text-blue-700">
+                          <Timer className="mr-1 h-3 w-3" />
+                          В работе
+                        </Badge>
+                      )}
+                    </div>
+                    <h4 className="font-semibold">{rec.title}</h4>
+                    <p className="text-sm text-muted-foreground">{rec.description}</p>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1 text-sm">
+                        <Zap className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-green-600">{rec.impact}</span>
+                      </div>
+                      {rec.metrics && rec.metrics.map((metric, i) => (
+                        <div key={i} className="flex items-center gap-1 text-sm">
+                          {metric.trend === 'up' ? (
+                            <TrendingUp className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <TrendingDown className="h-4 w-4 text-red-600" />
+                          )}
+                          <span className="text-muted-foreground">{metric.name}:</span>
+                          <span className="font-medium">{metric.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {rec.status === 'new' && (
+                      <>
+                        <Button
+                          size="sm"
+                          className="bg-primary hover:bg-primary/90"
+                          onClick={() => rec.actions.primary.href ? 
+                            window.location.href = rec.actions.primary.href : 
+                            handleRecommendationAction(rec.id, 'apply')
+                          }
+                        >
+                          <CheckCircle2 className="mr-1 h-4 w-4" />
+                          {rec.actions.primary.label}
+                        </Button>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => handleRecommendationAction(rec.id, 'postpone')}
+                          >
+                            <Clock className="mr-1 h-3 w-3" />
+                            Отложить
+                          </Button>
+                          {rec.actions.secondary && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="flex-1"
+                              onClick={rec.actions.secondary.action}
+                            >
+                              Подробнее
+                            </Button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                    {rec.status === 'in_progress' && (
+                      <Button size="sm" variant="secondary" disabled>
+                        <Timer className="mr-1 h-4 w-4" />
+                        В процессе
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
-      {/* Избранные метрики (как на странице аналитики) */}
-      <SelectedKpiTile />
-
-      {/* Полный дашборд метрик - главный блок */}
-      <FullMetricsDashboard filters={savedFilters || undefined} />
-
-      {/* Блок с уровнями доступа к данным */}
-      <DataAccessLevels />
-
-      {/* AI Инсайты и быстрые действия */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-primary" />
-              <CardTitle>AI Рекомендации</CardTitle>
-            </div>
-            <CardDescription>
-              Персонализированные советы на основе метрик
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Быстрые фильтры: Проект(ы) и ГЕО */}
-            <div className="grid gap-3 md:grid-cols-2 mb-4">
-              <div className="space-y-2">
-                <Label>Проекты</Label>
-                <MultiSelect
-                  options={projectOptions}
-                  selected={(savedFilters?.projects as string[]) || (savedFilters?.projectBrand ? [savedFilters.projectBrand] : [])}
-                  onChange={(selected) => updateSavedFilters({ ...(savedFilters || {}), projects: selected })}
-                  placeholder="Выбрать проект(ы)"
-                  showSelectAll
-                  selectAllLabel="Выбрать все"
-                  summaryFormatter={(count) => `Выбрано: ${count} проектов`}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>ГЕО</Label>
-                <MultiSelect
-                  options={geoOptions}
-                  selected={savedFilters?.countries || []}
-                  onChange={(selected) => updateSavedFilters({ ...(savedFilters || {}), countries: selected })}
-                  placeholder="Выберите страны"
-                  showSelectAll
-                  selectAllLabel="Выбрать все"
-                />
-              </div>
-            </div>
-            <div className="space-y-3">
-              {[{
-                title: 'Срочно: Запустить кампанию реактивации',
-                desc: 'Retention Rate упал ниже 65% - требуются меры',
-                priority: 'urgent',
-                impact: '+2.5% Retention'
-              }, {
-                title: 'Оптимизировать бонусную программу',
-                desc: 'Bonus Utilization Rate 71% - есть потенциал роста',
-                priority: 'recommended',
-                impact: '+3% GGR'
-              }, {
-                title: 'Усилить работу с VIP-сегментом',
-                desc: 'VIP Conversion Rate 8.3% ниже целевых 10%',
-                priority: 'optional',
-                impact: '+1% NGR'
-              }].map((rec, i) => (
-                <button key={i} className="w-full text-left p-3 rounded-lg border bg-background hover:bg-muted transition">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{rec.title}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded ${rec.priority === 'urgent' ? 'bg-destructive/10 text-destructive' : rec.priority === 'recommended' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                      {rec.priority === 'urgent' ? 'Срочно' : rec.priority === 'recommended' ? 'Рекомендуется' : 'Можно отложить'}
-                    </span>
+      {/* Ключевые KPI */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {kpiData.map((kpi) => {
+          const progress = (kpi.value / kpi.target) * 100;
+          const Icon = kpi.icon;
+          
+          return (
+            <Card key={kpi.id}>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {kpi.name}
+                  </CardTitle>
+                  <div className={cn("p-2 rounded-lg", kpi.bgColor)}>
+                    <Icon className={cn("h-4 w-4", kpi.color)} />
                   </div>
-                  <div className="mt-1 text-xs text-muted-foreground">{rec.desc}</div>
-                  <div className="mt-2 text-xs font-medium text-green-600">Ожидаемый эффект: {rec.impact}</div>
-                </button>
-              ))}
-              <Button variant="default" size="sm" className="w-full" asChild>
-                <Link href="/builder">
-                  Создать сценарий
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Фильтры и настройки</CardTitle>
-            </div>
-            <CardDescription>
-              Активные фильтры аналитики
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {savedFilters ? (
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  {getFilterSummary(savedFilters)}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {savedFilters.vertical && (
-                    <Badge variant="secondary">
-                      {verticalsData[savedFilters.vertical as VerticalKey]?.label}
-                    </Badge>
-                  )}
-                  {savedFilters.games && savedFilters.games.slice(0, 3).map((game) => (
-                    <Badge key={game} variant="outline">
-                      {savedFilters.vertical && 
-                        verticalsData[savedFilters.vertical as VerticalKey]?.games.find(g => g.value === game)?.label || game
-                      }
-                    </Badge>
-                  ))}
-                  {savedFilters.games && savedFilters.games.length > 3 && (
-                    <Badge variant="outline">+{savedFilters.games.length - 3}</Badge>
-                  )}
-                  {Array.isArray(savedFilters.projects) && savedFilters.projects.slice(0,3).map((p) => (
-                    <Badge key={p} variant="outline">{p}</Badge>
-                  ))}
-                  {savedFilters.projects && (savedFilters.projects as string[]).length > 3 && (
-                    <Badge variant="outline">+{(savedFilters.projects as string[]).length - 3}</Badge>
-                  )}
-                  {Array.isArray(savedFilters.countries) && savedFilters.countries.slice(0,3).map((c) => (
-                    <Badge key={c} variant="outline">{c.toUpperCase()}</Badge>
-                  ))}
-                  {savedFilters.countries && (savedFilters.countries as string[]).length > 3 && (
-                    <Badge variant="outline">+{(savedFilters.countries as string[]).length - 3}</Badge>
-                  )}
                 </div>
-                <Button asChild variant="outline" size="sm" className="w-full">
-                  <Link href="/analytics">
-                    Изменить фильтры
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center py-2">
-                <p className="text-sm text-muted-foreground mb-3">
-                  Настройте фильтры для персонализации
-                </p>
-                <Button asChild variant="default" size="sm" className="w-full">
-                  <Link href="/analytics">
-                    Настроить
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-2xl font-bold">
+                      {kpi.unit === '€' && '€'}
+                      {kpi.value.toLocaleString()}
+                      {kpi.unit === '%' && '%'}
+                    </span>
+                    <div className={cn(
+                      "flex items-center gap-1 text-sm",
+                      kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                    )}>
+                      {kpi.trend === 'up' ? (
+                        <TrendingUp className="h-4 w-4" />
+                      ) : (
+                        <TrendingDown className="h-4 w-4" />
+                      )}
+                      {Math.abs(kpi.change)}%
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Цель: {kpi.unit === '€' && '€'}{kpi.target.toLocaleString()}{kpi.unit === '%' && '%'}</span>
+                      <span>{Math.round(progress)}%</span>
+                    </div>
+                    <Progress value={Math.min(progress, 100)} className="h-2" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
+      {/* Геймификация и достижения */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Миссии */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-warning" />
-              <CardTitle>Быстрые действия</CardTitle>
+              <Target className="h-5 w-5 text-primary" />
+              <CardTitle>Активные миссии</CardTitle>
             </div>
             <CardDescription>
-              Рекомендуемые действия
+              Выполняйте задачи и получайте опыт
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start" asChild>
-                <Link href="/segments">
-                  <Users className="mr-2 h-4 w-4" />
-                  Управление сегментами
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start" asChild>
-                <Link href="/builder">
-                  <TrendingUp className="mr-2 h-4 w-4" />
-                  Создать кампанию
-                </Link>
-              </Button>
-              <Button variant="secondary" size="sm" className="w-full justify-start" asChild>
-                <Link href="/builder?template=reactivation">
-                  <TrendingUp className="mr-2 h-4 w-4" />
-                  Создать по шаблону: Реактивация
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start" asChild>
-                <Link href="/reports">
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  Экспорт отчетов
-                </Link>
-              </Button>
-              <div className="text-xs text-muted-foreground mt-2">
-                AI-подсказка: Создать сегмент «VIP 80% активности» для бонусной кампании.
-              </div>
+            <div className="space-y-4">
+              {gamificationData.missions.map((mission) => {
+                const progress = (mission.progress / mission.total) * 100;
+                return (
+                  <div key={mission.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium">{mission.title}</p>
+                      <Badge variant="secondary" className="text-xs">
+                        {mission.reward}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Progress value={progress} className="flex-1" />
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {mission.progress}/{mission.total}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <Button variant="outline" className="w-full mt-4" asChild>
+              <Link href="/achievements">
+                Все достижения
+                <Award className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Достижения */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-primary" />
+              <CardTitle>Достижения</CardTitle>
+            </div>
+            <CardDescription>
+              Ваш прогресс в освоении платформы
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-4 gap-4">
+              {gamificationData.achievements.map((achievement) => {
+                const Icon = achievement.icon;
+                return (
+                  <div
+                    key={achievement.id}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all",
+                      achievement.unlocked
+                        ? "border-primary bg-primary/5"
+                        : "border-muted bg-muted/5 opacity-50"
+                    )}
+                  >
+                    <div className={cn(
+                      "p-2 rounded-full",
+                      achievement.unlocked ? "bg-primary/10" : "bg-muted"
+                    )}>
+                      <Icon className={cn(
+                        "h-5 w-5",
+                        achievement.unlocked ? "text-primary" : "text-muted-foreground"
+                      )} />
+                    </div>
+                    <p className="text-xs text-center font-medium">
+                      {achievement.name}
+                    </p>
+                    {achievement.unlocked && (
+                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground text-center">
+                Разблокировано {gamificationData.achievements.filter(a => a.unlocked).length} из {gamificationData.achievements.length} достижений
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* AI предупреждения и риски */}
-      <RisksAndWarnings />
+      {/* Быстрые действия */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Быстрые действия</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link href="/segments">
+                <Users className="mr-2 h-4 w-4" />
+                Управление сегментами
+              </Link>
+            </Button>
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link href="/builder">
+                <Zap className="mr-2 h-4 w-4" />
+                Создать кампанию
+              </Link>
+            </Button>
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link href="/analytics">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Детальная аналитика
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Активность системы</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Активных кампаний</span>
+                <Badge variant="secondary">12</Badge>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Обработано событий</span>
+                <Badge variant="secondary">24.5K</Badge>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">ИИ-анализов сегодня</span>
+                <Badge variant="secondary">156</Badge>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Точность прогнозов</span>
+                <Badge className="bg-green-100 text-green-700">94.2%</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Следующие шаги</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
+                <span>Настроить Dashboard</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="h-4 w-4 rounded-full border-2 border-primary mt-0.5" />
+                <span>Создать первую кампанию</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="h-4 w-4 rounded-full border-2 border-muted mt-0.5" />
+                <span>Настроить сегменты</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="h-4 w-4 rounded-full border-2 border-muted mt-0.5" />
+                <span>Изучить ИИ-инсайты</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import './globals.css';
 import { MainLayout } from '@/components/layout/main-layout';
 import { Toaster } from '@/components/ui/toaster';
 import { CurrencyProvider } from '@/contexts/currency-context';
+import { ChatAssistant } from '@/components/ai/chat-assistant';
 
 export const metadata: Metadata = {
   title: 'AIGAMING.BOT',
@@ -26,6 +27,7 @@ export default function RootLayout({
           <MainLayout>
             {children}
           </MainLayout>
+          <ChatAssistant />
           <Toaster />
         </CurrencyProvider>
       </body>

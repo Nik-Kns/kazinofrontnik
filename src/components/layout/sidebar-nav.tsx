@@ -13,6 +13,7 @@ import {
   FolderKanban,
   Contact,
   LayoutGrid,
+  Brain,
 } from "lucide-react";
 import {
   Tooltip,
@@ -25,6 +26,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", label: "Дашборд", icon: LayoutDashboard },
+  { href: "/recommendations", label: "Рекомендации", icon: Brain },
   { href: "/players", label: "Игроки", icon: Users },
   { href: "/segments", label: "Сегменты", icon: FolderKanban },
   { href: "/builder", label: "Сценарии", icon: Workflow },

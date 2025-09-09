@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,9 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, CircleUserRound, History, Link as LinkIcon, ShieldCheck, Variable, GitPullRequest, GitBranch } from "lucide-react";
+import { Bell, CircleUserRound, History, Link as LinkIcon, ShieldCheck, Variable, GitPullRequest, GitBranch, DollarSign, Euro, Bitcoin, TrendingUp, AlertCircle, Sparkles } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { WebhookLogsTable } from "@/components/settings/webhook-logs-table";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SettingsPage() {
   return (
@@ -23,7 +34,8 @@ export default function SettingsPage() {
           <TabsTrigger value="notifications"><Bell className="mr-2 h-4 w-4" />Уведомления</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile">
+        <TabsContent value="profile" className="space-y-6">
+          {/* Основная информация профиля */}
           <Card>
             <CardHeader>
               <CardTitle>Настройки профиля</CardTitle>
@@ -38,7 +50,174 @@ export default function SettingsPage() {
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" defaultValue="john.doe@example.com" />
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="company">Компания</Label>
+                <Input id="company" defaultValue="AIGAMING" />
+              </div>
               <Button>Сохранить изменения</Button>
+            </CardContent>
+          </Card>
+
+          {/* Мультивалютные счета */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Мультивалютные счета</CardTitle>
+                  <CardDescription>Управление валютными счетами и рекомендации по оптимизации</CardDescription>
+                </div>
+                <Badge variant="secondary">
+                  <Sparkles className="mr-1 h-3 w-3" />
+                  AI-оптимизация
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* EUR счет */}
+              <div className="p-4 border rounded-lg space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Euro className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">EUR - Основной счет</h4>
+                      <p className="text-sm text-muted-foreground">Европейский рынок</p>
+                    </div>
+                  </div>
+                  <Badge className="bg-green-100 text-green-700">Активен</Badge>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Баланс</p>
+                    <p className="text-lg font-bold">€485,320</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">GGR (месяц)</p>
+                    <p className="text-lg font-bold">€124,850</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">ROI</p>
+                    <p className="text-lg font-bold text-green-600">+23.4%</p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-900">ИИ рекомендация</p>
+                      <p className="text-blue-700">CTR в EUR зоне ниже среднего на 15%. Рекомендуем протестировать новые креативы для немецкого сегмента.</p>
+                      <Button variant="link" className="h-auto p-0 text-blue-600 mt-1">
+                        Создать A/B тест →
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* USD счет */}
+              <div className="p-4 border rounded-lg space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <DollarSign className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">USD - Дополнительный</h4>
+                      <p className="text-sm text-muted-foreground">Глобальные рынки</p>
+                    </div>
+                  </div>
+                  <Badge className="bg-green-100 text-green-700">Активен</Badge>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Баланс</p>
+                    <p className="text-lg font-bold">$312,480</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">GGR (месяц)</p>
+                    <p className="text-lg font-bold">$89,230</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">ROI</p>
+                    <p className="text-lg font-bold text-green-600">+18.2%</p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <TrendingUp className="h-4 w-4 text-green-600 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-green-900">ИИ рекомендация</p>
+                      <p className="text-green-700">USD счет показывает рост конверсии на 8% за последние 2 недели. Увеличьте бюджет на успешные кампании.</p>
+                      <Button variant="link" className="h-auto p-0 text-green-600 mt-1">
+                        Масштабировать кампании →
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Crypto счет */}
+              <div className="p-4 border rounded-lg space-y-4 opacity-60">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-orange-100 rounded-lg">
+                      <Bitcoin className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Crypto</h4>
+                      <p className="text-sm text-muted-foreground">Криптовалютные операции</p>
+                    </div>
+                  </div>
+                  <Badge variant="secondary">Неактивен</Badge>
+                </div>
+                
+                <div className="text-center py-4">
+                  <p className="text-sm text-muted-foreground mb-3">Криптовалютный счет пока не подключен</p>
+                  <Button variant="outline" size="sm">
+                    Подключить Crypto счет
+                  </Button>
+                </div>
+              </div>
+
+              {/* Добавить новую валюту */}
+              <div className="flex items-center justify-between p-4 border border-dashed rounded-lg">
+                <div>
+                  <p className="font-medium">Добавить новую валюту</p>
+                  <p className="text-sm text-muted-foreground">Расширьте географию вашего бизнеса</p>
+                </div>
+                <Button variant="outline">
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  Добавить валюту
+                </Button>
+              </div>
+
+              {/* Общая статистика */}
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="font-semibold mb-3">Сводка по всем валютам</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Общий баланс</p>
+                    <p className="text-lg font-bold">€797,800</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Общий GGR</p>
+                    <p className="text-lg font-bold">€214,080</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Средний ROI</p>
+                    <p className="text-lg font-bold text-green-600">+20.8%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Активных валют</p>
+                    <p className="text-lg font-bold">2 из 3</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
