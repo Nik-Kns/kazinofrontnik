@@ -1,5 +1,11 @@
 # Commit History
 
+## 4f5ac89 - feat: implement AI-driven scenario prefilling from recommendations
+- Created scenario templates for different recommendation types
+- Added URL parameter processing in builder page
+- Updated Dashboard recommendation buttons with detailed parameters
+- Builder auto-loads and personalizes scenarios from AI recommendations
+
 ## 88b255a - fix: remove Retention Expert badge from Dashboard header
 - Removed Level/XP card from top right corner  
 - Simplified header layout
