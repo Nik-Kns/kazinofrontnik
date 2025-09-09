@@ -1,5 +1,9 @@
 # Commit History
 
+## 88b255a - fix: remove Retention Expert badge from Dashboard header
+- Removed Level/XP card from top right corner  
+- Simplified header layout
+
 ## 1bb2dde - feat: implement AI-powered features and gamification
 - Completely redesigned Dashboard with AI recommendations and KPI tracking
 - Added AI Recommendations section with filtering and prioritization
