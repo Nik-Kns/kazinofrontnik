@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -32,7 +35,13 @@ import {
   Search,
   ArrowUp,
   MapPin,
-  Send
+  Send,
+  Filter,
+  Settings,
+  Calendar,
+  GamepadIcon as Gamepad2,
+  CreditCard,
+  PieChart
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -54,8 +63,8 @@ interface AIRecommendation {
   deadline?: Date;
 }
 
-// Моковые данные KPI
-const kpiData = [
+// Полный список доступных метрик
+const allMetricsData = [
   {
     id: 'churn',
     name: 'Churn Rate',
@@ -103,6 +112,78 @@ const kpiData = [
     icon: Activity,
     color: 'text-purple-600',
     bgColor: 'bg-purple-50'
+  },
+  {
+    id: 'arpu',
+    name: 'ARPU',
+    value: 125,
+    target: 150,
+    unit: '€',
+    trend: 'up',
+    change: +8.5,
+    icon: PieChart,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50'
+  },
+  {
+    id: 'conversion',
+    name: 'Конверсия FTD',
+    value: 24,
+    target: 30,
+    unit: '%',
+    trend: 'up',
+    change: +4.2,
+    icon: Target,
+    color: 'text-green-600',
+    bgColor: 'bg-green-50'
+  },
+  {
+    id: 'bonus_utilization',
+    name: 'Использование бонусов',
+    value: 67,
+    target: 80,
+    unit: '%',
+    trend: 'down',
+    change: -2.1,
+    icon: Award,
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50'
+  },
+  {
+    id: 'sessions',
+    name: 'Сессии/день',
+    value: 3.2,
+    target: 4.0,
+    unit: '',
+    trend: 'up',
+    change: +6.8,
+    icon: Activity,
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50'
+  },
+  {
+    id: 'withdrawal_success',
+    name: 'Успешность выводов',
+    value: 94.2,
+    target: 98,
+    unit: '%',
+    trend: 'up',
+    change: +1.8,
+    icon: CreditCard,
+    color: 'text-green-600',
+    bgColor: 'bg-green-50'
+  },
+  {
+    id: 'tournament_participation',
+    name: 'Участие в турнирах',
+    value: 18,
+    target: 25,
+    unit: '%',
+    trend: 'up',
+    change: +3.5,
+    icon: Gamepad2,
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50'
   }
 ];
 
@@ -204,6 +285,16 @@ export default function DashboardPage() {
   const [auditPerformed, setAuditPerformed] = useState(false);
   const [retentionImprovements, setRetentionImprovements] = useState<any[]>([]);
   const [showImprovementsModal, setShowImprovementsModal] = useState(false);
+  
+  // Новые состояния для метрик
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['churn', 'ltv', 'deposits', 'retention']);
+  const [timeRange, setTimeRange] = useState<string>('');
+  const [showMetricsModal, setShowMetricsModal] = useState(false);
+
+  // Фильтруем метрики по выбору
+  const displayedMetrics = selectedMetrics.slice(0, 6).map(id => 
+    allMetricsData.find(metric => metric.id === id)
+  ).filter(Boolean);
 
   const handleRecommendationAction = (id: string, action: 'apply' | 'dismiss' | 'postpone') => {
     setRecommendations(prev => prev.map(rec => 
@@ -377,8 +468,105 @@ export default function DashboardPage() {
       </Card>
 
       {/* Ключевые KPI */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpiData.map((kpi) => {
+      <div className="space-y-4">
+        {/* Кнопки управления метриками */}
+        <div className="flex items-center gap-4">
+          <Popover open={showMetricsModal} onOpenChange={setShowMetricsModal}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Выбрать метрики
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">Выберите метрики</h4>
+                  <p className="text-sm text-muted-foreground">Максимум 6 метрик для отображения</p>
+                </div>
+                <div className="space-y-3">
+                  {allMetricsData.map((metric) => {
+                    const isSelected = selectedMetrics.includes(metric.id);
+                    const isDisabled = !isSelected && selectedMetrics.length >= 6;
+                    
+                    return (
+                      <div key={metric.id} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={metric.id}
+                          checked={isSelected}
+                          disabled={isDisabled}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              if (selectedMetrics.length < 6) {
+                                setSelectedMetrics([...selectedMetrics, metric.id]);
+                              }
+                            } else {
+                              setSelectedMetrics(selectedMetrics.filter(id => id !== metric.id));
+                            }
+                          }}
+                        />
+                        <label 
+                          htmlFor={metric.id} 
+                          className={cn(
+                            "text-sm cursor-pointer",
+                            isDisabled && "text-muted-foreground"
+                          )}
+                        >
+                          {metric.name}
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Выбрано: {selectedMetrics.length}/6</span>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-[200px]">
+              <Calendar className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Выберите период" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">Последние 7 дней</SelectItem>
+              <SelectItem value="30d">Последние 30 дней</SelectItem>
+              <SelectItem value="90d">Последние 90 дней</SelectItem>
+              <SelectItem value="6m">Последние 6 месяцев</SelectItem>
+              <SelectItem value="1y">Последний год</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {displayedMetrics.map((kpi) => {
+            if (!timeRange) {
+              return (
+                <Card key={kpi.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        {kpi.name}
+                      </CardTitle>
+                      <div className={cn("p-2 rounded-lg", kpi.bgColor)}>
+                        <kpi.icon className={cn("h-4 w-4", kpi.color)} />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-center h-20">
+                      <div className="text-center text-sm text-muted-foreground">
+                        <Calendar className="h-6 w-6 mx-auto mb-1 opacity-50" />
+                        <p>Выберите временной<br />промежуток</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            }
+            
           const progress = (kpi.value / kpi.target) * 100;
           const Icon = kpi.icon;
           
@@ -426,6 +614,7 @@ export default function DashboardPage() {
             </Card>
           );
         })}
+        </div>
       </div>
 
       {/* Retention аудит */}
