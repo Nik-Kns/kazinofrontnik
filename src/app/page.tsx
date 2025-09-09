@@ -287,12 +287,12 @@ export default function DashboardPage() {
   const [showImprovementsModal, setShowImprovementsModal] = useState(false);
   
   // Новые состояния для метрик
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['churn', 'ltv', 'deposits', 'retention']);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['churn', 'ltv', 'deposits', 'retention', 'arpu', 'conversion']);
   const [timeRange, setTimeRange] = useState<string>('');
   const [showMetricsModal, setShowMetricsModal] = useState(false);
 
   // Фильтруем метрики по выбору
-  const displayedMetrics = selectedMetrics.slice(0, 6).map(id => 
+  const displayedMetrics = selectedMetrics.slice(0, 8).map(id => 
     allMetricsData.find(metric => metric.id === id)
   ).filter(Boolean);
 
@@ -482,12 +482,12 @@ export default function DashboardPage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <h4 className="font-medium leading-none">Выберите метрики</h4>
-                  <p className="text-sm text-muted-foreground">Максимум 6 метрик для отображения</p>
+                  <p className="text-sm text-muted-foreground">Максимум 8 метрик для отображения</p>
                 </div>
                 <div className="space-y-3">
                   {allMetricsData.map((metric) => {
                     const isSelected = selectedMetrics.includes(metric.id);
-                    const isDisabled = !isSelected && selectedMetrics.length >= 6;
+                    const isDisabled = !isSelected && selectedMetrics.length >= 8;
                     
                     return (
                       <div key={metric.id} className="flex items-center space-x-2">
@@ -497,7 +497,7 @@ export default function DashboardPage() {
                           disabled={isDisabled}
                           onCheckedChange={(checked) => {
                             if (checked) {
-                              if (selectedMetrics.length < 6) {
+                              if (selectedMetrics.length < 8) {
                                 setSelectedMetrics([...selectedMetrics, metric.id]);
                               }
                             } else {
@@ -519,7 +519,7 @@ export default function DashboardPage() {
                   })}
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Выбрано: {selectedMetrics.length}/6</span>
+                  <span>Выбрано: {selectedMetrics.length}/8</span>
                 </div>
               </div>
             </PopoverContent>
