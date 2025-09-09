@@ -428,122 +428,9 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Чек-лист улучшений и Retention аудит */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Чек-лист улучшений */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-primary" />
-              <CardTitle>Чек-лист улучшений</CardTitle>
-            </div>
-            <CardDescription>
-              Критические задачи для роста retention
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {gamificationData.missions.map((mission) => {
-                const progress = (mission.progress / mission.total) * 100;
-                return (
-                  <div key={mission.id} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{mission.title}</p>
-                      <Badge variant="secondary" className="text-xs">
-                        {mission.reward}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Progress value={progress} className="flex-1" />
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {mission.progress}/{mission.total}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <Button 
-              variant="outline" 
-              className="w-full mt-4"
-              onClick={() => {
-                // Генерируем улучшения если их еще нет
-                if (!auditPerformed) {
-                  setAuditPerformed(true);
-                  setRetentionImprovements([
-                    {
-                      id: '1',
-                      title: 'Welcome серия для новых игроков',
-                      status: 'critical',
-                      description: 'Отсутствует онбординг для новых пользователей. 67% новых игроков уходят в первые 3 дня.',
-                      reason: 'Правильный онбординг увеличивает D1 retention на 35% и конверсию в первый депозит на 40%',
-                      potentialRevenue: '+40% FTD в ГЕО DE, AT',
-                      geo: 'DE, AT, CH',
-                      segment: 'Новые регистрации',
-                      channel: 'Email + Push',
-                      icon: Users
-                    },
-                    {
-                      id: '2',
-                      title: 'VIP программа лояльности',
-                      status: 'high',
-                      description: 'VIP игроки не получают эксклюзивных преимуществ. Churn rate VIP = 12% (выше среднего)',
-                      reason: 'VIP игроки генерируют 65% всей выручки. Снижение их оттока на 5%',
-                      potentialRevenue: '-5% Churn VIP в UK',
-                      geo: 'UK, IE',
-                      segment: 'VIP игроки',
-                      channel: 'Personal Manager',
-                      icon: DollarSign
-                    },
-                    {
-                      id: '3',
-                      title: 'Реактивация спящих',
-                      status: 'high',
-                      description: '8,450 спящих игроков с LTV > €200 не получают коммуникаций',
-                      reason: 'Каждый реактивированный игрок возвращается к активности',
-                      potentialRevenue: '+15% реактивация в FR',
-                      geo: 'FR, BE, LU',
-                      segment: 'Спящие 30+ дней',
-                      channel: 'Email + SMS',
-                      icon: Activity
-                    },
-                    {
-                      id: '4',
-                      title: 'Персонализация бонусов',
-                      status: 'medium',
-                      description: 'Все игроки получают одинаковые офферы без учета предпочтений',
-                      reason: 'Персонализированные бонусы повышают конверсию в депозит',
-                      potentialRevenue: '+28% бонус использование ES',
-                      geo: 'ES, PT',
-                      segment: 'Активные игроки',
-                      channel: 'In-App',
-                      icon: Target
-                    },
-                    {
-                      id: '5',
-                      title: 'Win-back кампании',
-                      status: 'medium',
-                      description: 'Нет систематических кампаний для ушедших игроков',
-                      reason: 'Ушедших игроков можно вернуть с правильным оффером',
-                      potentialRevenue: '+12% возврат через 90 дней IT',
-                      geo: 'IT, GR',
-                      segment: 'Ушедшие 90+ дней',
-                      channel: 'Email',
-                      icon: Zap
-                    }
-                  ]);
-                }
-                setShowImprovementsModal(true);
-              }}
-            >
-              Все улучшения
-              <Award className="ml-2 h-4 w-4" />
-            </Button>
-          </CardContent>
-        </Card>
+      {/* Retention аудит */}
 
-        {/* Улучшения Retention */}
-        <Card>
+      <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -731,7 +618,6 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
-      </div>
 
       {/* Быстрые действия */}
       <div className="grid gap-4 md:grid-cols-3">
