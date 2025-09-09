@@ -214,42 +214,15 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      {/* Заголовок с геймификацией */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <BarChart3 className="h-8 w-8 text-primary" />
-            Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Центр управления с ИИ-рекомендациями и ключевыми метриками
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          {/* Профиль с уровнем */}
-          <Card className="border-primary/20">
-            <CardContent className="flex items-center gap-3 p-4">
-              <Avatar className="h-12 w-12 border-2 border-primary">
-                <AvatarImage src="/avatar.png" />
-                <AvatarFallback className="bg-primary text-white">RM</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold">Level {gamificationData.level}</p>
-                  <Badge variant="secondary" className="text-xs">
-                    {gamificationData.levelName}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <Progress value={(gamificationData.currentXP / gamificationData.nextLevelXP) * 100} className="w-24 h-2" />
-                  <span className="text-xs text-muted-foreground">
-                    {gamificationData.currentXP}/{gamificationData.nextLevelXP} XP
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Заголовок */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <BarChart3 className="h-8 w-8 text-primary" />
+          Dashboard
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Центр управления с ИИ-рекомендациями и ключевыми метриками
+        </p>
       </div>
 
       {/* Блок ИИ рекомендует - приоритетные действия */}
