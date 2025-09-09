@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -202,6 +203,7 @@ export default function DashboardPage() {
   const [totalRecommendations, setTotalRecommendations] = useState(12);
   const [auditPerformed, setAuditPerformed] = useState(false);
   const [retentionImprovements, setRetentionImprovements] = useState<any[]>([]);
+  const [showImprovementsModal, setShowImprovementsModal] = useState(false);
 
   const handleRecommendationAction = (id: string, action: 'apply' | 'dismiss' | 'postpone') => {
     setRecommendations(prev => prev.map(rec => 
@@ -461,11 +463,81 @@ export default function DashboardPage() {
                 );
               })}
             </div>
-            <Button variant="outline" className="w-full mt-4" asChild>
-              <Link href="/achievements">
-                Все достижения
-                <Award className="ml-2 h-4 w-4" />
-              </Link>
+            <Button 
+              variant="outline" 
+              className="w-full mt-4"
+              onClick={() => {
+                // Генерируем улучшения если их еще нет
+                if (!auditPerformed) {
+                  setAuditPerformed(true);
+                  setRetentionImprovements([
+                    {
+                      id: '1',
+                      title: 'Welcome серия для новых игроков',
+                      status: 'critical',
+                      description: 'Отсутствует онбординг для новых пользователей. 67% новых игроков уходят в первые 3 дня.',
+                      reason: 'Правильный онбординг увеличивает D1 retention на 35% и конверсию в первый депозит на 40%',
+                      potentialRevenue: '+40% FTD в ГЕО DE, AT',
+                      geo: 'DE, AT, CH',
+                      segment: 'Новые регистрации',
+                      channel: 'Email + Push',
+                      icon: Users
+                    },
+                    {
+                      id: '2',
+                      title: 'VIP программа лояльности',
+                      status: 'high',
+                      description: 'VIP игроки не получают эксклюзивных преимуществ. Churn rate VIP = 12% (выше среднего)',
+                      reason: 'VIP игроки генерируют 65% всей выручки. Снижение их оттока на 5%',
+                      potentialRevenue: '-5% Churn VIP в UK',
+                      geo: 'UK, IE',
+                      segment: 'VIP игроки',
+                      channel: 'Personal Manager',
+                      icon: DollarSign
+                    },
+                    {
+                      id: '3',
+                      title: 'Реактивация спящих',
+                      status: 'high',
+                      description: '8,450 спящих игроков с LTV > €200 не получают коммуникаций',
+                      reason: 'Каждый реактивированный игрок возвращается к активности',
+                      potentialRevenue: '+15% реактивация в FR',
+                      geo: 'FR, BE, LU',
+                      segment: 'Спящие 30+ дней',
+                      channel: 'Email + SMS',
+                      icon: Activity
+                    },
+                    {
+                      id: '4',
+                      title: 'Персонализация бонусов',
+                      status: 'medium',
+                      description: 'Все игроки получают одинаковые офферы без учета предпочтений',
+                      reason: 'Персонализированные бонусы повышают конверсию в депозит',
+                      potentialRevenue: '+28% бонус использование ES',
+                      geo: 'ES, PT',
+                      segment: 'Активные игроки',
+                      channel: 'In-App',
+                      icon: Target
+                    },
+                    {
+                      id: '5',
+                      title: 'Win-back кампании',
+                      status: 'medium',
+                      description: 'Нет систематических кампаний для ушедших игроков',
+                      reason: 'Ушедших игроков можно вернуть с правильным оффером',
+                      potentialRevenue: '+12% возврат через 90 дней IT',
+                      geo: 'IT, GR',
+                      segment: 'Ушедшие 90+ дней',
+                      channel: 'Email',
+                      icon: Zap
+                    }
+                  ]);
+                }
+                setShowImprovementsModal(true);
+              }}
+            >
+              Все улучшения
+              <Award className="ml-2 h-4 w-4" />
             </Button>
           </CardContent>
         </Card>
@@ -741,6 +813,86 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Модальное окно с улучшениями */}
+      <Dialog open={showImprovementsModal} onOpenChange={setShowImprovementsModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-primary" />
+              Все улучшения Retention
+            </DialogTitle>
+            <DialogDescription>
+              Полный список возможностей для улучшения метрик удержания игроков
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-blue-600" />
+                  <span className="font-semibold text-blue-900">Обнаружено областей для улучшения:</span>
+                </div>
+                <span className="text-xl font-bold text-blue-600">
+                  {retentionImprovements.length} критичных метрик
+                </span>
+              </div>
+            </div>
+            
+            {retentionImprovements.map((improvement) => {
+              const Icon = improvement.icon;
+              const statusColor = improvement.status === 'critical' ? 'bg-red-100 border-red-300' : 
+                                 improvement.status === 'high' ? 'bg-orange-100 border-orange-300' : 
+                                 'bg-yellow-100 border-yellow-300';
+              
+              return (
+                <div key={improvement.id} className={`p-4 rounded-lg border ${statusColor}`}>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-white rounded-lg">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-lg">{improvement.title}</h4>
+                        <Badge variant="secondary" className="text-sm font-bold">
+                          <TrendingUp className="mr-1 h-4 w-4" />
+                          {improvement.potentialRevenue}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {improvement.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <Badge variant="outline" className="text-sm">
+                          <MapPin className="mr-1 h-3 w-3" />
+                          GEO: {improvement.geo}
+                        </Badge>
+                        <Badge variant="outline" className="text-sm">
+                          <Target className="mr-1 h-3 w-3" />
+                          {improvement.segment}
+                        </Badge>
+                        <Badge variant="outline" className="text-sm">
+                          <Send className="mr-1 h-3 w-3" />
+                          {improvement.channel}
+                        </Badge>
+                      </div>
+                      <div className="p-3 bg-white/80 rounded mb-3">
+                        <p className="text-sm">
+                          <span className="font-medium">Почему это важно:</span> {improvement.reason}
+                        </p>
+                      </div>
+                      <Button variant="default" className="w-full">
+                        Создать кампанию для этого улучшения →
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
