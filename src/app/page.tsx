@@ -26,7 +26,10 @@ import {
   Brain,
   ChevronRight,
   Trophy,
-  Star
+  Star,
+  ClipboardCheck,
+  Search,
+  ArrowUp
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -189,6 +192,8 @@ export default function DashboardPage() {
   const [recommendations, setRecommendations] = useState(aiRecommendations);
   const [completedToday, setCompletedToday] = useState(2);
   const [totalRecommendations, setTotalRecommendations] = useState(12);
+  const [auditPerformed, setAuditPerformed] = useState(false);
+  const [retentionImprovements, setRetentionImprovements] = useState<any[]>([]);
 
   const handleRecommendationAction = (id: string, action: 'apply' | 'dismiss' | 'postpone') => {
     setRecommendations(prev => prev.map(rec => 
@@ -413,17 +418,17 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Геймификация и достижения */}
+      {/* Чек-лист улучшений и Retention аудит */}
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Миссии */}
+        {/* Чек-лист улучшений */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
-              <CardTitle>Активные миссии</CardTitle>
+              <ClipboardCheck className="h-5 w-5 text-primary" />
+              <CardTitle>Чек-лист улучшений</CardTitle>
             </div>
             <CardDescription>
-              Выполняйте задачи и получайте опыт
+              Критические задачи для роста retention
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -457,55 +462,164 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Достижения */}
+        {/* Улучшения Retention */}
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-primary" />
-              <CardTitle>Достижения</CardTitle>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                <CardTitle>Улучшения Retention</CardTitle>
+              </div>
+              {!auditPerformed && (
+                <Button 
+                  size="sm" 
+                  onClick={() => {
+                    setAuditPerformed(true);
+                    // Генерируем рекомендации по улучшению retention
+                    setRetentionImprovements([
+                      {
+                        id: '1',
+                        title: 'Welcome серия для новых игроков',
+                        status: 'critical',
+                        description: 'Отсутствует онбординг для новых пользователей. 67% новых игроков уходят в первые 3 дня.',
+                        reason: 'Правильный онбординг увеличивает D1 retention на 35% и конверсию в первый депозит на 40%',
+                        potentialRevenue: '€285,000/мес',
+                        icon: Users
+                      },
+                      {
+                        id: '2',
+                        title: 'VIP программа лояльности',
+                        status: 'high',
+                        description: 'VIP игроки не получают эксклюзивных преимуществ. Churn rate VIP = 12% (выше среднего)',
+                        reason: 'VIP игроки генерируют 65% всей выручки. Снижение их оттока на 5% = +€420,000/мес',
+                        potentialRevenue: '€420,000/мес',
+                        icon: DollarSign
+                      },
+                      {
+                        id: '3',
+                        title: 'Реактивация спящих',
+                        status: 'high',
+                        description: '8,450 спящих игроков с LTV > €200 не получают коммуникаций',
+                        reason: 'Каждый реактивированный игрок приносит в среднем €85 в первые 30 дней',
+                        potentialRevenue: '€195,000/мес',
+                        icon: Activity
+                      },
+                      {
+                        id: '4',
+                        title: 'Персонализация бонусов',
+                        status: 'medium',
+                        description: 'Все игроки получают одинаковые офферы без учета предпочтений',
+                        reason: 'Персонализированные бонусы повышают конверсию в депозит на 28%',
+                        potentialRevenue: '€156,000/мес',
+                        icon: Target
+                      },
+                      {
+                        id: '5',
+                        title: 'Win-back кампании',
+                        status: 'medium',
+                        description: 'Нет систематических кампаний для ушедших игроков',
+                        reason: '15% ушедших игроков можно вернуть в течение 90 дней с правильным оффером',
+                        potentialRevenue: '€112,000/мес',
+                        icon: Zap
+                      }
+                    ]);
+                  }}
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Провести аудит
+                </Button>
+              )}
             </div>
             <CardDescription>
-              Ваш прогресс в освоении платформы
+              Области с упущенной выручкой
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-4 gap-4">
-              {gamificationData.achievements.map((achievement) => {
-                const Icon = achievement.icon;
-                return (
-                  <div
-                    key={achievement.id}
-                    className={cn(
-                      "flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all",
-                      achievement.unlocked
-                        ? "border-primary bg-primary/5"
-                        : "border-muted bg-muted/5 opacity-50"
-                    )}
-                  >
-                    <div className={cn(
-                      "p-2 rounded-full",
-                      achievement.unlocked ? "bg-primary/10" : "bg-muted"
-                    )}>
-                      <Icon className={cn(
-                        "h-5 w-5",
-                        achievement.unlocked ? "text-primary" : "text-muted-foreground"
-                      )} />
+            {!auditPerformed ? (
+              <div className="text-center py-8">
+                <Search className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground mb-4">
+                  Проведите аудит чтобы найти возможности для улучшения retention
+                </p>
+                <Button 
+                  onClick={() => {
+                    setAuditPerformed(true);
+                    setRetentionImprovements([
+                      {
+                        id: '1',
+                        title: 'Welcome серия для новых игроков',
+                        status: 'critical',
+                        description: 'Отсутствует онбординг для новых пользователей. 67% новых игроков уходят в первые 3 дня.',
+                        reason: 'Правильный онбординг увеличивает D1 retention на 35% и конверсию в первый депозит на 40%',
+                        potentialRevenue: '€285,000/мес',
+                        icon: Users
+                      },
+                      {
+                        id: '2',
+                        title: 'VIP программа лояльности',
+                        status: 'high',
+                        description: 'VIP игроки не получают эксклюзивных преимуществ. Churn rate VIP = 12% (выше среднего)',
+                        reason: 'VIP игроки генерируют 65% всей выручки. Снижение их оттока на 5% = +€420,000/мес',
+                        potentialRevenue: '€420,000/мес',
+                        icon: DollarSign
+                      }
+                    ]);
+                  }}
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Начать аудит
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5 text-red-600" />
+                      <span className="font-semibold text-red-900">Обнаружено упущенной выручки:</span>
                     </div>
-                    <p className="text-xs text-center font-medium">
-                      {achievement.name}
-                    </p>
-                    {achievement.unlocked && (
-                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                    )}
+                    <span className="text-xl font-bold text-red-600">€1,168,000/мес</span>
                   </div>
-                );
-              })}
-            </div>
-            <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground text-center">
-                Разблокировано {gamificationData.achievements.filter(a => a.unlocked).length} из {gamificationData.achievements.length} достижений
-              </p>
-            </div>
+                </div>
+                
+                {retentionImprovements.map((improvement) => {
+                  const Icon = improvement.icon;
+                  const statusColor = improvement.status === 'critical' ? 'bg-red-100 border-red-300' : 
+                                     improvement.status === 'high' ? 'bg-orange-100 border-orange-300' : 
+                                     'bg-yellow-100 border-yellow-300';
+                  
+                  return (
+                    <div key={improvement.id} className={`p-3 rounded-lg border ${statusColor}`}>
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-white rounded-lg">
+                          <Icon className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-semibold text-sm">{improvement.title}</h4>
+                            <Badge variant="secondary" className="text-xs font-bold">
+                              <ArrowUp className="mr-1 h-3 w-3" />
+                              {improvement.potentialRevenue}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            {improvement.description}
+                          </p>
+                          <div className="p-2 bg-white/80 rounded">
+                            <p className="text-xs">
+                              <span className="font-medium">Почему это важно:</span> {improvement.reason}
+                            </p>
+                          </div>
+                          <Button size="sm" variant="link" className="h-auto p-0 mt-2 text-xs">
+                            Создать кампанию →
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
