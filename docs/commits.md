@@ -1,5 +1,10 @@
 # Commit History
 
+## 0fbc4d7 - feat: add AI recommendations block to templates page
+- Added AI recommendations with 3 priority levels and €793k/month potential
+- Implement buttons create pre-filled scenarios in builder
+- Added welcome-series, abandoned-cart, tournament-invite templates
+
 ## d6fe022 - feat: redesign gamification sections with retention audit
 - Renamed 'Active Missions' to 'Improvement Checklist'
 - Renamed 'Achievements' to 'Retention Improvements'
