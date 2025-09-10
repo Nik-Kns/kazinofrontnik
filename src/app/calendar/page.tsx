@@ -40,7 +40,7 @@ interface CalendarCampaignEvent {
 }
 
 // Динамически импортируем конструктор сценариев для избежания SSR проблем
-const ScenariosBuilder = dynamic(() => import("@/app/builder/page"), { ssr: false });
+const ScenariosBuilder = dynamic(() => import("@/app/triggers/page"), { ssr: false });
 
 // Helper to generate days of the month for the calendar grid
 const generateCalendarDays = (year: number, month: number) => {

@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { PlayersTable } from "@/components/players/players-table";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Upload, Download } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PlusCircle, Upload, Download, Brain, TrendingUp, AlertCircle, Users, Sparkles } from "lucide-react";
 import { AdvancedFilters } from "@/components/ui/advanced-filters";
 import { CurrencyFilters, type CurrencyFiltersState } from "@/components/ui/currency-filters";
 import { CompactCurrencyToggle } from "@/components/ui/currency-toggle";
@@ -98,6 +101,78 @@ export default function PlayersPage() {
                     </Button>
                 </div>
             </div>
+
+            {/* ИИ рекомендации для игроков */}
+            <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-purple-500/5">
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Brain className="h-5 w-5 text-primary" />
+                            <CardTitle>ИИ анализ игроков</CardTitle>
+                        </div>
+                        <Badge variant="secondary">Обновлено 5 мин назад</Badge>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid gap-3 md:grid-cols-4">
+                        <div className="p-3 rounded-lg bg-background border">
+                            <div className="flex items-center gap-2 mb-2">
+                                <AlertCircle className="h-4 w-4 text-red-600" />
+                                <span className="text-xs font-semibold text-red-600">892 в риске</span>
+                            </div>
+                            <p className="text-sm font-medium">Высокий риск оттока</p>
+                            <p className="text-xs text-muted-foreground">
+                                Нет активности 14+ дней
+                            </p>
+                            <Button size="sm" variant="outline" className="w-full mt-2">
+                                Создать кампанию
+                            </Button>
+                        </div>
+                        
+                        <div className="p-3 rounded-lg bg-background border">
+                            <div className="flex items-center gap-2 mb-2">
+                                <TrendingUp className="h-4 w-4 text-green-600" />
+                                <span className="text-xs font-semibold text-green-600">+23% рост</span>
+                            </div>
+                            <p className="text-sm font-medium">VIP потенциал</p>
+                            <p className="text-xs text-muted-foreground">
+                                134 игрока близки к VIP
+                            </p>
+                            <Button size="sm" variant="outline" className="w-full mt-2">
+                                Посмотреть список
+                            </Button>
+                        </div>
+                        
+                        <div className="p-3 rounded-lg bg-background border">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Users className="h-4 w-4 text-blue-600" />
+                                <span className="text-xs font-semibold text-blue-600">423 игрока</span>
+                            </div>
+                            <p className="text-sm font-medium">Готовы к апсейлу</p>
+                            <p className="text-xs text-muted-foreground">
+                                Средний депозит вырос на 45%
+                            </p>
+                            <Button size="sm" variant="outline" className="w-full mt-2">
+                                Отправить оффер
+                            </Button>
+                        </div>
+                        
+                        <div className="p-3 rounded-lg bg-background border">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Sparkles className="h-4 w-4 text-purple-600" />
+                                <span className="text-xs font-semibold text-purple-600">Новый сегмент</span>
+                            </div>
+                            <p className="text-sm font-medium">Weekend Warriors</p>
+                            <p className="text-xs text-muted-foreground">
+                                +156% активности в выходные
+                            </p>
+                            <Button size="sm" variant="outline" className="w-full mt-2">
+                                Создать сегмент
+                            </Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
             
             {/* Убрали дублирующий переключатель валют из шапки */}
             
