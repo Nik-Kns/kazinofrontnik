@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { CreativeGeneratorModal } from "@/components/campaigns/creative-generator-modal";
 
 // Типы кампаний
 const campaignTypes = [
@@ -124,6 +125,7 @@ const activeCampaigns = [
 export default function CampaignsPage() {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
+  const [showCreativeModal, setShowCreativeModal] = useState(false);
   const [campaignData, setCampaignData] = useState({
     name: "",
     type: "",
@@ -500,7 +502,7 @@ export default function CampaignsPage() {
                       <Palette className="mr-2 h-4 w-4" />
                       Создать креатив
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowCreativeModal(true)}>
                       <Wand2 className="mr-2 h-4 w-4" />
                       ИИ генерация
                     </Button>
@@ -644,6 +646,14 @@ export default function CampaignsPage() {
           ))}
         </TabsContent>
       </Tabs>
+
+      {/* Creative Generator Modal */}
+      <CreativeGeneratorModal
+        open={showCreativeModal}
+        onOpenChange={setShowCreativeModal}
+        campaignType={campaignData.type}
+        campaignName={campaignData.name}
+      />
     </div>
   );
 }
