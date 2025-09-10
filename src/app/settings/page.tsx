@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, CircleUserRound, History, Link as LinkIcon, ShieldCheck, Variable, GitPullRequest, GitBranch, DollarSign, Euro, Bitcoin, TrendingUp, AlertCircle, Sparkles } from "lucide-react";
+import { Bell, CircleUserRound, History, Link as LinkIcon, ShieldCheck, Variable, GitPullRequest, GitBranch, DollarSign, Euro, Bitcoin, TrendingUp, AlertCircle, Sparkles, Target, BarChart3, Users, Activity, Clock, Settings } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { WebhookLogsTable } from "@/components/settings/webhook-logs-table";
 import { Progress } from "@/components/ui/progress";
@@ -21,15 +21,47 @@ import {
 } from "@/components/ui/select";
 
 export default function SettingsPage() {
+  const [metricGoals, setMetricGoals] = useState<Record<string, number>>({});
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+
+  useEffect(() => {
+    // Загружаем сохраненные метрики из localStorage
+    const savedMetrics = localStorage.getItem('metricGoals');
+    if (savedMetrics) {
+      setMetricGoals(JSON.parse(savedMetrics));
+    }
+    
+    // Проверяем, завершен ли онбординг
+    const completed = localStorage.getItem('onboardingCompleted');
+    setOnboardingCompleted(completed === 'true');
+  }, []);
+
+  const updateMetric = (id: string, value: number) => {
+    const newMetrics = { ...metricGoals, [id]: value };
+    setMetricGoals(newMetrics);
+    localStorage.setItem('metricGoals', JSON.stringify(newMetrics));
+  };
+
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      <h1 className="text-2xl font-bold tracking-tight mb-4">Настройки</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold tracking-tight">Настройки</h1>
+        {!onboardingCompleted && (
+          <Button variant="outline" asChild>
+            <a href="/onboarding">
+              <Settings className="mr-2 h-4 w-4" />
+              Запустить онбординг
+            </a>
+          </Button>
+        )}
+      </div>
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-6">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 mb-6">
           <TabsTrigger value="profile"><CircleUserRound className="mr-2 h-4 w-4" />Профиль</TabsTrigger>
+          <TabsTrigger value="metrics"><Target className="mr-2 h-4 w-4" />Метрики</TabsTrigger>
           <TabsTrigger value="access"><ShieldCheck className="mr-2 h-4 w-4" />Доступ</TabsTrigger>
           <TabsTrigger value="integrations"><LinkIcon className="mr-2 h-4 w-4" />Интеграции</TabsTrigger>
-          <TabsTrigger value="webhooks"><History className="mr-2 h-4 w-4" />Логи вебхуков</TabsTrigger>
+          <TabsTrigger value="webhooks"><History className="mr-2 h-4 w-4" />Логи</TabsTrigger>
           <TabsTrigger value="variables"><Variable className="mr-2 h-4 w-4" />Переменные</TabsTrigger>
           <TabsTrigger value="notifications"><Bell className="mr-2 h-4 w-4" />Уведомления</TabsTrigger>
         </TabsList>
@@ -218,6 +250,155 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Вкладка с целевыми метриками */}
+        <TabsContent value="metrics" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Целевые метрики</CardTitle>
+              <CardDescription>
+                Управление целевыми показателями для мониторинга и оптимизации
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {Object.keys(metricGoals).length === 0 ? (
+                <div className="text-center py-8">
+                  <Target className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    Целевые метрики еще не настроены
+                  </p>
+                  <Button asChild>
+                    <a href="/onboarding">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Настроить метрики
+                    </a>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Retention метрики */}
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Retention
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="retention_rate">Retention Rate (%)</Label>
+                        <Input
+                          id="retention_rate"
+                          type="number"
+                          value={metricGoals.retention_rate || 70}
+                          onChange={(e) => updateMetric('retention_rate', parseFloat(e.target.value))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="churn_rate">Churn Rate (%)</Label>
+                        <Input
+                          id="churn_rate"
+                          type="number"
+                          value={metricGoals.churn_rate || 5}
+                          onChange={(e) => updateMetric('churn_rate', parseFloat(e.target.value))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Revenue метрики */}
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Revenue
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="ltv">LTV (€)</Label>
+                        <Input
+                          id="ltv"
+                          type="number"
+                          value={metricGoals.ltv || 500}
+                          onChange={(e) => updateMetric('ltv', parseFloat(e.target.value))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="arpu">ARPU (€)</Label>
+                        <Input
+                          id="arpu"
+                          type="number"
+                          value={metricGoals.arpu || 45}
+                          onChange={(e) => updateMetric('arpu', parseFloat(e.target.value))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="monthly_revenue">Monthly Revenue (€)</Label>
+                        <Input
+                          id="monthly_revenue"
+                          type="number"
+                          value={metricGoals.monthly_revenue || 1500000}
+                          onChange={(e) => updateMetric('monthly_revenue', parseFloat(e.target.value))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Engagement метрики */}
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                      <Activity className="h-4 w-4" />
+                      Engagement
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="daily_active_users">DAU</Label>
+                        <Input
+                          id="daily_active_users"
+                          type="number"
+                          value={metricGoals.daily_active_users || 10000}
+                          onChange={(e) => updateMetric('daily_active_users', parseFloat(e.target.value))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="average_session_time">Avg Session Time (min)</Label>
+                        <Input
+                          id="average_session_time"
+                          type="number"
+                          value={metricGoals.average_session_time || 35}
+                          onChange={(e) => updateMetric('average_session_time', parseFloat(e.target.value))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Conversion метрики */}
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4" />
+                      Conversion
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="conversion_rate">Conversion Rate (%)</Label>
+                        <Input
+                          id="conversion_rate"
+                          type="number"
+                          step="0.1"
+                          value={metricGoals.conversion_rate || 3.5}
+                          onChange={(e) => updateMetric('conversion_rate', parseFloat(e.target.value))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      Последнее обновление: {new Date().toLocaleString('ru-RU')}
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

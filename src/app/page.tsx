@@ -45,6 +45,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { FullMetricsDashboard } from "@/components/dashboard/full-metrics-dashboard";
+import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Типы для ИИ-рекомендаций
 interface AIRecommendation {
@@ -290,6 +294,12 @@ export default function DashboardPage() {
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['churn', 'ltv', 'deposits', 'retention', 'arpu', 'conversion']);
   const [timeRange, setTimeRange] = useState<string>('');
   const [showMetricsModal, setShowMetricsModal] = useState(false);
+  
+  // Состояния для целей по метрикам
+  const [goalsOpen, setGoalsOpen] = useState(false);
+  const [metricGoals, setMetricGoals] = useState<Record<string, number>>({});
+  const [tempGoals, setTempGoals] = useState<Record<string, string>>({});
+  const [savedFilters, setSavedFilters] = useState<any>(null);
 
   // Фильтруем метрики по выбору
   const displayedMetrics = selectedMetrics.slice(0, 8).map(id => 
@@ -466,6 +476,130 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* БЛОК 1: Цели по ключевым метрикам */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Цели по ключевым метрикам</CardTitle>
+              <CardDescription>Отслеживайте прогресс по целевым значениям</CardDescription>
+            </div>
+            <Dialog open={goalsOpen} onOpenChange={setGoalsOpen}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setGoalsOpen(true);
+                  // Инициализируем временные цели текущими значениями
+                  const initialGoals: Record<string, string> = {};
+                  allMetricsData.forEach(metric => {
+                    initialGoals[metric.id] = metricGoals[metric.id]?.toString() || metric.target.toString();
+                  });
+                  setTempGoals(initialGoals);
+                }}
+              >
+                <Target className="mr-2 h-4 w-4" />
+                Настроить цели
+              </Button>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Настройка целевых показателей</DialogTitle>
+                  <DialogDescription>
+                    Установите целевые значения для ключевых метрик на текущий период
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  {allMetricsData.map(metric => (
+                    <div key={metric.id} className="grid grid-cols-3 items-center gap-4">
+                      <Label htmlFor={`goal-${metric.id}`} className="text-right">
+                        {metric.name}
+                      </Label>
+                      <Input
+                        id={`goal-${metric.id}`}
+                        type="number"
+                        value={tempGoals[metric.id] || ''}
+                        onChange={(e) => setTempGoals(prev => ({
+                          ...prev,
+                          [metric.id]: e.target.value
+                        }))}
+                        className="col-span-2"
+                        placeholder={`Текущее: ${metric.value}${metric.unit}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setGoalsOpen(false)}>
+                    Отмена
+                  </Button>
+                  <Button onClick={() => {
+                    // Сохраняем цели
+                    const newGoals: Record<string, number> = {};
+                    Object.entries(tempGoals).forEach(([key, value]) => {
+                      if (value) {
+                        newGoals[key] = parseFloat(value);
+                      }
+                    });
+                    setMetricGoals(newGoals);
+                    setGoalsOpen(false);
+                  }}>
+                    Сохранить цели
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {Object.keys(metricGoals).length === 0 ? (
+            <div className="text-center py-8">
+              <Target className="mx-auto h-12 w-12 text-muted-foreground/50" />
+              <p className="mt-2 text-sm text-muted-foreground">
+                Цели ещё не заданы. Нажмите "Настроить цели" для начала отслеживания прогресса.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {allMetricsData.filter(metric => metricGoals[metric.id]).map(metric => {
+                const goal = metricGoals[metric.id];
+                const current = typeof metric.value === 'number' ? metric.value : parseFloat(String(metric.value).replace(/[^0-9.-]/g, ''));
+                const progress = (current / goal) * 100;
+                const isAchieved = progress >= 100;
+                
+                return (
+                  <div key={metric.id} className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">{metric.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "font-semibold",
+                          isAchieved ? "text-green-600" : "text-muted-foreground"
+                        )}>
+                          {current}{metric.unit} / {goal}{metric.unit}
+                        </span>
+                        {isAchieved && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                      </div>
+                    </div>
+                    <Progress value={Math.min(progress, 100)} className="h-2" />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Прогресс: {progress.toFixed(1)}%</span>
+                      {!isAchieved && (
+                        <span>Осталось: {Math.abs(goal - current).toFixed(1)}{metric.unit}</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* БЛОК 2: Плитка с избранными метриками */}
+      <SelectedKpiTile />
+
+      {/* БЛОК 3: Полный дашборд со всеми метриками */}
+      <FullMetricsDashboard filters={savedFilters || undefined} />
 
       {/* Ключевые KPI */}
       <div className="space-y-4">
