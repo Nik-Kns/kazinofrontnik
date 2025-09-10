@@ -93,8 +93,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Валютный переключатель */}
-      <div className="flex items-center justify-between py-3 border-b bg-muted/20 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8">
-        <CompactCurrencyToggle />
+      <div className="flex items-center justify-end py-3 border-b bg-muted/20 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Быстрое переключение:</span>
           <CurrencyToggleButton size="sm" />
