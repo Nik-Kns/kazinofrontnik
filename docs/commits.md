@@ -1,5 +1,11 @@
 # Commit History
 
+## 92abb9d - fix: resolve TypeScript build error and improve onboarding navigation
+- Fixed metric.value toString() type error by using String() conversion
+- Added free navigation between onboarding steps
+- Users can now click on any step to navigate without completing previous steps
+- Added skip buttons and improved UX with hover states
+
 ## 0fbc4d7 - feat: add AI recommendations block to templates page
 - Added AI recommendations with 3 priority levels and €793k/month potential
 - Implement buttons create pre-filled scenarios in builder
