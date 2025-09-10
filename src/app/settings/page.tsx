@@ -8,10 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, CircleUserRound, History, Link as LinkIcon, ShieldCheck, Variable, GitPullRequest, GitBranch, DollarSign, Euro, Bitcoin, TrendingUp, AlertCircle, Sparkles, Target, BarChart3, Users, Activity, Clock, Settings } from "lucide-react";
+import { 
+  Bell, CircleUserRound, History, Link as LinkIcon, ShieldCheck, Variable, 
+  GitPullRequest, GitBranch, DollarSign, Euro, Bitcoin, TrendingUp, AlertCircle, 
+  Sparkles, Target, BarChart3, Users, Activity, Clock, Settings,
+  CheckCircle2, XCircle, Loader2, Mail, Shield, Webhook, Server, 
+  RefreshCw, Eye, EyeOff, ExternalLink, FileText
+} from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { WebhookLogsTable } from "@/components/settings/webhook-logs-table";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -20,9 +29,169 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Типы для интеграций
+interface IntegrationStatus {
+  id: string;
+  name: string;
+  description: string;
+  status: 'pending' | 'checking' | 'connected' | 'error';
+  icon: React.ElementType;
+  required: boolean;
+  lastChecked?: Date;
+  error?: string;
+}
+
+// Типы для вебхук логов
+interface WebhookLog {
+  id: string;
+  timestamp: Date;
+  service: string;
+  event: string;
+  status: 'success' | 'error' | 'warning';
+  message: string;
+  payload?: any;
+}
+
 export default function SettingsPage() {
   const [metricGoals, setMetricGoals] = useState<Record<string, number>>({});
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
+  
+  // Состояния интеграций
+  const [integrations, setIntegrations] = useState<IntegrationStatus[]>([
+    {
+      id: 'email',
+      name: 'Email рассыльщик',
+      description: 'Подключение к сервису email рассылок (SendGrid, Mailgun)',
+      status: 'connected',
+      icon: Mail,
+      required: true,
+      lastChecked: new Date(Date.now() - 3600000)
+    },
+    {
+      id: 'casino_admin',
+      name: 'Админка казино',
+      description: 'Интеграция с административной панелью казино',
+      status: 'connected',
+      icon: Shield,
+      required: true,
+      lastChecked: new Date(Date.now() - 7200000)
+    },
+    {
+      id: 'api',
+      name: 'API интеграция',
+      description: 'Подключение к внешним сервисам через API',
+      status: 'pending',
+      icon: Server,
+      required: true
+    },
+    {
+      id: 'webhooks',
+      name: 'Webhook endpoints',
+      description: 'Настройка webhook эндпоинтов для получения событий',
+      status: 'error',
+      icon: Webhook,
+      required: false,
+      error: 'Connection timeout'
+    }
+  ]);
+
+  // Вебхук логи
+  const [webhookLogs, setWebhookLogs] = useState<WebhookLog[]>([
+    {
+      id: '1',
+      timestamp: new Date(Date.now() - 60000),
+      service: 'Casino Admin',
+      event: 'player.registered',
+      status: 'success',
+      message: 'New player registered: player_12345',
+      payload: { playerId: 'player_12345', email: 'test@example.com' }
+    },
+    {
+      id: '2',
+      timestamp: new Date(Date.now() - 120000),
+      service: 'Email Service',
+      event: 'email.sent',
+      status: 'success',
+      message: 'Welcome email sent successfully',
+      payload: { to: 'test@example.com', template: 'welcome' }
+    },
+    {
+      id: '3',
+      timestamp: new Date(Date.now() - 180000),
+      service: 'API Gateway',
+      event: 'api.call',
+      status: 'error',
+      message: 'Rate limit exceeded',
+      payload: { endpoint: '/api/players', error: 'Too many requests' }
+    },
+    {
+      id: '4',
+      timestamp: new Date(Date.now() - 240000),
+      service: 'Webhook',
+      event: 'webhook.received',
+      status: 'warning',
+      message: 'Webhook signature verification failed',
+      payload: { source: 'payment_provider', event: 'deposit.completed' }
+    },
+    {
+      id: '5',
+      timestamp: new Date(Date.now() - 300000),
+      service: 'Casino Admin',
+      event: 'player.deposit',
+      status: 'success',
+      message: 'Player deposit processed: €100',
+      payload: { playerId: 'player_67890', amount: 100, currency: 'EUR' }
+    }
+  ]);
+
+  // Проверка интеграций
+  const checkIntegrations = async () => {
+    setIsChecking(true);
+    
+    // Симуляция проверки каждой интеграции
+    for (let i = 0; i < integrations.length; i++) {
+      const integration = integrations[i];
+      
+      // Обновляем статус на "проверка"
+      setIntegrations(prev => prev.map((item, index) => 
+        index === i ? { ...item, status: 'checking' } : item
+      ));
+      
+      // Симуляция задержки проверки
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Случайный результат проверки для демо
+      const isConnected = Math.random() > 0.3;
+      const newStatus = isConnected ? 'connected' : 'error';
+      const error = !isConnected ? 'Connection failed' : undefined;
+      
+      setIntegrations(prev => prev.map((item, index) => 
+        index === i ? { 
+          ...item, 
+          status: newStatus as any,
+          lastChecked: new Date(),
+          error
+        } : item
+      ));
+      
+      // Добавляем лог о проверке
+      const newLog: WebhookLog = {
+        id: Date.now().toString() + i,
+        timestamp: new Date(),
+        service: integration.name,
+        event: 'integration.check',
+        status: isConnected ? 'success' : 'error',
+        message: isConnected ? `${integration.name} connected successfully` : `Failed to connect to ${integration.name}`,
+        payload: { integrationId: integration.id, status: newStatus }
+      };
+      
+      setWebhookLogs(prev => [newLog, ...prev]);
+    }
+    
+    setIsChecking(false);
+  };
 
   useEffect(() => {
     // Загружаем сохраненные метрики из localStorage
@@ -415,11 +584,136 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="integrations">
+        <TabsContent value="integrations" className="space-y-6">
+          {/* Статус интеграций */}
           <Card>
             <CardHeader>
-              <CardTitle>Интеграции с сервисами</CardTitle>
-              <CardDescription>Подключите внешние сервисы для отправки сообщений и получения событий.</CardDescription>
+              <CardTitle>Статус интеграций</CardTitle>
+              <CardDescription>
+                Проверьте подключение всех необходимых сервисов
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">
+                    {integrations.filter(i => i.status === 'connected').length} из {integrations.length} подключено
+                  </Badge>
+                  <Badge 
+                    variant={integrations.filter(i => i.required && i.status !== 'connected').length > 0 ? 'destructive' : 'default'}
+                  >
+                    {integrations.filter(i => i.required && i.status !== 'connected').length} требуют внимания
+                  </Badge>
+                </div>
+                <Button 
+                  onClick={checkIntegrations} 
+                  disabled={isChecking}
+                  variant="outline"
+                  size="sm"
+                >
+                  {isChecking ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Проверка...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Проверить все
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {integrations.map((integration) => (
+                  <div 
+                    key={integration.id} 
+                    className={cn(
+                      "flex items-center justify-between p-4 rounded-lg border",
+                      integration.status === 'connected' && "border-green-200 bg-green-50/50",
+                      integration.status === 'error' && "border-red-200 bg-red-50/50",
+                      integration.status === 'checking' && "border-blue-200 bg-blue-50/50",
+                      integration.status === 'pending' && "border-gray-200"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "p-2 rounded-lg",
+                        integration.status === 'connected' && "bg-green-100",
+                        integration.status === 'error' && "bg-red-100",
+                        integration.status === 'checking' && "bg-blue-100",
+                        integration.status === 'pending' && "bg-gray-100"
+                      )}>
+                        <integration.icon className={cn(
+                          "h-5 w-5",
+                          integration.status === 'connected' && "text-green-600",
+                          integration.status === 'error' && "text-red-600",
+                          integration.status === 'checking' && "text-blue-600",
+                          integration.status === 'pending' && "text-gray-600"
+                        )} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold">{integration.name}</h4>
+                          {integration.required && (
+                            <Badge variant="outline" className="text-xs">Обязательно</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {integration.description}
+                        </p>
+                        {integration.lastChecked && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Последняя проверка: {integration.lastChecked.toLocaleTimeString('ru-RU')}
+                          </p>
+                        )}
+                        {integration.error && (
+                          <p className="text-xs text-red-600 mt-1">
+                            Ошибка: {integration.error}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {integration.status === 'connected' && (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      )}
+                      {integration.status === 'error' && (
+                        <XCircle className="h-5 w-5 text-red-600" />
+                      )}
+                      {integration.status === 'checking' && (
+                        <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                      )}
+                      {integration.status === 'pending' && (
+                        <AlertCircle className="h-5 w-5 text-gray-400" />
+                      )}
+                      <Button variant="ghost" size="sm">
+                        Настроить
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Информационные сообщения */}
+              {integrations.filter(i => i.required && i.status !== 'connected').length > 0 && (
+                <Alert className="border-orange-200 bg-orange-50">
+                  <AlertCircle className="h-4 w-4 text-orange-600" />
+                  <AlertDescription>
+                    <strong>Внимание:</strong> Некоторые обязательные интеграции не настроены. 
+                    Это может повлиять на работу платформы.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Детальные настройки интеграций */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Настройки интеграций</CardTitle>
+              <CardDescription>Подключите и настройте внешние сервисы</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2">
               <Card>
@@ -520,8 +814,95 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="webhooks">
-            <WebhookLogsTable />
+        <TabsContent value="webhooks" className="space-y-6">
+          {/* Webhook логи */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Webhook логи</CardTitle>
+                  <CardDescription>
+                    История всех webhook событий и API вызовов
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowLogs(!showLogs)}
+                  >
+                    {showLogs ? (
+                      <><EyeOff className="mr-2 h-4 w-4" />Скрыть детали</>
+                    ) : (
+                      <><Eye className="mr-2 h-4 w-4" />Показать детали</>
+                    )}
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Обновить
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {webhookLogs.map((log) => (
+                  <div 
+                    key={log.id} 
+                    className={cn(
+                      "flex items-start justify-between p-3 rounded-lg border",
+                      log.status === 'success' && "border-green-200 bg-green-50/30",
+                      log.status === 'error' && "border-red-200 bg-red-50/30",
+                      log.status === 'warning' && "border-yellow-200 bg-yellow-50/30"
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={cn(
+                        "p-1.5 rounded",
+                        log.status === 'success' && "bg-green-100",
+                        log.status === 'error' && "bg-red-100",
+                        log.status === 'warning' && "bg-yellow-100"
+                      )}>
+                        {log.status === 'success' && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                        {log.status === 'error' && <XCircle className="h-4 w-4 text-red-600" />}
+                        {log.status === 'warning' && <AlertCircle className="h-4 w-4 text-yellow-600" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-sm">{log.service}</span>
+                          <Badge variant="outline" className="text-xs">{log.event}</Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {log.timestamp.toLocaleString('ru-RU')}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{log.message}</p>
+                        {showLogs && log.payload && (
+                          <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto">
+                            {JSON.stringify(log.payload, null, 2)}
+                          </pre>
+                        )}
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                <p className="text-sm text-muted-foreground">
+                  Показано {webhookLogs.length} последних событий
+                </p>
+                <Button variant="outline" size="sm">
+                  Показать все логи
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Оригинальная таблица логов */}
+          <WebhookLogsTable />
         </TabsContent>
 
         <TabsContent value="variables">
