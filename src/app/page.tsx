@@ -595,6 +595,198 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
+      {/* Retention аудит - перемещен наверх */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-primary" />
+              <CardTitle>Улучшения Retention</CardTitle>
+            </div>
+          </div>
+          <CardDescription>
+            Области с упущенной выручкой
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!auditPerformed ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                <AlertCircle className="h-5 w-5 text-yellow-600 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-yellow-900">
+                    Вы еще не прошли базовый аудит retention структуры!
+                  </p>
+                  <p className="text-xs text-yellow-700 mt-1">
+                    Проведите аудит чтобы найти возможности для улучшения retention и увеличения выручки
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => {
+                    setAuditPerformed(true);
+                    // Генерируем рекомендации по улучшению retention
+                    setRetentionImprovements([
+                      {
+                        id: '1',
+                        title: 'Welcome серия для новых игроков',
+                        status: 'critical',
+                        description: 'Отсутствует онбординг для новых пользователей. 67% новых игроков уходят в первые 3 дня.',
+                        reason: 'Правильный онбординг увеличивает D1 retention на 35% и конверсию в первый депозит на 40%',
+                        potentialRevenue: '+40% FTD в ГЕО DE, AT',
+                        geo: 'DE, AT, CH',
+                        segment: 'Новые регистрации',
+                        channel: 'Email + Push',
+                        icon: Users
+                      },
+                      {
+                        id: '2',
+                        title: 'VIP программа лояльности',
+                        status: 'high',
+                        description: 'VIP игроки не получают эксклюзивных преимуществ. Churn rate VIP = 12% (выше среднего)',
+                        reason: 'VIP игроки генерируют 65% всей выручки. Снижение их оттока на 5%',
+                        potentialRevenue: '-5% Churn VIP в UK',
+                        geo: 'UK, IE',
+                        segment: 'VIP игроки',
+                        channel: 'Personal Manager',
+                        icon: DollarSign
+                      },
+                      {
+                        id: '3',
+                        title: 'Реактивация спящих',
+                        status: 'high',
+                        description: '8,450 спящих игроков с LTV > €200 не получают коммуникаций',
+                        reason: 'Каждый реактивированный игрок возвращается к активности',
+                        potentialRevenue: '+15% реактивация в FR',
+                        geo: 'FR, BE, LU',
+                        segment: 'Спящие 30+ дней',
+                        channel: 'Email + SMS',
+                        icon: Activity
+                      },
+                      {
+                        id: '4',
+                        title: 'Персонализация бонусов',
+                        status: 'medium',
+                        description: 'Все игроки получают одинаковые офферы без учета предпочтений',
+                        reason: 'Персонализированные бонусы повышают конверсию в депозит',
+                        potentialRevenue: '+28% бонус использование ES',
+                        geo: 'ES, PT',
+                        segment: 'Активные игроки',
+                        channel: 'In-App',
+                        icon: Target
+                      },
+                      {
+                        id: '5',
+                        title: 'Win-back кампании',
+                        status: 'medium',
+                        description: 'Нет систематических кампаний для ушедших игроков',
+                        reason: 'Ушедших игроков можно вернуть с правильным оффером',
+                        potentialRevenue: '+12% возврат через 90 дней IT',
+                        geo: 'IT, GR',
+                        segment: 'Ушедшие 90+ дней',
+                        channel: 'Email',
+                        icon: Zap
+                      }
+                    ]);
+                  }}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Пройти аудит
+                </Button>
+              </div>
+            </div>
+          ) : (
+            retentionImprovements.length > 0 && (
+              <div className="space-y-4">
+                {retentionImprovements.slice(0, 3).map((improvement) => {
+                  const Icon = improvement.icon;
+                  return (
+                    <div key={improvement.id} className="group relative">
+                      <div className="flex items-start gap-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+                        <div className={cn(
+                          "p-2 rounded-lg shrink-0",
+                          improvement.status === 'critical' && "bg-red-100",
+                          improvement.status === 'high' && "bg-orange-100",
+                          improvement.status === 'medium' && "bg-yellow-100"
+                        )}>
+                          <Icon className={cn(
+                            "h-4 w-4",
+                            improvement.status === 'critical' && "text-red-600",
+                            improvement.status === 'high' && "text-orange-600",
+                            improvement.status === 'medium' && "text-yellow-600"
+                          )} />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium text-sm">{improvement.title}</h4>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {improvement.description}
+                              </p>
+                            </div>
+                            <Badge 
+                              className={cn(
+                                "shrink-0",
+                                improvement.status === 'critical' && "bg-red-100 text-red-700",
+                                improvement.status === 'high' && "bg-orange-100 text-orange-700",
+                                improvement.status === 'medium' && "bg-yellow-100 text-yellow-700"
+                              )}
+                            >
+                              {improvement.status === 'critical' && 'Критично'}
+                              {improvement.status === 'high' && 'Важно'}
+                              {improvement.status === 'medium' && 'Средне'}
+                            </Badge>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-4 mt-3 text-xs">
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground">{improvement.geo}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground">{improvement.segment}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Send className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground">{improvement.channel}</span>
+                            </div>
+                            <div className="flex items-center gap-1 ml-auto">
+                              <TrendingUp className="h-3 w-3 text-green-600" />
+                              <span className="font-medium text-green-600">
+                                {improvement.potentialRevenue}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-3">
+                            <p className="text-xs text-muted-foreground italic">
+                              {improvement.reason}
+                            </p>
+                            <Button size="sm" variant="outline" className="h-7 text-xs">
+                              Создать кампанию
+                              <ChevronRight className="ml-1 h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {retentionImprovements.length > 3 && (
+                  <Button variant="outline" className="w-full" size="sm">
+                    <ChevronRight className="mr-2 h-4 w-4" />
+                    Все улучшения Retention ({retentionImprovements.length})
+                  </Button>
+                )}
+              </div>
+            )
+          )}
+        </CardContent>
+      </Card>
+
       {/* БЛОК 2: Плитка с избранными метриками */}
       <SelectedKpiTile />
 
@@ -751,196 +943,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Retention аудит */}
-
-      <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle>Улучшения Retention</CardTitle>
-              </div>
-              {!auditPerformed && (
-                <Button 
-                  size="sm" 
-                  onClick={() => {
-                    setAuditPerformed(true);
-                    // Генерируем рекомендации по улучшению retention
-                    setRetentionImprovements([
-                      {
-                        id: '1',
-                        title: 'Welcome серия для новых игроков',
-                        status: 'critical',
-                        description: 'Отсутствует онбординг для новых пользователей. 67% новых игроков уходят в первые 3 дня.',
-                        reason: 'Правильный онбординг увеличивает D1 retention на 35% и конверсию в первый депозит на 40%',
-                        potentialRevenue: '+40% FTD в ГЕО DE, AT',
-                        geo: 'DE, AT, CH',
-                        segment: 'Новые регистрации',
-                        channel: 'Email + Push',
-                        icon: Users
-                      },
-                      {
-                        id: '2',
-                        title: 'VIP программа лояльности',
-                        status: 'high',
-                        description: 'VIP игроки не получают эксклюзивных преимуществ. Churn rate VIP = 12% (выше среднего)',
-                        reason: 'VIP игроки генерируют 65% всей выручки. Снижение их оттока на 5%',
-                        potentialRevenue: '-5% Churn VIP в UK',
-                        geo: 'UK, IE',
-                        segment: 'VIP игроки',
-                        channel: 'Personal Manager',
-                        icon: DollarSign
-                      },
-                      {
-                        id: '3',
-                        title: 'Реактивация спящих',
-                        status: 'high',
-                        description: '8,450 спящих игроков с LTV > €200 не получают коммуникаций',
-                        reason: 'Каждый реактивированный игрок возвращается к активности',
-                        potentialRevenue: '+15% реактивация в FR',
-                        geo: 'FR, BE, LU',
-                        segment: 'Спящие 30+ дней',
-                        channel: 'Email + SMS',
-                        icon: Activity
-                      },
-                      {
-                        id: '4',
-                        title: 'Персонализация бонусов',
-                        status: 'medium',
-                        description: 'Все игроки получают одинаковые офферы без учета предпочтений',
-                        reason: 'Персонализированные бонусы повышают конверсию в депозит',
-                        potentialRevenue: '+28% бонус использование ES',
-                        geo: 'ES, PT',
-                        segment: 'Активные игроки',
-                        channel: 'In-App',
-                        icon: Target
-                      },
-                      {
-                        id: '5',
-                        title: 'Win-back кампании',
-                        status: 'medium',
-                        description: 'Нет систематических кампаний для ушедших игроков',
-                        reason: 'Ушедших игроков можно вернуть с правильным оффером',
-                        potentialRevenue: '+12% возврат через 90 дней IT',
-                        geo: 'IT, GR',
-                        segment: 'Ушедшие 90+ дней',
-                        channel: 'Email',
-                        icon: Zap
-                      }
-                    ]);
-                  }}
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  Провести аудит
-                </Button>
-              )}
-            </div>
-            <CardDescription>
-              Области с упущенной выручкой
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!auditPerformed ? (
-              <div className="text-center py-8">
-                <Search className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground mb-4">
-                  Проведите аудит чтобы найти возможности для улучшения retention
-                </p>
-                <Button 
-                  onClick={() => {
-                    setAuditPerformed(true);
-                    setRetentionImprovements([
-                      {
-                        id: '1',
-                        title: 'Welcome серия для новых игроков',
-                        status: 'critical',
-                        description: 'Отсутствует онбординг для новых пользователей. 67% новых игроков уходят в первые 3 дня.',
-                        reason: 'Правильный онбординг увеличивает D1 retention на 35% и конверсию в первый депозит на 40%',
-                        potentialRevenue: '€285,000/мес',
-                        icon: Users
-                      },
-                      {
-                        id: '2',
-                        title: 'VIP программа лояльности',
-                        status: 'high',
-                        description: 'VIP игроки не получают эксклюзивных преимуществ. Churn rate VIP = 12% (выше среднего)',
-                        reason: 'VIP игроки генерируют 65% всей выручки. Снижение их оттока на 5% = +€420,000/мес',
-                        potentialRevenue: '€420,000/мес',
-                        icon: DollarSign
-                      }
-                    ]);
-                  }}
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  Начать аудит
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5 text-red-600" />
-                      <span className="font-semibold text-red-900">Обнаружено областей для улучшения:</span>
-                    </div>
-                    <span className="text-xl font-bold text-red-600">5 критичных метрик</span>
-                  </div>
-                </div>
-                
-                {retentionImprovements.map((improvement) => {
-                  const Icon = improvement.icon;
-                  const statusColor = improvement.status === 'critical' ? 'bg-red-100 border-red-300' : 
-                                     improvement.status === 'high' ? 'bg-orange-100 border-orange-300' : 
-                                     'bg-yellow-100 border-yellow-300';
-                  
-                  return (
-                    <div key={improvement.id} className={`p-3 rounded-lg border ${statusColor}`}>
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 bg-white rounded-lg">
-                          <Icon className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <h4 className="font-semibold text-sm">{improvement.title}</h4>
-                            <Badge variant="secondary" className="text-xs font-bold">
-                              <TrendingUp className="mr-1 h-3 w-3" />
-                              {improvement.potentialRevenue}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-2">
-                            {improvement.description}
-                          </p>
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            <Badge variant="outline" className="text-xs">
-                              <MapPin className="mr-1 h-2.5 w-2.5" />
-                              GEO: {improvement.geo}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              <Target className="mr-1 h-2.5 w-2.5" />
-                              {improvement.segment}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              <Send className="mr-1 h-2.5 w-2.5" />
-                              {improvement.channel}
-                            </Badge>
-                          </div>
-                          <div className="p-2 bg-white/80 rounded">
-                            <p className="text-xs">
-                              <span className="font-medium">Почему это важно:</span> {improvement.reason}
-                            </p>
-                          </div>
-                          <Button size="sm" variant="link" className="h-auto p-0 mt-2 text-xs">
-                            Создать кампанию →
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
       {/* Быстрые действия */}
       <div className="grid gap-4 md:grid-cols-3">
