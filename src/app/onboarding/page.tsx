@@ -34,7 +34,11 @@ import {
   FileText,
   Eye,
   RefreshCw,
-  CheckSquare
+  CheckSquare,
+  Gamepad2,
+  Gift,
+  EyeOff,
+  ExternalLink
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -70,6 +74,7 @@ interface MetricGoal {
   unit: string;
   category: string;
   icon: React.ElementType;
+  isRequired?: boolean; // Обязательная метрика
 }
 
 export default function OnboardingPage() {
@@ -147,89 +152,212 @@ export default function OnboardingPage() {
   ]);
 
   // Метрики
-  const [metricGoals, setMetricGoals] = useState<Record<string, number>>({
-    retention_rate: 70,
-    churn_rate: 5,
-    ltv: 500,
-    arpu: 45,
-    conversion_rate: 3.5,
-    daily_active_users: 10000,
-    monthly_revenue: 1500000,
-    average_session_time: 35
-  });
+  const [metricGoals, setMetricGoals] = useState<Record<string, number>>({});
 
   const metricsData: MetricGoal[] = [
+    // Обязательные метрики - Retention
     {
       id: 'retention_rate',
       name: 'Retention Rate',
       description: 'Целевой процент удержания игроков',
-      value: metricGoals.retention_rate || 70,
+      value: metricGoals.retention_rate || 0,
       unit: '%',
       category: 'retention',
-      icon: Users
+      icon: Users,
+      isRequired: true
     },
     {
       id: 'churn_rate',
       name: 'Churn Rate',
       description: 'Максимальный допустимый отток',
-      value: metricGoals.churn_rate || 5,
+      value: metricGoals.churn_rate || 0,
       unit: '%',
       category: 'retention',
-      icon: TrendingUp
+      icon: TrendingUp,
+      isRequired: true
     },
+    {
+      id: 'retention_d1',
+      name: 'Day 1 Retention',
+      description: 'Удержание на 1-й день',
+      value: metricGoals.retention_d1 || 0,
+      unit: '%',
+      category: 'retention',
+      icon: Users,
+      isRequired: false
+    },
+    {
+      id: 'retention_d7',
+      name: 'Day 7 Retention',
+      description: 'Удержание на 7-й день',
+      value: metricGoals.retention_d7 || 0,
+      unit: '%',
+      category: 'retention',
+      icon: Users,
+      isRequired: false
+    },
+    {
+      id: 'retention_d30',
+      name: 'Day 30 Retention',
+      description: 'Удержание на 30-й день',
+      value: metricGoals.retention_d30 || 0,
+      unit: '%',
+      category: 'retention',
+      icon: Users,
+      isRequired: false
+    },
+    // Обязательные метрики - Revenue
     {
       id: 'ltv',
       name: 'LTV (Lifetime Value)',
       description: 'Целевая пожизненная ценность игрока',
-      value: metricGoals.ltv || 500,
+      value: metricGoals.ltv || 0,
       unit: '€',
       category: 'revenue',
-      icon: DollarSign
+      icon: DollarSign,
+      isRequired: true
     },
     {
       id: 'arpu',
       name: 'ARPU',
       description: 'Средний доход на пользователя',
-      value: metricGoals.arpu || 45,
+      value: metricGoals.arpu || 0,
       unit: '€',
       category: 'revenue',
-      icon: BarChart3
-    },
-    {
-      id: 'conversion_rate',
-      name: 'Conversion Rate',
-      description: 'Целевая конверсия в депозит',
-      value: metricGoals.conversion_rate || 3.5,
-      unit: '%',
-      category: 'conversion',
-      icon: Activity
-    },
-    {
-      id: 'daily_active_users',
-      name: 'DAU',
-      description: 'Целевое количество активных игроков в день',
-      value: metricGoals.daily_active_users || 10000,
-      unit: '',
-      category: 'engagement',
-      icon: Users
+      icon: BarChart3,
+      isRequired: true
     },
     {
       id: 'monthly_revenue',
       name: 'Monthly Revenue',
-      description: 'Целевая месячная выручка',
-      value: metricGoals.monthly_revenue || 1500000,
+      description: 'Целевой месячный доход',
+      value: metricGoals.monthly_revenue || 0,
       unit: '€',
       category: 'revenue',
-      icon: DollarSign
+      icon: DollarSign,
+      isRequired: false
+    },
+    {
+      id: 'arppu',
+      name: 'ARPPU',
+      description: 'Средний доход с платящего игрока',
+      value: metricGoals.arppu || 0,
+      unit: '€',
+      category: 'revenue',
+      icon: DollarSign,
+      isRequired: false
+    },
+    {
+      id: 'avg_deposit',
+      name: 'Average Deposit',
+      description: 'Средний размер депозита',
+      value: metricGoals.avg_deposit || 0,
+      unit: '€',
+      category: 'revenue',
+      icon: DollarSign,
+      isRequired: false
+    },
+    // Engagement метрики
+    {
+      id: 'daily_active_users',
+      name: 'DAU',
+      description: 'Целевое количество активных игроков в день',
+      value: metricGoals.daily_active_users || 0,
+      unit: '',
+      category: 'engagement',
+      icon: Activity,
+      isRequired: false
+    },
+    {
+      id: 'monthly_active_users',
+      name: 'MAU',
+      description: 'Целевое количество активных игроков в месяц',
+      value: metricGoals.monthly_active_users || 0,
+      unit: '',
+      category: 'engagement',
+      icon: Activity,
+      isRequired: false
     },
     {
       id: 'average_session_time',
       name: 'Avg Session Time',
-      description: 'Целевая длительность сессии',
-      value: metricGoals.average_session_time || 35,
-      unit: 'min',
+      description: 'Средняя длительность сессии',
+      value: metricGoals.average_session_time || 0,
+      unit: 'мин',
       category: 'engagement',
-      icon: Clock
+      icon: Clock,
+      isRequired: false
+    },
+    {
+      id: 'sessions_per_day',
+      name: 'Sessions per Day',
+      description: 'Среднее количество сессий в день',
+      value: metricGoals.sessions_per_day || 0,
+      unit: '',
+      category: 'engagement',
+      icon: Activity,
+      isRequired: false
+    },
+    {
+      id: 'games_per_session',
+      name: 'Games per Session',
+      description: 'Среднее количество игр за сессию',
+      value: metricGoals.games_per_session || 0,
+      unit: '',
+      category: 'engagement',
+      icon: Gamepad2,
+      isRequired: false
+    },
+    // Обязательные метрики - Conversion
+    {
+      id: 'conversion_rate',
+      name: 'FTD Conversion',
+      description: 'Конверсия в первый депозит',
+      value: metricGoals.conversion_rate || 0,
+      unit: '%',
+      category: 'conversion',
+      icon: Activity,
+      isRequired: true
+    },
+    {
+      id: 'registration_to_deposit',
+      name: 'Reg to Deposit',
+      description: 'Конверсия регистрация → депозит',
+      value: metricGoals.registration_to_deposit || 0,
+      unit: '%',
+      category: 'conversion',
+      icon: Activity,
+      isRequired: false
+    },
+    {
+      id: 'deposit_frequency',
+      name: 'Deposit Frequency',
+      description: 'Частота депозитов',
+      value: metricGoals.deposit_frequency || 0,
+      unit: '/мес',
+      category: 'conversion',
+      icon: Activity,
+      isRequired: false
+    },
+    {
+      id: 'reactivation_rate',
+      name: 'Reactivation Rate',
+      description: 'Процент реактивации игроков',
+      value: metricGoals.reactivation_rate || 0,
+      unit: '%',
+      category: 'conversion',
+      icon: Activity,
+      isRequired: false
+    },
+    {
+      id: 'bonus_conversion',
+      name: 'Bonus Conversion',
+      description: 'Конверсия бонусных предложений',
+      value: metricGoals.bonus_conversion || 0,
+      unit: '%',
+      category: 'conversion',
+      icon: Gift,
+      isRequired: false
     }
   ];
 
@@ -277,8 +405,41 @@ export default function OnboardingPage() {
     }
   };
 
+  // Проверка заполнения обязательных метрик
+  const areRequiredMetricsFilled = () => {
+    const requiredMetrics = metricsData.filter(m => m.isRequired);
+    return requiredMetrics.every(metric => 
+      metricGoals[metric.id] && metricGoals[metric.id] > 0
+    );
+  };
+
+  // Подсчет заполненных метрик
+  const getMetricsProgress = () => {
+    const requiredMetrics = metricsData.filter(m => m.isRequired);
+    const filledRequired = requiredMetrics.filter(m => 
+      metricGoals[m.id] && metricGoals[m.id] > 0
+    );
+    
+    const optionalMetrics = metricsData.filter(m => !m.isRequired);
+    const filledOptional = optionalMetrics.filter(m => 
+      metricGoals[m.id] && metricGoals[m.id] > 0
+    );
+    
+    return {
+      required: { filled: filledRequired.length, total: requiredMetrics.length },
+      optional: { filled: filledOptional.length, total: optionalMetrics.length }
+    };
+  };
+
   // Сохранение метрик
   const saveMetrics = () => {
+    // Проверяем обязательные метрики
+    if (!areRequiredMetricsFilled()) {
+      // Показываем предупреждение
+      alert('Пожалуйста, заполните все обязательные метрики для продолжения');
+      return;
+    }
+    
     // Сохраняем в localStorage для демо
     localStorage.setItem('metricGoals', JSON.stringify(metricGoals));
     
@@ -543,8 +704,40 @@ export default function OnboardingPage() {
             <CardDescription>
               Установите целевые значения для ключевых метрик вашего бизнеса
             </CardDescription>
+            {/* Прогресс заполнения метрик */}
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">Обязательные метрики</span>
+                <span className="text-muted-foreground">
+                  {getMetricsProgress().required.filled} из {getMetricsProgress().required.total} заполнено
+                </span>
+              </div>
+              <Progress 
+                value={(getMetricsProgress().required.filled / getMetricsProgress().required.total) * 100} 
+                className="h-2"
+              />
+              <div className="flex items-center justify-between text-sm mt-2">
+                <span className="font-medium">Дополнительные метрики</span>
+                <span className="text-muted-foreground">
+                  {getMetricsProgress().optional.filled} из {getMetricsProgress().optional.total} заполнено
+                </span>
+              </div>
+              <Progress 
+                value={(getMetricsProgress().optional.filled / getMetricsProgress().optional.total) * 100} 
+                className="h-2 bg-blue-100"
+              />
+            </div>
           </CardHeader>
           <CardContent>
+            {/* Информационное сообщение */}
+            <Alert className="mb-6 border-orange-200 bg-orange-50">
+              <AlertCircle className="h-4 w-4 text-orange-600" />
+              <AlertDescription>
+                <strong>Внимание:</strong> Для завершения настройки необходимо заполнить все <strong>обязательные метрики</strong> (отмечены красным).
+                Дополнительные метрики помогут улучшить точность AI-рекомендаций.
+              </AlertDescription>
+            </Alert>
+            
             <Tabs defaultValue="retention" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="retention">Retention</TabsTrigger>
@@ -553,40 +746,109 @@ export default function OnboardingPage() {
                 <TabsTrigger value="conversion">Conversion</TabsTrigger>
               </TabsList>
               
-              {['retention', 'revenue', 'engagement', 'conversion'].map((category) => (
-                <TabsContent key={category} value={category} className="space-y-4">
-                  {metricsData
-                    .filter(metric => metric.category === category)
-                    .map((metric) => (
-                      <div key={metric.id} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor={metric.id} className="flex items-center gap-2">
-                            <metric.icon className="h-4 w-4 text-muted-foreground" />
-                            {metric.name}
-                          </Label>
-                          <span className="text-sm text-muted-foreground">
-                            {metric.description}
-                          </span>
-                        </div>
+              {['retention', 'revenue', 'engagement', 'conversion'].map((category) => {
+                const categoryMetrics = metricsData.filter(metric => metric.category === category);
+                const requiredMetrics = categoryMetrics.filter(m => m.isRequired);
+                const optionalMetrics = categoryMetrics.filter(m => !m.isRequired);
+                
+                return (
+                  <TabsContent key={category} value={category} className="space-y-6">
+                    {/* Обязательные метрики */}
+                    {requiredMetrics.length > 0 && (
+                      <div className="space-y-4">
                         <div className="flex items-center gap-2">
-                          <Input
-                            id={metric.id}
-                            type="number"
-                            value={metricGoals[metric.id] || 0}
-                            onChange={(e) => setMetricGoals(prev => ({
-                              ...prev,
-                              [metric.id]: parseFloat(e.target.value) || 0
-                            }))}
-                            className="flex-1"
-                          />
-                          <span className="text-sm font-medium w-12">
-                            {metric.unit}
+                          <Badge variant="destructive" className="text-xs">Обязательные</Badge>
+                          <span className="text-xs text-muted-foreground">
+                            Необходимо заполнить для завершения настройки
                           </span>
                         </div>
+                        {requiredMetrics.map((metric) => (
+                          <div key={metric.id} className="space-y-2 p-3 rounded-lg border-2 border-red-100 bg-red-50/30">
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor={metric.id} className="flex items-center gap-2 font-medium">
+                                <metric.icon className="h-4 w-4 text-red-600" />
+                                {metric.name}
+                                <Badge variant="destructive" className="text-xs ml-2">*</Badge>
+                              </Label>
+                              <span className="text-sm text-muted-foreground">
+                                {metric.description}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                id={metric.id}
+                                type="number"
+                                step="0.01"
+                                value={metricGoals[metric.id] || ''}
+                                onChange={(e) => setMetricGoals(prev => ({
+                                  ...prev,
+                                  [metric.id]: parseFloat(e.target.value) || 0
+                                }))}
+                                className={cn(
+                                  "flex-1",
+                                  (!metricGoals[metric.id] || metricGoals[metric.id] === 0) && "border-red-300"
+                                )}
+                                placeholder="Введите значение"
+                              />
+                              <span className="text-sm font-medium w-12">
+                                {metric.unit}
+                              </span>
+                              {metricGoals[metric.id] && metricGoals[metric.id] > 0 && (
+                                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                </TabsContent>
-              ))}
+                    )}
+                    
+                    {/* Дополнительные метрики */}
+                    {optionalMetrics.length > 0 && (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">Дополнительные</Badge>
+                          <span className="text-xs text-muted-foreground">
+                            Рекомендуется заполнить для лучшей оптимизации
+                          </span>
+                        </div>
+                        {optionalMetrics.map((metric) => (
+                          <div key={metric.id} className="space-y-2 p-3 rounded-lg border border-gray-200">
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor={metric.id} className="flex items-center gap-2">
+                                <metric.icon className="h-4 w-4 text-muted-foreground" />
+                                {metric.name}
+                              </Label>
+                              <span className="text-sm text-muted-foreground">
+                                {metric.description}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                id={metric.id}
+                                type="number"
+                                step="0.01"
+                                value={metricGoals[metric.id] || ''}
+                                onChange={(e) => setMetricGoals(prev => ({
+                                  ...prev,
+                                  [metric.id]: parseFloat(e.target.value) || 0
+                                }))}
+                                className="flex-1"
+                                placeholder="Опционально"
+                              />
+                              <span className="text-sm font-medium w-12">
+                                {metric.unit}
+                              </span>
+                              {metricGoals[metric.id] && metricGoals[metric.id] > 0 && (
+                                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                );
+              })}
             </Tabs>
             
             <div className="flex justify-between items-center mt-6 pt-6 border-t">
@@ -603,9 +865,13 @@ export default function OnboardingPage() {
                 >
                   Пропустить
                 </Button>
-                <Button onClick={saveMetrics} className="gap-2">
+                <Button 
+                  onClick={saveMetrics} 
+                  className="gap-2"
+                  disabled={!areRequiredMetricsFilled()}
+                >
                   <CheckSquare className="h-4 w-4" />
-                  Сохранить метрики
+                  {areRequiredMetricsFilled() ? 'Сохранить и продолжить' : 'Заполните обязательные метрики'}
                 </Button>
               </div>
             </div>
