@@ -161,7 +161,7 @@ export function CampaignFilters({ onFiltersChange }: CampaignFiltersProps) {
                 <SelectValue placeholder="Все статусы" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все статусы</SelectItem>
+                <SelectItem value="all">Все статусы</SelectItem>
                 <SelectItem value="active">Активная</SelectItem>
                 <SelectItem value="scheduled">Запланирована</SelectItem>
                 <SelectItem value="paused">На паузе</SelectItem>
@@ -178,7 +178,7 @@ export function CampaignFilters({ onFiltersChange }: CampaignFiltersProps) {
                 <SelectValue placeholder="Все типы" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все типы</SelectItem>
+                <SelectItem value="all">Все типы</SelectItem>
                 <SelectItem value="reactivation">Реактивация</SelectItem>
                 <SelectItem value="welcome">Приветственная</SelectItem>
                 <SelectItem value="vip">VIP программа</SelectItem>
@@ -196,7 +196,7 @@ export function CampaignFilters({ onFiltersChange }: CampaignFiltersProps) {
                 <SelectValue placeholder="Все каналы" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все каналы</SelectItem>
+                <SelectItem value="all">Все каналы</SelectItem>
                 <SelectItem value="email">Email</SelectItem>
                 <SelectItem value="sms">SMS</SelectItem>
                 <SelectItem value="push">Push</SelectItem>
@@ -545,7 +545,7 @@ export function CampaignFilters({ onFiltersChange }: CampaignFiltersProps) {
                       <SelectValue placeholder="Любой" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Любой</SelectItem>
+                      <SelectItem value="all">Любой</SelectItem>
                       <SelectItem value="low">Низкий</SelectItem>
                       <SelectItem value="medium">Средний</SelectItem>
                       <SelectItem value="high">Высокий</SelectItem>

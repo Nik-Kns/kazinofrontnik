@@ -161,7 +161,7 @@ export function TriggerFilters({ onFiltersChange }: TriggerFiltersProps) {
                 <SelectValue placeholder="Все типы" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все типы</SelectItem>
+                <SelectItem value="all">Все типы</SelectItem>
                 <SelectItem value="event">Событийный</SelectItem>
                 <SelectItem value="basic">Базовый</SelectItem>
                 <SelectItem value="custom">Пользовательский</SelectItem>
@@ -176,7 +176,7 @@ export function TriggerFilters({ onFiltersChange }: TriggerFiltersProps) {
                 <SelectValue placeholder="Все каналы" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все каналы</SelectItem>
+                <SelectItem value="all">Все каналы</SelectItem>
                 <SelectItem value="Email">Email</SelectItem>
                 <SelectItem value="Push">Push</SelectItem>
                 <SelectItem value="SMS">SMS</SelectItem>
@@ -193,7 +193,7 @@ export function TriggerFilters({ onFiltersChange }: TriggerFiltersProps) {
                 <SelectValue placeholder="Все категории" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все категории</SelectItem>
+                <SelectItem value="all">Все категории</SelectItem>
                 <SelectItem value="Onboarding">Onboarding</SelectItem>
                 <SelectItem value="Retention">Retention</SelectItem>
                 <SelectItem value="Reactivation">Reactivation</SelectItem>
@@ -378,7 +378,7 @@ export function TriggerFilters({ onFiltersChange }: TriggerFiltersProps) {
                       <SelectValue placeholder="Любое" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Любое</SelectItem>
+                      <SelectItem value="all">Любое</SelectItem>
                       <SelectItem value="active">Активно использует</SelectItem>
                       <SelectItem value="rare">Редко использует</SelectItem>
                       <SelectItem value="never">Не использует</SelectItem>
@@ -434,7 +434,7 @@ export function TriggerFilters({ onFiltersChange }: TriggerFiltersProps) {
                       <SelectValue placeholder="Все статусы" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Все статусы</SelectItem>
+                      <SelectItem value="all">Все статусы</SelectItem>
                       <SelectItem value="new">Новый</SelectItem>
                       <SelectItem value="active">Активный</SelectItem>
                       <SelectItem value="at_risk">В зоне риска</SelectItem>
@@ -488,7 +488,7 @@ export function TriggerFilters({ onFiltersChange }: TriggerFiltersProps) {
                       <SelectValue placeholder="Любое" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Любое</SelectItem>
+                      <SelectItem value="all">Любое</SelectItem>
                       <SelectItem value="deposit_bonus">Депозитный бонус</SelectItem>
                       <SelectItem value="free_spins">Фриспины</SelectItem>
                       <SelectItem value="cashback">Кэшбэк</SelectItem>
@@ -513,7 +513,7 @@ export function TriggerFilters({ onFiltersChange }: TriggerFiltersProps) {
                       <SelectValue placeholder="Любые" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Любые</SelectItem>
+                      <SelectItem value="all">Любые</SelectItem>
                       <SelectItem value="yes">Да</SelectItem>
                       <SelectItem value="no">Нет</SelectItem>
                     </SelectContent>
