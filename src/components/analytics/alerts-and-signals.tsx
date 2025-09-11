@@ -313,7 +313,7 @@ export function AlertsAndSignals() {
                         </div>
                       </div>
                       <Button size="sm" variant="outline" asChild>
-                        <Link href={`/builder?template=${scenario.id}`}>
+                        <Link href={`/triggers?template=${scenario.id}&segment=${alert.category}_risk&metric=${alert.metric}`}>
                           Создать
                           <ArrowRight className="ml-2 h-3 w-3" />
                         </Link>
