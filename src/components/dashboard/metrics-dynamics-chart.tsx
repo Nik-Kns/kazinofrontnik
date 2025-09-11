@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
@@ -89,13 +89,18 @@ export function MetricsDynamicsChart({
     }
   }, [propActiveMetric]);
 
-  useEffect(() => {
-    // Генерируем данные для активной метрики
-    setLoading(true);
-    const data = generateMockData(activeMetric, dateRange);
-    setChartData(data);
-    setTimeout(() => setLoading(false), 300); // Имитация загрузки
+  // Мемоизируем генерацию данных для предотвращения лишних перерисовок
+  const memoizedChartData = useMemo(() => {
+    return generateMockData(activeMetric, dateRange);
   }, [activeMetric, dateRange]);
+
+  useEffect(() => {
+    // Обновляем состояние только при изменении данных
+    setLoading(true);
+    setChartData(memoizedChartData);
+    const timer = setTimeout(() => setLoading(false), 300); // Имитация загрузки
+    return () => clearTimeout(timer);
+  }, [memoizedChartData]);
 
   const handleMetricClick = (metricKey: string) => {
     setActiveMetric(metricKey);
@@ -106,17 +111,15 @@ export function MetricsDynamicsChart({
 
   const activeConfig = metricsConfig.find(m => m.key === activeMetric) || metricsConfig[0];
   
-  // Вычисляем изменение за период
-  const calculateChange = () => {
+  // Мемоизируем вычисление изменений для предотвращения лишних пересчетов
+  const change = useMemo(() => {
     if (chartData.length < 2) return { value: 0, percentage: 0 };
     const first = chartData[0].value;
     const last = chartData[chartData.length - 1].value;
-    const change = last - first;
-    const percentage = (change / first) * 100;
-    return { value: change, percentage };
-  };
-
-  const change = calculateChange();
+    const changeValue = last - first;
+    const percentage = (changeValue / first) * 100;
+    return { value: changeValue, percentage };
+  }, [chartData]);
 
   return (
     <Card>

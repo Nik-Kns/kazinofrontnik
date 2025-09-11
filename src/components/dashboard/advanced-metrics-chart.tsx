@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   LineChart, 
@@ -373,17 +373,23 @@ export function AdvancedMetricsChart({
     }
   }, [propActiveMetric, displayedMetrics, compareMode]);
   
-  useEffect(() => {
-    setLoading(true);
-    const data = generateMockData(
+  // Мемоизируем генерацию данных для предотвращения лишних перерисовок
+  const memoizedChartData = useMemo(() => {
+    return generateMockData(
       compareMode ? activeMetrics : displayedMetrics,
       effectiveDateRange,
       segment !== 'all' ? segment : undefined,
       campaign
     );
-    setChartData(data);
-    setTimeout(() => setLoading(false), 300);
   }, [activeMetrics, effectiveDateRange, segment, campaign, compareMode, displayedMetrics]);
+
+  useEffect(() => {
+    // Обновляем состояние только при изменении данных
+    setLoading(true);
+    setChartData(memoizedChartData);
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, [memoizedChartData]);
   
   // Вычисляем среднее значение для трендовой линии
   const calculateAverage = (metricKey: string) => {
