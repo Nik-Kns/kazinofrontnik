@@ -470,44 +470,6 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {/* AI Рекомендации и алерты */}
           <AlertsAndSignals />
-          
-          {/* Быстрые действия */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Быстрые действия</CardTitle>
-              <CardDescription>
-                Основные операции для работы с системой
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 md:grid-cols-2">
-                <Button variant="outline" className="justify-start" asChild>
-                  <Link href="/triggers">
-                    <Zap className="mr-2 h-4 w-4" />
-                    Создать новый триггер
-                  </Link>
-                </Button>
-                <Button variant="outline" className="justify-start" asChild>
-                  <Link href="/campaigns">
-                    <Send className="mr-2 h-4 w-4" />
-                    Запустить кампанию
-                  </Link>
-                </Button>
-                <Button variant="outline" className="justify-start" asChild>
-                  <Link href="/segments">
-                    <Users className="mr-2 h-4 w-4" />
-                    Управление сегментами
-                  </Link>
-                </Button>
-                <Button variant="outline" className="justify-start" asChild>
-                  <Link href="/analytics">
-                    <BarChart3 className="mr-2 h-4 w-4" />
-                    Детальная аналитика
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Следующие шаги */}
           <Card>
