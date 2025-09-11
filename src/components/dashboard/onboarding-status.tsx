@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Circle, ArrowRight, Settings, Target, Database, Rocket, Shield, Loader2, CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { GoalsModal } from "./goals-modal";
 
 interface OnboardingStep {
   id: string;
@@ -25,6 +26,7 @@ export function OnboardingStatus() {
   const [auditRunning, setAuditRunning] = useState(false);
   const [auditCompleted, setAuditCompleted] = useState(false);
   const [auditResults, setAuditResults] = useState<any>(null);
+  const [goalsModalOpen, setGoalsModalOpen] = useState(false);
 
   useEffect(() => {
     // Проверяем статус онбординга из localStorage
@@ -68,7 +70,7 @@ export function OnboardingStatus() {
           title: 'Постановка KPI-целей',
           description: 'Определите целевые показатели',
           completed: goalsSet,
-          href: '/analytics?showGoals=true',
+          href: '#',
           icon: Target,
           priority: 'recommended'
         },
@@ -255,6 +257,15 @@ export function OnboardingStatus() {
                         </>
                       )}
                     </Button>
+                  ) : step.id === 'goals' ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setGoalsModalOpen(true)}
+                    >
+                      Настроить
+                      <ArrowRight className="ml-2 h-3 w-3" />
+                    </Button>
                   ) : (
                     <Button asChild variant="outline" size="sm">
                       <Link href={step.href}>
@@ -355,6 +366,21 @@ export function OnboardingStatus() {
         )}
         
       </CardContent>
+      
+      <GoalsModal 
+        open={goalsModalOpen} 
+        onOpenChange={(open) => {
+          setGoalsModalOpen(open);
+          if (!open) {
+            // Обновляем статус после закрытия модалки
+            const goalsData = localStorage.getItem('kpiGoals');
+            const goalsSet = goalsData ? JSON.parse(goalsData).set : false;
+            setSteps(prev => prev.map(step => 
+              step.id === 'goals' ? { ...step, completed: goalsSet } : step
+            ));
+          }
+        }}
+      />
     </Card>
   );
 }
