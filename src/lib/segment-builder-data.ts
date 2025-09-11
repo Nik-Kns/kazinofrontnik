@@ -112,6 +112,45 @@ export const segmentParameters: SegmentParameter[] = [
     min: 0,
     max: 100
   },
+  {
+    id: 'withdrawal_count',
+    name: 'Количество выводов',
+    description: 'Общее количество выводов средств',
+    group: 'financial',
+    type: 'number',
+    min: 0,
+    max: 1000
+  },
+  {
+    id: 'total_bet_amount',
+    name: 'Сумма ставок',
+    description: 'Общая сумма всех ставок',
+    group: 'financial',
+    type: 'currency',
+    unit: '€',
+    min: 0,
+    max: 10000000
+  },
+  {
+    id: 'bonus_amount_received',
+    name: 'Сумма полученных бонусов',
+    description: 'Общая сумма всех полученных бонусов',
+    group: 'financial',
+    type: 'currency',
+    unit: '€',
+    min: 0,
+    max: 100000
+  },
+  {
+    id: 'bonus_activation_rate',
+    name: 'Процент активации бонусов',
+    description: 'Процент активированных бонусов от предложенных',
+    group: 'financial',
+    type: 'percentage',
+    unit: '%',
+    min: 0,
+    max: 100
+  },
 
   // Gaming Activity Parameters
   {
@@ -186,6 +225,71 @@ export const segmentParameters: SegmentParameter[] = [
     type: 'list',
     options: ['Low', 'Medium', 'High', 'Very High']
   },
+  {
+    id: 'last_login_days_ago',
+    name: 'Последний вход (дней назад)',
+    description: 'Количество дней с последнего входа',
+    group: 'gaming',
+    type: 'number',
+    unit: 'дней',
+    min: 0,
+    max: 365
+  },
+  {
+    id: 'last_bet_days_ago',
+    name: 'Последняя ставка (дней назад)',
+    description: 'Количество дней с последней ставки',
+    group: 'gaming',
+    type: 'number',
+    unit: 'дней',
+    min: 0,
+    max: 365
+  },
+  {
+    id: 'unique_games_played',
+    name: 'Количество уникальных игр',
+    description: 'Количество различных игр, в которые играл игрок',
+    group: 'gaming',
+    type: 'number',
+    min: 0,
+    max: 1000
+  },
+  {
+    id: 'total_playtime_hours',
+    name: 'Общее время в игре',
+    description: 'Общее время, проведенное в играх',
+    group: 'gaming',
+    type: 'number',
+    unit: 'часов',
+    min: 0,
+    max: 10000
+  },
+  {
+    id: 'game_categories',
+    name: 'Категории игр',
+    description: 'Предпочитаемые категории игр',
+    group: 'gaming',
+    type: 'list',
+    options: ['Slots', 'Live Casino', 'Table Games', 'Sports', 'Poker', 'Crash Games', 'Virtual Sports']
+  },
+  {
+    id: 'big_win_count',
+    name: 'Количество больших выигрышей',
+    description: 'Количество выигрышей выше определенного порога',
+    group: 'gaming',
+    type: 'number',
+    min: 0,
+    max: 1000
+  },
+  {
+    id: 'big_loss_count',
+    name: 'Количество больших проигрышей',
+    description: 'Количество проигрышей выше определенного порога',
+    group: 'gaming',
+    type: 'number',
+    min: 0,
+    max: 1000
+  },
 
   // Marketing/CRM Parameters
   {
@@ -242,6 +346,54 @@ export const segmentParameters: SegmentParameter[] = [
     group: 'marketing',
     type: 'list',
     options: ['Email', 'Push', 'SMS', 'Telegram', 'In-App']
+  },
+  {
+    id: 'tournament_participation',
+    name: 'Участие в турнирах',
+    description: 'Количество турниров с участием игрока',
+    group: 'marketing',
+    type: 'number',
+    min: 0,
+    max: 500
+  },
+  {
+    id: 'sms_ctr',
+    name: 'SMS CTR',
+    description: 'Click-through rate по SMS сообщениям',
+    group: 'marketing',
+    type: 'percentage',
+    unit: '%',
+    min: 0,
+    max: 100
+  },
+  {
+    id: 'winback_success',
+    name: 'Успешность winback',
+    description: 'Был ли игрок успешно возвращен после оттока',
+    group: 'marketing',
+    type: 'boolean'
+  },
+  {
+    id: 'utm_source',
+    name: 'UTM Source',
+    description: 'Источник трафика по UTM метке',
+    group: 'marketing',
+    type: 'list',
+    options: ['google', 'facebook', 'instagram', 'tiktok', 'yandex', 'affiliate', 'direct', 'email']
+  },
+  {
+    id: 'utm_campaign',
+    name: 'UTM Campaign',
+    description: 'Название кампании по UTM метке',
+    group: 'marketing',
+    type: 'string'
+  },
+  {
+    id: 'affiliate_id',
+    name: 'ID партнера',
+    description: 'Идентификатор партнера-аффилиата',
+    group: 'marketing',
+    type: 'string'
   },
 
   // Profile Parameters
@@ -346,6 +498,58 @@ export const segmentParameters: SegmentParameter[] = [
     min: 0,
     max: 50000
   },
+  {
+    id: 'city',
+    name: 'Город',
+    description: 'Город проживания игрока',
+    group: 'profile',
+    type: 'string'
+  },
+  {
+    id: 'region',
+    name: 'Регион',
+    description: 'Регион/область проживания игрока',
+    group: 'profile',
+    type: 'string'
+  },
+  {
+    id: 'first_deposit_made',
+    name: 'Первый депозит сделан',
+    description: 'Сделал ли игрок первый депозит',
+    group: 'profile',
+    type: 'boolean'
+  },
+  {
+    id: 'retention_status',
+    name: 'Retention статус',
+    description: 'Текущий статус удержания игрока',
+    group: 'profile',
+    type: 'list',
+    options: ['New', 'Active', 'At Risk', 'Churning', 'Churned', 'Reactivated', 'Dormant']
+  },
+  {
+    id: 'login_frequency',
+    name: 'Частота логинов',
+    description: 'Как часто игрок заходит в систему',
+    group: 'profile',
+    type: 'list',
+    options: ['Daily', 'Weekly', 'Monthly', 'Rarely', 'Never']
+  },
+  {
+    id: 'uses_vpn',
+    name: 'Использует VPN',
+    description: 'Обнаружено ли использование VPN',
+    group: 'profile',
+    type: 'boolean'
+  },
+  {
+    id: 'ip_country',
+    name: 'Страна IP',
+    description: 'Страна по IP адресу',
+    group: 'profile',
+    type: 'list',
+    options: ['Germany', 'Russia', 'United Kingdom', 'France', 'Spain', 'Italy', 'Poland', 'Netherlands', 'Other']
+  },
 
   // Risk/Compliance Parameters
   {
@@ -401,6 +605,43 @@ export const segmentParameters: SegmentParameter[] = [
     type: 'number',
     min: 0,
     max: 500
+  },
+  {
+    id: 'deposit_limit_set',
+    name: 'Установлен лимит депозитов',
+    description: 'Установил ли игрок лимит на депозиты',
+    group: 'risk',
+    type: 'boolean'
+  },
+  {
+    id: 'bet_limit_set',
+    name: 'Установлен лимит ставок',
+    description: 'Установил ли игрок лимит на ставки',
+    group: 'risk',
+    type: 'boolean'
+  },
+  {
+    id: 'time_limit_set',
+    name: 'Установлен лимит времени',
+    description: 'Установил ли игрок лимит времени игры',
+    group: 'risk',
+    type: 'boolean'
+  },
+  {
+    id: 'self_exclusion_active',
+    name: 'Активно самоисключение',
+    description: 'Находится ли игрок в состоянии самоисключения',
+    group: 'risk',
+    type: 'boolean'
+  },
+  {
+    id: 'responsible_gaming_requests',
+    name: 'Запросы по responsible gaming',
+    description: 'Количество запросов по ответственной игре',
+    group: 'risk',
+    type: 'number',
+    min: 0,
+    max: 100
   },
 
   // AI/Predictive Parameters
@@ -459,6 +700,44 @@ export const segmentParameters: SegmentParameter[] = [
     group: 'ai_predictive',
     type: 'list',
     options: ['Deposit Bonus', 'Free Spins', 'Cashback', 'VIP Upgrade', 'Tournament', 'Sports Promo']
+  },
+  {
+    id: 'optimal_send_time',
+    name: 'Оптимальное время отправки',
+    description: 'AI-рекомендация лучшего времени для коммуникации',
+    group: 'ai_predictive',
+    type: 'list',
+    options: ['Morning', 'Afternoon', 'Evening', 'Night', 'Weekend']
+  },
+  {
+    id: 'predicted_next_deposit_amount',
+    name: 'Прогноз суммы следующего депозита',
+    description: 'AI-прогноз суммы следующего депозита',
+    group: 'ai_predictive',
+    type: 'currency',
+    unit: '€',
+    min: 0,
+    max: 10000
+  },
+  {
+    id: 'vip_upgrade_probability',
+    name: 'Вероятность перехода в VIP',
+    description: 'Вероятность апгрейда до VIP статуса',
+    group: 'ai_predictive',
+    type: 'percentage',
+    unit: '%',
+    min: 0,
+    max: 100
+  },
+  {
+    id: 'reactivation_probability',
+    name: 'Вероятность реактивации',
+    description: 'Вероятность успешной реактивации игрока',
+    group: 'ai_predictive',
+    type: 'percentage',
+    unit: '%',
+    min: 0,
+    max: 100
   }
 ];
 
