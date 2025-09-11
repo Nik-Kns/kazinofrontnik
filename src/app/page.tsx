@@ -388,11 +388,17 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Секция 1: Быстрый старт и основные метрики */}
-      <div className="space-y-6">
-        {/* Статус онбординга */}
+      {/* Секция 1: Базовая настройка и аудит */}
+      <CollapsibleSection 
+        id="basic-setup-audit" 
+        title="⚙️ Базовая настройка и аудит" 
+        defaultOpen={true}
+      >
         <OnboardingStatus />
-        
+      </CollapsibleSection>
+
+      {/* Основные метрики и аналитика */}
+      <div className="space-y-6">
         {/* Избранные метрики */}
         <SelectedKpiTile 
           activeMetric={activeMetric}
@@ -409,68 +415,49 @@ export default function DashboardPage() {
         
         {/* Риски и предупреждения */}
         <RisksAndWarnings />
-        
-        {/* Активные кампании */}
-        <ActiveCampaigns />
       </div>
 
-      {/* Секция 2: Глубокий Анализ и Метрики */}
+      {/* Секция 2: Анализ трендов */}
       <CollapsibleSection 
-        id="deep-analysis" 
-        title="Глубокий Анализ" 
+        id="trend-analysis" 
+        title="📊 Анализ трендов" 
         defaultOpen={true}
       >
-        <div className="space-y-6">
-          <CollapsibleSection 
-            id="full-dashboard" 
-            title="Все метрики системы (25 показателей)" 
-            defaultOpen={false}
-          >
-            <FullMetricsDashboard filters={savedFilters || undefined} />
-          </CollapsibleSection>
-          
-          <CollapsibleSection 
-            id="trend-analysis" 
-            title="Анализ трендов" 
-            defaultOpen={true}
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">Положительные тренды</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                    <span>LTV вырос на 12% за последний месяц</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                    <span>Конверсия в депозит +5% после оптимизации</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                    <span>Активность VIP игроков +23%</span>
-                  </div>
-                </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Положительные тренды</h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <span>LTV вырос на 12% за последний месяц</span>
               </div>
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">Требуют внимания</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <TrendingDown className="h-4 w-4 text-red-600" />
-                    <span>Retention D7 снизился на 8%</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <TrendingDown className="h-4 w-4 text-red-600" />
-                    <span>Использование бонусов -15%</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <AlertCircle className="h-4 w-4 text-yellow-600" />
-                    <span>Рост жалоб на выплаты +3%</span>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2 text-sm">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <span>Конверсия в депозит +5% после оптимизации</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <span>Активность VIP игроков +23%</span>
               </div>
             </div>
-          </CollapsibleSection>
+          </div>
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Требуют внимания</h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <TrendingDown className="h-4 w-4 text-red-600" />
+                <span>Retention D7 снизился на 8%</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <TrendingDown className="h-4 w-4 text-red-600" />
+                <span>Использование бонусов -15%</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <span>Рост жалоб на выплаты +3%</span>
+              </div>
+            </div>
+          </div>
         </div>
       </CollapsibleSection>
 

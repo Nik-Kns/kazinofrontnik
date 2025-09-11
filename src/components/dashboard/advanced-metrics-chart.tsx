@@ -25,7 +25,8 @@ import {
   Eye,
   EyeOff,
   BarChart2,
-  LineChartIcon
+  LineChartIcon,
+  Settings2
 } from "lucide-react";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -40,6 +41,15 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Расширенная конфигурация метрик согласно требованиям
 interface MetricConfig {
@@ -312,6 +322,8 @@ export function AdvancedMetricsChart({
   campaign,
   currency = 'EUR'
 }: AdvancedMetricsChartProps) {
+  const [showMetricsDialog, setShowMetricsDialog] = useState(false);
+  const [tempSelectedMetrics, setTempSelectedMetrics] = useState<string[]>([]);
   // Конвертируем timeRange в количество дней
   const getDaysFromTimeRange = (range: string): number => {
     switch(range) {
@@ -332,6 +344,7 @@ export function AdvancedMetricsChart({
   };
   
   const effectiveDateRange = timeRange ? getDaysFromTimeRange(timeRange) : (dateRange || 30);
+  const [displayedMetrics, setDisplayedMetrics] = useState<string[]>(selectedMetrics);
   const [activeMetrics, setActiveMetrics] = useState<string[]>([selectedMetrics[0]]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -339,28 +352,55 @@ export function AdvancedMetricsChart({
   const [showTrendline, setShowTrendline] = useState(true);
   const [compareMode, setCompareMode] = useState(false);
   
+  // Открытие диалога выбора метрик
+  const handleOpenMetricsDialog = () => {
+    setTempSelectedMetrics([...displayedMetrics]);
+    setShowMetricsDialog(true);
+  };
+
+  // Применение выбранных метрик
+  const handleApplyMetrics = () => {
+    if (tempSelectedMetrics.length > 0) {
+      setDisplayedMetrics(tempSelectedMetrics);
+      setActiveMetrics([tempSelectedMetrics[0]]);
+      setLoading(true);
+    }
+    setShowMetricsDialog(false);
+  };
+
+  // Переключение метрики в диалоге
+  const toggleMetricSelection = (metricKey: string) => {
+    setTempSelectedMetrics(prev => {
+      if (prev.includes(metricKey)) {
+        return prev.filter(m => m !== metricKey);
+      } else {
+        return [...prev, metricKey];
+      }
+    });
+  };
+
   useEffect(() => {
     // Если включен режим сравнения, показываем до 2х метрик
-    if (compareMode && selectedMetrics.length > 1) {
-      setActiveMetrics([selectedMetrics[0], selectedMetrics[1]]);
-    } else if (propActiveMetric) {
+    if (compareMode && displayedMetrics.length > 1) {
+      setActiveMetrics([displayedMetrics[0], displayedMetrics[1]]);
+    } else if (propActiveMetric && displayedMetrics.includes(propActiveMetric)) {
       setActiveMetrics([propActiveMetric]);
     } else {
-      setActiveMetrics([selectedMetrics[0]]);
+      setActiveMetrics([displayedMetrics[0]]);
     }
-  }, [propActiveMetric, selectedMetrics, compareMode]);
+  }, [propActiveMetric, displayedMetrics, compareMode]);
   
   useEffect(() => {
     setLoading(true);
     const data = generateMockData(
-      compareMode ? activeMetrics : selectedMetrics,
+      compareMode ? activeMetrics : displayedMetrics,
       effectiveDateRange,
       segment !== 'all' ? segment : undefined,
       campaign
     );
     setChartData(data);
     setTimeout(() => setLoading(false), 300);
-  }, [activeMetrics, effectiveDateRange, segment, campaign, compareMode, selectedMetrics]);
+  }, [activeMetrics, effectiveDateRange, segment, campaign, compareMode, displayedMetrics]);
   
   // Вычисляем среднее значение для трендовой линии
   const calculateAverage = (metricKey: string) => {
@@ -388,6 +428,13 @@ export function AdvancedMetricsChart({
     return value.toFixed(0);
   };
   
+  // Обновляем displayedMetrics при изменении selectedMetrics
+  useEffect(() => {
+    if (selectedMetrics.length > 0) {
+      setDisplayedMetrics(selectedMetrics);
+    }
+  }, [selectedMetrics]);
+
   // Кастомный тултип
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || !payload.length) return null;
@@ -575,6 +622,16 @@ export function AdvancedMetricsChart({
             </p>
           </div>
           <div className="flex items-center gap-4">
+            {/* Кнопка выбора метрик */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleOpenMetricsDialog}
+              className="flex items-center gap-2"
+            >
+              <Settings2 className="h-4 w-4" />
+              Выбор метрик
+            </Button>
             {/* Переключатель режима сравнения */}
             <div className="flex items-center gap-2">
               <Switch
@@ -700,6 +757,66 @@ export function AdvancedMetricsChart({
           </div>
         )}
       </CardContent>
+      
+      {/* Диалог выбора метрик */}
+      <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Выбор метрик для отображения</DialogTitle>
+            <DialogDescription>
+              Выберите метрики, которые хотите видеть на графике (минимум одна метрика)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto py-4">
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(metricsConfig).map(([key, metric]) => (
+                <div key={key} className="flex items-start space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <Checkbox
+                    id={key}
+                    checked={tempSelectedMetrics.includes(key)}
+                    onCheckedChange={() => toggleMetricSelection(key)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1 space-y-1">
+                    <Label
+                      htmlFor={key}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2"
+                    >
+                      <div 
+                        className="w-3 h-3 rounded-full flex-shrink-0" 
+                        style={{ backgroundColor: metric.color }}
+                      />
+                      {metric.name}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {metric.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter className="flex justify-between items-center">
+            <p className="text-sm text-muted-foreground">
+              Выбрано: {tempSelectedMetrics.length} из {Object.keys(metricsConfig).length}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowMetricsDialog(false)}
+              >
+                Отмена
+              </Button>
+              <Button 
+                onClick={handleApplyMetrics}
+                disabled={tempSelectedMetrics.length === 0}
+              >
+                Применить
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

@@ -382,7 +382,7 @@ export type TemplateData = {
   performance: number; // 1-5 stars
   channel: "Email" | "Push" | "SMS" | "InApp" | "Multi-channel";
   type: "event" | "basic" | "custom";
-  event?: "first_deposit" | "withdrawal" | "registration" | "inactivity" | "big_win" | "bonus_activation" | "login" | "game_start";
+  event?: "first_deposit" | "withdrawal" | "registration" | "inactivity" | "big_win" | "bonus_activation" | "login" | "game_start" | "birthday" | "jackpot_alert" | "tournament_reminder" | "transaction" | "vip_upgrade" | "long_inactivity";
   geo?: string[]; // Supported countries/regions
   project?: string[]; // Supported projects/brands
 };

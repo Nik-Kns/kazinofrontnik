@@ -17,6 +17,7 @@ import { HandCoins, TrendingUp, Users, BarChart3, Activity, Target } from "lucid
 import Link from "next/link";
 import { CampaignPerformanceTable } from "@/components/analytics/campaign-performance-table";
 import { RetentionMetricsDashboard } from "@/components/analytics/retention-metrics-dashboard";
+import { FullMetricsDashboard } from "@/components/dashboard/full-metrics-dashboard";
 import { useState } from "react";
 import type { FilterConfig } from "@/lib/types";
 import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
@@ -209,6 +210,21 @@ export default function AnalyticsPage() {
           </CollapsibleSection>
         </TabsContent>
       </Tabs>
+
+      {/* Секция: Глубокий Анализ и Метрики */}
+      <CollapsibleSection 
+        id="deep-analysis" 
+        title="Глубокий Анализ"
+      >
+        <div className="space-y-6">
+          <CollapsibleSection 
+            id="full-dashboard" 
+            title="Все метрики системы (25 показателей)"
+          >
+            <FullMetricsDashboard />
+          </CollapsibleSection>
+        </div>
+      </CollapsibleSection>
     </div>
   );
 }

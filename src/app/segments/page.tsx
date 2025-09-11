@@ -1191,13 +1191,13 @@ function SegmentFilters() {
   ];
 
   const categoryOptions = [
+    { value: 'active', label: 'Активные' },
+    { value: 'deposits', label: 'Депозиты' },
     { value: 'vip', label: 'VIP' },
-    { value: 'retention', label: 'Retention' },
-    { value: 'churn', label: 'Churn' },
-    { value: 'reactivation', label: 'Реактивация' },
-    { value: 'onboarding', label: 'Онбординг' },
-    { value: 'engagement', label: 'Вовлечение' },
-    { value: 'conversion', label: 'Конверсия' }
+    { value: 'previp', label: 'PreVIP' },
+    { value: 'churn', label: 'Отток' },
+    { value: 'prechurn', label: 'Предотток' },
+    { value: 'no_deposit', label: 'Без депозита' }
   ];
 
   const projectOptions = [

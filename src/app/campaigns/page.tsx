@@ -18,7 +18,7 @@ import {
   Target, Zap, Gift, Trophy, Mail, MessageSquare, Bell, 
   ChevronRight, ChevronLeft, Sparkles, AlertCircle, CheckCircle2,
   Play, Pause, Archive, BarChart3, Clock, Filter, Search,
-  Edit, Copy, Trash2, MoreVertical, Palette, Image, Wand2
+  Edit, Copy, Trash2, MoreVertical, Palette, Image, Wand2, Eye, X
 } from "lucide-react";
 import {
   Select,
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { CreativeGeneratorModal } from "@/components/campaigns/creative-generator-modal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Типы кампаний
 const campaignTypes = [
@@ -357,6 +358,8 @@ function CampaignsContent() {
   const [showCreativeModal, setShowCreativeModal] = useState(false);
   const [templateCampaigns, setTemplateCampaigns] = useState<any[]>([]);
   const [highlightedCampaign, setHighlightedCampaign] = useState<string | null>(null);
+  const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
+  const [showCampaignDetails, setShowCampaignDetails] = useState(false);
   const [campaignData, setCampaignData] = useState({
     name: "",
     type: "",
@@ -1040,6 +1043,17 @@ function CampaignsContent() {
                           </td>
                           <td className="p-3">
                             <div className="flex justify-end gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => {
+                                  setSelectedCampaign(campaign);
+                                  setShowCampaignDetails(true);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Pause className="h-4 w-4" />
                               </Button>
@@ -1173,6 +1187,226 @@ function CampaignsContent() {
         campaignType={campaignData.type}
         campaignName={campaignData.name}
       />
+
+      {/* Campaign Details Dialog */}
+      <Dialog open={showCampaignDetails} onOpenChange={setShowCampaignDetails}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{selectedCampaign?.name}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowCampaignDetails(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedCampaign && (
+            <div className="space-y-6 mt-4">
+              {/* Основная информация */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Основная информация</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Тип кампании</Label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className={cn(
+                          "p-1 rounded",
+                          campaignTypes.find(t => t.id === selectedCampaign.type)?.bgColor
+                        )}>
+                          {(() => {
+                            const type = campaignTypes.find(t => t.id === selectedCampaign.type);
+                            const Icon = type?.icon || Contact;
+                            return <Icon className={cn("h-4 w-4", type?.color)} />;
+                          })()}
+                        </div>
+                        <span>{campaignTypes.find(t => t.id === selectedCampaign.type)?.name}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Статус</Label>
+                      <div className="mt-1">
+                        <Badge className={cn(
+                          selectedCampaign.status === 'active' && "bg-green-100 text-green-700",
+                          selectedCampaign.status === 'paused' && "bg-yellow-100 text-yellow-700",
+                          selectedCampaign.status === 'completed' && "bg-gray-100 text-gray-700"
+                        )}>
+                          {selectedCampaign.status === 'active' && 'Активна'}
+                          {selectedCampaign.status === 'paused' && 'На паузе'}
+                          {selectedCampaign.status === 'completed' && 'Завершена'}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Дата начала</Label>
+                      <p className="mt-1">{selectedCampaign.startDate}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Дата окончания</Label>
+                      <p className="mt-1">{selectedCampaign.endDate || 'Без ограничений'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Статистика отправки */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Статистика отправки</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{selectedCampaign.sent.toLocaleString()}</div>
+                      <p className="text-sm text-muted-foreground">Отправлено</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {selectedCampaign.opened.toLocaleString()}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Открыто ({selectedCampaign.metrics.openRate}%)
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {selectedCampaign.clicked.toLocaleString()}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Кликов ({selectedCampaign.metrics.clickRate}%)
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {selectedCampaign.converted.toLocaleString()}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Конверсий ({selectedCampaign.metrics.conversionRate}%)
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Метрики эффективности */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Метрики эффективности</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between mb-2">
+                        <Label className="text-sm">Конверсия</Label>
+                        <span className={cn(
+                          "text-sm font-medium",
+                          selectedCampaign.metrics.conversionRate >= selectedCampaign.targets.conversionRate
+                            ? "text-green-600" : "text-orange-600"
+                        )}>
+                          {selectedCampaign.metrics.conversionRate}% / {selectedCampaign.targets.conversionRate}%
+                        </span>
+                      </div>
+                      <Progress 
+                        value={(selectedCampaign.metrics.conversionRate / selectedCampaign.targets.conversionRate) * 100}
+                        className="h-2"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-2">
+                        <Label className="text-sm">Использование бонусов</Label>
+                        <span className={cn(
+                          "text-sm font-medium",
+                          selectedCampaign.metrics.bonusUsage >= selectedCampaign.targets.bonusUsage
+                            ? "text-green-600" : "text-orange-600"
+                        )}>
+                          {selectedCampaign.metrics.bonusUsage}% / {selectedCampaign.targets.bonusUsage}%
+                        </span>
+                      </div>
+                      <Progress 
+                        value={(selectedCampaign.metrics.bonusUsage / selectedCampaign.targets.bonusUsage) * 100}
+                        className="h-2"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-2">
+                        <Label className="text-sm">Средний депозит</Label>
+                        <span className={cn(
+                          "text-sm font-medium",
+                          selectedCampaign.metrics.avgDeposit >= selectedCampaign.targets.avgDeposit
+                            ? "text-green-600" : "text-orange-600"
+                        )}>
+                          €{selectedCampaign.metrics.avgDeposit} / €{selectedCampaign.targets.avgDeposit}
+                        </span>
+                      </div>
+                      <Progress 
+                        value={(selectedCampaign.metrics.avgDeposit / selectedCampaign.targets.avgDeposit) * 100}
+                        className="h-2"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Финансовые показатели */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Финансовые показатели</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Общий доход</Label>
+                      <p className="text-2xl font-bold text-green-600 mt-1">
+                        {selectedCampaign.revenue}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-muted-foreground">ROI</Label>
+                      <p className={cn(
+                        "text-2xl font-bold mt-1",
+                        selectedCampaign.roi.startsWith('+') ? "text-green-600" : "text-red-600"
+                      )}>
+                        {selectedCampaign.roi}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Действия */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline">
+                  <Copy className="mr-2 h-4 w-4" />
+                  Дублировать
+                </Button>
+                <Button variant="outline">
+                  <Edit className="mr-2 h-4 w-4" />
+                  Редактировать
+                </Button>
+                <Button variant="outline">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Подробная аналитика
+                </Button>
+                <Button className={cn(
+                  selectedCampaign.status === 'active' ? "bg-yellow-600 hover:bg-yellow-700" : "bg-green-600 hover:bg-green-700"
+                )}>
+                  {selectedCampaign.status === 'active' ? (
+                    <><Pause className="mr-2 h-4 w-4" />Приостановить</>
+                  ) : (
+                    <><Play className="mr-2 h-4 w-4" />Возобновить</>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

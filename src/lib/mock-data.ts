@@ -738,18 +738,126 @@ export const segmentsData: SegmentData[] = [
 ];
 
 export const templatesData: TemplateData[] = [
-    { id: '1', name: 'Welcome-цепочка', description: 'Серия из 3 писем для новых игроков для их активации и первого депозита.', category: 'Onboarding', performance: 5, channel: 'Email', type: 'event', event: 'registration', geo: ['DE', 'RU', 'EN'], project: ['CasinoX', 'LuckyWheel'] },
-    { id: '2', name: 'Реактивация "спящих"', description: 'Push-уведомление с бонусом для игроков, неактивных 30+ дней.', category: 'Reactivation', performance: 4, channel: 'Push', type: 'event', event: 'inactivity', geo: ['DE', 'EN'], project: ['CasinoX', 'GoldenPlay'] },
-    { id: '3', name: 'Бонус для VIP-игроков', description: 'Еженедельное эксклюзивное предложение для сегмента VIP.', category: 'Retention', performance: 5, channel: 'Multi-channel', type: 'basic', geo: ['DE', 'RU', 'EN', 'FR'], project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] },
-    { id: '4', name: 'Запрос обратной связи', description: 'In-app сообщение с просьбой оценить игру после 5 сессий.', category: 'Feedback', performance: 3, channel: 'InApp', type: 'basic', geo: ['RU', 'EN'], project: ['AIGAMING.BOT', 'LuckyWheel'] },
-    { id: '5', name: 'Напоминание о брошенном депозите', description: 'SMS-напоминание игрокам, которые начали, но не завершили процесс пополнения.', category: 'Conversion', performance: 4, channel: 'SMS', type: 'event', event: 'first_deposit', geo: ['DE', 'FR'], project: ['CasinoX', 'GoldenPlay'] },
-    { id: '6', name: 'Поздравление с крупным выигрышем', description: 'Персональное поздравление при выигрыше свыше €500.', category: 'Engagement', performance: 5, channel: 'Email', type: 'event', event: 'big_win', geo: ['DE', 'RU', 'EN'], project: ['AIGAMING.BOT', 'CasinoX'] },
-    { id: '7', name: 'Приглашение в турнир', description: 'Базовый шаблон приглашения на турниры.', category: 'Engagement', performance: 4, channel: 'Push', type: 'basic', geo: ['RU', 'EN', 'FR'], project: ['LuckyWheel', 'GoldenPlay'] },
-    { id: '8', name: 'Индивидуальный сценарий', description: 'Пользовательский шаблон с настраиваемой логикой.', category: 'Custom', performance: 3, channel: 'Multi-channel', type: 'custom', geo: ['DE'], project: ['CasinoX'] },
-    { id: '9', name: 'Активация бонуса', description: 'Уведомление при активации бонуса игроком.', category: 'Bonus', performance: 4, channel: 'InApp', type: 'event', event: 'bonus_activation', geo: ['DE', 'RU'], project: ['AIGAMING.BOT', 'GoldenPlay'] },
-    { id: '10', name: 'Первый логин после регистрации', description: 'Приветственное сообщение при первом входе в систему.', category: 'Onboarding', performance: 5, channel: 'InApp', type: 'event', event: 'login', geo: ['DE', 'EN', 'FR'], project: ['CasinoX', 'LuckyWheel', 'GoldenPlay'] },
-    { id: '11', name: 'Немецкий специальный бонус', description: 'Персонализированный шаблон для немецкой аудитории CasinoX.', category: 'Promotion', performance: 4, channel: 'Email', type: 'custom', geo: ['DE'], project: ['CasinoX'] },
-    { id: '12', name: 'Система лояльности', description: 'Базовый шаблон для программы лояльности всех проектов.', category: 'Loyalty', performance: 5, channel: 'Multi-channel', type: 'basic', geo: ['DE', 'RU', 'EN', 'FR'], project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] },
+    { 
+      id: '1', 
+      name: 'Welcome Flow', 
+      description: 'Приветственная серия после регистрации. Содержит приветствие, бонус за регистрацию, подсказки по интерфейсу. Цель: вовлечь нового игрока, довести до первого депозита.', 
+      category: 'Onboarding', 
+      performance: 5, 
+      channel: 'Multi-channel', 
+      type: 'event', 
+      event: 'registration', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    },
+    { 
+      id: '2', 
+      name: 'First Deposit Trigger', 
+      description: 'Активация после первого депозита. Содержит благодарность, апселл на второй депозит, подсказки по играм. Цель: сформировать привычку играть, подтолкнуть к повторному депозиту.', 
+      category: 'Conversion', 
+      performance: 5, 
+      channel: 'Email', 
+      type: 'event', 
+      event: 'first_deposit', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    },
+    { 
+      id: '3', 
+      name: 'Churn Prevention', 
+      description: 'Анти-отток. Запускается если игрок не заходил X дней. Содержит персональные бонусы, free spins, напоминания о турнирах. Цель: вернуть игрока до того, как он «остынет».', 
+      category: 'Reactivation', 
+      performance: 4, 
+      channel: 'Push', 
+      type: 'event', 
+      event: 'inactivity', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    },
+    { 
+      id: '4', 
+      name: 'Big Win / Big Loss Trigger', 
+      description: 'Срабатывает после значительного выигрыша или проигрыша. Big Win: поздравление, VIP-оферы. Big Loss: поддержка, лимиты на ставки. Цель: укрепить лояльность и снизить риск ухода.', 
+      category: 'Engagement', 
+      performance: 5, 
+      channel: 'Multi-channel', 
+      type: 'event', 
+      event: 'big_win', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    },
+    { 
+      id: '5', 
+      name: 'Anniversary / Birthday Trigger', 
+      description: 'Запускается в день рождения игрока или годовщину регистрации. Содержит персональный подарок (бонус, free spins, кешбэк). Цель: повысить эмоциональную привязанность.', 
+      category: 'Loyalty', 
+      performance: 5, 
+      channel: 'Email', 
+      type: 'event', 
+      event: 'birthday', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    },
+    { 
+      id: '6', 
+      name: 'Jackpot Alert', 
+      description: 'Отправляется когда джекпот близок к срыву или вырос до рекордного уровня. Содержит CTA на игру с джекпотом. Цель: стимулировать депозиты и участие в горячих играх.', 
+      category: 'Engagement', 
+      performance: 4, 
+      channel: 'Push', 
+      type: 'event', 
+      event: 'jackpot_alert', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    },
+    { 
+      id: '7', 
+      name: 'Tournament / Event Reminder', 
+      description: 'Срабатывает за X часов до турнира или эвента. Содержит расписание, призы, быстрый вход. Цель: повысить вовлеченность в ивенты, стимулировать ставки.', 
+      category: 'Engagement', 
+      performance: 4, 
+      channel: 'Multi-channel', 
+      type: 'event', 
+      event: 'tournament_reminder', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    },
+    { 
+      id: '8', 
+      name: 'Withdrawal / Deposit Confirmation', 
+      description: 'Автоматическая транзакционная коммуникация. Подтверждает факт ввода/вывода средств, включает апселл. Цель: прозрачность + увеличение доверия.', 
+      category: 'Transaction', 
+      performance: 5, 
+      channel: 'Email', 
+      type: 'event', 
+      event: 'transaction', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    },
+    { 
+      id: '9', 
+      name: 'VIP Tier Upgrade / Loyalty Status', 
+      description: 'Запускается при переходе игрока на новый уровень лояльности. Содержит поздравление, преимущества уровня, персональный менеджер. Цель: удержание VIP-клиентов.', 
+      category: 'Loyalty', 
+      performance: 5, 
+      channel: 'Multi-channel', 
+      type: 'event', 
+      event: 'vip_upgrade', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    },
+    { 
+      id: '10', 
+      name: 'Reactivation Campaign (Winback)', 
+      description: 'Срабатывает если игрок «спит» 30–90 дней. Содержит сильный бонус-пакет, персональные оферы. Цель: вернуть неактивных игроков.', 
+      category: 'Reactivation', 
+      performance: 4, 
+      channel: 'Multi-channel', 
+      type: 'event', 
+      event: 'long_inactivity', 
+      geo: ['DE', 'RU', 'EN', 'FR'], 
+      project: ['AIGAMING.BOT', 'CasinoX', 'LuckyWheel', 'GoldenPlay'] 
+    }
 ];
 
 export const reportsData: ReportData[] = [

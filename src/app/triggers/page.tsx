@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TemplatesTable } from '@/components/builder/templates-table';
 import { TemplatesGrid } from '@/components/builder/templates-grid';
 import { AIScenariosTab, type AIScenario } from '@/components/builder/ai-scenarios-tab';
 import { TemplateData } from '@/lib/types';
@@ -208,9 +209,9 @@ export default function ScenariosPage() {
             
             <div className="flex items-center justify-between">
                         <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Сценарии</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">Триггеры</h1>
                     <p className="text-muted-foreground">
-                        Создавайте, управляйте и анализируйте ваши CRM-кампании и сценарии.
+                        Создавайте, управляйте и анализируйте ваши CRM-кампании и триггеры.
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -224,12 +225,6 @@ export default function ScenariosPage() {
             {/* Раздел с шаблонами */}
             <div id="templates-section">
                 <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 className="text-xl font-semibold">Библиотека шаблонов</h2>
-                        <p className="text-sm text-muted-foreground">
-                            Готовые сценарии для быстрого старта. Клонируйте или редактируйте под свои нужды.
-                        </p>
-                    </div>
                     <Button onClick={() => setIsCreateDialogOpen(true)}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Создать пустой сценарий
@@ -246,19 +241,19 @@ export default function ScenariosPage() {
                     </TabsList>
 
                     <TabsContent value="all">
-                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} />
+                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} />
                     </TabsContent>
                     <TabsContent value="default">
-                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> t.type==='basic'} />
+                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> t.type==='basic'} />
                     </TabsContent>
                     <TabsContent value="tournaments">
-                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> (t.category||'').toLowerCase().includes('tournament')} />
+                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> (t.category||'').toLowerCase().includes('tournament')} />
                     </TabsContent>
                     <TabsContent value="event-driven">
-                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> t.type==='event'} />
+                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> t.type==='event'} />
                     </TabsContent>
                     <TabsContent value="promo-events">
-                        <TemplatesGrid onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> (t.category||'').toLowerCase().includes('promotion') || (t.category||'').toLowerCase().includes('loyalty')} />
+                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> (t.category||'').toLowerCase().includes('promotion') || (t.category||'').toLowerCase().includes('loyalty')} />
                     </TabsContent>
                 </Tabs>
             </div>
@@ -392,11 +387,11 @@ export default function ScenariosPage() {
                                         </p>
                                     </div>
                                     <TemplatesGrid 
-                                        onClone={(template) => {
+                                        onClone={(template: TemplateData) => {
                                             handleCloneTemplate(template);
                                             setIsCreateDialogOpen(false);
                                         }} 
-                                        onEdit={(template) => {
+                                        onEdit={(template: TemplateData) => {
                                             handleEditTemplate(template);
                                             setIsCreateDialogOpen(false);
                                         }}
