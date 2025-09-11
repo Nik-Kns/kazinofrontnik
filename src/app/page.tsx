@@ -54,7 +54,6 @@ import { FullMetricsDashboard } from "@/components/dashboard/full-metrics-dashbo
 import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OnboardingStatus } from "@/components/dashboard/onboarding-status";
 import { AlertsAndSignals } from "@/components/analytics/alerts-and-signals";
 
@@ -313,43 +312,28 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Основные вкладки */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            <span className="hidden sm:inline">1. Сводка и Здоровье</span>
-            <span className="sm:hidden">Сводка</span>
-          </TabsTrigger>
-          <TabsTrigger value="analysis" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">2. Глубокий Анализ</span>
-            <span className="sm:hidden">Анализ</span>
-          </TabsTrigger>
-          <TabsTrigger value="actions" className="flex items-center gap-2">
-            <Lightbulb className="h-4 w-4" />
-            <span className="hidden sm:inline">3. Рекомендации и Действия</span>
-            <span className="sm:hidden">Действия</span>
-          </TabsTrigger>
-        </TabsList>
+      {/* Секция 1: Быстрый старт и основные метрики */}
+      <div className="space-y-6">
+        {/* Статус онбординга */}
+        <OnboardingStatus />
+        
+        {/* Избранные метрики */}
+        <SelectedKpiTile />
+        
+        {/* Риски и предупреждения */}
+        <RisksAndWarnings />
+        
+        {/* Активные кампании */}
+        <ActiveCampaigns />
+      </div>
 
-        {/* Вкладка 1: Сводка и Здоровье Системы */}
-        <TabsContent value="overview" className="space-y-6">
-          {/* Статус онбординга */}
-          <OnboardingStatus />
-          
-          {/* Избранные метрики */}
-          <SelectedKpiTile />
-          
-          {/* Риски и предупреждения */}
-          <RisksAndWarnings />
-          
-          {/* Активные кампании */}
-          <ActiveCampaigns />
-        </TabsContent>
-
-        {/* Вкладка 2: Глубокий Анализ и Метрики */}
-        <TabsContent value="analysis" className="space-y-6">
+      {/* Секция 2: Глубокий Анализ и Метрики */}
+      <CollapsibleSection 
+        id="deep-analysis" 
+        title="Глубокий Анализ" 
+        defaultOpen={true}
+      >
+        <div className="space-y-6">
           <CollapsibleSection 
             id="full-dashboard" 
             title="Все метрики системы (25 показателей)" 
@@ -400,10 +384,16 @@ export default function DashboardPage() {
               </div>
             </div>
           </CollapsibleSection>
-        </TabsContent>
+        </div>
+      </CollapsibleSection>
 
-        {/* Вкладка 3: Рекомендации и Действия */}
-        <TabsContent value="actions" className="space-y-6">
+      {/* Секция 3: Рекомендации и Действия */}
+      <CollapsibleSection 
+        id="recommendations-actions" 
+        title="Рекомендации и Действия" 
+        defaultOpen={true}
+      >
+        <div className="space-y-6">
           {/* AI Рекомендации и алерты */}
           <AlertsAndSignals />
           
@@ -502,8 +492,8 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </CollapsibleSection>
     </div>
   );
 }
