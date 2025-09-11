@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,9 +25,17 @@ import {
   Calendar,
   Info,
   Save,
-  Sparkles
+  Sparkles,
+  Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface GoalsModalProps {
   open: boolean;
@@ -196,6 +204,8 @@ export function GoalsModal({ open, onOpenChange }: GoalsModalProps) {
   );
 
   const [useAiRecommendations, setUseAiRecommendations] = useState(false);
+  const [timePeriod, setTimePeriod] = useState<string>("30");
+  const [previousPeriod, setPreviousPeriod] = useState<string>("30");
 
   const handleGoalChange = (metricId: string, value: number) => {
     setGoals(prev => ({
@@ -204,11 +214,44 @@ export function GoalsModal({ open, onOpenChange }: GoalsModalProps) {
     }));
   };
 
+  const calculateGoalForPeriod = (metric: MetricGoal, baseValue: number, period: string) => {
+    const periodDays = parseInt(period);
+    const periodMultiplier = periodDays / 30; // Базовые значения рассчитаны на 30 дней
+    
+    let adjustedValue = baseValue;
+    
+    // Для метрик типа "доход" умножаем на коэффициент периода
+    if (metric.category === "revenue" && metric.unit === "€") {
+      adjustedValue = Math.round(baseValue * periodMultiplier);
+    }
+    // Для процентных метрик корректируем с учетом реалистичного роста
+    else if (metric.unit === "%") {
+      const dailyGrowthRate = Math.pow((baseValue / metric.currentValue), 1/30) - 1;
+      const periodGrowth = Math.pow(1 + dailyGrowthRate, periodDays) - 1;
+      adjustedValue = Math.round(metric.currentValue * (1 + periodGrowth));
+      adjustedValue = Math.min(metric.maxValue, Math.max(metric.minValue, adjustedValue));
+    }
+    // Для метрик активности (DAU) корректируем с учетом роста
+    else if (metric.id === "dau") {
+      const dailyGrowth = Math.pow(baseValue / metric.currentValue, 1/30);
+      adjustedValue = Math.round(metric.currentValue * Math.pow(dailyGrowth, periodDays));
+      adjustedValue = Math.min(metric.maxValue, Math.max(metric.minValue, adjustedValue));
+    }
+    
+    return adjustedValue;
+  };
+
   const applyAiRecommendations = () => {
-    const aiGoals = metricsGoals.reduce((acc, metric) => ({
-      ...acc,
-      [metric.id]: metric.aiRecommendation || metric.targetValue
-    }), {});
+    const aiGoals = metricsGoals.reduce((acc, metric) => {
+      const baseValue = metric.aiRecommendation || metric.targetValue;
+      const adjustedValue = calculateGoalForPeriod(metric, baseValue, timePeriod);
+      
+      return {
+        ...acc,
+        [metric.id]: adjustedValue
+      };
+    }, {});
+    
     setGoals(aiGoals);
     setUseAiRecommendations(true);
   };
@@ -218,6 +261,7 @@ export function GoalsModal({ open, onOpenChange }: GoalsModalProps) {
     localStorage.setItem('kpiGoals', JSON.stringify({
       set: true,
       goals,
+      timePeriod: parseInt(timePeriod),
       date: new Date().toISOString(),
       useAi: useAiRecommendations
     }));
@@ -239,17 +283,74 @@ export function GoalsModal({ open, onOpenChange }: GoalsModalProps) {
     setUseAiRecommendations(false);
   };
 
+  // Автоматически пересчитываем цели при изменении периода
+  useEffect(() => {
+    if (timePeriod !== previousPeriod) {
+      const periodRatio = parseInt(timePeriod) / parseInt(previousPeriod);
+      
+      setGoals(prevGoals => {
+        const newGoals: Record<string, number> = {};
+        
+        Object.entries(prevGoals).forEach(([metricId, currentGoal]) => {
+          const metric = metricsGoals.find(m => m.id === metricId);
+          if (!metric) {
+            newGoals[metricId] = currentGoal;
+            return;
+          }
+          
+          // Используем базовое значение для пересчета
+          const baseValue = useAiRecommendations && metric.aiRecommendation 
+            ? metric.aiRecommendation 
+            : metric.targetValue;
+            
+          newGoals[metricId] = calculateGoalForPeriod(metric, baseValue, timePeriod);
+        });
+        
+        return newGoals;
+      });
+      
+      setPreviousPeriod(timePeriod);
+    }
+  }, [timePeriod, previousPeriod, useAiRecommendations]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Установка KPI-целей
-          </DialogTitle>
-          <DialogDescription>
-            Определите целевые показатели для отслеживания эффективности вашего казино
-          </DialogDescription>
+          <div className="space-y-3">
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Установка KPI-целей
+            </DialogTitle>
+            <DialogDescription>
+              Определите целевые показатели для отслеживания эффективности вашего казино
+            </DialogDescription>
+            
+            {/* Выбор периода */}
+            <div className="flex items-center gap-3 pt-2">
+              <Label className="flex items-center gap-2 text-sm font-medium">
+                <Clock className="h-4 w-4" />
+                Период достижения целей:
+              </Label>
+              <Select value={timePeriod} onValueChange={setTimePeriod}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 дней</SelectItem>
+                  <SelectItem value="14">14 дней</SelectItem>
+                  <SelectItem value="30">30 дней</SelectItem>
+                  <SelectItem value="60">60 дней</SelectItem>
+                  <SelectItem value="90">90 дней (квартал)</SelectItem>
+                  <SelectItem value="180">180 дней (полгода)</SelectItem>
+                  <SelectItem value="365">365 дней (год)</SelectItem>
+                </SelectContent>
+              </Select>
+              <Badge variant="outline" className="text-xs">
+                Все цели будут адаптированы под выбранный период
+              </Badge>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -273,7 +374,7 @@ export function GoalsModal({ open, onOpenChange }: GoalsModalProps) {
             <CardContent>
               <p className="text-sm text-muted-foreground">
                 На основе анализа вашей текущей производительности и лучших практик индустрии, 
-                AI рекомендует оптимальные цели для достижения в ближайшие 30 дней.
+                AI рекомендует оптимальные цели для достижения в течение {timePeriod} дней.
               </p>
             </CardContent>
           </Card>
