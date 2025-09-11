@@ -3,7 +3,14 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Calendar } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 
@@ -29,40 +36,222 @@ const metricsConfig: MetricConfig[] = [
   { key: "retention7", name: "Retention 7d", color: "#FFC107", format: (v) => `${v.toFixed(1)}%` },
 ];
 
-// Генерируем моковые данные для графика
-const generateMockData = (metricKey: string, days: number = 30): MetricData[] => {
-  const data: MetricData[] = [];
-  const now = new Date();
+// Фиксированные моковые данные для каждой метрики
+const fixedMockData: Record<string, Record<number, MetricData[]>> = {
+  ggr: {
+    7: [
+      { date: "01.01", value: 110000 },
+      { date: "02.01", value: 115000 },
+      { date: "03.01", value: 108000 },
+      { date: "04.01", value: 122000 },
+      { date: "05.01", value: 130000 },
+      { date: "06.01", value: 135000 },
+      { date: "07.01", value: 142000 },
+    ],
+    30: [
+      { date: "01.12", value: 95000 },
+      { date: "05.12", value: 98000 },
+      { date: "10.12", value: 102000 },
+      { date: "15.12", value: 108000 },
+      { date: "20.12", value: 115000 },
+      { date: "25.12", value: 125000 },
+      { date: "30.12", value: 142000 },
+    ],
+    90: [
+      { date: "01.10", value: 75000 },
+      { date: "15.10", value: 82000 },
+      { date: "01.11", value: 90000 },
+      { date: "15.11", value: 98000 },
+      { date: "01.12", value: 110000 },
+      { date: "15.12", value: 125000 },
+      { date: "30.12", value: 142000 },
+    ],
+  },
+  arpu: {
+    7: [
+      { date: "01.01", value: 105 },
+      { date: "02.01", value: 110 },
+      { date: "03.01", value: 108 },
+      { date: "04.01", value: 115 },
+      { date: "05.01", value: 120 },
+      { date: "06.01", value: 125 },
+      { date: "07.01", value: 135 },
+    ],
+    30: [
+      { date: "01.12", value: 95 },
+      { date: "05.12", value: 100 },
+      { date: "10.12", value: 105 },
+      { date: "15.12", value: 110 },
+      { date: "20.12", value: 120 },
+      { date: "25.12", value: 128 },
+      { date: "30.12", value: 135 },
+    ],
+    90: [
+      { date: "01.10", value: 85 },
+      { date: "15.10", value: 90 },
+      { date: "01.11", value: 95 },
+      { date: "15.11", value: 105 },
+      { date: "01.12", value: 115 },
+      { date: "15.12", value: 125 },
+      { date: "30.12", value: 135 },
+    ],
+  },
+  ltv: {
+    7: [
+      { date: "01.01", value: 380 },
+      { date: "02.01", value: 390 },
+      { date: "03.01", value: 385 },
+      { date: "04.01", value: 410 },
+      { date: "05.01", value: 430 },
+      { date: "06.01", value: 450 },
+      { date: "07.01", value: 480 },
+    ],
+    30: [
+      { date: "01.12", value: 350 },
+      { date: "05.12", value: 365 },
+      { date: "10.12", value: 380 },
+      { date: "15.12", value: 400 },
+      { date: "20.12", value: 425 },
+      { date: "25.12", value: 450 },
+      { date: "30.12", value: 480 },
+    ],
+    90: [
+      { date: "01.10", value: 320 },
+      { date: "15.10", value: 340 },
+      { date: "01.11", value: 370 },
+      { date: "15.11", value: 400 },
+      { date: "01.12", value: 430 },
+      { date: "15.12", value: 455 },
+      { date: "30.12", value: 480 },
+    ],
+  },
+  dau: {
+    7: [
+      { date: "01.01", value: 2200 },
+      { date: "02.01", value: 2350 },
+      { date: "03.01", value: 2280 },
+      { date: "04.01", value: 2450 },
+      { date: "05.01", value: 2550 },
+      { date: "06.01", value: 2680 },
+      { date: "07.01", value: 2850 },
+    ],
+    30: [
+      { date: "01.12", value: 1900 },
+      { date: "05.12", value: 2000 },
+      { date: "10.12", value: 2150 },
+      { date: "15.12", value: 2300 },
+      { date: "20.12", value: 2500 },
+      { date: "25.12", value: 2700 },
+      { date: "30.12", value: 2850 },
+    ],
+    90: [
+      { date: "01.10", value: 1500 },
+      { date: "15.10", value: 1700 },
+      { date: "01.11", value: 1950 },
+      { date: "15.11", value: 2200 },
+      { date: "01.12", value: 2450 },
+      { date: "15.12", value: 2650 },
+      { date: "30.12", value: 2850 },
+    ],
+  },
+  mau: {
+    7: [
+      { date: "01.01", value: 42000 },
+      { date: "02.01", value: 42500 },
+      { date: "03.01", value: 43000 },
+      { date: "04.01", value: 44000 },
+      { date: "05.01", value: 45000 },
+      { date: "06.01", value: 46500 },
+      { date: "07.01", value: 48000 },
+    ],
+    30: [
+      { date: "01.12", value: 38000 },
+      { date: "05.12", value: 39500 },
+      { date: "10.12", value: 41000 },
+      { date: "15.12", value: 42500 },
+      { date: "20.12", value: 44500 },
+      { date: "25.12", value: 46000 },
+      { date: "30.12", value: 48000 },
+    ],
+    90: [
+      { date: "01.10", value: 32000 },
+      { date: "15.10", value: 34500 },
+      { date: "01.11", value: 37000 },
+      { date: "15.11", value: 40000 },
+      { date: "01.12", value: 43000 },
+      { date: "15.12", value: 45500 },
+      { date: "30.12", value: 48000 },
+    ],
+  },
+  retention1: {
+    7: [
+      { date: "01.01", value: 38 },
+      { date: "02.01", value: 40 },
+      { date: "03.01", value: 39 },
+      { date: "04.01", value: 42 },
+      { date: "05.01", value: 44 },
+      { date: "06.01", value: 46 },
+      { date: "07.01", value: 48.5 },
+    ],
+    30: [
+      { date: "01.12", value: 35 },
+      { date: "05.12", value: 36.5 },
+      { date: "10.12", value: 38 },
+      { date: "15.12", value: 40 },
+      { date: "20.12", value: 43 },
+      { date: "25.12", value: 45.5 },
+      { date: "30.12", value: 48.5 },
+    ],
+    90: [
+      { date: "01.10", value: 32 },
+      { date: "15.10", value: 34 },
+      { date: "01.11", value: 36.5 },
+      { date: "15.11", value: 39 },
+      { date: "01.12", value: 42 },
+      { date: "15.12", value: 45 },
+      { date: "30.12", value: 48.5 },
+    ],
+  },
+  retention7: {
+    7: [
+      { date: "01.01", value: 20 },
+      { date: "02.01", value: 21 },
+      { date: "03.01", value: 20.5 },
+      { date: "04.01", value: 22 },
+      { date: "05.01", value: 23.5 },
+      { date: "06.01", value: 25 },
+      { date: "07.01", value: 27 },
+    ],
+    30: [
+      { date: "01.12", value: 18 },
+      { date: "05.12", value: 19 },
+      { date: "10.12", value: 20 },
+      { date: "15.12", value: 21.5 },
+      { date: "20.12", value: 23 },
+      { date: "25.12", value: 25 },
+      { date: "30.12", value: 27 },
+    ],
+    90: [
+      { date: "01.10", value: 15 },
+      { date: "15.10", value: 16.5 },
+      { date: "01.11", value: 18 },
+      { date: "15.11", value: 20 },
+      { date: "01.12", value: 22.5 },
+      { date: "15.12", value: 24.5 },
+      { date: "30.12", value: 27 },
+    ],
+  },
+};
+
+// Получаем фиксированные данные для метрики и периода
+const getFixedMockData = (metricKey: string, days: number): MetricData[] => {
+  const metricData = fixedMockData[metricKey];
+  if (!metricData) return [];
   
-  // Базовые значения для разных метрик
-  const baseValues: Record<string, { base: number, variance: number }> = {
-    ggr: { base: 125000, variance: 25000 },
-    arpu: { base: 125, variance: 30 },
-    ltv: { base: 450, variance: 100 },
-    dau: { base: 2500, variance: 500 },
-    mau: { base: 45000, variance: 5000 },
-    retention1: { base: 45, variance: 10 },
-    retention7: { base: 25, variance: 8 },
-  };
-  
-  const config = baseValues[metricKey] || { base: 100, variance: 20 };
-  
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    
-    // Добавляем тренд и случайные колебания
-    const trend = (days - i) / days * 0.3; // Растущий тренд
-    const randomFactor = Math.random() * 2 - 1; // От -1 до 1
-    const value = config.base * (1 + trend) + randomFactor * config.variance;
-    
-    data.push({
-      date: format(date, "dd.MM", { locale: ru }),
-      value: Math.max(0, value),
-    });
-  }
-  
-  return data;
+  // Выбираем ближайший доступный период
+  if (days <= 7) return metricData[7] || [];
+  if (days <= 30) return metricData[30] || [];
+  return metricData[90] || [];
 };
 
 interface MetricsDynamicsChartProps {
@@ -74,13 +263,14 @@ interface MetricsDynamicsChartProps {
 
 export function MetricsDynamicsChart({ 
   selectedMetrics = ["ggr", "arpu"],
-  dateRange = 30,
+  dateRange: propDateRange = 30,
   activeMetric: propActiveMetric,
   onMetricClick 
 }: MetricsDynamicsChartProps) {
   const [activeMetric, setActiveMetric] = useState<string>(propActiveMetric || selectedMetrics[0] || "ggr");
   const [chartData, setChartData] = useState<MetricData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState<number>(propDateRange);
 
   useEffect(() => {
     // Синхронизируем с пропсом activeMetric
@@ -89,9 +279,9 @@ export function MetricsDynamicsChart({
     }
   }, [propActiveMetric]);
 
-  // Мемоизируем генерацию данных для предотвращения лишних перерисовок
+  // Мемоизируем получение фиксированных данных
   const memoizedChartData = useMemo(() => {
-    return generateMockData(activeMetric, dateRange);
+    return getFixedMockData(activeMetric, dateRange);
   }, [activeMetric, dateRange]);
 
   useEffect(() => {
@@ -131,9 +321,26 @@ export function MetricsDynamicsChart({
               Кликните на метрику для просмотра её динамики
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            {/* Фильтр по времени */}
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Select 
+                value={dateRange.toString()} 
+                onValueChange={(value) => setDateRange(parseInt(value))}
+              >
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 дней</SelectItem>
+                  <SelectItem value="30">30 дней</SelectItem>
+                  <SelectItem value="90">90 дней</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Изменение за период</p>
+              <p className="text-sm text-muted-foreground">Изменение</p>
               <div className="flex items-center gap-1">
                 {change.percentage > 0 ? (
                   <TrendingUp className="h-4 w-4 text-green-500" />
