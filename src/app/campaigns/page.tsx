@@ -30,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CreativeGeneratorModal } from "@/components/campaigns/creative-generator-modal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CampaignFilters } from "@/components/filters/campaign-filters";
 
 // Типы кампаний
 const campaignTypes = [
@@ -428,6 +429,9 @@ function CampaignsContent() {
           Создать кампанию
         </Button>
       </div>
+
+      {/* Фильтры */}
+      <CampaignFilters />
 
       {/* ИИ рекомендации */}
       <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-purple-500/5">

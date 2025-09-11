@@ -23,6 +23,7 @@ import { useCurrency } from "@/contexts/currency-context";
 import { useRouter, useSearchParams } from "next/navigation";
 import { scenarioTemplates, createPersonalizedScenario } from '@/lib/scenario-templates';
 import { Badge } from "@/components/ui/badge";
+import { TriggerFilters } from '@/components/filters/trigger-filters';
 
 function searchParamsSafe() {
   // хелпер, возвращаем прокси без SSR обращения
@@ -221,6 +222,9 @@ export default function ScenariosPage() {
                     </div>
                 </div>
                         </div>
+            
+            {/* Фильтры */}
+            <TriggerFilters onFiltersChange={(filters) => console.log('Filters changed:', filters)} />
             
             {/* Раздел с шаблонами */}
             <div id="templates-section">
