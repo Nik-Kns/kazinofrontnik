@@ -372,6 +372,9 @@ export type SegmentData = {
   playerCount: number;
   createdAt: string;
   createdBy: 'AI' | 'Пользователь';
+  growthChurn30d?: number; // Прирост/отток за 30 дней (в процентах)
+  avgDeposit?: number; // Средний депозит
+  runRateToTarget?: number; // Ранрейт до цели (в процентах)
 };
 
 export type TemplateData = {

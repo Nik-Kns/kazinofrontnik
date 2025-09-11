@@ -9,7 +9,8 @@ import {
   Bot, Copy, Pencil, PlusCircle, Trash2, X, Filter, Eye, Play, 
   Save, Download, Plus, Minus, Move, Grip, Settings,
   ChevronDown, ChevronRight, Users, BarChart3, Target,
-  Layers, Zap, Shield, Brain, Euro, Calendar, Hash
+  Layers, Zap, Shield, Brain, Euro, Calendar, Hash,
+  TrendingUp, TrendingDown
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -142,6 +143,9 @@ export default function SegmentsPage() {
                     <TableHead>Название</TableHead>
                     <TableHead>Описание</TableHead>
                     <TableHead>Игроков</TableHead>
+                    <TableHead>Прирост/Отток за 30д</TableHead>
+                    <TableHead>Средний депозит</TableHead>
+                    <TableHead>Ранрейт до цели</TableHead>
                     <TableHead>Дата создания</TableHead>
                     <TableHead>Автор</TableHead>
                     <TableHead>Действия</TableHead>
@@ -160,6 +164,51 @@ export default function SegmentsPage() {
                         <Badge variant="secondary">
                           {segment.playerCount.toLocaleString()}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {segment.growthChurn30d !== undefined && (
+                            <>
+                              {segment.growthChurn30d > 0 ? (
+                                <TrendingUp className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <TrendingDown className="h-4 w-4 text-red-600" />
+                              )}
+                              <span className={cn(
+                                "font-medium",
+                                segment.growthChurn30d > 0 ? "text-green-600" : "text-red-600"
+                              )}>
+                                {segment.growthChurn30d > 0 ? '+' : ''}{segment.growthChurn30d}%
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {segment.avgDeposit !== undefined ? (
+                          <div className="flex items-center gap-1">
+                            <Euro className="h-3 w-3 text-muted-foreground" />
+                            <span className="font-medium">{segment.avgDeposit}</span>
+                          </div>
+                        ) : '—'}
+                      </TableCell>
+                      <TableCell>
+                        {segment.runRateToTarget !== undefined ? (
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[100px]">
+                              <div 
+                                className={cn(
+                                  "h-2 rounded-full",
+                                  segment.runRateToTarget >= 80 ? "bg-green-500" :
+                                  segment.runRateToTarget >= 50 ? "bg-yellow-500" :
+                                  "bg-red-500"
+                                )}
+                                style={{ width: `${segment.runRateToTarget}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium">{segment.runRateToTarget}%</span>
+                          </div>
+                        ) : '—'}
                       </TableCell>
                       <TableCell>{segment.createdAt}</TableCell>
                       <TableCell>

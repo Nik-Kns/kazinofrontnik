@@ -729,12 +729,12 @@ export const risksData: RiskData[] = [
 ]
 
 export const segmentsData: SegmentData[] = [
-  { id: '1', name: 'Новые игроки (без депозита)', description: 'Пользователи, зарегистрировавшиеся за последние 7 дней и не совершившие ни одного депозита.', playerCount: 1250, createdAt: '2024-07-01', createdBy: 'AI' },
-  { id: '2', name: 'VIP-игроки', description: 'Игроки с Lifetime Revenue > €5,000 и последней активностью не позднее 30 дней назад.', playerCount: 320, createdAt: '2024-06-28', createdBy: 'Пользователь' },
-  { id: '3', name: 'Риск оттока (предиктивный)', description: 'Игроки с Churn Probability Score > 75% и снижением частоты сессий на 50% за последние 14 дней.', playerCount: 890, createdAt: '2024-07-03', createdBy: 'AI' },
-  { id: '4', name: 'Сделали первый депозит', description: 'Игроки, которые совершили свой первый депозит за последний месяц.', playerCount: 2100, createdAt: '2024-06-15', createdBy: 'Пользователь' },
-  { id: '5', name: 'Спящие (30+ дней)', description: 'Игроки, не заходившие в игру более 30 дней, но имеющие хотя бы 1 депозит в истории.', playerCount: 450, createdAt: '2024-05-20', createdBy: 'Пользователь' },
-  { id: '6', name: 'Любители слотов', description: 'Игроки, у которых 80% игрового времени приходится на слоты.', playerCount: 5400, createdAt: '2024-07-04', createdBy: 'AI' },
+  { id: '1', name: 'Новые игроки (без депозита)', description: 'Пользователи, зарегистрировавшиеся за последние 7 дней и не совершившие ни одного депозита.', playerCount: 1250, createdAt: '2024-07-01', createdBy: 'AI', growthChurn30d: 15.2, avgDeposit: 0, runRateToTarget: 0 },
+  { id: '2', name: 'VIP-игроки', description: 'Игроки с Lifetime Revenue > €5,000 и последней активностью не позднее 30 дней назад.', playerCount: 320, createdAt: '2024-06-28', createdBy: 'Пользователь', growthChurn30d: -5.3, avgDeposit: 450, runRateToTarget: 87 },
+  { id: '3', name: 'Риск оттока (предиктивный)', description: 'Игроки с Churn Probability Score > 75% и снижением частоты сессий на 50% за последние 14 дней.', playerCount: 890, createdAt: '2024-07-03', createdBy: 'AI', growthChurn30d: -18.7, avgDeposit: 75, runRateToTarget: 42 },
+  { id: '4', name: 'Сделали первый депозит', description: 'Игроки, которые совершили свой первый депозит за последний месяц.', playerCount: 2100, createdAt: '2024-06-15', createdBy: 'Пользователь', growthChurn30d: 8.9, avgDeposit: 125, runRateToTarget: 68 },
+  { id: '5', name: 'Спящие (30+ дней)', description: 'Игроки, не заходившие в игру более 30 дней, но имеющие хотя бы 1 депозит в истории.', playerCount: 450, createdAt: '2024-05-20', createdBy: 'Пользователь', growthChurn30d: -22.1, avgDeposit: 95, runRateToTarget: 25 },
+  { id: '6', name: 'Любители слотов', description: 'Игроки, у которых 80% игрового времени приходится на слоты.', playerCount: 5400, createdAt: '2024-07-04', createdBy: 'AI', growthChurn30d: 12.4, avgDeposit: 185, runRateToTarget: 94 },
 ];
 
 export const templatesData: TemplateData[] = [
