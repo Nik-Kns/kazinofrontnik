@@ -122,19 +122,6 @@ const metricsConfig: Record<string, MetricConfig> = {
     description: "Return on Marketing Investment",
     goodThreshold: 100 // ROMI > 100% - прибыльные кампании
   },
-  ngr: {
-    key: "ngr",
-    name: "NGR",
-    unit: 'currency',
-    format: (v, currency = 'EUR') => {
-      if (v == null || isNaN(v)) return '—';
-      const symbols: Record<string, string> = { EUR: '€', USD: '$', VND: '₫' };
-      return `${symbols[currency]}${v.toLocaleString()}`;
-    },
-    color: "#4CAF50",
-    chartType: 'line',
-    description: "Net Gaming Revenue - чистый игровой доход"
-  },
   arpu: {
     key: "arpu",
     name: "ARPU",
@@ -232,10 +219,6 @@ const generateMockData = (
       switch (key) {
         case 'ggr':
           baseValue = segment === 'vip' ? 250000 : segment === 'new' ? 50000 : 125000;
-          variance = baseValue * 0.2;
-          break;
-        case 'ngr':
-          baseValue = segment === 'vip' ? 200000 : segment === 'new' ? 40000 : 100000;
           variance = baseValue * 0.2;
           break;
         case 'avg_deposit':

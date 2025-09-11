@@ -21,7 +21,6 @@ interface MetricConfig {
 
 const metricsConfig: MetricConfig[] = [
   { key: "ggr", name: "GGR", color: "#2962FF", format: (v) => `€${v.toLocaleString()}` },
-  { key: "ngr", name: "NGR", color: "#00C853", format: (v) => `€${v.toLocaleString()}` },
   { key: "arpu", name: "ARPU", color: "#9C27B0", format: (v) => `€${v.toFixed(2)}` },
   { key: "ltv", name: "LTV", color: "#FF6F00", format: (v) => `€${v.toLocaleString()}` },
   { key: "dau", name: "DAU", color: "#00BCD4", format: (v) => v.toLocaleString() },
@@ -38,7 +37,6 @@ const generateMockData = (metricKey: string, days: number = 30): MetricData[] =>
   // Базовые значения для разных метрик
   const baseValues: Record<string, { base: number, variance: number }> = {
     ggr: { base: 125000, variance: 25000 },
-    ngr: { base: 100000, variance: 20000 },
     arpu: { base: 125, variance: 30 },
     ltv: { base: 450, variance: 100 },
     dau: { base: 2500, variance: 500 },
@@ -75,7 +73,7 @@ interface MetricsDynamicsChartProps {
 }
 
 export function MetricsDynamicsChart({ 
-  selectedMetrics = ["ggr", "ngr", "arpu"],
+  selectedMetrics = ["ggr", "arpu"],
   dateRange = 30,
   activeMetric: propActiveMetric,
   onMetricClick 
