@@ -57,7 +57,7 @@ export default function SegmentsPage() {
   const [isAdvancedBuilderOpen, setIsAdvancedBuilderOpen] = React.useState(false);
   const [selectedSegment, setSelectedSegment] = React.useState<SegmentData | null>(null);
   const [defaultTab, setDefaultTab] = React.useState("builder");
-  const [activeMainTab, setActiveMainTab] = React.useState("all-segments");
+  const [activeMainTab, setActiveMainTab] = React.useState("library");
 
   // Обработчики для AI-сегментов
   const handleCreateAISegment = (aiSegment: AISegment) => {
@@ -92,7 +92,7 @@ export default function SegmentsPage() {
         </div>
         <Button onClick={() => {
           setSelectedSegment(null);
-          setDefaultTab(activeMainTab === "ai-segments" ? "ai-templates" : "builder");
+          setDefaultTab(activeMainTab === "constructor" ? "ai-templates" : "builder");
           setIsAdvancedBuilderOpen(true);
         }}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -103,16 +103,17 @@ export default function SegmentsPage() {
       {/* Main Tabs */}
       <Tabs value={activeMainTab} onValueChange={setActiveMainTab}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="all-segments">Все сегменты</TabsTrigger>
-          <TabsTrigger value="ai-segments">
-            <div className="flex items-center gap-2">
-              <Bot className="h-4 w-4" />
-              Сегменты рекомендованные ИИ
-            </div>
+          <TabsTrigger value="library">
+            <Layers className="mr-2 h-4 w-4" />
+            Библиотека
+          </TabsTrigger>
+          <TabsTrigger value="constructor">
+            <Settings className="mr-2 h-4 w-4" />
+            Конструктор
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="all-segments" className="space-y-6">
+        <TabsContent value="library" className="space-y-6">
           {/* Filters */}
           <Card>
             <CardHeader>
@@ -235,11 +236,98 @@ export default function SegmentsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="ai-segments">
-          <AiSegmentsTab 
-            onCreateSegment={handleCreateAISegment}
-            onViewDetails={handleViewAISegmentDetails}
-          />
+        <TabsContent value="constructor" className="space-y-6">
+          {/* AI рекомендации */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5" />
+                Рекомендации ИИ
+              </CardTitle>
+              <CardDescription>
+                Сегменты, созданные на основе анализа поведения игроков
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AiSegmentsTab 
+                onCreateSegment={handleCreateAISegment}
+                onViewDetails={handleViewAISegmentDetails}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Шаблоны */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Copy className="h-5 w-5" />
+                Шаблоны сегментов
+              </CardTitle>
+              <CardDescription>
+                Готовые шаблоны для быстрого создания сегментов
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {segmentTemplates.slice(0, 6).map((template) => (
+                  <Card 
+                    key={template.id}
+                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => {
+                      setPredefinedSegment(template.builder);
+                      setDefaultTab("builder");
+                      setIsAdvancedBuilderOpen(true);
+                    }}
+                  >
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">{template.name}</CardTitle>
+                      <Badge variant="outline" className="w-fit">{template.category}</Badge>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-xs text-muted-foreground">{template.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full mt-4"
+                onClick={() => {
+                  setDefaultTab("templates");
+                  setIsAdvancedBuilderOpen(true);
+                }}
+              >
+                Посмотреть все шаблоны
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Быстрый конструктор */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                Быстрый конструктор
+              </CardTitle>
+              <CardDescription>
+                Создайте сегмент с нуля используя конструктор условий
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                className="w-full"
+                onClick={() => {
+                  setSelectedSegment(null);
+                  setPredefinedSegment(null);
+                  setDefaultTab("builder");
+                  setIsAdvancedBuilderOpen(true);
+                }}
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Открыть конструктор
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 

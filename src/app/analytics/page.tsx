@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { KpiGrid } from "@/components/dashboard/kpi-grid";
 import { AnalyticsCharts } from "@/components/dashboard/analytics-charts";
 import { EnhancedFilters } from "@/components/ui/enhanced-filters";
@@ -19,7 +20,7 @@ import { RetentionMetricsDashboard } from "@/components/analytics/retention-metr
 import { useState } from "react";
 import type { FilterConfig } from "@/lib/types";
 import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp as TrendingUpIcon, DollarSign, Download } from "lucide-react";
 
 function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState<boolean>(() => {
@@ -92,96 +93,120 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Валютный переключатель */}
-      <div className="flex items-center justify-end py-3 border-b bg-muted/20 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Быстрое переключение:</span>
-          <CurrencyToggleButton size="sm" />
+      {/* Сворачиваемая панель фильтров */}
+      <CollapsibleSection id="filters" title="Фильтры и настройки">
+        <div className="space-y-4">
+          <div className="flex items-center justify-end">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Валюта:</span>
+              <CurrencyToggleButton size="sm" />
+            </div>
+          </div>
+          <EnhancedFilters 
+            onApply={handleFiltersChange} 
+            onExport={handleExport}
+            defaultFilters={activeFilters}
+          />
         </div>
-      </div>
+      </CollapsibleSection>
 
-      {/* Расширенные фильтры с экспортом */}
-      <EnhancedFilters 
-        onApply={handleFiltersChange} 
-        onExport={handleExport}
-        defaultFilters={activeFilters}
-      />
-
-      {/* Пользовательская плитка KPI */}
-      <SelectedKpiTile />
-
-      <Tabs defaultValue="kpi-summary">
-        <TabsList className="mb-4 grid w-full grid-cols-5">
+      <Tabs defaultValue="overview">
+        <TabsList className="mb-4 grid w-full grid-cols-4">
+          <TabsTrigger value="overview"><BarChart3 className="mr-2 h-4 w-4" />Обзор Аналитики</TabsTrigger>
           <TabsTrigger value="kpi-summary"><Activity className="mr-2 h-4 w-4" />KPI Summary</TabsTrigger>
-          <TabsTrigger value="retention"><TrendingUp className="mr-2 h-4 w-4" />Retention</TabsTrigger>
-          <TabsTrigger value="crm"><Users className="mr-2 h-4 w-4" />CRM</TabsTrigger>
-          <TabsTrigger value="finance"><HandCoins className="mr-2 h-4 w-4" />Финансы</TabsTrigger>
-          <TabsTrigger value="detailed"><BarChart3 className="mr-2 h-4 w-4" />Отчеты</TabsTrigger>
+          <TabsTrigger value="crm-analytics"><Users className="mr-2 h-4 w-4" />Аналитика CRM</TabsTrigger>
+          <TabsTrigger value="all-metrics"><BarChart3 className="mr-2 h-4 w-4" />Все 25 метрик</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="overview" className="space-y-6">
+          {/* Избранные метрики */}
+          <SelectedKpiTile />
+
+          {/* Карточки-шорткаты для навигации */}
+          <div className="grid gap-4 md:grid-cols-3">
+            {/* Карточка Сигналы и Риски */}
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => document.querySelector('[value="kpi-summary"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                    Сигналы и Риски
+                  </CardTitle>
+                  <Badge variant="destructive">3 критических</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Активных алертов: 12</p>
+                <p className="text-sm text-muted-foreground">Требуют внимания: 5</p>
+                <Button variant="link" className="p-0 h-auto mt-2">Перейти к сигналам →</Button>
+              </CardContent>
+            </Card>
+
+            {/* Карточка Эффективность CRM */}
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => document.querySelector('[value="crm-analytics"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <TrendingUpIcon className="h-5 w-5 text-green-500" />
+                    Эффективность CRM
+                  </CardTitle>
+                  <Badge variant="secondary">ROI 285%</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Активных кампаний: 24</p>
+                <p className="text-sm text-muted-foreground">Конверсия: 12.5%</p>
+                <Button variant="link" className="p-0 h-auto mt-2">Анализ кампаний →</Button>
+              </CardContent>
+            </Card>
+
+            {/* Карточка Финансовые метрики */}
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => document.querySelector('[value="all-metrics"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-blue-500" />
+                    Финансовые метрики
+                  </CardTitle>
+                  <Badge>GGR +15%</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">NGR: €1.2M</p>
+                <p className="text-sm text-muted-foreground">ARPU: €125</p>
+                <Button variant="link" className="p-0 h-auto mt-2">Все метрики →</Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Основные KPI карточки */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Ключевые показатели</CardTitle>
+              <CardDescription>Сводка основных метрик вашего казино</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <KpiGrid />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="kpi-summary" className="space-y-6">
-          <CollapsibleSection id="kpi-summary-overview" title="KPI Summary">
-            <KPISummary 
-              filters={activeFilters}
-              segment={activeFilters.segments?.[0]}
-            />
-          </CollapsibleSection>
-          <CollapsibleSection id="alerts-signals" title="Сигналы и уведомления">
-            <AlertsAndSignals />
-          </CollapsibleSection>
-          <CollapsibleSection id="flexible-charts" title="Динамика метрик">
-            <FlexibleCharts filters={activeFilters} />
-          </CollapsibleSection>
-          <CollapsibleSection id="segment-metrics" title="Метрики по сегментам">
-            <SegmentMetricsTable />
-          </CollapsibleSection>
+          <KPISummary 
+            filters={activeFilters}
+            segment={activeFilters.segments?.[0]}
+          />
         </TabsContent>
 
-        <TabsContent value="retention" className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Ключевые метрики Retention</CardTitle>
-                    <CardDescription>Обзор показателей удержания пользователей.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <KpiGrid />
-                </CardContent>
-            </Card>
-            <AnalyticsCharts />
+        <TabsContent value="crm-analytics" className="space-y-6">
+          <CampaignPerformanceTable />
+          <CampaignDeepAnalytics />
         </TabsContent>
 
-        <TabsContent value="crm" className="space-y-6">
-            <CampaignPerformanceTable />
-            <CampaignDeepAnalytics />
-            <AlertsAndSignals />
-        </TabsContent>
-
-        <TabsContent value="finance" className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Ключевые финансовые метрики</CardTitle>
-                    <CardDescription>Обзор финансовых показателей, связанных с CRM-активностями.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <KpiGrid />
-                </CardContent>
-            </Card>
-             <AnalyticsCharts />
-        </TabsContent>
-
-        <TabsContent value="detailed" className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Подробная аналитика и мониторинг эффективности ретеншена</CardTitle>
-                    <CardDescription>
-                        25 важнейших показателей и их рекомендуемые значения для различных сегментов игроков. 
-                        Эффективное удержание игроков требует глубокого и регулярного анализа ключевых метрик.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <RetentionMetricsDashboard />
-                </CardContent>
-            </Card>
+        <TabsContent value="all-metrics" className="space-y-6">
+          <CollapsibleSection id="retention-metrics" title="25 ключевых метрик удержания">
+            <RetentionMetricsDashboard />
+          </CollapsibleSection>
         </TabsContent>
       </Tabs>
     </div>

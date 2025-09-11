@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    instrumentationHook: false,
-  },
   webpack: (config) => {
     // Игнорируем опциональные OTEL экспортеры, которых нет в проде
     config.resolve.fallback = {

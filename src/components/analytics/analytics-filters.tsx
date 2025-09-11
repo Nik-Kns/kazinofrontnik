@@ -1,20 +1,34 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { retentionMetrics } from "@/lib/retention-metrics-data";
 import type { RetentionMetric } from "@/lib/types";
-import { TrendingDown, TrendingUp, Settings } from "lucide-react";
+import { TrendingDown, TrendingUp, Settings, Calendar } from "lucide-react";
 import { CollapsibleFilters } from "@/components/ui/collapsible-filters";
 import type { FilterConfig, FilterGroup } from "@/lib/types";
 
 const DEFAULT_IDS = ["ggr", "retention_rate", "crm_spend", "arpu", "conversion_rate"];
 
-export function SelectedKpiTile() {
+interface SelectedKpiTileProps {
+  activeMetric?: string;
+  onMetricClick?: (metricKey: string) => void;
+}
+
+export function SelectedKpiTile({ activeMetric, onMetricClick }: SelectedKpiTileProps = {}) {
   const [open, setOpen] = useState(false);
+  const [timeRange, setTimeRange] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem("selectedKpiTimeRange");
+      return saved || "today";
+    } catch {
+      return "today";
+    }
+  });
   const [selected, setSelected] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem("analyticsSelectedTile");
@@ -23,6 +37,7 @@ export function SelectedKpiTile() {
       return DEFAULT_IDS;
     }
   });
+  const [metrics, setMetrics] = useState<Record<string, RetentionMetric>>({});
 
   const metricsMap = useMemo(() => {
     const map: Record<string, RetentionMetric> = {} as any;
@@ -30,13 +45,91 @@ export function SelectedKpiTile() {
     return map;
   }, []);
 
+  // Функция для генерации метрик в зависимости от временного периода
+  const generateMetricsForPeriod = (period: string) => {
+    const baseMetrics = { ...metricsMap };
+    const result: Record<string, RetentionMetric> = {};
+    
+    // Множители для разных периодов
+    const multipliers: Record<string, { value: number, trend: number }> = {
+      today: { value: 1, trend: 0.05 },
+      yesterday: { value: 0.95, trend: -0.02 },
+      week: { value: 7.2, trend: 0.12 },
+      month: { value: 30.5, trend: 0.18 },
+      quarter: { value: 91, trend: 0.25 },
+      year: { value: 365, trend: 0.35 }
+    };
+    
+    const mult = multipliers[period] || multipliers.today;
+    
+    for (const [id, metric] of Object.entries(baseMetrics)) {
+      const newMetric = { ...metric };
+      
+      // Обновляем значения в зависимости от типа метрики
+      if (metric.unit === '€') {
+        const baseValue = parseFloat(metric.value.toString().replace(/[€,]/g, ''));
+        newMetric.value = (baseValue * mult.value).toFixed(0);
+      } else if (metric.unit === '%') {
+        // Проценты остаются примерно одинаковыми, с небольшими вариациями
+        const baseValue = parseFloat(metric.value.toString());
+        newMetric.value = (baseValue + (Math.random() * 4 - 2)).toFixed(1);
+      } else {
+        // Для чисел без единиц
+        const baseValue = parseFloat(metric.value.toString().replace(/,/g, ''));
+        newMetric.value = Math.round(baseValue * mult.value).toLocaleString();
+      }
+      
+      // Обновляем тренд
+      if (metric.trendValue) {
+        const trendNum = parseFloat(metric.trendValue.toString().replace(/[+%]/g, ''));
+        const newTrend = trendNum * (1 + mult.trend);
+        newMetric.trendValue = `+${newTrend.toFixed(1)}%`;
+        newMetric.trend = newTrend > 0 ? 'up' : newTrend < 0 ? 'down' : 'stable';
+      }
+      
+      result[id] = newMetric;
+    }
+    
+    return result;
+  };
+
+  useEffect(() => {
+    const newMetrics = generateMetricsForPeriod(timeRange);
+    setMetrics(newMetrics);
+  }, [timeRange]);
+
+  const handleTimeRangeChange = (value: string) => {
+    setTimeRange(value);
+    try {
+      localStorage.setItem("selectedKpiTimeRange", value);
+      // Сохраняем в основные фильтры для синхронизации
+      localStorage.setItem("selectedKpis", JSON.stringify(selected));
+    } catch {}
+  };
+
   const apply = () => {
-    try { localStorage.setItem("analyticsSelectedTile", JSON.stringify(selected)); } catch {}
+    try { 
+      localStorage.setItem("analyticsSelectedTile", JSON.stringify(selected));
+      // Также сохраняем для использования в главной странице
+      localStorage.setItem("selectedKpis", JSON.stringify(selected));
+      // Вызываем событие для обновления
+      window.dispatchEvent(new Event('storage'));
+    } catch {}
     setOpen(false);
   };
 
   const toggle = (id: string, checked: boolean) => {
     setSelected(prev => checked ? Array.from(new Set([...prev, id])).slice(0, 6) : prev.filter(x => x !== id));
+  };
+
+  const handleMetricClick = (metricId: string) => {
+    if (onMetricClick) {
+      onMetricClick(metricId);
+      // Сохраняем активную метрику в localStorage
+      try {
+        localStorage.setItem('activeMetric', metricId);
+      } catch {}
+    }
   };
 
   return (
@@ -46,11 +139,26 @@ export function SelectedKpiTile() {
           <CardTitle>Избранные метрики</CardTitle>
           <CardDescription>Быстрый доступ к важным KPI. До 6 метрик.</CardDescription>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm"><Settings className="h-4 w-4 mr-2"/>Настроить</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+        <div className="flex items-center gap-2">
+          <Select value={timeRange} onValueChange={handleTimeRangeChange}>
+            <SelectTrigger className="w-[140px]">
+              <Calendar className="h-4 w-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">Сегодня</SelectItem>
+              <SelectItem value="yesterday">Вчера</SelectItem>
+              <SelectItem value="week">Неделя</SelectItem>
+              <SelectItem value="month">Месяц</SelectItem>
+              <SelectItem value="quarter">Квартал</SelectItem>
+              <SelectItem value="year">Год</SelectItem>
+            </SelectContent>
+          </Select>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm"><Settings className="h-4 w-4 mr-2"/>Настроить</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Выберите метрики (до 6)</DialogTitle>
             </DialogHeader>
@@ -66,16 +174,24 @@ export function SelectedKpiTile() {
               <Button onClick={apply}>Сохранить</Button>
             </div>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
           {selected.map((id) => {
-            const m = metricsMap[id];
+            const m = metrics[id] || metricsMap[id];
             if (!m) return null;
             const up = m.trend === 'up';
+            const isActive = activeMetric === id;
             return (
-              <div key={id} className={`rounded-lg border p-3 ${up ? 'bg-green-50 border-green-200' : m.trend === 'down' ? 'bg-red-50 border-red-200' : 'bg-background'}`}>
+              <div 
+                key={id} 
+                onClick={() => handleMetricClick(id)}
+                className={`rounded-lg border p-3 cursor-pointer transition-all hover:shadow-md ${
+                  isActive ? 'ring-2 ring-primary ring-offset-2 shadow-lg' : ''
+                } ${up ? 'bg-green-50 border-green-200' : m.trend === 'down' ? 'bg-red-50 border-red-200' : 'bg-background'}`}
+              >
                 <div className="text-xs text-muted-foreground mb-1 truncate">{m.name}</div>
                 <div className="flex items-center justify-between">
                   <div className="text-xl font-bold">{m.value}{m.unit}</div>

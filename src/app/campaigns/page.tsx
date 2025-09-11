@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,18 +86,33 @@ const channels = [
   { id: "push", name: "Push", icon: Bell }
 ];
 
-// Активные кампании
-const activeCampaigns = [
+// Расширенный список кампаний с метриками эффективности
+const allCampaigns = [
   {
     id: "1",
     name: "Weekend Cashback VIP",
     type: "vip",
     status: "active",
     startDate: "2024-01-15",
+    endDate: null,
     sent: 423,
     opened: 387,
+    clicked: 234,
     converted: 89,
-    revenue: "€45,230"
+    revenue: "€45,230",
+    roi: "+312%",
+    metrics: {
+      conversionRate: 21.0,
+      bonusUsage: 67.3,
+      avgDeposit: 508.76,
+      openRate: 91.5,
+      clickRate: 55.3
+    },
+    targets: {
+      conversionRate: 15.0,
+      bonusUsage: 50.0,
+      avgDeposit: 400.0
+    }
   },
   {
     id: "2",
@@ -104,10 +120,25 @@ const activeCampaigns = [
     type: "reactivation",
     status: "active",
     startDate: "2024-01-12",
+    endDate: null,
     sent: 1847,
     opened: 723,
+    clicked: 312,
     converted: 134,
-    revenue: "€23,450"
+    revenue: "€23,450",
+    roi: "+178%",
+    metrics: {
+      conversionRate: 7.3,
+      bonusUsage: 45.2,
+      avgDeposit: 175.0,
+      openRate: 39.1,
+      clickRate: 16.9
+    },
+    targets: {
+      conversionRate: 10.0,
+      bonusUsage: 40.0,
+      avgDeposit: 150.0
+    }
   },
   {
     id: "3",
@@ -115,17 +146,217 @@ const activeCampaigns = [
     type: "welcome",
     status: "scheduled",
     startDate: "2024-01-20",
+    endDate: null,
     sent: 0,
     opened: 0,
+    clicked: 0,
     converted: 0,
-    revenue: "€0"
+    revenue: "€0",
+    roi: "—",
+    metrics: {
+      conversionRate: 0,
+      bonusUsage: 0,
+      avgDeposit: 0,
+      openRate: 0,
+      clickRate: 0
+    },
+    targets: {
+      conversionRate: 25.0,
+      bonusUsage: 60.0,
+      avgDeposit: 100.0
+    }
+  },
+  {
+    id: "4",
+    name: "Flash Sale Monday Madness",
+    type: "tournament",
+    status: "completed",
+    startDate: "2024-01-08",
+    endDate: "2024-01-09",
+    sent: 5234,
+    opened: 3456,
+    clicked: 1234,
+    converted: 456,
+    revenue: "€67,890",
+    roi: "+425%",
+    metrics: {
+      conversionRate: 8.7,
+      bonusUsage: 78.4,
+      avgDeposit: 148.88,
+      openRate: 66.0,
+      clickRate: 23.6
+    },
+    targets: {
+      conversionRate: 5.0,
+      bonusUsage: 70.0,
+      avgDeposit: 120.0
+    }
+  },
+  {
+    id: "5",
+    name: "Birthday Bonus Campaign",
+    type: "vip",
+    status: "active",
+    startDate: "2024-01-14",
+    endDate: null,
+    sent: 156,
+    opened: 145,
+    clicked: 98,
+    converted: 67,
+    revenue: "€18,340",
+    roi: "+567%",
+    metrics: {
+      conversionRate: 42.9,
+      bonusUsage: 89.3,
+      avgDeposit: 273.73,
+      openRate: 92.9,
+      clickRate: 62.8
+    },
+    targets: {
+      conversionRate: 30.0,
+      bonusUsage: 80.0,
+      avgDeposit: 200.0
+    }
+  },
+  {
+    id: "6",
+    name: "Churn Prevention Wave 3",
+    type: "reactivation",
+    status: "paused",
+    startDate: "2024-01-10",
+    endDate: null,
+    sent: 2345,
+    opened: 567,
+    clicked: 123,
+    converted: 34,
+    revenue: "€4,560",
+    roi: "-23%",
+    metrics: {
+      conversionRate: 1.4,
+      bonusUsage: 23.5,
+      avgDeposit: 134.12,
+      openRate: 24.2,
+      clickRate: 5.2
+    },
+    targets: {
+      conversionRate: 8.0,
+      bonusUsage: 50.0,
+      avgDeposit: 200.0
+    }
+  },
+  {
+    id: "7",
+    name: "Mega Tournament Weekend",
+    type: "tournament",
+    status: "active",
+    startDate: "2024-01-16",
+    endDate: null,
+    sent: 8456,
+    opened: 6234,
+    clicked: 3456,
+    converted: 1234,
+    revenue: "€145,670",
+    roi: "+678%",
+    metrics: {
+      conversionRate: 14.6,
+      bonusUsage: 56.7,
+      avgDeposit: 118.08,
+      openRate: 73.7,
+      clickRate: 40.9
+    },
+    targets: {
+      conversionRate: 10.0,
+      bonusUsage: 45.0,
+      avgDeposit: 100.0
+    }
+  },
+  {
+    id: "8",
+    name: "New Year Special Offer",
+    type: "welcome",
+    status: "completed",
+    startDate: "2024-01-01",
+    endDate: "2024-01-07",
+    sent: 3456,
+    opened: 2890,
+    clicked: 1567,
+    converted: 678,
+    revenue: "€34,567",
+    roi: "+234%",
+    metrics: {
+      conversionRate: 19.6,
+      bonusUsage: 67.8,
+      avgDeposit: 50.98,
+      openRate: 83.7,
+      clickRate: 45.4
+    },
+    targets: {
+      conversionRate: 15.0,
+      bonusUsage: 55.0,
+      avgDeposit: 75.0
+    }
+  },
+  {
+    id: "9",
+    name: "VIP Exclusive Tournament",
+    type: "vip",
+    status: "draft",
+    startDate: "2024-01-25",
+    endDate: null,
+    sent: 0,
+    opened: 0,
+    clicked: 0,
+    converted: 0,
+    revenue: "€0",
+    roi: "—",
+    metrics: {
+      conversionRate: 0,
+      bonusUsage: 0,
+      avgDeposit: 0,
+      openRate: 0,
+      clickRate: 0
+    },
+    targets: {
+      conversionRate: 35.0,
+      bonusUsage: 75.0,
+      avgDeposit: 500.0
+    }
+  },
+  {
+    id: "10",
+    name: "Weekend Warriors Promo",
+    type: "tournament",
+    status: "failed",
+    startDate: "2024-01-05",
+    endDate: "2024-01-06",
+    sent: 1234,
+    opened: 234,
+    clicked: 45,
+    converted: 12,
+    revenue: "€890",
+    roi: "-67%",
+    metrics: {
+      conversionRate: 1.0,
+      bonusUsage: 12.3,
+      avgDeposit: 74.17,
+      openRate: 19.0,
+      clickRate: 3.6
+    },
+    targets: {
+      conversionRate: 12.0,
+      bonusUsage: 60.0,
+      avgDeposit: 150.0
+    }
   }
 ];
 
-export default function CampaignsPage() {
+function CampaignsContent() {
+  const searchParams = useSearchParams();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [showCreativeModal, setShowCreativeModal] = useState(false);
+  const [templateCampaigns, setTemplateCampaigns] = useState<any[]>([]);
+  const [highlightedCampaign, setHighlightedCampaign] = useState<string | null>(null);
   const [campaignData, setCampaignData] = useState({
     name: "",
     type: "",
@@ -133,11 +364,32 @@ export default function CampaignsPage() {
     channels: [] as string[],
     schedule: "immediate",
     message: "",
-    budget: ""
+    budget: "",
+    targets: {
+      conversionRate: "",
+      bonusUsage: "",
+      avgDeposit: ""
+    }
   });
 
+  useEffect(() => {
+    // Загружаем кампании из localStorage
+    const savedCampaigns = localStorage.getItem('campaigns');
+    if (savedCampaigns) {
+      setTemplateCampaigns(JSON.parse(savedCampaigns));
+    }
+
+    // Проверяем, есть ли новая кампания для подсветки
+    const newCampaignId = searchParams.get('newCampaign');
+    if (newCampaignId) {
+      setHighlightedCampaign(newCampaignId);
+      // Убираем подсветку через 3 секунды
+      setTimeout(() => setHighlightedCampaign(null), 3000);
+    }
+  }, [searchParams]);
+
   const handleNext = () => {
-    if (wizardStep < 5) setWizardStep(wizardStep + 1);
+    if (wizardStep < 6) setWizardStep(wizardStep + 1);
   };
 
   const handleBack = () => {
@@ -147,9 +399,10 @@ export default function CampaignsPage() {
   const canProceed = () => {
     switch (wizardStep) {
       case 1: return campaignData.name && campaignData.type;
-      case 2: return campaignData.segments.length > 0;
-      case 3: return campaignData.channels.length > 0;
-      case 4: return campaignData.message;
+      case 2: return campaignData.targets.conversionRate && campaignData.targets.bonusUsage && campaignData.targets.avgDeposit;
+      case 3: return campaignData.segments.length > 0;
+      case 4: return campaignData.channels.length > 0;
+      case 5: return campaignData.message;
       default: return true;
     }
   };
@@ -248,9 +501,9 @@ export default function CampaignsPage() {
                 Отмена
               </Button>
             </div>
-            <Progress value={(wizardStep / 5) * 100} className="mt-4" />
+            <Progress value={(wizardStep / 6) * 100} className="mt-4" />
             <div className="flex justify-between mt-2">
-              {["Основное", "Сегменты", "Каналы", "Сообщение", "Креативы"].map((step, index) => (
+              {["Основное", "Цели", "Сегменты", "Каналы", "Сообщение", "Креативы"].map((step, index) => (
                 <span 
                   key={step}
                   className={cn(
@@ -328,8 +581,129 @@ export default function CampaignsPage() {
               </div>
             )}
 
-            {/* Шаг 2: Выбор сегментов */}
+            {/* Шаг 2: Целевые метрики */}
             {wizardStep === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-4">Установите целевые показатели кампании</h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Определите KPI для оценки эффективности кампании
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="target-conversion">
+                      Конверсия в депозит (%)
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="target-conversion"
+                        type="number"
+                        placeholder="15"
+                        value={campaignData.targets.conversionRate}
+                        onChange={(e) => setCampaignData({
+                          ...campaignData,
+                          targets: {...campaignData.targets, conversionRate: e.target.value}
+                        })}
+                        className="w-32"
+                      />
+                      <span className="text-sm text-muted-foreground">%</span>
+                      <Badge variant="outline" className="ml-auto">
+                        Средний по типу: {
+                          campaignData.type === 'vip' ? '25%' :
+                          campaignData.type === 'reactivation' ? '8%' :
+                          campaignData.type === 'welcome' ? '20%' :
+                          '12%'
+                        }
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="target-bonus">
+                      Использование бонусов (%)
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="target-bonus"
+                        type="number"
+                        placeholder="50"
+                        value={campaignData.targets.bonusUsage}
+                        onChange={(e) => setCampaignData({
+                          ...campaignData,
+                          targets: {...campaignData.targets, bonusUsage: e.target.value}
+                        })}
+                        className="w-32"
+                      />
+                      <span className="text-sm text-muted-foreground">%</span>
+                      <Badge variant="outline" className="ml-auto">
+                        Средний по типу: {
+                          campaignData.type === 'vip' ? '70%' :
+                          campaignData.type === 'reactivation' ? '45%' :
+                          campaignData.type === 'welcome' ? '60%' :
+                          '55%'
+                        }
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="target-deposit">
+                      Средний депозит (€)
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="target-deposit"
+                        type="number"
+                        placeholder="150"
+                        value={campaignData.targets.avgDeposit}
+                        onChange={(e) => setCampaignData({
+                          ...campaignData,
+                          targets: {...campaignData.targets, avgDeposit: e.target.value}
+                        })}
+                        className="w-32"
+                      />
+                      <span className="text-sm text-muted-foreground">€</span>
+                      <Badge variant="outline" className="ml-auto">
+                        Средний по типу: {
+                          campaignData.type === 'vip' ? '€450' :
+                          campaignData.type === 'reactivation' ? '€180' :
+                          campaignData.type === 'welcome' ? '€85' :
+                          '€150'
+                        }
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ИИ рекомендация по целям */}
+                <Alert className="border-purple-200 bg-purple-50">
+                  <Sparkles className="h-4 w-4 text-purple-600" />
+                  <AlertDescription>
+                    <strong>ИИ рекомендация:</strong> Для {
+                      campaignData.type === 'vip' ? 'VIP кампаний' :
+                      campaignData.type === 'reactivation' ? 'реактивационных кампаний' :
+                      campaignData.type === 'welcome' ? 'приветственных кампаний' :
+                      'данного типа кампаний'
+                    } оптимальные цели: конверсия {
+                      campaignData.type === 'vip' ? '20-30%' :
+                      campaignData.type === 'reactivation' ? '7-12%' :
+                      campaignData.type === 'welcome' ? '18-25%' :
+                      '10-15%'
+                    }, средний депозит {
+                      campaignData.type === 'vip' ? '€400-600' :
+                      campaignData.type === 'reactivation' ? '€150-250' :
+                      campaignData.type === 'welcome' ? '€75-120' :
+                      '€100-200'
+                    }
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+
+            {/* Шаг 3: Выбор сегментов */}
+            {wizardStep === 3 && (
               <div className="space-y-6">
                 <div className="space-y-3">
                   <Label>Выберите целевые сегменты</Label>
@@ -383,8 +757,8 @@ export default function CampaignsPage() {
               </div>
             )}
 
-            {/* Шаг 3: Выбор каналов */}
-            {wizardStep === 3 && (
+            {/* Шаг 4: Выбор каналов */}
+            {wizardStep === 4 && (
               <div className="space-y-6">
                 <div className="space-y-3">
                   <Label>Каналы коммуникации</Label>
@@ -451,8 +825,8 @@ export default function CampaignsPage() {
               </div>
             )}
 
-            {/* Шаг 4: Сообщение */}
-            {wizardStep === 4 && (
+            {/* Шаг 5: Сообщение */}
+            {wizardStep === 5 && (
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="message">Текст сообщения</Label>
@@ -488,8 +862,8 @@ export default function CampaignsPage() {
               </div>
             )}
 
-            {/* Шаг 5: Креативы */}
-            {wizardStep === 5 && (
+            {/* Шаг 6: Креативы */}
+            {wizardStep === 6 && (
               <div className="space-y-6">
                 <div className="text-center py-12 border-2 border-dashed rounded-lg">
                   <Image className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -530,7 +904,7 @@ export default function CampaignsPage() {
                 Назад
               </Button>
               
-              {wizardStep < 5 ? (
+              {wizardStep < 6 ? (
                 <Button
                   onClick={handleNext}
                   disabled={!canProceed()}
@@ -559,68 +933,136 @@ export default function CampaignsPage() {
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">
-          {activeCampaigns.filter(c => c.status === "active").map((campaign) => (
-            <Card key={campaign.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className={cn(
-                      "p-2 rounded-lg",
-                      campaignTypes.find(t => t.id === campaign.type)?.bgColor
-                    )}>
-                      {(() => {
-                        const type = campaignTypes.find(t => t.id === campaign.type);
-                        const Icon = type?.icon || Contact;
-                        return <Icon className={cn("h-5 w-5", type?.color)} />;
-                      })()}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">{campaign.name}</h3>
-                        <Badge className="bg-green-100 text-green-700">Активна</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Запущена {campaign.startDate}
-                      </p>
-                      <div className="flex gap-6 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Отправлено:</span>
-                          <span className="ml-1 font-medium">{campaign.sent}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Открыто:</span>
-                          <span className="ml-1 font-medium">{campaign.opened}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Конверсия:</span>
-                          <span className="ml-1 font-medium">{campaign.converted}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Доход:</span>
-                          <span className="ml-1 font-medium text-green-600">{campaign.revenue}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon">
-                      <Pause className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <BarChart3 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <Card>
+            <CardHeader>
+              <CardTitle>Активные кампании</CardTitle>
+              <CardDescription>Кампании в процессе выполнения с метриками эффективности</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-muted/50 border-b">
+                    <tr>
+                      <th className="text-left p-3 font-medium text-sm">Кампания</th>
+                      <th className="text-left p-3 font-medium text-sm">Тип</th>
+                      <th className="text-left p-3 font-medium text-sm">Статус</th>
+                      <th className="text-center p-3 font-medium text-sm">Отправлено</th>
+                      <th className="text-center p-3 font-medium text-sm">Конверсия</th>
+                      <th className="text-center p-3 font-medium text-sm">Бонусы</th>
+                      <th className="text-center p-3 font-medium text-sm">Ср. депозит</th>
+                      <th className="text-center p-3 font-medium text-sm">ROI</th>
+                      <th className="text-center p-3 font-medium text-sm">Доход</th>
+                      <th className="text-right p-3 font-medium text-sm">Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {allCampaigns.filter(c => c.status === "active").map((campaign) => {
+                      const type = campaignTypes.find(t => t.id === campaign.type);
+                      const isOverTarget = {
+                        conversion: campaign.metrics.conversionRate >= campaign.targets.conversionRate,
+                        bonus: campaign.metrics.bonusUsage >= campaign.targets.bonusUsage,
+                        deposit: campaign.metrics.avgDeposit >= campaign.targets.avgDeposit
+                      };
+                      
+                      return (
+                        <tr key={campaign.id} className="hover:bg-muted/30 transition-colors">
+                          <td className="p-3">
+                            <div className="font-medium">{campaign.name}</div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Начата {campaign.startDate}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              <div className={cn("p-1 rounded", type?.bgColor)}>
+                                {(() => {
+                                  const Icon = type?.icon || Contact;
+                                  return <Icon className={cn("h-3 w-3", type?.color)} />;
+                                })()}
+                              </div>
+                              <span className="text-sm">{type?.name}</span>
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <Badge className="bg-green-100 text-green-700">Активна</Badge>
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className="text-sm font-medium">{campaign.sent.toLocaleString()}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {campaign.opened} откр.
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className={cn(
+                              "text-sm font-medium",
+                              isOverTarget.conversion ? "text-green-600" : "text-orange-600"
+                            )}>
+                              {campaign.metrics.conversionRate}%
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Цель: {campaign.targets.conversionRate}%
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className={cn(
+                              "text-sm font-medium",
+                              isOverTarget.bonus ? "text-green-600" : "text-orange-600"
+                            )}>
+                              {campaign.metrics.bonusUsage}%
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Цель: {campaign.targets.bonusUsage}%
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className={cn(
+                              "text-sm font-medium",
+                              isOverTarget.deposit ? "text-green-600" : "text-orange-600"
+                            )}>
+                              €{campaign.metrics.avgDeposit}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Цель: €{campaign.targets.avgDeposit}
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className={cn(
+                              "text-sm font-bold",
+                              campaign.roi.startsWith('+') ? "text-green-600" : "text-red-600"
+                            )}>
+                              {campaign.roi}
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className="text-sm font-bold text-green-600">
+                              {campaign.revenue}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <div className="flex justify-end gap-1">
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Pause className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <BarChart3 className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="scheduled">
-          {activeCampaigns.filter(c => c.status === "scheduled").map((campaign) => (
+          {allCampaigns.filter(c => c.status === "scheduled").map((campaign) => (
             <Card key={campaign.id}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -645,6 +1087,83 @@ export default function CampaignsPage() {
             </Card>
           ))}
         </TabsContent>
+
+        <TabsContent value="drafts" className="space-y-4">
+          {templateCampaigns.length === 0 ? (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-muted-foreground">
+                  Нет черновиков кампаний. Создайте кампанию из шаблона на странице шаблонов.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            templateCampaigns.map((campaign) => (
+              <Card 
+                key={campaign.id}
+                className={cn(
+                  "transition-all",
+                  highlightedCampaign === campaign.id && "ring-2 ring-primary ring-offset-2"
+                )}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 rounded-lg bg-gray-100">
+                        <Contact className="h-5 w-5 text-gray-600" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold">{campaign.name}</h3>
+                          <Badge variant="secondary">Черновик</Badge>
+                          {highlightedCampaign === campaign.id && (
+                            <Badge className="bg-green-100 text-green-700">Новая</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {campaign.description}
+                        </p>
+                        <div className="flex gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{campaign.category}</Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Канал:</span>
+                            <span>{campaign.channel}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Создана:</span>
+                            <span>{new Date(campaign.createdAt).toLocaleDateString('ru-RU')}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Edit className="mr-2 h-4 w-4" />
+                        Настроить
+                      </Button>
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                        <Play className="mr-2 h-4 w-4" />
+                        Запустить
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="completed">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-muted-foreground">
+                Нет завершенных кампаний.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Creative Generator Modal */}
@@ -655,5 +1174,13 @@ export default function CampaignsPage() {
         campaignName={campaignData.name}
       />
     </div>
+  );
+}
+
+export default function CampaignsPage() {
+  return (
+    <Suspense fallback={<div className="p-4 md:p-6 lg:p-8">Загрузка...</div>}>
+      <CampaignsContent />
+    </Suspense>
   );
 }

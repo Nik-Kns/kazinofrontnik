@@ -37,6 +37,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis } from "recharts";
+import { PlayerOverview } from "@/components/players/PlayerOverview";
 // Моки для истории игр и почасовой активности
 const mockGameHistory = Array.from({ length: 120 }).map((_, i) => ({
   date: new Date(Date.now() - i * 36e5).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
@@ -434,10 +435,21 @@ export default function PlayerProfilePage() {
                     <label key={opt.key} className="flex items-center gap-2">
                       <input
                         type="checkbox"
-                        defaultChecked={(typeof window !== 'undefined' && JSON.parse(localStorage.getItem('playerKeyKpis')||'null'))?.includes(opt.key) ?? true}
+                        defaultChecked={(() => {
+                          if (typeof window === 'undefined') return true;
+                          const stored = localStorage.getItem('playerKeyKpis');
+                          if (!stored || stored === 'null') return true;
+                          try {
+                            const parsed = JSON.parse(stored);
+                            return Array.isArray(parsed) ? parsed.includes(opt.key) : true;
+                          } catch {
+                            return true;
+                          }
+                        })()}
                         onChange={(e) => {
                           try {
-                            const cur = JSON.parse(localStorage.getItem('playerKeyKpis')||'null') || ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq'];
+                            const stored = localStorage.getItem('playerKeyKpis');
+                            const cur = (stored && stored !== 'null' ? JSON.parse(stored) : null) || ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq'];
                             const next = e.target.checked ? Array.from(new Set([...cur, opt.key])) : cur.filter((k: string) => k !== opt.key);
                             localStorage.setItem('playerKeyKpis', JSON.stringify(next));
                           } catch {}
@@ -497,7 +509,16 @@ export default function PlayerProfilePage() {
             const ngr = ggr - bonusCost - taxes;
             const hold = totalBets>0 ? (ggr/totalBets)*100 : 0;
             const netDeposits = player.financial.totalDeposit - player.financial.totalWithdrawal;
-            const visible: string[] = (() => { try { return JSON.parse(localStorage.getItem('playerKeyKpis')||'null') || ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq']; } catch { return ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq']; } })();
+            const visible: string[] = (() => { 
+              try { 
+                const stored = localStorage.getItem('playerKeyKpis');
+                if (!stored || stored === 'null') return ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq'];
+                const parsed = JSON.parse(stored);
+                return Array.isArray(parsed) ? parsed : ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq'];
+              } catch { 
+                return ['ggr','ngr','hold','ltv','netDeposits','totalDeposits','totalWithdrawals','rtp','avgDeposit','avgBet','depFreq']; 
+              } 
+            })();
             const kpis = [
               { key:'ggr', name:'GGR', value:`€${ggr.toLocaleString()}`, formula:'GGR = Total Bets – Total Wins', good:ggr>=0 },
               { key:'ngr', name:'NGR', value:`€${ngr.toLocaleString()}`, formula:'NGR = GGR – Bonus Cost – Taxes', good:ngr>=0 },
@@ -681,11 +702,11 @@ export default function PlayerProfilePage() {
       )}
 
       {/* Вкладки с подробной информацией */}
-      <Tabs defaultValue="main" className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="main">
-            <User className="mr-2 h-4 w-4" />
-            Основное
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="overview">
+            <Activity className="mr-2 h-4 w-4" />
+            Обзор
           </TabsTrigger>
           <TabsTrigger value="financial">
             <CreditCard className="mr-2 h-4 w-4" />
@@ -707,21 +728,23 @@ export default function PlayerProfilePage() {
             <Brain className="mr-2 h-4 w-4" />
             AI
           </TabsTrigger>
-          <TabsTrigger value="activity">
-            <Activity className="mr-2 h-4 w-4" />
-            Активность
-          </TabsTrigger>
           <TabsTrigger value="vip">
             <Shield className="mr-2 h-4 w-4" />
             VIP
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="main">
-          <Card>
-            <CardHeader>
-              <CardTitle>Основная информация</CardTitle>
-              <CardDescription>Регистрационные данные и источники трафика</CardDescription>
+        <TabsContent value="overview">
+          <PlayerOverview player={player} />
+        </TabsContent>
+
+        <TabsContent value="main-info-old" className="hidden">
+          <div className="space-y-6">
+            {/* Основная информация */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Основная информация</CardTitle>
+                <CardDescription>Регистрационные данные и источники трафика</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -770,6 +793,91 @@ export default function PlayerProfilePage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Финансовая сводка */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Финансовая сводка</CardTitle>
+              <CardDescription>Ключевые финансовые показатели</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-4">
+                <div>
+                  <div className="text-sm text-muted-foreground">Всего депозитов</div>
+                  <div className="text-xl font-bold">€{player.financial.totalDeposit.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Всего выводов</div>
+                  <div className="text-xl font-bold">€{player.financial.totalWithdrawal.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Текущий баланс</div>
+                  <div className="text-xl font-bold">€{player.financial.currentBalance.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Средний депозит</div>
+                  <div className="text-xl font-bold">€{player.financial.averageDeposit}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Игровая активность */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Игровая активность</CardTitle>
+              <CardDescription>Статистика игровой активности</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-4">
+                <div>
+                  <div className="text-sm text-muted-foreground">Всего сессий</div>
+                  <div className="text-xl font-bold">{player.gaming.sessionCount.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Любимая игра</div>
+                  <div className="text-xl font-bold">{player.gaming.favoriteGames?.[0] || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Средняя ставка</div>
+                  <div className="text-xl font-bold">€{player.gaming.averageBetSize}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">RTP игрока</div>
+                  <div className="text-xl font-bold">{player.gaming.playerRTP}%</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI прогнозы */}
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Insights</CardTitle>
+              <CardDescription>Прогнозы и рекомендации искусственного интеллекта</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="p-3 rounded-lg border bg-green-50">
+                  <div className="text-sm text-muted-foreground mb-1">Вероятность редепозита</div>
+                  <div className="text-2xl font-bold text-green-600">{player.ai.reDepositProbability}%</div>
+                </div>
+                <div className="p-3 rounded-lg border bg-yellow-50">
+                  <div className="text-sm text-muted-foreground mb-1">Риск оттока</div>
+                  <div className="text-2xl font-bold text-yellow-600">{player.ai.churnProbability}%</div>
+                </div>
+                <div className="p-3 rounded-lg border">
+                  <div className="text-sm text-muted-foreground mb-1">Прогноз LTV</div>
+                  <div className="text-2xl font-bold">€{player.behavior.predictedCLV.toLocaleString()}</div>
+                </div>
+              </div>
+              <div className="mt-4 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                <div className="text-sm font-medium mb-2">Рекомендованное действие:</div>
+                <p className="text-sm">{player.ai.recommendedReactivationOffer}</p>
+              </div>
+            </CardContent>
+          </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="financial">
@@ -1787,76 +1895,6 @@ export default function PlayerProfilePage() {
                   );
                 })()}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="activity">
-          <Card>
-            <CardHeader>
-              <CardTitle>Журнал активности</CardTitle>
-              <CardDescription>История взаимодействий и событий</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h4 className="font-semibold mb-3">История входов</h4>
-                <div className="space-y-2">
-                  {player.actionLog.loginHistory.slice(0, 5).map(login => (
-                    <div key={login.id} className="flex items-center justify-between p-2 rounded-lg border">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm">{login.device}</p>
-                          <p className="text-xs text-muted-foreground">{login.location}</p>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {login.date.toLocaleString('ru-RU')}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {player.actionLog.supportRequests.length > 0 && (
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold mb-3">Обращения в поддержку</h4>
-                  <div className="space-y-2">
-                    {player.actionLog.supportRequests.map(ticket => (
-                      <div key={ticket.id} className="p-3 rounded-lg border">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-medium text-sm">{ticket.subject}</p>
-                          <Badge variant={ticket.status === 'resolved' ? 'default' : 'secondary'}>
-                            {ticket.status}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {ticket.date.toLocaleDateString('ru-RU')}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {player.actionLog.managerNotes.length > 0 && (
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold mb-3">Заметки менеджера</h4>
-                  <div className="space-y-2">
-                    {player.actionLog.managerNotes.map(note => (
-                      <div key={note.id} className="p-3 rounded-lg border bg-secondary/20">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="font-medium text-sm">{note.author}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {note.date.toLocaleDateString('ru-RU')}
-                          </p>
-                        </div>
-                        <p className="text-sm">{note.content}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
         </TabsContent>

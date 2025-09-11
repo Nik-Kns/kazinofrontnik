@@ -15,7 +15,6 @@ import {
   MessageSquare, 
   PlusCircle, 
   Smartphone, 
-  Star, 
   Zap,
   Brain,
   Sparkles,
@@ -25,7 +24,10 @@ import {
   DollarSign,
   ArrowRight,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Table,
+  ExternalLink,
+  Rocket
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -39,13 +41,6 @@ const channelIcons: Record<string, React.ElementType> = {
   "Multi-channel": Zap,
 };
 
-const PerformanceStars = ({ count }: { count: number }) => (
-  <div className="flex items-center gap-0.5">
-    {Array.from({ length: 5 }).map((_, i) => (
-      <Star key={i} className={`h-4 w-4 ${i < count ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/50'}`} />
-    ))}
-  </div>
-);
 
 // ИИ-рекомендации для шаблонов
 const aiTemplateRecommendations = [
@@ -114,6 +109,29 @@ const aiTemplateRecommendations = [
 export default function TemplatesPage() {
   const router = useRouter();
   const [implementedTemplates, setImplementedTemplates] = useState<string[]>([]);
+
+  const handleCreateCampaign = (template: any) => {
+    // Сохраняем шаблон в localStorage для использования на странице кампаний
+    const campaignData = {
+      id: `campaign-${Date.now()}`,
+      name: template.name,
+      templateId: template.id,
+      category: template.category,
+      channel: template.channel,
+      description: template.description,
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      performance: template.performance
+    };
+    
+    // Получаем существующие кампании или создаем новый массив
+    const existingCampaigns = JSON.parse(localStorage.getItem('campaigns') || '[]');
+    existingCampaigns.push(campaignData);
+    localStorage.setItem('campaigns', JSON.stringify(existingCampaigns));
+    
+    // Переходим на страницу кампаний
+    router.push(`/campaigns?newCampaign=${campaignData.id}`);
+  };
 
   const handleImplementTemplate = (recommendation: any) => {
     // Отмечаем как внедренный
@@ -288,40 +306,73 @@ export default function TemplatesPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {templatesData.map(template => {
-          const ChannelIcon = channelIcons[template.channel];
-          return (
-            <Card key={template.id} className="flex flex-col">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                    <div>
-                        <Badge variant="secondary" className="mb-2">{template.category}</Badge>
-                        <CardTitle>{template.name}</CardTitle>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <ChannelIcon className="h-5 w-5"/>
-                        <span>{template.channel}</span>
-                    </div>
-                </div>
-                <CardDescription>{template.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-1 flex-col justify-end">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-xs text-muted-foreground mb-1">Эффективность</p>
-                        <PerformanceStars count={template.performance} />
-                    </div>
-                    <Button>
-                        <ClipboardCopy className="mr-2 h-4 w-4" />
-                        Клонировать
-                    </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+      {/* Таблица шаблонов */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Table className="h-5 w-5" />
+            Библиотека шаблонов
+          </CardTitle>
+          <CardDescription>
+            Готовые шаблоны для различных маркетинговых сценариев
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-muted/50 border-b">
+                <tr>
+                  <th className="text-left p-4 font-medium text-sm">Название</th>
+                  <th className="text-left p-4 font-medium text-sm">Категория</th>
+                  <th className="text-left p-4 font-medium text-sm">Канал</th>
+                  <th className="text-left p-4 font-medium text-sm">Описание</th>
+                  <th className="text-right p-4 font-medium text-sm">Действия</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {templatesData.map(template => {
+                  const ChannelIcon = channelIcons[template.channel];
+                  return (
+                    <tr key={template.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="p-4">
+                        <div className="font-medium">{template.name}</div>
+                      </td>
+                      <td className="p-4">
+                        <Badge variant="secondary">{template.category}</Badge>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <ChannelIcon className="h-4 w-4 text-muted-foreground"/>
+                          <span className="text-sm">{template.channel}</span>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <p className="text-sm text-muted-foreground max-w-md">{template.description}</p>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => handleCreateCampaign(template)}
+                            title="Создать кампанию из шаблона"
+                          >
+                            <Rocket className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm">
+                            <ClipboardCopy className="mr-2 h-3 w-3" />
+                            Клонировать
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

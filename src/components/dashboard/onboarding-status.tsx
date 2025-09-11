@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Circle, ArrowRight, Settings, Target, Database, Rocket } from "lucide-react";
+import { CheckCircle2, Circle, ArrowRight, Settings, Target, Database, Rocket, Shield, Loader2, CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,9 @@ interface OnboardingStep {
 export function OnboardingStatus() {
   const [steps, setSteps] = useState<OnboardingStep[]>([]);
   const [loading, setLoading] = useState(true);
+  const [auditRunning, setAuditRunning] = useState(false);
+  const [auditCompleted, setAuditCompleted] = useState(false);
+  const [auditResults, setAuditResults] = useState<any>(null);
 
   useEffect(() => {
     // Проверяем статус онбординга из localStorage
@@ -29,11 +32,17 @@ export function OnboardingStatus() {
       const integrationsData = localStorage.getItem('integrations');
       const projectData = localStorage.getItem('projectSettings');
       const goalsData = localStorage.getItem('kpiGoals');
-      const analyticsFilters = localStorage.getItem('analyticsFilters');
+      const auditData = localStorage.getItem('retentionAudit');
 
       const integrationsConnected = integrationsData ? JSON.parse(integrationsData).connected : false;
       const projectConfigured = projectData ? JSON.parse(projectData).configured : false;
       const goalsSet = goalsData ? JSON.parse(goalsData).set : false;
+      const auditPassed = auditData ? JSON.parse(auditData).completed : false;
+      
+      if (auditData && JSON.parse(auditData).results) {
+        setAuditResults(JSON.parse(auditData).results);
+        setAuditCompleted(true);
+      }
 
       setSteps([
         {
@@ -62,6 +71,15 @@ export function OnboardingStatus() {
           href: '/analytics?showGoals=true',
           icon: Target,
           priority: 'recommended'
+        },
+        {
+          id: 'audit',
+          title: 'Аудит retention структуры',
+          description: 'Проверьте эффективность удержания',
+          completed: auditPassed,
+          href: '#',
+          icon: Shield,
+          priority: 'recommended'
         }
       ]);
       setLoading(false);
@@ -69,6 +87,49 @@ export function OnboardingStatus() {
 
     checkOnboardingStatus();
   }, []);
+
+  const runAudit = async () => {
+    setAuditRunning(true);
+    
+    // Имитация анализа
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    const results = {
+      totalSegments: 12,
+      recommendedSegments: [
+        'Игроки на грани оттока (не играли 7 дней)',
+        'VIP без депозитов 14 дней',
+        'Новички после первого депозита'
+      ],
+      communicationCoverage: 68,
+      missingCommunication: [
+        'Утренние игроки (6:00-10:00)',
+        'Игроки с низким RTP'
+      ],
+      triggerCoverage: 45,
+      recommendedTests: [
+        'A/B тест welcome-бонусов',
+        'Тестирование push vs email для VIP',
+        'Оптимизация времени отправки'
+      ]
+    };
+    
+    setAuditResults(results);
+    setAuditCompleted(true);
+    setAuditRunning(false);
+    
+    // Сохраняем результаты
+    localStorage.setItem('retentionAudit', JSON.stringify({
+      completed: true,
+      results,
+      date: new Date().toISOString()
+    }));
+    
+    // Обновляем шаги
+    setSteps(prev => prev.map(step => 
+      step.id === 'audit' ? { ...step, completed: true } : step
+    ));
+  };
 
   const completedSteps = steps.filter(s => s.completed).length;
   const totalSteps = steps.length;
@@ -175,12 +236,33 @@ export function OnboardingStatus() {
                   </div>
                 </div>
                 {!step.completed && (
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={step.href}>
-                      Настроить
-                      <ArrowRight className="ml-2 h-3 w-3" />
-                    </Link>
-                  </Button>
+                  step.id === 'audit' ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={runAudit}
+                      disabled={auditRunning}
+                    >
+                      {auditRunning ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Анализ...
+                        </>
+                      ) : (
+                        <>
+                          Запустить аудит
+                          <ArrowRight className="ml-2 h-3 w-3" />
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={step.href}>
+                        Настроить
+                        <ArrowRight className="ml-2 h-3 w-3" />
+                      </Link>
+                    </Button>
+                  )
                 )}
                 {step.completed && (
                   <Badge variant="outline" className="text-green-600 border-green-300">
@@ -192,16 +274,86 @@ export function OnboardingStatus() {
           })}
         </div>
 
-        {!allCompleted && (
-          <div className="pt-2">
-            <Button asChild className="w-full">
-              <Link href={steps.find(s => !s.completed)?.href || '/settings'}>
-                Продолжить настройку
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+        {auditCompleted && auditResults && (
+          <div className="mt-4 p-4 rounded-lg bg-muted/50 space-y-3">
+            <h4 className="font-semibold flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              Результаты аудита retention структуры
+            </h4>
+            
+            <div className="space-y-3 text-sm">
+              <div className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-medium">Сегментация: {auditResults.totalSegments} сегментов</p>
+                    <p className="text-muted-foreground mb-2">Рекомендуем добавить:</p>
+                    <div className="space-y-1">
+                      {auditResults.recommendedSegments.map((segment: string, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between">
+                          <span className="text-muted-foreground">• {segment}</span>
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" asChild>
+                            <Link href={`/segments?action=create&name=${encodeURIComponent(segment)}&type=behavioral`}>
+                              Создать
+                              <ArrowRight className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <TrendingUp className="h-4 w-4 text-blue-500 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-medium">Коммуникации покрывают {auditResults.communicationCoverage}% игроков</p>
+                    <p className="text-muted-foreground mb-2">Добавить коммуникации для:</p>
+                    <div className="space-y-1">
+                      {auditResults.missingCommunication.map((comm: string, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between">
+                          <span className="text-muted-foreground">• {comm}</span>
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" asChild>
+                            <Link href={`/builder?action=create&audience=${encodeURIComponent(comm)}&type=retention`}>
+                              Создать сценарий
+                              <ArrowRight className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <Target className="h-4 w-4 text-purple-500 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-medium">Триггеры покрывают {auditResults.triggerCoverage}% игроков</p>
+                    <p className="text-muted-foreground mb-2">Рекомендуемые A/B тесты:</p>
+                    <div className="space-y-1">
+                      {auditResults.recommendedTests.map((test: string, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between">
+                          <span className="text-muted-foreground">• {test}</span>
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" asChild>
+                            <Link href={`/triggers?action=create&test=${encodeURIComponent(test)}&type=ab`}>
+                              Создать тест
+                              <ArrowRight className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
+        
       </CardContent>
     </Card>
   );
