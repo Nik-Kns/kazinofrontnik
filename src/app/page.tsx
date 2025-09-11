@@ -57,7 +57,6 @@ import { Label } from "@/components/ui/label";
 import { OnboardingStatus } from "@/components/dashboard/onboarding-status";
 import { AlertsAndSignals } from "@/components/analytics/alerts-and-signals";
 import { AdvancedMetricsChart } from "@/components/dashboard/advanced-metrics-chart";
-import { AIRecommendations } from "@/components/dashboard/ai-recommendations";
 
 // Компонент для сворачиваемых секций
 function CollapsibleSection({ 
@@ -469,9 +468,6 @@ export default function DashboardPage() {
         defaultOpen={true}
       >
         <div className="space-y-6">
-          {/* AI Рекомендации из аудита */}
-          <AIRecommendations />
-          
           {/* AI Рекомендации и алерты */}
           <AlertsAndSignals />
 
