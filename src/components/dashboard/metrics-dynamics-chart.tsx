@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import Image from "next/image";
 import { TrendingUp, TrendingDown, Minus, Calendar } from "lucide-react";
 import {
   Select,
@@ -36,7 +36,51 @@ const metricsConfig: MetricConfig[] = [
   { key: "retention7", name: "Retention 7d", color: "#FFC107", format: (v) => `${v.toFixed(1)}%` },
 ];
 
-// Фиксированные моковые данные для каждой метрики
+// Функция для получения изображения графика в зависимости от метрики и периода
+const getChartImage = (metric: string, period: number): string => {
+  // Базовые URL для изображений графиков
+  const baseColors: Record<string, string> = {
+    ggr: '2962FF',
+    arpu: '9C27B0',
+    ltv: 'FF6F00',
+    dau: '00BCD4',
+    mau: 'E91E63',
+    retention1: '4CAF50',
+    retention7: 'FFC107'
+  };
+  
+  const color = baseColors[metric] || '6B7280';
+  const metricName = metric.toUpperCase().replace('RETENTION1', 'Retention 1d').replace('RETENTION7', 'Retention 7d');
+  const periodLabel = period <= 7 ? '7d' : period <= 30 ? '30d' : '90d';
+  
+  // Возвращаем placeholder изображение с параметрами
+  return `https://via.placeholder.com/800x400/${color}/ffffff?text=${metricName}+Chart+(${periodLabel})`;
+};
+
+// Моковые статистические данные
+const getMockStats = (metric: string, period: number) => {
+  const baseStats: Record<string, { value: number; change: number }> = {
+    ggr: { value: 142000, change: 13.5 },
+    arpu: { value: 135, change: 8.0 },
+    ltv: { value: 480, change: 6.7 },
+    dau: { value: 2850, change: 14.2 },
+    mau: { value: 48000, change: 5.5 },
+    retention1: { value: 48.5, change: 7.2 },
+    retention7: { value: 27, change: 8.0 }
+  };
+  
+  const stats = baseStats[metric] || { value: 100, change: 5.0 };
+  
+  // Корректируем изменение в зависимости от периода
+  const periodMultiplier = period <= 7 ? 0.5 : period <= 30 ? 1.0 : 1.5;
+  
+  return {
+    currentValue: stats.value,
+    change: stats.change * periodMultiplier
+  };
+};
+
+// Оригинальные фиксированные данные (оставляем для совместимости)
 const fixedMockData: Record<string, Record<number, MetricData[]>> = {
   ggr: {
     7: [
@@ -279,18 +323,21 @@ export function MetricsDynamicsChart({
     }
   }, [propActiveMetric]);
 
-  // Мемоизируем получение фиксированных данных
-  const memoizedChartData = useMemo(() => {
-    return getFixedMockData(activeMetric, dateRange);
+  // Получаем изображение графика и статистику
+  const chartImage = useMemo(() => {
+    return getChartImage(activeMetric, dateRange);
+  }, [activeMetric, dateRange]);
+
+  const stats = useMemo(() => {
+    return getMockStats(activeMetric, dateRange);
   }, [activeMetric, dateRange]);
 
   useEffect(() => {
-    // Обновляем состояние только при изменении данных
+    // Имитация загрузки при смене метрики или периода
     setLoading(true);
-    setChartData(memoizedChartData);
-    const timer = setTimeout(() => setLoading(false), 300); // Имитация загрузки
+    const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
-  }, [memoizedChartData]);
+  }, [activeMetric, dateRange]);
 
   const handleMetricClick = (metricKey: string) => {
     setActiveMetric(metricKey);
@@ -300,16 +347,6 @@ export function MetricsDynamicsChart({
   };
 
   const activeConfig = metricsConfig.find(m => m.key === activeMetric) || metricsConfig[0];
-  
-  // Мемоизируем вычисление изменений для предотвращения лишних пересчетов
-  const change = useMemo(() => {
-    if (chartData.length < 2) return { value: 0, percentage: 0 };
-    const first = chartData[0].value;
-    const last = chartData[chartData.length - 1].value;
-    const changeValue = last - first;
-    const percentage = (changeValue / first) * 100;
-    return { value: changeValue, percentage };
-  }, [chartData]);
 
   return (
     <Card>
@@ -342,19 +379,19 @@ export function MetricsDynamicsChart({
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Изменение</p>
               <div className="flex items-center gap-1">
-                {change.percentage > 0 ? (
+                {stats.change > 0 ? (
                   <TrendingUp className="h-4 w-4 text-green-500" />
-                ) : change.percentage < 0 ? (
+                ) : stats.change < 0 ? (
                   <TrendingDown className="h-4 w-4 text-red-500" />
                 ) : (
                   <Minus className="h-4 w-4 text-gray-500" />
                 )}
                 <span className={`text-lg font-bold ${
-                  change.percentage > 0 ? "text-green-600" : 
-                  change.percentage < 0 ? "text-red-600" : 
+                  stats.change > 0 ? "text-green-600" : 
+                  stats.change < 0 ? "text-red-600" : 
                   "text-gray-600"
                 }`}>
-                  {change.percentage > 0 ? "+" : ""}{change.percentage.toFixed(1)}%
+                  {stats.change > 0 ? "+" : ""}{stats.change.toFixed(1)}%
                 </span>
               </div>
             </div>
@@ -384,48 +421,20 @@ export function MetricsDynamicsChart({
           })}
         </div>
 
-        {/* График */}
+        {/* График - статичное изображение */}
         {loading ? (
-          <div className="h-[300px] flex items-center justify-center">
+          <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
             <div className="animate-pulse text-muted-foreground">Загрузка данных...</div>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
-                dataKey="date"
-                tick={{ fontSize: 12 }}
-                interval="preserveStartEnd"
-              />
-              <YAxis 
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => {
-                  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-                  if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
-                  return value.toFixed(0);
-                }}
-              />
-              <Tooltip
-                formatter={(value: number) => activeConfig.format(value)}
-                labelFormatter={(label) => `Дата: ${label}`}
-                contentStyle={{
-                  backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={activeConfig.color}
-                strokeWidth={2}
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
-                name={activeConfig.name}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="relative h-[300px] bg-gray-50 rounded-lg overflow-hidden">
+            <img 
+              src={chartImage}
+              alt={`${activeConfig.name} Chart`}
+              className="w-full h-full object-contain"
+              style={{ imageRendering: 'crisp-edges' }}
+            />
+          </div>
         )}
 
         {/* Легенда с текущими значениями */}
@@ -437,10 +446,10 @@ export function MetricsDynamicsChart({
             </div>
             <div className="text-right">
               <p className="text-lg font-bold" style={{ color: activeConfig.color }}>
-                {chartData.length > 0 ? activeConfig.format(chartData[chartData.length - 1].value) : "—"}
+                {activeConfig.format(stats.currentValue)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {chartData.length > 0 ? `за ${chartData[chartData.length - 1].date}` : ""}
+                за последние {dateRange} дней
               </p>
             </div>
           </div>

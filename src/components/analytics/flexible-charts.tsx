@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import Image from "next/image";
 import { Calendar, TrendingUp, Users, Euro, Target, Activity, Download } from "lucide-react";
 import type { ChartData, SegmentType } from "@/lib/types";
 
@@ -28,57 +28,42 @@ const timePeriods = [
   { value: 'month', label: 'По месяцам' }
 ];
 
-// Генерация данных для графиков
-const generateChartData = (metric: string, period: string, days: number = 30): ChartData[] => {
-  const data: ChartData[] = [];
-  const now = new Date();
-  
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    
-    let dateStr = '';
-    if (period === 'day') {
-      dateStr = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-    } else if (period === 'week') {
-      const weekNum = Math.ceil((days - i) / 7);
-      dateStr = `Неделя ${weekNum}`;
-    } else {
-      dateStr = date.toLocaleDateString('ru-RU', { month: 'short', year: 'numeric' });
-    }
-    
-    // Базовое значение в зависимости от метрики
-    let baseValue = 0;
-    switch (metric) {
-      case 'retention_rate': baseValue = 65 + Math.random() * 20; break;
-      case 'churn_rate': baseValue = 2 + Math.random() * 3; break;
-      case 'ltv': baseValue = 5000 + Math.random() * 5000; break;
-      case 'arpu': baseValue = 80 + Math.random() * 40; break;
-      case 'player_reactivation_rate': baseValue = 10 + Math.random() * 10; break;
-      case 'average_deposit': baseValue = 150 + Math.random() * 100; break;
-      case 'average_deposit_first': baseValue = 30 + Math.random() * 40; break;
-    }
-    
-    // Добавляем тренд
-    const trend = (days - i) / days * 0.1;
-    const value = baseValue * (1 + trend + (Math.random() - 0.5) * 0.1);
-    
-    // Прогнозные значения для последних 20% данных
-    const isPredicted = i < days * 0.2;
-    
-    data.push({
-      date: dateStr,
-      value: isPredicted ? null : value,
-      predictedValue: isPredicted ? value : null,
-      // Для сплитов по сегментам
-      vip: value * 1.5,
-      active: value * 0.9,
-      new: value * 0.7,
-      sleeping: value * 0.4
-    });
+// Функция для получения изображения графика в зависимости от метрики
+const getChartImage = (metric: string): string => {
+  // Используем плейсхолдер изображения для каждой метрики
+  // В реальном проекте здесь будут пути к реальным изображениям
+  switch (metric) {
+    case 'retention_rate':
+      return 'https://via.placeholder.com/800x400/3b82f6/ffffff?text=Retention+Rate+Chart';
+    case 'churn_rate':
+      return 'https://via.placeholder.com/800x400/ef4444/ffffff?text=Churn+Rate+Chart';
+    case 'ltv':
+      return 'https://via.placeholder.com/800x400/10b981/ffffff?text=LTV+Chart';
+    case 'arpu':
+      return 'https://via.placeholder.com/800x400/8b5cf6/ffffff?text=ARPU+Chart';
+    case 'player_reactivation_rate':
+      return 'https://via.placeholder.com/800x400/f59e0b/ffffff?text=Reactivation+Rate+Chart';
+    case 'average_deposit':
+      return 'https://via.placeholder.com/800x400/06b6d4/ffffff?text=Average+Deposit+Chart';
+    case 'average_deposit_first':
+      return 'https://via.placeholder.com/800x400/ec4899/ffffff?text=First+Deposit+Chart';
+    default:
+      return 'https://via.placeholder.com/800x400/6b7280/ffffff?text=Default+Chart';
   }
-  
-  return data;
+};
+
+// Моковые данные для статистики
+const getMockStats = (metric: string) => {
+  const stats: Record<string, { avg: number; max: number; min: number; trend: number }> = {
+    'retention_rate': { avg: 72.5, max: 85.3, min: 62.1, trend: 8.5 },
+    'churn_rate': { avg: 3.2, max: 4.8, min: 2.1, trend: -5.2 },
+    'ltv': { avg: 7250, max: 9800, min: 5100, trend: 12.3 },
+    'arpu': { avg: 105, max: 140, min: 85, trend: 6.7 },
+    'player_reactivation_rate': { avg: 15.3, max: 19.2, min: 11.5, trend: 4.1 },
+    'average_deposit': { avg: 200, max: 250, min: 150, trend: 9.8 },
+    'average_deposit_first': { avg: 50, max: 70, min: 30, trend: 11.2 }
+  };
+  return stats[metric] || { avg: 100, max: 150, min: 50, trend: 5.0 };
 };
 
 interface FlexibleChartsProps {
@@ -93,80 +78,8 @@ export function FlexibleCharts({ filters }: FlexibleChartsProps) {
   const [chartType, setChartType] = useState<'line' | 'area' | 'bar'>('line');
   
   const currentMetric = chartMetrics.find(m => m.id === selectedMetric)!;
-  const chartData = generateChartData(selectedMetric, timePeriod);
-  
-  // Расчет средних значений
-  const avgValue = chartData
-    .filter(d => d.value !== null)
-    .reduce((sum, d) => sum + (d.value || 0), 0) / chartData.filter(d => d.value !== null).length;
-    
-  const renderChart = () => {
-    const commonProps = {
-      data: chartData,
-      margin: { top: 5, right: 30, left: 20, bottom: 5 }
-    };
-    
-    const ChartComponent = chartType === 'line' ? LineChart : 
-                          chartType === 'area' ? AreaChart : BarChart;
-    const DataComponent = chartType === 'line' ? Line : 
-                         chartType === 'area' ? Area : Bar;
-    
-    return (
-      <ResponsiveContainer width="100%" height={400}>
-        <ChartComponent {...commonProps}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip 
-            formatter={(value: any) => [
-              `${typeof value === 'number' ? value.toFixed(2) : value}${currentMetric.unit}`,
-              currentMetric.name
-            ]}
-          />
-          <Legend />
-          
-          {!showSplits ? (
-            <>
-              {React.createElement(DataComponent as any, {
-                type: 'monotone',
-                dataKey: 'value',
-                stroke: currentMetric.color,
-                fill: currentMetric.color,
-                fillOpacity: chartType === 'area' ? 0.6 : 1,
-                name: currentMetric.name,
-                strokeWidth: 2,
-              })}
-              {React.createElement(DataComponent as any, {
-                type: 'monotone',
-                dataKey: 'predictedValue',
-                stroke: currentMetric.color,
-                fill: currentMetric.color,
-                fillOpacity: chartType === 'area' ? 0.3 : 0.5,
-                strokeDasharray: '5 5',
-                name: 'Прогноз',
-                strokeWidth: 2,
-              })}
-              <Line
-                type="monotone"
-                dataKey={() => avgValue}
-                stroke="#666"
-                strokeDasharray="3 3"
-                name={`Среднее (${avgValue.toFixed(2)}${currentMetric.unit})`}
-                dot={false}
-              />
-            </>
-          ) : (
-            <>
-              {React.createElement(DataComponent as any, { dataKey: 'vip', stroke: '#f59e0b', fill: '#f59e0b', name: 'VIP', stackId: 'a' })}
-              {React.createElement(DataComponent as any, { dataKey: 'active', stroke: '#3b82f6', fill: '#3b82f6', name: 'Активные', stackId: 'a' })}
-              {React.createElement(DataComponent as any, { dataKey: 'new', stroke: '#10b981', fill: '#10b981', name: 'Новые', stackId: 'a' })}
-              {React.createElement(DataComponent as any, { dataKey: 'sleeping', stroke: '#6b7280', fill: '#6b7280', name: 'Спящие', stackId: 'a' })}
-            </>
-          )}
-        </ChartComponent>
-      </ResponsiveContainer>
-    );
-  };
+  const chartImage = getChartImage(selectedMetric);
+  const stats = getMockStats(selectedMetric);
   
   return (
     <Card>
@@ -261,9 +174,15 @@ export function FlexibleCharts({ filters }: FlexibleChartsProps) {
           </div>
         </div>
         
-        {/* График */}
-        <div className="border rounded-lg p-4">
-          {renderChart()}
+        {/* График - статичное изображение */}
+        <div className="border rounded-lg p-4 bg-gray-50 relative">
+          <div className="relative w-full h-[400px]">
+            <img 
+              src={chartImage} 
+              alt={`${currentMetric.name} Chart`}
+              className="w-full h-full object-contain rounded"
+            />
+          </div>
         </div>
         
         {/* Дополнительная информация */}
@@ -271,26 +190,35 @@ export function FlexibleCharts({ filters }: FlexibleChartsProps) {
           <div className="p-3 bg-muted rounded-lg">
             <div className="text-sm text-muted-foreground">Среднее значение</div>
             <div className="text-lg font-bold">
-              {avgValue.toFixed(2)}{currentMetric.unit}
+              {stats.avg.toFixed(2)}{currentMetric.unit}
             </div>
           </div>
           <div className="p-3 bg-muted rounded-lg">
             <div className="text-sm text-muted-foreground">Максимум</div>
             <div className="text-lg font-bold">
-              {Math.max(...chartData.map(d => d.value || 0)).toFixed(2)}{currentMetric.unit}
+              {stats.max.toFixed(2)}{currentMetric.unit}
             </div>
           </div>
           <div className="p-3 bg-muted rounded-lg">
             <div className="text-sm text-muted-foreground">Минимум</div>
             <div className="text-lg font-bold">
-              {Math.min(...chartData.filter(d => d.value).map(d => d.value || 0)).toFixed(2)}{currentMetric.unit}
+              {stats.min.toFixed(2)}{currentMetric.unit}
             </div>
           </div>
           <div className="p-3 bg-muted rounded-lg">
             <div className="text-sm text-muted-foreground">Тренд</div>
             <div className="text-lg font-bold flex items-center gap-1">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-              <span className="text-green-600">+8.5%</span>
+              {stats.trend > 0 ? (
+                <>
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                  <span className="text-green-600">+{stats.trend}%</span>
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
+                  <span className="text-red-600">{stats.trend}%</span>
+                </>
+              )}
             </div>
           </div>
         </div>
