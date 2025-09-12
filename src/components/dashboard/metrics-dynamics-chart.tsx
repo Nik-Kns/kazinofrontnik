@@ -329,11 +329,11 @@ export function MetricsDynamicsChart({
   }, [activeMetric, dateRange]);
 
   useEffect(() => {
-    // Имитация загрузки при смене метрики или периода
+    // Загрузка только при начальном рендере
     setLoading(true);
     const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
-  }, [activeMetric, dateRange]);
+  }, []); // Пустой массив зависимостей - загрузка только при монтировании
 
   const handleMetricClick = (metricKey: string) => {
     setActiveMetric(metricKey);

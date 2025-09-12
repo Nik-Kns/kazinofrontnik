@@ -144,12 +144,12 @@ export function AdvancedMetricsChart({
     return getMockStats(selectedMetrics, dateRange);
   }, [selectedMetrics, dateRange]);
 
-  // Имитация загрузки при изменении параметров
+  // Загрузка только при смене типа графика или значительном изменении периода
   useEffect(() => {
     setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 500);
+    const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
-  }, [selectedMetrics, chartType, dateRange]);
+  }, [chartType]); // Убрали selectedMetrics и dateRange из зависимостей
 
   const handleMetricClick = (metric: string) => {
     setActiveMetric(metric);
