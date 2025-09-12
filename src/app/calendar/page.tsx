@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Brain, TrendingUp, AlertTriangle, Lightbulb } from "lucide-react";
+import { Brain, TrendingUp, AlertTriangle, Lightbulb, Target, Trophy, Activity, BarChart3 } from "lucide-react";
 import { campaignsData } from "@/lib/mock-data";
 import { ChevronLeft, ChevronRight, PlusCircle, ArrowLeft, DollarSign, Settings } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useState, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -186,8 +187,170 @@ export default function CalendarPage() {
     setEditingScenario(null);
   };
 
+  // Расчет общей статистики по целям
+  const calculateGoalStats = () => {
+    const activeCampaigns = filteredCampaigns.filter(c => c.status === 'active');
+    const totalCampaigns = filteredCampaigns.length;
+    
+    // Рассчитываем средние метрики
+    const avgCR = filteredCampaigns.reduce((sum, c) => {
+      const cr = typeof c.cr === 'string' ? parseFloat(c.cr) : c.cr;
+      return sum + (cr || 0);
+    }, 0) / (filteredCampaigns.length || 1);
+    
+    const avgCTR = filteredCampaigns.reduce((sum, c) => {
+      const ctr = typeof c.ctr === 'string' ? parseFloat(c.ctr) : c.ctr;
+      return sum + (ctr || 0);
+    }, 0) / (filteredCampaigns.length || 1);
+    
+    // Целевые показатели
+    const targetCR = 10; // Целевая конверсия 10%
+    const targetCTR = 20; // Целевой CTR 20%
+    const targetRevenue = 500000; // Целевой доход €500k
+    
+    // Текущий прогресс к целям
+    const currentRevenue = 425000; // Текущий доход
+    const goalAchievement = (avgCR / targetCR) * 100;
+    const revenueAchievement = (currentRevenue / targetRevenue) * 100;
+    
+    return {
+      totalCampaigns,
+      activeCampaigns: activeCampaigns.length,
+      avgCR,
+      avgCTR,
+      targetCR,
+      targetCTR,
+      goalAchievement: Math.min(goalAchievement, 100),
+      revenueAchievement: Math.min(revenueAchievement, 100),
+      currentRevenue,
+      targetRevenue,
+      runRate: currentRevenue * 1.2 // Прогнозируемый доход с текущим темпом
+    };
+  };
+  
+  const stats = calculateGoalStats();
+
+  // Расчет ранрейта для конкретной кампании
+  const calculateCampaignRunRate = (campaign: CalendarCampaignEvent) => {
+    const cr = typeof campaign.cr === 'string' ? parseFloat(campaign.cr) : campaign.cr || 0;
+    const targetCR = 10; // Целевая конверсия для кампании
+    const currentDay = new Date(campaign.date).getDate();
+    const daysInMonth = 30;
+    const remainingDays = daysInMonth - currentDay;
+    
+    // Прогнозируемая конверсия к концу месяца
+    const projectedCR = cr + (cr / currentDay * remainingDays);
+    const runRatePercent = (projectedCR / targetCR) * 100;
+    
+    return {
+      currentCR: cr,
+      projectedCR,
+      targetCR,
+      runRatePercent: Math.min(runRatePercent, 150), // Ограничиваем 150%
+      daysRemaining: remainingDays
+    };
+  };
+
   return (
     <div className="p-4 md:p-6 lg:p-8" ref={calendarRef}>
+      {/* Плитка со статистикой целей */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-blue-600" />
+              <CardTitle>Прогресс к целям месяца</CardTitle>
+            </div>
+            <Badge variant="outline" className="text-sm">
+              {monthName} {currentYear}
+            </Badge>
+          </div>
+          <CardDescription>
+            Общий прогресс достижения целей по активным кампаниям
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {/* Общий прогресс к целям */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Общее достижение целей</span>
+                <span className="font-bold text-lg">{stats.goalAchievement.toFixed(1)}%</span>
+              </div>
+              <Progress value={stats.goalAchievement} className="h-2" />
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Trophy className="h-3 w-3" />
+                <span>Цель: {stats.targetCR}% CR</span>
+              </div>
+            </div>
+
+            {/* Прогресс по доходу */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Достижение по доходу</span>
+                <span className="font-bold text-lg">{stats.revenueAchievement.toFixed(1)}%</span>
+              </div>
+              <Progress value={stats.revenueAchievement} className="h-2" />
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <DollarSign className="h-3 w-3" />
+                <span>€{(stats.currentRevenue/1000).toFixed(0)}k / €{(stats.targetRevenue/1000).toFixed(0)}k</span>
+              </div>
+            </div>
+
+            {/* Run Rate */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Run Rate (прогноз)</span>
+                <span className="font-bold text-lg text-green-600">€{(stats.runRate/1000).toFixed(0)}k</span>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <Activity className="h-4 w-4 text-green-600" />
+                <span className="text-xs text-muted-foreground">
+                  Прогноз на конец месяца
+                </span>
+              </div>
+              <div className="text-xs text-green-600 font-medium">
+                +{((stats.runRate - stats.currentRevenue) / stats.currentRevenue * 100).toFixed(1)}% к текущему
+              </div>
+            </div>
+
+            {/* Активные кампании */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Активные кампании</span>
+                <span className="font-bold text-lg">{stats.activeCampaigns}/{stats.totalCampaigns}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="text-center p-2 bg-blue-50 rounded">
+                  <div className="text-xs text-muted-foreground">Ср. CTR</div>
+                  <div className="font-bold text-blue-600">{stats.avgCTR.toFixed(1)}%</div>
+                </div>
+                <div className="text-center p-2 bg-green-50 rounded">
+                  <div className="text-xs text-muted-foreground">Ср. CR</div>
+                  <div className="font-bold text-green-600">{stats.avgCR.toFixed(1)}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Предупреждение если цели под угрозой */}
+          {stats.goalAchievement < 70 && (
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                <div className="text-sm">
+                  <span className="font-medium text-amber-900">Цели месяца под угрозой</span>
+                  <p className="text-amber-700 mt-1">
+                    Текущий темп достижения целей ниже планового. Рекомендуется усилить активности 
+                    или скорректировать параметры кампаний для улучшения показателей.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
@@ -462,6 +625,48 @@ export default function CalendarPage() {
                     <div><b>Тексты:</b> {selectedCampaign.texts}</div>
                     {selectedCampaign.media && <div><b>Медиа:</b> {selectedCampaign.media}</div>}
 
+                    {/* === RUN RATE И ПРОГНОЗ === */}
+                    {(() => {
+                      const runRateData = calculateCampaignRunRate(selectedCampaign);
+                      return (
+                        <div className="mt-6 pt-4 border-t">
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-semibold text-lg flex items-center gap-2">
+                              <Activity className="h-5 w-5 text-blue-600" />
+                              Run Rate к цели
+                            </h4>
+                            <Badge variant={runRateData.runRatePercent >= 100 ? "default" : runRateData.runRatePercent >= 70 ? "secondary" : "destructive"}>
+                              {runRateData.runRatePercent.toFixed(1)}% к цели
+                            </Badge>
+                          </div>
+                          
+                          <div className="space-y-3 mb-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">Прогресс достижения цели CR</span>
+                              <span className="text-sm font-medium">{runRateData.currentCR.toFixed(1)}% / {runRateData.targetCR}%</span>
+                            </div>
+                            <Progress value={(runRateData.currentCR / runRateData.targetCR) * 100} className="h-3" />
+                            
+                            <div className="grid grid-cols-2 gap-4 mt-3">
+                              <div className="p-3 bg-blue-50 rounded-lg">
+                                <div className="text-xs text-muted-foreground mb-1">Текущий CR</div>
+                                <div className="font-bold text-lg text-blue-600">{runRateData.currentCR.toFixed(1)}%</div>
+                              </div>
+                              <div className="p-3 bg-green-50 rounded-lg">
+                                <div className="text-xs text-muted-foreground mb-1">Прогноз CR к концу месяца</div>
+                                <div className="font-bold text-lg text-green-600">{runRateData.projectedCR.toFixed(1)}%</div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <BarChart3 className="h-4 w-4" />
+                              <span>Осталось {runRateData.daysRemaining} дней до конца месяца</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                    
                     {/* === СТАТИСТИКА ЭФФЕКТИВНОСТИ === */}
                     <div className="mt-6 pt-4 border-t">
                       <div className="flex items-center justify-between mb-4">
