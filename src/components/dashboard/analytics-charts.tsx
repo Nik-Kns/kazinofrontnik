@@ -1,17 +1,6 @@
 "use client";
 
 import * as React from "react";
-import {
-  Area,
-  AreaChart,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 
 import {
   Card,
@@ -27,13 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from "@/components/ui/chart";
 import { analyticsChartsData } from "@/lib/mock-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -42,15 +24,16 @@ import { Skeleton } from "../ui/skeleton";
 import { Bot } from "lucide-react";
 
 
-const chartConfig = {
-  value: {
-    label: "Value",
-    color: "hsl(var(--primary))",
-  },
-  predictedValue: {
-    label: "Predicted",
-    color: "hsl(var(--primary))",
-  },
+// Объект для сопоставления метрик с изображениями
+const chartImages: Record<string, string> = {
+  'Retention Rate': '/charts/chart-retention_rate.svg',
+  'Conversion Rate': '/charts/chart-conversion_rate.svg',
+  'Churn Rate': '/charts/chart-churn_rate.svg',
+  'GGR': '/charts/chart-ggr.svg',
+  'ARPU': '/charts/chart-arpu.svg',
+  'LTV': '/charts/chart-ltv.svg',
+  'DAU': '/charts/chart-dau.svg',
+  'MAU': '/charts/chart-mau.svg',
 };
 
 export function AnalyticsCharts() {
@@ -134,34 +117,16 @@ export function AnalyticsCharts() {
           <div className="mt-6">
             {analyticsChartsData.map((chart) => (
               <TabsContent key={chart.title} value={chart.title}>
-                <div className="cursor-pointer" onClick={() => handleChartClick(chart.title, chart.data)}>
-                  <ChartContainer config={chartConfig} className="h-[320px] w-full">
-                    {chart.type === 'line' ? (
-                      <LineChart data={chart.data} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
-                        <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-                        <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Legend content={<ChartLegendContent />} />
-                        <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} dot={false} name="Actual" />
-                        <Line type="monotone" dataKey="predictedValue" stroke="var(--color-predictedValue)" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Predicted" />
-                      </LineChart>
-                    ) : (
-                      <AreaChart data={chart.data} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--color-value)" stopOpacity={0.8} />
-                            <stop offset="95%" stopColor="var(--color-value)" stopOpacity={0.1} />
-                          </linearGradient>
-                        </defs>
-                        <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-                        <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Legend content={<ChartLegendContent />} />
-                        <Area type="monotone" dataKey="value" stroke="var(--color-value)" fill="url(#fillValue)" strokeWidth={2} name="Actual" />
-                        <Line type="monotone" dataKey="predictedValue" stroke="var(--color-predictedValue)" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Predicted" />
-                      </AreaChart>
-                    )}
-                  </ChartContainer>
+                <div 
+                  className="cursor-pointer h-[320px] w-full bg-gray-50 rounded-lg overflow-hidden" 
+                  onClick={() => handleChartClick(chart.title, chart.data)}
+                >
+                  <img 
+                    src={chartImages[chart.title] || '/charts/chart-ggr.svg'} 
+                    alt={`Chart for ${chart.title}`}
+                    className="w-full h-full object-contain"
+                    style={{ imageRendering: 'crisp-edges' }}
+                  />
                 </div>
               </TabsContent>
             ))}

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <rect width="800" height="400" fill="#f9fafb"/>
+  
+  <!-- Grid lines -->
+  <g stroke="#e5e7eb" stroke-width="1">
+    <line x1="60" y1="50" x2="60" y2="350"/>
+    <line x1="60" y1="350" x2="740" y2="350"/>
+    <line x1="60" y1="50" x2="740" y2="50"/>
+    <line x1="60" y1="150" x2="740" y2="150"/>
+    <line x1="60" y1="250" x2="740" y2="250"/>
+  </g>
+  
+  <!-- Y-axis labels -->
+  <g fill="#6b7280" font-size="12" font-family="system-ui">
+    <text x="45" y="55" text-anchor="end">80%</text>
+    <text x="45" y="155" text-anchor="end">60%</text>
+    <text x="45" y="255" text-anchor="end">40%</text>
+    <text x="45" y="355" text-anchor="end">20%</text>
+  </g>
+  
+  <!-- X-axis labels -->
+  <g fill="#6b7280" font-size="12" font-family="system-ui">
+    <text x="120" y="375" text-anchor="middle">Day 1</text>
+    <text x="240" y="375" text-anchor="middle">Day 7</text>
+    <text x="360" y="375" text-anchor="middle">Day 14</text>
+    <text x="480" y="375" text-anchor="middle">Day 21</text>
+    <text x="600" y="375" text-anchor="middle">Day 28</text>
+    <text x="720" y="375" text-anchor="middle">Day 30</text>
+  </g>
+  
+  <!-- Chart line (actual) -->
+  <polyline
+    fill="none"
+    stroke="#2962FF"
+    stroke-width="3"
+    points="120,90 240,120 360,160 480,200 600,230"
+  />
+  
+  <!-- Chart line (predicted) -->
+  <polyline
+    fill="none"
+    stroke="#2962FF"
+    stroke-width="3"
+    stroke-dasharray="5 5"
+    points="600,230 720,250"
+  />
+  
+  <!-- Data points -->
+  <g fill="#2962FF">
+    <circle cx="120" cy="90" r="5"/>
+    <circle cx="240" cy="120" r="5"/>
+    <circle cx="360" cy="160" r="5"/>
+    <circle cx="480" cy="200" r="5"/>
+    <circle cx="600" cy="230" r="5"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">
+    Retention Rate
+  </text>
+</svg>
