@@ -38,23 +38,19 @@ const metricsConfig: MetricConfig[] = [
 
 // Функция для получения изображения графика в зависимости от метрики и периода
 const getChartImage = (metric: string, period: number): string => {
-  // Базовые URL для изображений графиков
-  const baseColors: Record<string, string> = {
-    ggr: '2962FF',
-    arpu: '9C27B0',
-    ltv: 'FF6F00',
-    dau: '00BCD4',
-    mau: 'E91E63',
-    retention1: '4CAF50',
-    retention7: 'FFC107'
+  // Используем локальные SVG файлы из public/charts/
+  const chartFiles: Record<string, string> = {
+    ggr: '/charts/chart-ggr.svg',
+    arpu: '/charts/chart-arpu.svg',
+    ltv: '/charts/chart-ltv.svg',
+    dau: '/charts/chart-dau.svg',
+    mau: '/charts/chart-mau.svg',
+    retention1: '/charts/chart-retention1.svg',
+    retention7: '/charts/chart-retention7.svg'
   };
   
-  const color = baseColors[metric] || '6B7280';
-  const metricName = metric.toUpperCase().replace('RETENTION1', 'Retention 1d').replace('RETENTION7', 'Retention 7d');
-  const periodLabel = period <= 7 ? '7d' : period <= 30 ? '30d' : '90d';
-  
-  // Возвращаем placeholder изображение с параметрами
-  return `https://via.placeholder.com/800x400/${color}/ffffff?text=${metricName}+Chart+(${periodLabel})`;
+  // Возвращаем путь к локальному SVG файлу или fallback
+  return chartFiles[metric] || '/charts/chart-ggr.svg';
 };
 
 // Моковые статистические данные

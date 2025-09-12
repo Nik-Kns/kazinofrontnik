@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <rect width="800" height="400" fill="#f9fafb"/>
+  
+  <!-- Grid lines -->
+  <g stroke="#e5e7eb" stroke-width="1">
+    <line x1="60" y1="50" x2="60" y2="350"/>
+    <line x1="60" y1="350" x2="740" y2="350"/>
+    <line x1="60" y1="50" x2="740" y2="50"/>
+    <line x1="60" y1="150" x2="740" y2="150"/>
+    <line x1="60" y1="250" x2="740" y2="250"/>
+  </g>
+  
+  <!-- Y-axis labels -->
+  <g fill="#6b7280" font-size="12" font-family="system-ui">
+    <text x="45" y="55" text-anchor="end">60K</text>
+    <text x="45" y="155" text-anchor="end">40K</text>
+    <text x="45" y="255" text-anchor="end">20K</text>
+    <text x="45" y="355" text-anchor="end">0</text>
+  </g>
+  
+  <!-- X-axis labels -->
+  <g fill="#6b7280" font-size="12" font-family="system-ui">
+    <text x="120" y="375" text-anchor="middle">Jan</text>
+    <text x="240" y="375" text-anchor="middle">Feb</text>
+    <text x="360" y="375" text-anchor="middle">Mar</text>
+    <text x="480" y="375" text-anchor="middle">Apr</text>
+    <text x="600" y="375" text-anchor="middle">May</text>
+    <text x="720" y="375" text-anchor="middle">Jun</text>
+  </g>
+  
+  <!-- Chart line -->
+  <polyline
+    fill="none"
+    stroke="#E91E63"
+    stroke-width="3"
+    points="120,250 240,220 360,190 480,150 600,110 720,80"
+  />
+  
+  <!-- Data points -->
+  <g fill="#E91E63">
+    <circle cx="120" cy="250" r="5"/>
+    <circle cx="240" cy="220" r="5"/>
+    <circle cx="360" cy="190" r="5"/>
+    <circle cx="480" cy="150" r="5"/>
+    <circle cx="600" cy="110" r="5"/>
+    <circle cx="720" cy="80" r="5"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">
+    Monthly Active Users (MAU)
+  </text>
+</svg>

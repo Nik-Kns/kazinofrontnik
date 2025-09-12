@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <rect width="800" height="400" fill="#f9fafb"/>
+  
+  <!-- Grid lines -->
+  <g stroke="#e5e7eb" stroke-width="1">
+    <line x1="60" y1="50" x2="60" y2="350"/>
+    <line x1="60" y1="350" x2="740" y2="350"/>
+    <line x1="60" y1="50" x2="740" y2="50"/>
+    <line x1="60" y1="150" x2="740" y2="150"/>
+    <line x1="60" y1="250" x2="740" y2="250"/>
+  </g>
+  
+  <!-- Y-axis labels -->
+  <g fill="#6b7280" font-size="12" font-family="system-ui">
+    <text x="45" y="55" text-anchor="end">3000</text>
+    <text x="45" y="155" text-anchor="end">2000</text>
+    <text x="45" y="255" text-anchor="end">1000</text>
+    <text x="45" y="355" text-anchor="end">0</text>
+  </g>
+  
+  <!-- X-axis labels -->
+  <g fill="#6b7280" font-size="12" font-family="system-ui">
+    <text x="120" y="375" text-anchor="middle">Day 1</text>
+    <text x="240" y="375" text-anchor="middle">Day 2</text>
+    <text x="360" y="375" text-anchor="middle">Day 3</text>
+    <text x="480" y="375" text-anchor="middle">Day 4</text>
+    <text x="600" y="375" text-anchor="middle">Day 5</text>
+    <text x="720" y="375" text-anchor="middle">Day 6</text>
+  </g>
+  
+  <!-- Chart line -->
+  <polyline
+    fill="none"
+    stroke="#00BCD4"
+    stroke-width="3"
+    points="120,200 240,180 360,190 480,150 600,120 720,100"
+  />
+  
+  <!-- Data points -->
+  <g fill="#00BCD4">
+    <circle cx="120" cy="200" r="5"/>
+    <circle cx="240" cy="180" r="5"/>
+    <circle cx="360" cy="190" r="5"/>
+    <circle cx="480" cy="150" r="5"/>
+    <circle cx="600" cy="120" r="5"/>
+    <circle cx="720" cy="100" r="5"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">
+    Daily Active Users (DAU)
+  </text>
+</svg>
