@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Brain, TrendingUp, AlertTriangle, Lightbulb } from "lucide-react";
 import { campaignsData } from "@/lib/mock-data";
 import { ChevronLeft, ChevronRight, PlusCircle, ArrowLeft, DollarSign, Settings } from "lucide-react";
 import { useState, useRef } from "react";
@@ -566,6 +567,124 @@ export default function CalendarPage() {
               )}
             </DialogContent>
           </Dialog>
+        </CardContent>
+      </Card>
+
+      {/* AI Рекомендации */}
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-blue-600" />
+            <CardTitle>AI Рекомендации</CardTitle>
+          </div>
+          <CardDescription>
+            Персонализированные инсайты и предложения на основе анализа календаря кампаний
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            {/* Оптимизация расписания */}
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-start gap-3">
+                <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
+                <div className="space-y-2 flex-1">
+                  <h4 className="font-semibold text-blue-900">Оптимизация расписания</h4>
+                  <p className="text-sm text-blue-700">
+                    Обнаружено перекрытие кампаний для сегмента "VIP" 15 и 18 июля. 
+                    Рекомендуем перенести кампанию "Турнир выходного дня" на 20 июля для 
+                    избежания усталости от коммуникаций.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="text-blue-600 border-blue-300 hover:bg-blue-100">
+                      Применить рекомендацию
+                    </Button>
+                    <Button size="sm" variant="ghost" className="text-blue-600">
+                      Подробнее
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Предупреждение о конфликтах */}
+            <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                <div className="space-y-2 flex-1">
+                  <h4 className="font-semibold text-amber-900">Конфликт каналов</h4>
+                  <p className="text-sm text-amber-700">
+                    22 июля запланировано 3 email-кампании для сегмента "Новые игроки". 
+                    Высокий риск снижения Open Rate из-за перегрузки канала. 
+                    Рекомендуем использовать мультиканальный подход: Email + Push + InApp.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="text-amber-600 border-amber-300 hover:bg-amber-100">
+                      Перераспределить каналы
+                    </Button>
+                    <Button size="sm" variant="ghost" className="text-amber-600">
+                      Игнорировать
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Новые возможности */}
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-start gap-3">
+                <Lightbulb className="h-5 w-5 text-green-600 mt-0.5" />
+                <div className="space-y-2 flex-1">
+                  <h4 className="font-semibold text-green-900">Упущенная возможность</h4>
+                  <p className="text-sm text-green-700">
+                    Сегмент "Спящие игроки" не имеет запланированных кампаний на последнюю 
+                    неделю июля. На основе исторических данных, реактивационная кампания 
+                    в этот период может принести дополнительно €45,000 в GGR.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                      Создать кампанию с AI
+                    </Button>
+                    <Button size="sm" variant="ghost" className="text-green-600">
+                      Анализ данных
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Прогноз эффективности */}
+            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="flex items-start gap-3">
+                <Brain className="h-5 w-5 text-purple-600 mt-0.5" />
+                <div className="space-y-2 flex-1">
+                  <h4 className="font-semibold text-purple-900">Прогноз месяца</h4>
+                  <p className="text-sm text-purple-700">
+                    На основе текущего расписания кампаний прогнозируемые показатели на июль:
+                  </p>
+                  <div className="grid grid-cols-3 gap-3 mt-2">
+                    <div className="bg-white p-2 rounded border border-purple-200">
+                      <div className="text-xs text-purple-600">Охват</div>
+                      <div className="font-bold text-purple-900">85.4%</div>
+                      <div className="text-xs text-green-600">↑ 12% vs июнь</div>
+                    </div>
+                    <div className="bg-white p-2 rounded border border-purple-200">
+                      <div className="text-xs text-purple-600">Ожидаемый GGR</div>
+                      <div className="font-bold text-purple-900">€425K</div>
+                      <div className="text-xs text-green-600">↑ 8% vs июнь</div>
+                    </div>
+                    <div className="bg-white p-2 rounded border border-purple-200">
+                      <div className="text-xs text-purple-600">ROI</div>
+                      <div className="font-bold text-purple-900">312%</div>
+                      <div className="text-xs text-green-600">↑ 15% vs июнь</div>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" className="text-purple-600 border-purple-300 hover:bg-purple-100 mt-3">
+                    Детальный прогноз
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

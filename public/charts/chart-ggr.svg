@@ -1,0 +1,28 @@
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#f8f9fa"/>
+  <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#2962FF">GGR Chart</text>
+  
+  <!-- Grid lines -->
+  <line x1="50" y1="350" x2="750" y2="350" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="50" y1="280" x2="750" y2="280" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2,2"/>
+  <line x1="50" y1="210" x2="750" y2="210" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2,2"/>
+  <line x1="50" y1="140" x2="750" y2="140" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2,2"/>
+  <line x1="50" y1="70" x2="750" y2="70" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2,2"/>
+  
+  <!-- Chart line -->
+  <polyline points="50,300 150,250 250,220 350,180 450,150 550,120 650,100 750,80" 
+            fill="none" stroke="#2962FF" stroke-width="3"/>
+  
+  <!-- Data points -->
+  <circle cx="50" cy="300" r="4" fill="#2962FF"/>
+  <circle cx="150" cy="250" r="4" fill="#2962FF"/>
+  <circle cx="250" cy="220" r="4" fill="#2962FF"/>
+  <circle cx="350" cy="180" r="4" fill="#2962FF"/>
+  <circle cx="450" cy="150" r="4" fill="#2962FF"/>
+  <circle cx="550" cy="120" r="4" fill="#2962FF"/>
+  <circle cx="650" cy="100" r="4" fill="#2962FF"/>
+  <circle cx="750" cy="80" r="4" fill="#2962FF"/>
+  
+  <!-- Trend indicator -->
+  <text x="720" y="380" font-size="14" fill="#10b981">↑ +13.5%</text>
+</svg>

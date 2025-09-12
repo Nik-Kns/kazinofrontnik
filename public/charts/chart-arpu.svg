@@ -1,0 +1,28 @@
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#f8f9fa"/>
+  <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#9C27B0">ARPU Chart</text>
+  
+  <!-- Grid lines -->
+  <line x1="50" y1="350" x2="750" y2="350" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="50" y1="280" x2="750" y2="280" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2,2"/>
+  <line x1="50" y1="210" x2="750" y2="210" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2,2"/>
+  <line x1="50" y1="140" x2="750" y2="140" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2,2"/>
+  <line x1="50" y1="70" x2="750" y2="70" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2,2"/>
+  
+  <!-- Chart line -->
+  <polyline points="50,280 150,260 250,240 350,200 450,180 550,160 650,140 750,120" 
+            fill="none" stroke="#9C27B0" stroke-width="3"/>
+  
+  <!-- Data points -->
+  <circle cx="50" cy="280" r="4" fill="#9C27B0"/>
+  <circle cx="150" cy="260" r="4" fill="#9C27B0"/>
+  <circle cx="250" cy="240" r="4" fill="#9C27B0"/>
+  <circle cx="350" cy="200" r="4" fill="#9C27B0"/>
+  <circle cx="450" cy="180" r="4" fill="#9C27B0"/>
+  <circle cx="550" cy="160" r="4" fill="#9C27B0"/>
+  <circle cx="650" cy="140" r="4" fill="#9C27B0"/>
+  <circle cx="750" cy="120" r="4" fill="#9C27B0"/>
+  
+  <!-- Trend indicator -->
+  <text x="720" y="380" font-size="14" fill="#10b981">↑ +8.0%</text>
+</svg>
