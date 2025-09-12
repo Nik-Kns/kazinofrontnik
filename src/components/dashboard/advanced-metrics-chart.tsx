@@ -42,15 +42,23 @@ const metricsConfig: Record<string, { name: string; color: string; unit: string 
 
 // Функция для получения изображения графика
 const getChartImage = (metrics: string[], chartType: string, dateRange: number): string => {
-  // Формируем текст для изображения
-  const metricNames = metrics.map(m => metricsConfig[m]?.name || m).join('+');
-  const periodLabel = dateRange <= 7 ? '7d' : dateRange <= 30 ? '30d' : '90d';
-  const typeLabel = chartType === 'bar' ? 'Bar' : chartType === 'composed' ? 'Mixed' : 'Line';
+  // Мапинг метрик на локальные SVG файлы
+  const chartFiles: Record<string, string> = {
+    ggr: '/charts/chart-ggr.svg',
+    arpu: '/charts/chart-arpu.svg',
+    ltv: '/charts/chart-ltv.svg',
+    dau: '/charts/chart-dau.svg',
+    mau: '/charts/chart-mau.svg',
+    retention_rate: '/charts/chart-retention_rate.svg',
+    churn_rate: '/charts/chart-churn_rate.svg',
+    conversion_rate: '/charts/chart-conversion_rate.svg',
+    crm_spend: '/charts/chart-ggr.svg', // fallback to ggr
+    bonus_utilization: '/charts/chart-conversion_rate.svg' // fallback to conversion
+  };
   
-  // Цвет основной метрики
-  const primaryColor = metricsConfig[metrics[0]]?.color?.replace('#', '') || '6B7280';
-  
-  return `https://via.placeholder.com/800x400/${primaryColor}/ffffff?text=${metricNames}+${typeLabel}+Chart+(${periodLabel})`;
+  // Возвращаем путь к локальному SVG файлу для первой метрики
+  const primaryMetric = metrics[0];
+  return chartFiles[primaryMetric] || '/charts/chart-ggr.svg';
 };
 
 // Моковые статистические данные
