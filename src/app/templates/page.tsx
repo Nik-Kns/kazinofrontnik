@@ -62,66 +62,94 @@ const channelIcons: Record<string, React.ElementType> = {
 };
 
 
-// ИИ-рекомендации для шаблонов
+// ИИ-рекомендации для шаблонов с реалистичными метриками
 const aiTemplateRecommendations = [
   {
     id: '1',
     priority: 'critical',
-    title: 'Внедрить Drip-кампанию для новых игроков',
-    description: '78% новых регистраций не делают депозит в первые 24 часа',
-    impact: '+45% конверсия FTD',
-    metric: '+45% FTD конверсия',
+    title: 'Создать Welcome Flow для новых регистраций',
+    description: 'Сейчас без коммуникаций остаются 82% новых игроков из сегмента "Регистрации без депозита" (12,450 игроков)',
+    impact: 'Покроет 82% сегмента',
+    metric: '+35% FTD из этого сегмента',
+    coverage: '12,450 игроков',
     geo: ['DE', 'AT', 'CH'],
-    segment: 'Новые регистрации',
+    segment: 'Регистрации без депозита',
     channels: ['Email', 'Push', 'SMS'],
     templateId: 'welcome-series',
     scenarioParams: {
       type: 'drip-campaign',
-      steps: 7,
-      duration: '7 days',
+      steps: 5,
+      duration: '5 days',
       channels: ['email', 'push', 'sms'],
-      targetSegment: 'new_registrations',
-      expectedConversion: '45%'
+      targetSegment: 'registrations_no_deposit',
+      expectedConversion: '35%',
+      estimatedRevenue: '€187,500/мес'
     }
   },
   {
     id: '2',
     priority: 'high',
-    title: 'Создать триггеры для брошенных корзин',
-    description: '4,230 брошенных корзин ежедневно со средней суммой €85',
-    impact: '+18% возврат корзин',
-    metric: '+18% возврат депозитов',
-    geo: ['UK', 'IE'],
-    segment: 'Незавершенные депозиты',
-    channels: ['Email', 'Push'],
-    templateId: 'abandoned-cart',
+    title: 'Триггер возврата для VIP в риске оттока',
+    description: 'Не охвачено 68% VIP-игроков с признаками снижения активности (856 игроков со средним депозитом €2,300)',
+    impact: 'Покроет 68% VIP сегмента',
+    metric: '+42% удержание VIP',
+    coverage: '856 VIP игроков',
+    geo: ['UK', 'IE', 'DE'],
+    segment: 'VIP в риске оттока',
+    channels: ['Email', 'SMS', 'Персональный звонок'],
+    templateId: 'vip-retention',
     scenarioParams: {
       type: 'trigger-based',
-      trigger: 'cart_abandoned',
-      delay: '1 hour',
-      channels: ['email', 'push'],
-      incentive: '10% bonus',
-      expectedRecovery: '18%'
+      trigger: 'activity_decline',
+      delay: '24 hours',
+      channels: ['email', 'sms', 'call'],
+      incentive: 'Персональный кешбэк 15%',
+      expectedRecovery: '42%',
+      estimatedRevenue: '€823,000/мес'
     }
   },
   {
     id: '3', 
-    priority: 'medium',
-    title: 'Запустить персонализированные турниры',
-    description: 'Только 12% активных игроков участвуют в турнирах',
-    impact: '+25% DAU',
-    metric: '+13% участников турниров',
-    geo: ['FR', 'BE', 'LU'],
-    segment: 'Активные игроки',
-    channels: ['Push', 'In-App'],
-    templateId: 'tournament-invite',
+    priority: 'high',
+    title: 'Реактивация спящих слотеров',
+    description: 'Упускаем 74% игроков слотов без активности 14+ дней (8,920 игроков со средним LTV €340)',
+    impact: 'Покроет 74% спящих',
+    metric: '+28% реактивация',
+    coverage: '8,920 игроков',
+    geo: ['FR', 'ES', 'IT'],
+    segment: 'Спящие любители слотов',
+    channels: ['Email', 'Push'],
+    templateId: 'slots-reactivation',
     scenarioParams: {
-      type: 'engagement',
-      frequency: 'weekly',
-      prizePool: 5000,
-      channels: ['push', 'in-app'],
-      targetSegment: 'active_players',
-      expectedParticipation: '35%'
+      type: 'reactivation',
+      frequency: 'bi-weekly',
+      offer: '50 фриспинов',
+      channels: ['email', 'push'],
+      targetSegment: 'dormant_slots_players',
+      expectedParticipation: '28%',
+      estimatedRevenue: '€267,000/мес'
+    }
+  },
+  {
+    id: '4',
+    priority: 'medium',
+    title: 'День рождения для лояльных игроков',
+    description: 'Не поздравляем 91% игроков с днем рождения из сегмента "Активные 30д+" (3,240 игроков в месяц)',
+    impact: 'Покроет 91% именинников',
+    metric: '+65% депозитов в ДР',
+    coverage: '3,240 игроков/мес',
+    geo: ['Все регионы'],
+    segment: 'Активные игроки 30д+',
+    channels: ['Email', 'SMS', 'Push'],
+    templateId: 'birthday-bonus',
+    scenarioParams: {
+      type: 'event-based',
+      trigger: 'birthday',
+      delay: '0 hours',
+      channels: ['email', 'sms', 'push'],
+      incentive: '100% бонус до €100',
+      expectedConversion: '65%',
+      estimatedRevenue: '€97,200/мес'
     }
   }
 ];
@@ -250,12 +278,12 @@ export default function TemplatesPage() {
             </div>
             <Badge variant="secondary">
               <Sparkles className="mr-1 h-3 w-3" />
-              Потенциал: +28% общей конверсии
+              Потенциал: €1.37M дополнительного дохода/мес
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {aiTemplateRecommendations.map((rec) => (
               <div 
                 key={rec.id}
@@ -296,22 +324,41 @@ export default function TemplatesPage() {
                       <TrendingUp className="h-3 w-3 text-green-600" />
                       <span className="font-bold text-green-700">{rec.metric}</span>
                     </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <Users className="h-3 w-3 text-blue-600" />
+                      <span className="font-bold text-blue-700">{rec.coverage}</span>
+                    </div>
                     <div className="flex flex-wrap gap-1">
                       <Badge variant="outline" className="text-xs">
                         <Target className="mr-1 h-2.5 w-2.5" />
                         {rec.segment}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
-                        GEO: {rec.geo.join(', ')}
+                        {rec.impact}
                       </Badge>
                     </div>
                     <div className="flex gap-1">
-                      {rec.channels.map(channel => (
+                      {rec.channels.slice(0, 2).map(channel => (
                         <Badge key={channel} variant="secondary" className="text-xs">
                           {channel}
                         </Badge>
                       ))}
+                      {rec.channels.length > 2 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{rec.channels.length - 2}
+                        </Badge>
+                      )}
                     </div>
+                    {rec.scenarioParams?.estimatedRevenue && (
+                      <div className="pt-1 border-t">
+                        <div className="flex items-center gap-1 text-xs">
+                          <DollarSign className="h-3 w-3 text-green-600" />
+                          <span className="font-bold text-green-700">
+                            {rec.scenarioParams.estimatedRevenue}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <Button 
@@ -342,9 +389,10 @@ export default function TemplatesPage() {
             <div className="flex items-start gap-2">
               <Clock className="h-4 w-4 text-blue-600 mt-0.5" />
               <div className="text-sm">
-                <p className="font-medium text-blue-900">Совет</p>
+                <p className="font-medium text-blue-900">Рекомендация ИИ</p>
                 <p className="text-blue-700">
-                  Начните с критичных шаблонов - они дают максимальный ROI в первые 30 дней.
+                  Начните с шаблона "Welcome Flow" - он покроет 82% неохваченного сегмента новых регистраций и даст быстрый прирост FTD на 35%. 
+                  Затем внедрите VIP-триггер для защиты высокодоходных игроков.
                 </p>
               </div>
             </div>
