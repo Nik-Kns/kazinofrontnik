@@ -27,7 +27,8 @@ import {
   ChevronUp,
   ChevronDown,
   Shield,
-  Settings
+  Settings,
+  FileText
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
