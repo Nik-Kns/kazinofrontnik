@@ -9,6 +9,8 @@ import {
   Moon,
   Sun,
   Settings,
+  PiggyBank,
+  Zap,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +36,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const [brand, setBrand] = React.useState<string>("aigaming");
   const [theme, setTheme] = React.useState<"light" | "dark">("light");
   const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = React.useState(false);
+  const [economyMode, setEconomyMode] = React.useState(false);
   
   const { state: currencyState } = useCurrency();
   const BRAND_OPTIONS = React.useMemo(
@@ -67,6 +70,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         setTheme("dark");
       }
+      // Загружаем режим экономии
+      const savedEconomyMode = localStorage.getItem("aiEconomyMode");
+      setEconomyMode(savedEconomyMode === "true");
     } catch {}
   }, []);
 
@@ -169,6 +175,21 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
           
+          {/* Индикатор режима экономии ИИ */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border">
+            {economyMode ? (
+              <>
+                <PiggyBank className="h-4 w-4 text-green-600" />
+                <span className="text-xs font-medium text-green-600">Экономный режим</span>
+              </>
+            ) : (
+              <>
+                <Zap className="h-4 w-4 text-blue-600" />
+                <span className="text-xs font-medium text-blue-600">Базовый режим</span>
+              </>
+            )}
+          </div>
+
           {/* Базовая валюта */}
           <Button 
             variant="outline" 

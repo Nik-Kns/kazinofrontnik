@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { WebhookLogsTable } from "@/components/settings/webhook-logs-table";
+import { AICostTracking } from "@/components/settings/ai-cost-tracking";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -225,11 +226,12 @@ export default function SettingsPage() {
         )}
       </div>
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 mb-6">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 mb-6">
           <TabsTrigger value="profile"><CircleUserRound className="mr-2 h-4 w-4" />Профиль</TabsTrigger>
           <TabsTrigger value="metrics"><Target className="mr-2 h-4 w-4" />Метрики</TabsTrigger>
           <TabsTrigger value="access"><ShieldCheck className="mr-2 h-4 w-4" />Доступ</TabsTrigger>
           <TabsTrigger value="integrations"><LinkIcon className="mr-2 h-4 w-4" />Интеграции</TabsTrigger>
+          <TabsTrigger value="ai-costs"><DollarSign className="mr-2 h-4 w-4" />ИИ Расходы</TabsTrigger>
           <TabsTrigger value="webhooks"><History className="mr-2 h-4 w-4" />Логи</TabsTrigger>
           <TabsTrigger value="variables"><Variable className="mr-2 h-4 w-4" />Переменные</TabsTrigger>
           <TabsTrigger value="notifications"><Bell className="mr-2 h-4 w-4" />Уведомления</TabsTrigger>
@@ -915,6 +917,10 @@ export default function SettingsPage() {
                 <p>Здесь будет интерфейс для создания и редактирования переменных (например, ссылки, промокоды).</p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="ai-costs">
+          <AICostTracking />
         </TabsContent>
 
         <TabsContent value="notifications">
