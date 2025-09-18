@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-// Просто перенаправляем на основную страницу builder с правильным ID
-export default function NewScenarioPage() {
+function NewScenarioRedirect() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -18,4 +17,13 @@ export default function NewScenarioPage() {
   }, [searchParams, router]);
   
   return null;
+}
+
+// Оборачиваем в Suspense для useSearchParams
+export default function NewScenarioPage() {
+  return (
+    <Suspense fallback={null}>
+      <NewScenarioRedirect />
+    </Suspense>
+  );
 }

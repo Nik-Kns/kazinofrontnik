@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import ReactFlow, {
   Background,
@@ -15,6 +15,7 @@ import ReactFlow, {
   Node,
   NodeTypes,
   MarkerType,
+  BackgroundVariant,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -315,7 +316,7 @@ const draggableElements = {
   ]
 };
 
-export default function ScenarioBuilderPage() {
+function ScenarioBuilder() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -553,7 +554,7 @@ export default function ScenarioBuilderPage() {
           fitView
           className="bg-gray-50 dark:bg-gray-950"
         >
-          <Background variant="dots" gap={12} size={1} />
+          <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
           <Controls />
           <MiniMap />
         </ReactFlow>
@@ -820,5 +821,14 @@ export default function ScenarioBuilderPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+// Экспортируем компонент обернутый в Suspense
+export default function ScenarioBuilderPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Загрузка...</div>}>
+      <ScenarioBuilder />
+    </Suspense>
   );
 }
