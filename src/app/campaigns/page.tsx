@@ -349,6 +349,318 @@ const allCampaigns = [
       bonusUsage: 60.0,
       avgDeposit: 150.0
     }
+  },
+  {
+    id: "11",
+    name: "День рождения VIP клиентов",
+    type: "vip",
+    status: "active",
+    startDate: "2024-01-01",
+    endDate: null,
+    sent: 89,
+    opened: 87,
+    clicked: 76,
+    converted: 68,
+    revenue: "€34,560",
+    roi: "+890%",
+    metrics: {
+      conversionRate: 76.4,
+      bonusUsage: 94.1,
+      avgDeposit: 508.24,
+      openRate: 97.8,
+      clickRate: 85.4
+    },
+    targets: {
+      conversionRate: 50.0,
+      bonusUsage: 80.0,
+      avgDeposit: 300.0
+    }
+  },
+  {
+    id: "12",
+    name: "Winback 60+ дней неактивности",
+    type: "reactivation",
+    status: "completed",
+    startDate: "2024-01-02",
+    endDate: "2024-01-14",
+    sent: 5678,
+    opened: 1234,
+    clicked: 456,
+    converted: 234,
+    revenue: "€45,670",
+    roi: "+234%",
+    metrics: {
+      conversionRate: 4.1,
+      bonusUsage: 67.9,
+      avgDeposit: 195.17,
+      openRate: 21.7,
+      clickRate: 8.0
+    },
+    targets: {
+      conversionRate: 5.0,
+      bonusUsage: 60.0,
+      avgDeposit: 150.0
+    }
+  },
+  {
+    id: "13",
+    name: "Антифрод кампания - верификация",
+    type: "welcome",
+    status: "active",
+    startDate: "2024-01-10",
+    endDate: null,
+    sent: 3456,
+    opened: 2890,
+    clicked: 2345,
+    converted: 1890,
+    revenue: "€0",
+    roi: "N/A",
+    metrics: {
+      conversionRate: 54.7,
+      bonusUsage: 0,
+      avgDeposit: 0,
+      openRate: 83.7,
+      clickRate: 67.9
+    },
+    targets: {
+      conversionRate: 40.0,
+      bonusUsage: 0,
+      avgDeposit: 0
+    }
+  },
+  {
+    id: "14",
+    name: "Турнир Новогодний Джекпот",
+    type: "tournament",
+    status: "completed",
+    startDate: "2023-12-28",
+    endDate: "2024-01-03",
+    sent: 12456,
+    opened: 10234,
+    clicked: 6789,
+    converted: 3456,
+    revenue: "€567,890",
+    roi: "+1234%",
+    metrics: {
+      conversionRate: 27.7,
+      bonusUsage: 89.3,
+      avgDeposit: 164.47,
+      openRate: 82.2,
+      clickRate: 54.5
+    },
+    targets: {
+      conversionRate: 20.0,
+      bonusUsage: 70.0,
+      avgDeposit: 120.0
+    }
+  },
+  {
+    id: "15",
+    name: "VIP апселл - премиум статус",
+    type: "vip",
+    status: "scheduled",
+    startDate: "2024-01-22",
+    endDate: null,
+    sent: 0,
+    opened: 0,
+    clicked: 0,
+    converted: 0,
+    revenue: "€0",
+    roi: "—",
+    metrics: {
+      conversionRate: 0,
+      bonusUsage: 0,
+      avgDeposit: 0,
+      openRate: 0,
+      clickRate: 0
+    },
+    targets: {
+      conversionRate: 35.0,
+      bonusUsage: 60.0,
+      avgDeposit: 1000.0
+    }
+  },
+  {
+    id: "16",
+    name: "Понедельничный бустер",
+    type: "tournament",
+    status: "active",
+    startDate: "2024-01-15",
+    endDate: null,
+    sent: 6789,
+    opened: 4567,
+    clicked: 2345,
+    converted: 1234,
+    revenue: "€89,760",
+    roi: "+456%",
+    metrics: {
+      conversionRate: 18.2,
+      bonusUsage: 73.4,
+      avgDeposit: 72.75,
+      openRate: 67.3,
+      clickRate: 34.5
+    },
+    targets: {
+      conversionRate: 15.0,
+      bonusUsage: 65.0,
+      avgDeposit: 75.0
+    }
+  },
+  {
+    id: "17",
+    name: "Реактивация чурнеров высокого риска",
+    type: "reactivation",
+    status: "draft",
+    startDate: "2024-01-25",
+    endDate: null,
+    sent: 0,
+    opened: 0,
+    clicked: 0,
+    converted: 0,
+    revenue: "€0",
+    roi: "—",
+    metrics: {
+      conversionRate: 0,
+      bonusUsage: 0,
+      avgDeposit: 0,
+      openRate: 0,
+      clickRate: 0
+    },
+    targets: {
+      conversionRate: 8.0,
+      bonusUsage: 55.0,
+      avgDeposit: 250.0
+    }
+  },
+  {
+    id: "18",
+    name: "Flash Sale Пятничная распродажа",
+    type: "tournament",
+    status: "completed",
+    startDate: "2024-01-12",
+    endDate: "2024-01-12",
+    sent: 8901,
+    opened: 7234,
+    clicked: 4567,
+    converted: 2345,
+    revenue: "€234,560",
+    roi: "+789%",
+    metrics: {
+      conversionRate: 26.3,
+      bonusUsage: 91.2,
+      avgDeposit: 100.02,
+      openRate: 81.3,
+      clickRate: 51.3
+    },
+    targets: {
+      conversionRate: 20.0,
+      bonusUsage: 80.0,
+      avgDeposit: 80.0
+    }
+  },
+  {
+    id: "19",
+    name: "Приветственная серия - день 1",
+    type: "welcome",
+    status: "active",
+    startDate: "2024-01-01",
+    endDate: null,
+    sent: 4567,
+    opened: 3890,
+    clicked: 2345,
+    converted: 1567,
+    revenue: "€78,350",
+    roi: "+567%",
+    metrics: {
+      conversionRate: 34.3,
+      bonusUsage: 87.6,
+      avgDeposit: 50.00,
+      openRate: 85.2,
+      clickRate: 51.3
+    },
+    targets: {
+      conversionRate: 25.0,
+      bonusUsage: 70.0,
+      avgDeposit: 50.0
+    }
+  },
+  {
+    id: "20",
+    name: "VIP персональный менеджер",
+    type: "vip",
+    status: "paused",
+    startDate: "2024-01-08",
+    endDate: null,
+    sent: 234,
+    opened: 223,
+    clicked: 198,
+    converted: 145,
+    revenue: "€234,567",
+    roi: "+2345%",
+    metrics: {
+      conversionRate: 62.0,
+      bonusUsage: 45.6,
+      avgDeposit: 1617.70,
+      openRate: 95.3,
+      clickRate: 84.6
+    },
+    targets: {
+      conversionRate: 40.0,
+      bonusUsage: 30.0,
+      avgDeposit: 1500.0
+    }
+  },
+  {
+    id: "21",
+    name: "Турнир выходного дня",
+    type: "tournament",
+    status: "scheduled",
+    startDate: "2024-01-20",
+    endDate: "2024-01-21",
+    sent: 0,
+    opened: 0,
+    clicked: 0,
+    converted: 0,
+    revenue: "€0",
+    roi: "—",
+    metrics: {
+      conversionRate: 0,
+      bonusUsage: 0,
+      avgDeposit: 0,
+      openRate: 0,
+      clickRate: 0
+    },
+    targets: {
+      conversionRate: 22.0,
+      bonusUsage: 75.0,
+      avgDeposit: 125.0
+    }
+  },
+  {
+    id: "22",
+    name: "Автоматическая реактивация 7 дней",
+    type: "reactivation",
+    status: "active",
+    startDate: "2024-01-05",
+    endDate: null,
+    sent: 7890,
+    opened: 4567,
+    clicked: 2345,
+    converted: 1234,
+    revenue: "€123,400",
+    roi: "+345%",
+    metrics: {
+      conversionRate: 15.6,
+      bonusUsage: 78.9,
+      avgDeposit: 100.00,
+      openRate: 57.9,
+      clickRate: 29.7
+    },
+    targets: {
+      conversionRate: 12.0,
+      bonusUsage: 70.0,
+      avgDeposit: 100.0
+    }
   }
 ];
 
@@ -933,10 +1245,18 @@ function CampaignsContent() {
       {/* Табы с кампаниями */}
       <Tabs defaultValue="active" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="active">Активные</TabsTrigger>
-          <TabsTrigger value="scheduled">Запланированные</TabsTrigger>
-          <TabsTrigger value="drafts">Черновики</TabsTrigger>
-          <TabsTrigger value="completed">Завершенные</TabsTrigger>
+          <TabsTrigger value="active">
+            Активные ({allCampaigns.filter(c => c.status === "active").length})
+          </TabsTrigger>
+          <TabsTrigger value="scheduled">
+            Запланированные ({allCampaigns.filter(c => c.status === "scheduled").length})
+          </TabsTrigger>
+          <TabsTrigger value="drafts">
+            Черновики ({allCampaigns.filter(c => c.status === "draft").length + templateCampaigns.length})
+          </TabsTrigger>
+          <TabsTrigger value="completed">
+            Завершенные ({allCampaigns.filter(c => c.status === "completed" || c.status === "failed" || c.status === "paused").length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">
@@ -1079,108 +1399,293 @@ function CampaignsContent() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="scheduled">
-          {allCampaigns.filter(c => c.status === "scheduled").map((campaign) => (
-            <Card key={campaign.id}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">{campaign.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Запланирована на {campaign.startDate}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Edit className="mr-2 h-4 w-4" />
-                      Изменить
-                    </Button>
-                    <Button size="sm">
-                      <Play className="mr-2 h-4 w-4" />
-                      Запустить сейчас
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="drafts" className="space-y-4">
-          {templateCampaigns.length === 0 ? (
+        <TabsContent value="scheduled" className="space-y-4">
+          {allCampaigns.filter(c => c.status === "scheduled").length === 0 ? (
             <Card>
               <CardContent className="p-6 text-center">
                 <p className="text-muted-foreground">
-                  Нет черновиков кампаний. Создайте кампанию из шаблона на странице шаблонов.
+                  Нет запланированных кампаний.
                 </p>
               </CardContent>
             </Card>
           ) : (
-            templateCampaigns.map((campaign) => (
-              <Card 
-                key={campaign.id}
-                className={cn(
-                  "transition-all",
-                  highlightedCampaign === campaign.id && "ring-2 ring-primary ring-offset-2"
-                )}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="p-2 rounded-lg bg-gray-100">
-                        <Contact className="h-5 w-5 text-gray-600" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold">{campaign.name}</h3>
-                          <Badge variant="secondary">Черновик</Badge>
-                          {highlightedCampaign === campaign.id && (
-                            <Badge className="bg-green-100 text-green-700">Новая</Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {campaign.description}
-                        </p>
-                        <div className="flex gap-4 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{campaign.category}</Badge>
+            <div className="grid gap-4">
+              {allCampaigns.filter(c => c.status === "scheduled").map((campaign) => {
+                const type = campaignTypes.find(t => t.id === campaign.type);
+                return (
+                  <Card key={campaign.id}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={cn("p-2 rounded-lg", type?.bgColor)}>
+                            {(() => {
+                              const Icon = type?.icon || Contact;
+                              return <Icon className={cn("h-5 w-5", type?.color)} />;
+                            })()}
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Канал:</span>
-                            <span>{campaign.channel}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Создана:</span>
-                            <span>{new Date(campaign.createdAt).toLocaleDateString('ru-RU')}</span>
+                          <div>
+                            <h3 className="font-semibold">{campaign.name}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Запланирована на {campaign.startDate}
+                            </p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline">{type?.name}</Badge>
+                              <Badge variant="secondary">
+                                Цель: {campaign.targets.conversionRate}% CR
+                              </Badge>
+                            </div>
                           </div>
                         </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Изменить
+                          </Button>
+                          <Button size="sm">
+                            <Play className="mr-2 h-4 w-4" />
+                            Запустить сейчас
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="mr-2 h-4 w-4" />
-                        Настроить
-                      </Button>
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                        <Play className="mr-2 h-4 w-4" />
-                        Запустить
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           )}
         </TabsContent>
 
-        <TabsContent value="completed">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">
-                Нет завершенных кампаний.
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="drafts" className="space-y-4">
+          {allCampaigns.filter(c => c.status === "draft").length === 0 && templateCampaigns.length === 0 ? (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-muted-foreground">
+                  Нет черновиков кампаний. Создайте новую кампанию или выберите шаблон.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {allCampaigns.filter(c => c.status === "draft").map((campaign) => {
+                const type = campaignTypes.find(t => t.id === campaign.type);
+                return (
+                  <Card key={campaign.id}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                          <div className={cn("p-2 rounded-lg", type?.bgColor)}>
+                            {(() => {
+                              const Icon = type?.icon || Contact;
+                              return <Icon className={cn("h-5 w-5", type?.color)} />;
+                            })()}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold">{campaign.name}</h3>
+                              <Badge variant="secondary">Черновик</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Планируется запуск: {campaign.startDate}
+                            </p>
+                            <div className="flex gap-4 text-sm">
+                              <Badge variant="outline">{type?.name}</Badge>
+                              <span className="text-muted-foreground">
+                                Цель: {campaign.targets.conversionRate}% CR, €{campaign.targets.avgDeposit} ср.депозит
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Настроить
+                          </Button>
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                            <Play className="mr-2 h-4 w-4" />
+                            Запустить
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+              {templateCampaigns.map((campaign) => (
+                <Card 
+                  key={campaign.id}
+                  className={cn(
+                    "transition-all",
+                    highlightedCampaign === campaign.id && "ring-2 ring-primary ring-offset-2"
+                  )}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-gray-100">
+                          <Contact className="h-5 w-5 text-gray-600" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{campaign.name}</h3>
+                            <Badge variant="secondary">Из шаблона</Badge>
+                            {highlightedCampaign === campaign.id && (
+                              <Badge className="bg-green-100 text-green-700">Новая</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {campaign.description}
+                          </p>
+                          <div className="flex gap-4 text-sm">
+                            <Badge variant="outline">{campaign.category}</Badge>
+                            <span className="text-muted-foreground">
+                              Канал: {campaign.channel}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <Edit className="mr-2 h-4 w-4" />
+                          Настроить
+                        </Button>
+                        <Button size="sm">
+                          <Play className="mr-2 h-4 w-4" />
+                          Запустить
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="completed" className="space-y-4">
+          {allCampaigns.filter(c => c.status === "completed" || c.status === "failed" || c.status === "paused").length === 0 ? (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-muted-foreground">
+                  Нет завершенных кампаний.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50 border-b">
+                  <tr>
+                    <th className="text-left p-3 font-medium text-sm">Кампания</th>
+                    <th className="text-left p-3 font-medium text-sm">Тип</th>
+                    <th className="text-left p-3 font-medium text-sm">Статус</th>
+                    <th className="text-center p-3 font-medium text-sm">Период</th>
+                    <th className="text-center p-3 font-medium text-sm">Отправлено</th>
+                    <th className="text-center p-3 font-medium text-sm">Конверсия</th>
+                    <th className="text-center p-3 font-medium text-sm">ROI</th>
+                    <th className="text-center p-3 font-medium text-sm">Доход</th>
+                    <th className="text-right p-3 font-medium text-sm">Действия</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {allCampaigns.filter(c => c.status === "completed" || c.status === "failed" || c.status === "paused").map((campaign) => {
+                    const type = campaignTypes.find(t => t.id === campaign.type);
+                    return (
+                      <tr key={campaign.id} className="hover:bg-muted/30 transition-colors">
+                        <td className="p-3">
+                          <div className="font-medium">{campaign.name}</div>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <div className={cn("p-1 rounded", type?.bgColor)}>
+                              {(() => {
+                                const Icon = type?.icon || Contact;
+                                return <Icon className={cn("h-3 w-3", type?.color)} />;
+                              })()}
+                            </div>
+                            <span className="text-sm">{type?.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <Badge className={cn(
+                            campaign.status === 'completed' && "bg-gray-100 text-gray-700",
+                            campaign.status === 'failed' && "bg-red-100 text-red-700",
+                            campaign.status === 'paused' && "bg-yellow-100 text-yellow-700"
+                          )}>
+                            {campaign.status === 'completed' && 'Завершена'}
+                            {campaign.status === 'failed' && 'Неудачна'}
+                            {campaign.status === 'paused' && 'На паузе'}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="text-sm">
+                            {campaign.startDate}
+                            {campaign.endDate && (
+                              <>
+                                <br />
+                                <span className="text-muted-foreground">до {campaign.endDate}</span>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="text-sm font-medium">{campaign.sent.toLocaleString()}</div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className={cn(
+                            "text-sm font-medium",
+                            campaign.metrics.conversionRate >= campaign.targets.conversionRate 
+                              ? "text-green-600" 
+                              : "text-orange-600"
+                          )}>
+                            {campaign.metrics.conversionRate}%
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className={cn(
+                            "text-sm font-bold",
+                            campaign.roi.startsWith('+') ? "text-green-600" : "text-red-600"
+                          )}>
+                            {campaign.roi}
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="text-sm font-bold">
+                            {campaign.revenue}
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex justify-end gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={() => {
+                                setSelectedCampaign(campaign);
+                                setShowCampaignDetails(true);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {campaign.status === 'paused' && (
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Play className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Archive className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
