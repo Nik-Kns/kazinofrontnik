@@ -286,7 +286,7 @@ export default function AuditPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{stats.passed}</div>
                     <div className="text-xs text-muted-foreground">Пройдено</div>
