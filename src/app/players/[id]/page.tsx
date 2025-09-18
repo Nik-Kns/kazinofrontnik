@@ -111,7 +111,8 @@ const mockFavoriteOffers = [
 const mockPlayerData: PlayerFullProfile = {
   mainInfo: {
     id: "PLR-12345",
-    nickname: "LuckyAce777",
+    nickname: "usr_12345",
+    project: "LuckySlots",
     country: "DE",
     geo: "Berlin, Germany",
     language: "de",
@@ -360,12 +361,15 @@ export default function PlayerProfilePage() {
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.mainInfo.nickname}`} />
-            <AvatarFallback>{player.mainInfo.nickname.slice(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.mainInfo.id}`} />
+            <AvatarFallback>{player.mainInfo.id.slice(4, 6).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold">{player.mainInfo.nickname}</h1>
+              <Badge variant="outline" className="ml-2">
+                {player.mainInfo.project || 'LuckySlots'}
+              </Badge>
               {player.marketing.vipStatus && (
                 <Badge variant="default" className="bg-gradient-to-r from-yellow-500 to-yellow-600">
                   <Star className="mr-1 h-3 w-3" />

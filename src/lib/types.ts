@@ -452,6 +452,7 @@ export type PlayerData = {
 export type PlayerMainInfo = {
     id: string;
     nickname: string;
+    project?: string;
     country: string;
     geo: string;
     language: string;

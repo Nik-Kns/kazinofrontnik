@@ -137,8 +137,8 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
           <table className="min-w-[1000px] w-full text-sm">
             <thead className="sticky top-0 bg-background">
               <tr className="border-b">
-                <th className="px-3 py-2 text-left">ID игрока</th>
-                <th className="px-3 py-2 text-left">Имя</th>
+                <th className="px-3 py-2 text-left">User ID</th>
+                <th className="px-3 py-2 text-left">Проект</th>
                 <th className="px-3 py-2 text-left">Статус</th>
                 <th className="px-3 py-2 text-left">VIP</th>
                 <th className="px-3 py-2 text-left">
@@ -247,8 +247,8 @@ export function PlayersTable({ filters, currencyFilters }: PlayersTableProps) {
               ) : (
                 filteredPlayers.map((p) => (
                   <tr key={p.player_id} className="border-b hover:bg-muted/40 cursor-pointer" onClick={() => window.location.assign(`/players/${p.player_id}`)}>
-                    <td className="px-3 py-2">usr_{p.player_id}</td>
-                    <td className="px-3 py-2">{p.name}</td>
+                    <td className="px-3 py-2">{p.name || `usr_${p.player_id}`}</td>
+                    <td className="px-3 py-2">{p.project || 'LuckySlots'}</td>
                     <td className="px-3 py-2">
                       <Badge variant="outline" className={cn(statusColors[p.status])}>
                         {p.status}

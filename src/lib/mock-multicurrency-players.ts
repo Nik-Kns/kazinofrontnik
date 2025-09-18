@@ -211,6 +211,7 @@ export const multiCurrencyPlayersData: PlayerCurrencyData[] = [
 export interface ExtendedPlayerData extends PlayerCurrencyData {
   name: string;
   email: string;
+  project: string;
   status: 'Активен' | 'Спящий' | 'Отток';
   vip_level: 'ПреVIP 1' | 'ПреVIP 2' | 'ПреVIP 3' | 'VIP' | 'Обычный';
   churn_risk: 'Низкий' | 'Средний' | 'Высокий';
@@ -224,8 +225,9 @@ export interface ExtendedPlayerData extends PlayerCurrencyData {
 export const extendedPlayersData: ExtendedPlayerData[] = [
   {
     ...multiCurrencyPlayersData[0],
-    name: 'Alexander Schmidt',
+    name: 'usr_P001',
     email: 'alex.schmidt@email.com',
+    project: 'LuckySlots',
     status: 'Активен',
     vip_level: 'VIP',
     churn_risk: 'Низкий',
@@ -237,8 +239,9 @@ export const extendedPlayersData: ExtendedPlayerData[] = [
   },
   {
     ...multiCurrencyPlayersData[1],
-    name: 'Sarah Johnson',
+    name: 'usr_P002',
     email: 'sarah.j@email.com',
+    project: 'CasinoRoyale',
     status: 'Активен',
     vip_level: 'ПреVIP 3',
     churn_risk: 'Низкий',
@@ -250,8 +253,9 @@ export const extendedPlayersData: ExtendedPlayerData[] = [
   },
   {
     ...multiCurrencyPlayersData[2],
-    name: 'James Wilson',
+    name: 'usr_P003',
     email: 'j.wilson@email.com',
+    project: 'MegaWins',
     status: 'Спящий',
     vip_level: 'ПреVIP 2',
     churn_risk: 'Средний',
@@ -263,8 +267,9 @@ export const extendedPlayersData: ExtendedPlayerData[] = [
   },
   {
     ...multiCurrencyPlayersData[3],
-    name: 'Dmitri Volkov',
+    name: 'usr_P004',
     email: 'd.volkov@email.com',
+    project: 'GoldenBet',
     status: 'Активен',
     vip_level: 'ПреVIP 1',
     churn_risk: 'Низкий',
@@ -276,8 +281,9 @@ export const extendedPlayersData: ExtendedPlayerData[] = [
   },
   {
     ...multiCurrencyPlayersData[4],
-    name: 'Emma Thompson',
+    name: 'usr_P005',
     email: 'emma.t@email.com',
+    project: 'SuperSpin',
     status: 'Отток',
     vip_level: 'Обычный',
     churn_risk: 'Высокий',

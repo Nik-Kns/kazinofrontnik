@@ -9,6 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -37,13 +47,23 @@ import {
   Activity,
   ArrowRight,
   ChevronRight,
-  Calendar
+  Calendar,
+  Grid,
+  List,
+  Info,
+  CheckSquare,
+  BarChart3,
+  Calculator
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 
 export default function RecommendationsPage() {
+  const router = useRouter();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   
   // Загружаем рекомендации из общего источника
   useEffect(() => {
@@ -64,7 +84,9 @@ export default function RecommendationsPage() {
       window.removeEventListener('recommendationStatusChanged', handleStatusChange);
     };
   }, []);
+  
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('active');
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,6 +95,7 @@ export default function RecommendationsPage() {
   // Фильтрация рекомендаций
   const filteredRecommendations = recommendations.filter(rec => {
     if (selectedCategory !== 'all' && rec.category !== selectedCategory) return false;
+    if (selectedType !== 'all' && rec.type !== selectedType) return false;
     if (selectedPriority !== 'all' && rec.priority !== selectedPriority) return false;
     if (selectedStatus === 'active' && (rec.status === 'completed' || rec.status === 'dismissed')) return false;
     if (selectedStatus === 'completed' && rec.status !== 'completed') return false;
@@ -122,6 +145,22 @@ export default function RecommendationsPage() {
         ? { ...rec, status: newStatus as Recommendation['status'] }
         : rec
     ));
+  };
+
+  const handlePrimaryAction = (rec: Recommendation) => {
+    // Если есть href, переходим по ссылке
+    if (rec.actions.primary.href) {
+      router.push(rec.actions.primary.href);
+    }
+    // Иначе выполняем действие и обновляем статус
+    else {
+      handleAction(rec.id, 'apply');
+    }
+  };
+
+  const showRecommendationDetails = (rec: Recommendation) => {
+    setSelectedRecommendation(rec);
+    setShowDetails(true);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -225,6 +264,24 @@ export default function RecommendationsPage() {
               Фильтры и сортировка
             </CardTitle>
             <div className="flex gap-2">
+              <div className="flex items-center border rounded-md">
+                <Button 
+                  variant={viewMode === 'cards' ? 'default' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setViewMode('cards')}
+                  className="rounded-r-none"
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant={viewMode === 'table' ? 'default' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setViewMode('table')}
+                  className="rounded-l-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
               <Button variant="outline" size="sm">
                 <RefreshCw className="h-4 w-4 mr-1" />
                 Обновить
@@ -237,7 +294,7 @@ export default function RecommendationsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -247,6 +304,19 @@ export default function RecommendationsPage() {
                 className="pl-9"
               />
             </div>
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Тип" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Все типы</SelectItem>
+                <SelectItem value="segment">Сегмент</SelectItem>
+                <SelectItem value="campaign">Кампания</SelectItem>
+                <SelectItem value="trigger">Триггер</SelectItem>
+                <SelectItem value="optimization">Оптимизация</SelectItem>
+                <SelectItem value="analysis">Анализ</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger>
                 <SelectValue placeholder="Категория" />
@@ -298,89 +368,195 @@ export default function RecommendationsPage() {
       </Card>
 
       {/* Список рекомендаций */}
-      <div className="space-y-4">
-        {sortedRecommendations.map((rec) => {
-          const CategoryIcon = getCategoryIcon(rec.category);
-          
-          return (
-            <Card key={rec.id} className={cn(
-              "border-l-4",
-              rec.priority === 'critical' && "border-l-red-500",
-              rec.priority === 'high' && "border-l-orange-500",
-              rec.priority === 'medium' && "border-l-blue-500",
-              rec.priority === 'low' && "border-l-gray-400",
-              rec.status === 'completed' && "opacity-60"
-            )}>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CategoryIcon className="h-5 w-5 text-muted-foreground" />
-                      <Badge className={getPriorityColor(rec.priority)} variant="outline">
-                        <Sparkles className="mr-1 h-3 w-3" />
-                        {rec.priority === 'critical' ? 'Критичный' :
-                         rec.priority === 'high' ? 'Высокий' :
-                         rec.priority === 'medium' ? 'Средний' : 'Низкий'}
-                      </Badge>
-                      {rec.deadline && rec.status !== 'completed' && (
-                        <Badge variant="outline" className="text-xs">
-                          <Calendar className="mr-1 h-3 w-3" />
-                          {Math.ceil((rec.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} дней
-                        </Badge>
-                      )}
-                      {rec.status === 'in_progress' && (
-                        <Badge className="bg-blue-100 text-blue-700">
-                          <Timer className="mr-1 h-3 w-3" />
-                          В работе
-                        </Badge>
-                      )}
-                      {rec.status === 'completed' && (
-                        <Badge className="bg-green-100 text-green-700">
-                          <CheckCircle2 className="mr-1 h-3 w-3" />
-                          Выполнено
-                        </Badge>
-                      )}
-                    </div>
-                    <CardTitle className="text-lg">{rec.title}</CardTitle>
-                    <CardDescription className="mt-1">{rec.description}</CardDescription>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-1 text-sm font-medium">
-                      <Zap className="h-4 w-4 text-green-600" />
-                      <span className="text-green-600">{rec.impact?.value}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{rec.impact?.metric}</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="overview">Обзор</TabsTrigger>
-                    <TabsTrigger value="reasoning">Обоснование</TabsTrigger>
-                    <TabsTrigger value="data">Данные</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="overview" className="space-y-4">
-                    <div className="flex flex-wrap gap-2">
-                      {rec.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Уверенность ИИ:</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={rec.confidence} className="w-24 h-2" />
-                          <span className="text-sm font-medium">{rec.confidence}%</span>
+      {viewMode === 'table' ? (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Рекомендация</TableHead>
+                  <TableHead>Тип</TableHead>
+                  <TableHead>Приоритет</TableHead>
+                  <TableHead>Влияние</TableHead>
+                  <TableHead>Дедлайн</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead className="text-right">Действия</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedRecommendations.map((rec) => {
+                  const CategoryIcon = getCategoryIcon(rec.category);
+                  return (
+                    <TableRow key={rec.id} className={cn(
+                      rec.status === 'completed' && "opacity-60"
+                    )}>
+                      <TableCell>
+                        <div className="flex items-start gap-2">
+                          <CategoryIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
+                          <div>
+                            <p className="font-medium">{rec.title}</p>
+                            <p className="text-xs text-muted-foreground">{rec.description}</p>
+                          </div>
                         </div>
-                      </div>
-                      {rec.status === 'new' && (
-                        <div className="flex gap-2">
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {rec.type === 'segment' ? 'Сегмент' :
+                           rec.type === 'campaign' ? 'Кампания' :
+                           rec.type === 'trigger' ? 'Триггер' :
+                           rec.type === 'optimization' ? 'Оптимизация' : 'Анализ'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getPriorityColor(rec.priority)} variant="outline">
+                          {rec.priority === 'critical' ? 'Критичный' :
+                           rec.priority === 'high' ? 'Высокий' :
+                           rec.priority === 'medium' ? 'Средний' : 'Низкий'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {rec.impact?.trend === 'up' ? (
+                            <TrendingUp className="h-3 w-3 text-green-600" />
+                          ) : rec.impact?.trend === 'down' ? (
+                            <TrendingDown className="h-3 w-3 text-red-600" />
+                          ) : null}
+                          <span className="text-sm font-medium">{rec.impact?.value}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{rec.impact?.metric}</p>
+                      </TableCell>
+                      <TableCell>
+                        {rec.deadline && rec.status !== 'completed' ? (
+                          <div className="text-sm">
+                            {Math.ceil((rec.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} дней
+                          </div>
+                        ) : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {rec.status === 'new' && (
+                          <Badge variant="secondary">Новая</Badge>
+                        )}
+                        {rec.status === 'in_progress' && (
+                          <Badge className="bg-blue-100 text-blue-700">В работе</Badge>
+                        )}
+                        {rec.status === 'completed' && (
+                          <Badge className="bg-green-100 text-green-700">Выполнено</Badge>
+                        )}
+                        {rec.status === 'dismissed' && (
+                          <Badge variant="outline">Отклонено</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             size="sm"
-                            onClick={() => handleAction(rec.id, 'apply')}
+                            variant="ghost"
+                            onClick={() => showRecommendationDetails(rec)}
+                          >
+                            <Info className="h-4 w-4" />
+                          </Button>
+                          {rec.status === 'new' && (
+                            <Button
+                              size="sm"
+                              onClick={() => handlePrimaryAction(rec)}
+                            >
+                              {rec.actions.primary.label}
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {sortedRecommendations.map((rec) => {
+            const CategoryIcon = getCategoryIcon(rec.category);
+            
+            return (
+              <Card key={rec.id} className={cn(
+                "border-l-4",
+                rec.priority === 'critical' && "border-l-red-500",
+                rec.priority === 'high' && "border-l-orange-500",
+                rec.priority === 'medium' && "border-l-blue-500",
+                rec.priority === 'low' && "border-l-gray-400",
+                rec.status === 'completed' && "opacity-60"
+              )}>
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CategoryIcon className="h-5 w-5 text-muted-foreground" />
+                        <Badge className={getPriorityColor(rec.priority)} variant="outline">
+                          <Sparkles className="mr-1 h-3 w-3" />
+                          {rec.priority === 'critical' ? 'Критичный' :
+                           rec.priority === 'high' ? 'Высокий' :
+                           rec.priority === 'medium' ? 'Средний' : 'Низкий'}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {rec.type === 'segment' ? 'Сегмент' :
+                           rec.type === 'campaign' ? 'Кампания' :
+                           rec.type === 'trigger' ? 'Триггер' :
+                           rec.type === 'optimization' ? 'Оптимизация' : 'Анализ'}
+                        </Badge>
+                        {rec.deadline && rec.status !== 'completed' && (
+                          <Badge variant="outline" className="text-xs">
+                            <Calendar className="mr-1 h-3 w-3" />
+                            {Math.ceil((rec.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} дней
+                          </Badge>
+                        )}
+                        {rec.status === 'in_progress' && (
+                          <Badge className="bg-blue-100 text-blue-700">
+                            <Timer className="mr-1 h-3 w-3" />
+                            В работе
+                          </Badge>
+                        )}
+                        {rec.status === 'completed' && (
+                          <Badge className="bg-green-100 text-green-700">
+                            <CheckCircle2 className="mr-1 h-3 w-3" />
+                            Выполнено
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-lg">{rec.title}</CardTitle>
+                      <CardDescription className="mt-1">{rec.description}</CardDescription>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center gap-1 text-sm font-medium">
+                        <Zap className="h-4 w-4 text-green-600" />
+                        <span className="text-green-600">{rec.impact?.value}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{rec.impact?.metric}</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Уверенность ИИ:</span>
+                      <div className="flex items-center gap-2">
+                        <Progress value={rec.confidence} className="w-24 h-2" />
+                        <span className="text-sm font-medium">{rec.confidence}%</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => showRecommendationDetails(rec)}
+                      >
+                        <Info className="mr-1 h-4 w-4" />
+                        Подробнее
+                      </Button>
+                      {rec.status === 'new' && (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => handlePrimaryAction(rec)}
                           >
                             <CheckCircle2 className="mr-1 h-4 w-4" />
                             {rec.actions.primary.label}
@@ -401,29 +577,16 @@ export default function RecommendationsPage() {
                             <XCircle className="mr-1 h-4 w-4" />
                             Отклонить
                           </Button>
-                        </div>
+                        </>
                       )}
                     </div>
-                  </TabsContent>
-                  <TabsContent value="reasoning">
-                    <p className="text-sm text-muted-foreground">{rec.reasoning}</p>
-                  </TabsContent>
-                  <TabsContent value="data">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {rec.dataPoints.map((point, i) => (
-                        <div key={i}>
-                          <p className="text-xs text-muted-foreground">{point.label}</p>
-                          <p className="text-sm font-semibold">{point.value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {sortedRecommendations.length === 0 && (
         <Card className="border-dashed">
@@ -436,6 +599,180 @@ export default function RecommendationsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Детальный просмотр рекомендации */}
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          {selectedRecommendation && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Badge className={getPriorityColor(selectedRecommendation.priority)} variant="outline">
+                        {selectedRecommendation.priority === 'critical' ? 'Критичный' :
+                         selectedRecommendation.priority === 'high' ? 'Высокий' :
+                         selectedRecommendation.priority === 'medium' ? 'Средний' : 'Низкий'} приоритет
+                      </Badge>
+                      <Badge variant="outline">
+                        {selectedRecommendation.type === 'segment' ? 'Сегмент' :
+                         selectedRecommendation.type === 'campaign' ? 'Кампания' :
+                         selectedRecommendation.type === 'trigger' ? 'Триггер' :
+                         selectedRecommendation.type === 'optimization' ? 'Оптимизация' : 'Анализ'}
+                      </Badge>
+                      {selectedRecommendation.status === 'new' && (
+                        <Badge variant="secondary">Новая</Badge>
+                      )}
+                      {selectedRecommendation.status === 'in_progress' && (
+                        <Badge className="bg-blue-100 text-blue-700">В работе</Badge>
+                      )}
+                      {selectedRecommendation.status === 'completed' && (
+                        <Badge className="bg-green-100 text-green-700">Выполнено</Badge>
+                      )}
+                    </div>
+                    <DialogTitle className="text-xl">
+                      {selectedRecommendation.title}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {selectedRecommendation.description}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <div className="space-y-6 mt-6">
+                {/* Обоснование */}
+                <div className="space-y-2">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Brain className="h-4 w-4" />
+                    Анализ ИИ
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{selectedRecommendation.reasoning}</p>
+                </div>
+
+                {/* Ожидаемый эффект */}
+                {selectedRecommendation.expectedUplift && (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Ожидаемый эффект
+                    </h3>
+                    <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                      <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                        {selectedRecommendation.expectedUplift}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Расчеты */}
+                {selectedRecommendation.calculations && (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Calculator className="h-4 w-4" />
+                      Расчеты
+                    </h3>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-sm font-mono">{selectedRecommendation.calculations}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Ключевые метрики */}
+                <div className="space-y-2">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Ключевые метрики
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {selectedRecommendation.dataPoints.map((point, i) => (
+                      <div key={i} className="p-3 bg-muted rounded-lg">
+                        <p className="text-xs text-muted-foreground">{point.label}</p>
+                        <p className="text-lg font-semibold mt-1">{point.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Чеклист действий */}
+                {selectedRecommendation.checklist && selectedRecommendation.checklist.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <CheckSquare className="h-4 w-4" />
+                      План действий
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedRecommendation.checklist.map((item, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <div className="h-5 w-5 rounded-full border-2 border-primary flex items-center justify-center mt-0.5">
+                            <span className="text-xs font-bold">{i + 1}</span>
+                          </div>
+                          <p className="text-sm flex-1">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Дополнительная информация */}
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Уверенность ИИ</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Progress value={selectedRecommendation.confidence} className="flex-1 h-2" />
+                      <span className="text-sm font-medium">{selectedRecommendation.confidence}%</span>
+                    </div>
+                  </div>
+                  {selectedRecommendation.deadline && (
+                    <div>
+                      <p className="text-xs text-muted-foreground">Дедлайн</p>
+                      <p className="text-sm font-medium mt-1">
+                        {Math.ceil((selectedRecommendation.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} дней
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <DialogFooter className="mt-6">
+                {selectedRecommendation.status === 'new' && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleAction(selectedRecommendation.id, 'dismiss');
+                        setShowDetails(false);
+                      }}
+                    >
+                      <XCircle className="mr-1 h-4 w-4" />
+                      Отклонить
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleAction(selectedRecommendation.id, 'postpone');
+                        setShowDetails(false);
+                      }}
+                    >
+                      <Clock className="mr-1 h-4 w-4" />
+                      Отложить
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        handlePrimaryAction(selectedRecommendation);
+                        setShowDetails(false);
+                      }}
+                    >
+                      <CheckCircle2 className="mr-1 h-4 w-4" />
+                      {selectedRecommendation.actions.primary.label}
+                    </Button>
+                  </>
+                )}
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
