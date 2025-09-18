@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -666,6 +666,7 @@ const allCampaigns = [
 
 function CampaignsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [showCreativeModal, setShowCreativeModal] = useState(false);
@@ -1292,7 +1293,11 @@ function CampaignsContent() {
                       };
                       
                       return (
-                        <tr key={campaign.id} className="hover:bg-muted/30 transition-colors">
+                        <tr 
+                          key={campaign.id} 
+                          className="hover:bg-muted/30 transition-colors cursor-pointer"
+                          onClick={() => router.push(`/campaigns/${campaign.id}`)}
+                        >
                           <td className="p-3">
                             <div className="font-medium">{campaign.name}</div>
                             <div className="text-xs text-muted-foreground mt-1">
@@ -1413,7 +1418,11 @@ function CampaignsContent() {
               {allCampaigns.filter(c => c.status === "scheduled").map((campaign) => {
                 const type = campaignTypes.find(t => t.id === campaign.type);
                 return (
-                  <Card key={campaign.id}>
+                  <Card 
+                    key={campaign.id}
+                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => router.push(`/campaigns/${campaign.id}`)}
+                  >
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -1469,7 +1478,11 @@ function CampaignsContent() {
               {allCampaigns.filter(c => c.status === "draft").map((campaign) => {
                 const type = campaignTypes.find(t => t.id === campaign.type);
                 return (
-                  <Card key={campaign.id}>
+                  <Card 
+                    key={campaign.id}
+                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => router.push(`/campaigns/${campaign.id}`)}
+                  >
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
@@ -1590,7 +1603,11 @@ function CampaignsContent() {
                   {allCampaigns.filter(c => c.status === "completed" || c.status === "failed" || c.status === "paused").map((campaign) => {
                     const type = campaignTypes.find(t => t.id === campaign.type);
                     return (
-                      <tr key={campaign.id} className="hover:bg-muted/30 transition-colors">
+                      <tr 
+                        key={campaign.id} 
+                        className="hover:bg-muted/30 transition-colors cursor-pointer"
+                        onClick={() => router.push(`/campaigns/${campaign.id}`)}
+                      >
                         <td className="p-3">
                           <div className="font-medium">{campaign.name}</div>
                         </td>
