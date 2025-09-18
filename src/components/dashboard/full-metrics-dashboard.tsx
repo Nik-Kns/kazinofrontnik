@@ -99,7 +99,7 @@ function MetricCard({ metric, isCompact = false, onOpen }: { metric: RetentionMe
         {metric.targetValue && (
           <div>
             <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>Цель: {metric.targetValue}{metric.unit}</span>
+              <span>Цель: <span>{metric.targetValue}{metric.unit}</span></span>
               <span>{Math.round(Number(String(metric.value).replace(/[^0-9.-]/g, '')) / Number(String(metric.targetValue).replace(/[^0-9.-]/g, '')) * 100)}%</span>
             </div>
             <Progress 
@@ -425,7 +425,7 @@ export function FullMetricsDashboard({ filters }: { filters?: FilterConfig }) {
             </div>
             <Button asChild variant="outline" size="sm">
               <Link href="/segments">
-                Все сегменты
+                <span>Все сегменты</span>
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -480,7 +480,7 @@ export function FullMetricsDashboard({ filters }: { filters?: FilterConfig }) {
               <div className="p-4 bg-blue-50 rounded-lg" title="Ежедневно следим за краткосрочными изменениями и аномалиями">
                 <h4 className="font-medium mb-2 flex items-center gap-2">
                   <Badge variant="secondary">Ежедневно</Badge>
-                  <span className="text-sm text-muted-foreground">{monitoringSchedule.daily.length} метрик</span>
+                  <span className="text-sm text-muted-foreground">{monitoringSchedule.daily.length} <span>метрик</span></span>
                 </h4>
                 <p className="text-xs text-muted-foreground">
                   Retention Rate, Churn Rate, Active Players и другие критические показатели
@@ -489,7 +489,7 @@ export function FullMetricsDashboard({ filters }: { filters?: FilterConfig }) {
               <div className="p-4 bg-green-50 rounded-lg" title="Еженедельно анализируем тренды и эффективность кампаний">
                 <h4 className="font-medium mb-2 flex items-center gap-2">
                   <Badge variant="secondary">Еженедельно</Badge>
-                  <span className="text-sm text-muted-foreground">{monitoringSchedule.weekly.length} метрик</span>
+                  <span className="text-sm text-muted-foreground">{monitoringSchedule.weekly.length} <span>метрик</span></span>
                 </h4>
                 <p className="text-xs text-muted-foreground">
                   ARPU, Frequency of Deposits, ROI Campaigns и финансовые показатели
@@ -498,7 +498,7 @@ export function FullMetricsDashboard({ filters }: { filters?: FilterConfig }) {
               <div className="p-4 bg-purple-50 rounded-lg" title="Ежемесячно смотрим долгосрочные цели и стратегию">
                 <h4 className="font-medium mb-2 flex items-center gap-2">
                   <Badge variant="secondary">Ежемесячно</Badge>
-                  <span className="text-sm text-muted-foreground">{monitoringSchedule.monthly.length} метрик</span>
+                  <span className="text-sm text-muted-foreground">{monitoringSchedule.monthly.length} <span>метрик</span></span>
                 </h4>
                 <p className="text-xs text-muted-foreground">
                   LTV, VIP Conversion, NPS и долгосрочные показатели

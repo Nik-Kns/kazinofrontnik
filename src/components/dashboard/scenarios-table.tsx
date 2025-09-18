@@ -80,13 +80,13 @@ export function ScenariosTable() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <ChannelIcon className="h-4 w-4 text-muted-foreground" />
-                      {scenario.channel}
+                      <span>{scenario.channel}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <span className={cn("h-2.5 w-2.5 rounded-full", statusColors[scenario.status])} />
-                      {scenario.status}
+                      <span>{scenario.status}</span>
                     </div>
                   </TableCell>
                   <TableCell>

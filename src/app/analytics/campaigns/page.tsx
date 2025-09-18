@@ -343,13 +343,13 @@ function ActiveFilters({ filters }: { filters: AnalyticsFilters }) {
         <div className="flex flex-wrap gap-2">
           <Badge variant="secondary">{filters.period.type}</Badge>
           {filters.projects.map(project => (
-            <Badge key={project} variant="outline">Проект: {project}</Badge>
+            <Badge key={project} variant="outline">Проект: <span>{project}</span></Badge>
           ))}
           {filters.geo.map(geo => (
-            <Badge key={geo} variant="outline">GEO: {geo}</Badge>
+            <Badge key={geo} variant="outline">GEO: <span>{geo}</span></Badge>
           ))}
           {filters.channels.map(channel => (
-            <Badge key={channel} variant="outline">Канал: {channel}</Badge>
+            <Badge key={channel} variant="outline">Канал: <span>{channel}</span></Badge>
           ))}
         </div>
       </CardContent>
@@ -422,7 +422,7 @@ function SegmentAnalyticsTab({ data }: { data: SegmentAnalytics }) {
             {data.segmentName}
           </CardTitle>
           <CardDescription>
-            {data.totalUsers.toLocaleString()} игроков в сегменте
+            {data.totalUsers.toLocaleString()} <span>игроков в сегменте</span>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -452,7 +452,7 @@ function TemplateAnalyticsTab({ data }: { data: TemplateAnalytics }) {
             {data.templateName}
           </CardTitle>
           <CardDescription>
-            Тип: {data.type} • Версия: {data.currentVersion}
+            Тип: <span>{data.type}</span> • Версия: <span>{data.currentVersion}</span>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -488,7 +488,7 @@ function KpiTilesGrid({
         <div>
           <CardTitle>Ключевые метрики</CardTitle>
           <CardDescription>
-            Выбрано {selectedKpis.length} из {kpis.length} метрик
+            Выбрано {selectedKpis.length} из {kpis.length} <span>метрик</span>
           </CardDescription>
         </div>
         <Dialog open={isConfigOpen} onOpenChange={setIsConfigOpen}>
@@ -556,7 +556,7 @@ function KpiCard({ kpi }: { kpi: CampaignKPI }) {
             </span>
             {kpi.benchmark && (
               <Badge variant="outline" className="text-xs">
-                Benchmark: {kpi.benchmark}{kpi.unit}
+                Benchmark: <span>{kpi.benchmark}{kpi.unit}</span>
               </Badge>
             )}
           </div>
@@ -596,7 +596,7 @@ function FunnelCard({ funnel }: { funnel: CampaignFunnel }) {
                   {funnel.name}
                 </CardTitle>
                 <CardDescription>
-                  {funnel.totalUsers.toLocaleString()} пользователей • {funnel.conversionRate}% конверсия
+                  {funnel.totalUsers.toLocaleString()} <span>пользователей</span> • {funnel.conversionRate}% <span>конверсия</span>
                 </CardDescription>
               </div>
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -620,9 +620,9 @@ function FunnelCard({ funnel }: { funnel: CampaignFunnel }) {
                       />
                     </div>
                     <div className="flex items-center justify-between mt-1 text-xs text-muted-foreground">
-                      <span>{step.value.toLocaleString()} пользователей</span>
+                      <span>{step.value.toLocaleString()} <span>пользователей</span></span>
                       {step.benchmark && (
-                        <span>Benchmark: {step.benchmark}%</span>
+                        <span>Benchmark: <span>{step.benchmark}%</span></span>
                       )}
                     </div>
                   </div>

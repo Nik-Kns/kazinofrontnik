@@ -501,7 +501,7 @@ export default function OnboardingPage() {
               </span>
             </div>
             <span className="text-sm font-medium">
-              {Math.round((completedSteps.length / 3) * 100)}% завершено
+              {Math.round((completedSteps.length / 3) * 100)}% <span>завершено</span>
             </span>
           </div>
           <Progress value={(completedSteps.length / 3) * 100} className="h-2" />
@@ -709,7 +709,7 @@ export default function OnboardingPage() {
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium">Обязательные метрики</span>
                 <span className="text-muted-foreground">
-                  {getMetricsProgress().required.filled} из {getMetricsProgress().required.total} заполнено
+                  {getMetricsProgress().required.filled} из {getMetricsProgress().required.total} <span>заполнено</span>
                 </span>
               </div>
               <Progress 
@@ -719,7 +719,7 @@ export default function OnboardingPage() {
               <div className="flex items-center justify-between text-sm mt-2">
                 <span className="font-medium">Дополнительные метрики</span>
                 <span className="text-muted-foreground">
-                  {getMetricsProgress().optional.filled} из {getMetricsProgress().optional.total} заполнено
+                  {getMetricsProgress().optional.filled} из {getMetricsProgress().optional.total} <span>заполнено</span>
                 </span>
               </div>
               <Progress 
@@ -759,7 +759,7 @@ export default function OnboardingPage() {
                         <div className="flex items-center gap-2">
                           <Badge variant="destructive" className="text-xs">Обязательные</Badge>
                           <span className="text-xs text-muted-foreground">
-                            Необходимо заполнить для завершения настройки
+                            <span>Необходимо заполнить для завершения настройки</span>
                           </span>
                         </div>
                         {requiredMetrics.map((metric) => (
@@ -808,7 +808,7 @@ export default function OnboardingPage() {
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary" className="text-xs">Дополнительные</Badge>
                           <span className="text-xs text-muted-foreground">
-                            Рекомендуется заполнить для лучшей оптимизации
+                            <span>Рекомендуется заполнить для лучшей оптимизации</span>
                           </span>
                         </div>
                         {optionalMetrics.map((metric) => (
@@ -871,7 +871,7 @@ export default function OnboardingPage() {
                   disabled={!areRequiredMetricsFilled()}
                 >
                   <CheckSquare className="h-4 w-4" />
-                  {areRequiredMetricsFilled() ? 'Сохранить и продолжить' : 'Заполните обязательные метрики'}
+                  {areRequiredMetricsFilled() ? <span>Сохранить и продолжить</span> : <span>Заполните обязательные метрики</span>}
                 </Button>
               </div>
             </div>
