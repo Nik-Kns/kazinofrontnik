@@ -325,7 +325,7 @@ export default function AuditPage() {
                 <ul className="mt-2 space-y-1">
                   {criticalFailures.map(item => (
                     <li key={item.id} className="text-sm text-red-800">
-                      • <strong>{item.title}:</strong> {item.aiNotes}
+                      <span>• <strong>{item.title}:</strong> {item.aiNotes}</span>
                     </li>
                   ))}
                 </ul>
@@ -349,10 +349,10 @@ export default function AuditPage() {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-xs">
-                        Прогресс считается как процент завершённых проверок.<br />
-                        Проверки выполняются ИИ автоматически и обновляются в реальном времени.
-                      </p>
+                      <div className="text-xs space-y-1">
+                        <p>Прогресс считается как процент завершённых проверок.</p>
+                        <p>Проверки выполняются ИИ автоматически и обновляются в реальном времени.</p>
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -412,7 +412,7 @@ export default function AuditPage() {
           </Card>
 
           {/* Секции чек-листа */}
-          <Accordion type="multiple" className="space-y-2" defaultValue={snapshot.sections.map(s => s.id)}>
+          <Accordion type="multiple" className="space-y-2" defaultValue={snapshot?.sections.map(s => s.id) || []}>
             {snapshot.sections.map(section => {
               const filteredItems = activeFilter === 'all' 
                 ? section.items 

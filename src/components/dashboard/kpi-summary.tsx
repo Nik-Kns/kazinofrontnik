@@ -173,7 +173,7 @@ export function KPISummary({ filters, segment }: KPISummaryProps) {
           <div>
             <CardTitle>Обзор ключевых метрик (KPI Summary)</CardTitle>
             <CardDescription>
-              {segment ? `Сегмент: ${segment}` : 'Все сегменты'} • {kpiData.length} метрик
+              <span>{segment ? `Сегмент: ${segment}` : 'Все сегменты'} • {kpiData.length} метрик</span>
             </CardDescription>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

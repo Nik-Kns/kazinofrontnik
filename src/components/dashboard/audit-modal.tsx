@@ -247,7 +247,7 @@ export function AuditModal({ open, onOpenChange }: AuditModalProps) {
                     <ul className="mt-2 space-y-1">
                       {criticalFailures.map(item => (
                         <li key={item.id} className="text-sm text-red-800">
-                          • {item.title}: {item.aiNotes}
+                          <span>• {item.title}: {item.aiNotes}</span>
                         </li>
                       ))}
                     </ul>
