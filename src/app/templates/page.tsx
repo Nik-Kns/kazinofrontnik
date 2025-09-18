@@ -185,44 +185,53 @@ export default function TemplatesPage() {
   });
 
   const handleCreateCampaign = (template: any) => {
-    // Сохраняем шаблон в localStorage для использования на странице кампаний
-    const campaignData = {
-      id: `campaign-${Date.now()}`,
-      name: template.name,
-      templateId: template.id,
-      category: template.category,
-      channel: template.channel,
-      description: template.description,
-      status: 'draft',
-      createdAt: new Date().toISOString(),
-      performance: template.performance
+    // Определяем соответствие между шаблонами и конструктором сценариев
+    const templateToScenarioMap: Record<string, string> = {
+      'welcome-series': 'welcome-series',
+      'vip-retention': 'churn-prevention',
+      'slots-reactivation': 'deposit-booster',
+      'birthday-bonus': 'birthday-campaign',
+      'first-deposit': 'welcome-series',
+      'withdrawal': 'churn-prevention',
+      'registration': 'welcome-series',
+      'inactivity': 'win-back-30days',
+      'bonus-activation': 'deposit-booster'
     };
     
-    // Получаем существующие кампании или создаем новый массив
-    const existingCampaigns = JSON.parse(localStorage.getItem('campaigns') || '[]');
-    existingCampaigns.push(campaignData);
-    localStorage.setItem('campaigns', JSON.stringify(existingCampaigns));
+    // Определяем ID шаблона для конструктора сценариев
+    const scenarioTemplateId = templateToScenarioMap[template.id] || 
+                              templateToScenarioMap[template.event] || 
+                              'welcome-series';
     
-    // Переходим на страницу кампаний
-    router.push(`/campaigns?newCampaign=${campaignData.id}`);
+    // Переходим в конструктор сценариев с шаблоном
+    router.push(`/triggers/builder/new?template=${scenarioTemplateId}&from=templates&name=${encodeURIComponent(template.name)}`);
   };
 
   const handleImplementTemplate = (recommendation: any) => {
     // Отмечаем как внедренный
     setImplementedTemplates([...implementedTemplates, recommendation.id]);
     
-    // Формируем URL с параметрами
+    // Определяем соответствие между рекомендациями и шаблонами сценариев
+    const recommendationToScenarioMap: Record<string, string> = {
+      'welcome-series': 'welcome-series',
+      'vip-retention': 'churn-prevention',
+      'slots-reactivation': 'deposit-booster',
+      'birthday-bonus': 'birthday-campaign'
+    };
+    
+    const scenarioTemplateId = recommendationToScenarioMap[recommendation.templateId] || 'welcome-series';
+    
+    // Переходим в конструктор сценариев с шаблоном и дополнительными параметрами
     const params = new URLSearchParams({
-      template: recommendation.templateId,
-      type: recommendation.scenarioParams.type,
-      priority: recommendation.priority,
-      expectedRevenue: recommendation.revenue.replace(/[€,/мес]/g, ''),
-      impact: recommendation.impact,
-      ...recommendation.scenarioParams
+      template: scenarioTemplateId,
+      from: 'ai-recommendations',
+      name: recommendation.title,
+      segment: recommendation.segment,
+      expectedRevenue: recommendation.scenarioParams.estimatedRevenue,
+      conversion: recommendation.scenarioParams.expectedConversion || recommendation.scenarioParams.expectedRecovery || recommendation.scenarioParams.expectedParticipation
     });
     
-    // Переходим в builder с параметрами
-    router.push(`/builder?${params.toString()}`);
+    router.push(`/triggers/builder/new?${params.toString()}`);
   };
 
   const getPriorityColor = (priority: string) => {

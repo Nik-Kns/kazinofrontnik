@@ -289,6 +289,184 @@ const scenarioTemplates: Record<string, { nodes: Node[], edges: Edge[] }> = {
         animated: true 
       }
     ]
+  },
+  "deposit-booster": {
+    nodes: [
+      {
+        id: "trigger-1",
+        type: "trigger",
+        position: { x: 100, y: 150 },
+        data: {
+          type: "behavior",
+          name: "Паттерн депозитов",
+          description: "Снижение частоты депозитов",
+          icon: "TrendingDown",
+          config: { behaviorRule: "deposit_frequency_decline" }
+        }
+      },
+      {
+        id: "action-1",
+        type: "action",
+        position: { x: 400, y: 150 },
+        data: {
+          type: "bonus",
+          name: "Персональный бонус",
+          description: "Начислить бонус на депозит",
+          icon: "Gift",
+          config: { bonusAmount: 50 }
+        }
+      },
+      {
+        id: "action-2",
+        type: "action",
+        position: { x: 700, y: 150 },
+        data: {
+          type: "email",
+          name: "Email с оффером",
+          description: "Отправить персональное предложение",
+          icon: "Mail",
+          config: { template: "deposit-booster" }
+        }
+      }
+    ],
+    edges: [
+      { id: "e1", source: "trigger-1", target: "action-1", animated: true },
+      { id: "e2", source: "action-1", target: "action-2", animated: true }
+    ]
+  },
+  "birthday-campaign": {
+    nodes: [
+      {
+        id: "trigger-1",
+        type: "trigger",
+        position: { x: 100, y: 150 },
+        data: {
+          type: "event",
+          name: "День рождения",
+          description: "Срабатывает в день рождения",
+          icon: "Calendar",
+          config: { eventType: "birthday" }
+        }
+      },
+      {
+        id: "action-1",
+        type: "action",
+        position: { x: 400, y: 150 },
+        data: {
+          type: "bonus",
+          name: "Подарочный бонус",
+          description: "100% бонус до €100",
+          icon: "Gift",
+          config: { bonusAmount: 100 }
+        }
+      },
+      {
+        id: "action-2",
+        type: "action",
+        position: { x: 700, y: 100 },
+        data: {
+          type: "email",
+          name: "Поздравление",
+          description: "Email с поздравлением",
+          icon: "Mail",
+          config: { template: "birthday-greeting" }
+        }
+      },
+      {
+        id: "action-3",
+        type: "action",
+        position: { x: 700, y: 200 },
+        data: {
+          type: "sms",
+          name: "SMS поздравление",
+          description: "SMS с промокодом",
+          icon: "MessageSquare",
+          config: { message: "С днем рождения! Ваш подарок ждет" }
+        }
+      }
+    ],
+    edges: [
+      { id: "e1", source: "trigger-1", target: "action-1", animated: true },
+      { id: "e2", source: "action-1", target: "action-2", animated: true },
+      { id: "e3", source: "action-1", target: "action-3", animated: true }
+    ]
+  },
+  "win-back-30days": {
+    nodes: [
+      {
+        id: "trigger-1",
+        type: "trigger",
+        position: { x: 100, y: 150 },
+        data: {
+          type: "segment",
+          name: "30 дней без активности",
+          description: "Игроки неактивны 30+ дней",
+          icon: "Users",
+          config: { segmentId: "inactive-30days" }
+        }
+      },
+      {
+        id: "action-1",
+        type: "action",
+        position: { x: 400, y: 150 },
+        data: {
+          type: "email",
+          name: "Мы скучаем",
+          description: "Email с персональным предложением",
+          icon: "Mail",
+          config: { template: "we-miss-you" }
+        }
+      },
+      {
+        id: "delay-1",
+        type: "logic",
+        position: { x: 700, y: 150 },
+        data: {
+          type: "delay",
+          name: "Задержка 3 дня",
+          description: "Ждать реакции",
+          icon: "Clock",
+          config: { delayTime: 3, delayUnit: "days" }
+        }
+      },
+      {
+        id: "condition-1",
+        type: "logic",
+        position: { x: 1000, y: 150 },
+        data: {
+          type: "condition",
+          name: "Проверка активности",
+          description: "Вернулся ли игрок?",
+          icon: "GitBranch",
+          config: { condition: "has_activity" }
+        }
+      },
+      {
+        id: "action-2",
+        type: "action",
+        position: { x: 1300, y: 250 },
+        data: {
+          type: "bonus",
+          name: "Супер бонус",
+          description: "200% бонус для возврата",
+          icon: "Gift",
+          config: { bonusAmount: 200 }
+        }
+      }
+    ],
+    edges: [
+      { id: "e1", source: "trigger-1", target: "action-1", animated: true },
+      { id: "e2", source: "action-1", target: "delay-1", animated: true },
+      { id: "e3", source: "delay-1", target: "condition-1", animated: true },
+      { 
+        id: "e4", 
+        source: "condition-1", 
+        target: "action-2", 
+        sourceHandle: "no",
+        label: "Нет активности",
+        animated: true 
+      }
+    ]
   }
 };
 
@@ -321,6 +499,11 @@ function ScenarioBuilder() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const templateId = searchParams.get("template");
+  const fromSource = searchParams.get("from");
+  const customName = searchParams.get("name");
+  const segmentName = searchParams.get("segment");
+  const expectedRevenue = searchParams.get("expectedRevenue");
+  const conversionRate = searchParams.get("conversion");
   
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -328,26 +511,49 @@ function ScenarioBuilder() {
   const [scenarioName, setScenarioName] = useState("Новый сценарий");
   const [scenarioStatus, setScenarioStatus] = useState<"draft" | "active" | "paused">("draft");
   const [isSaving, setIsSaving] = useState(false);
+  const [scenarioInfo, setScenarioInfo] = useState({
+    segment: "",
+    expectedRevenue: "",
+    conversionTarget: ""
+  });
 
   // Загрузка шаблона при монтировании
   useEffect(() => {
+    // Устанавливаем дополнительную информацию из параметров
+    if (segmentName || expectedRevenue || conversionRate) {
+      setScenarioInfo({
+        segment: segmentName || "",
+        expectedRevenue: expectedRevenue || "",
+        conversionTarget: conversionRate || ""
+      });
+    }
+
+    // Устанавливаем имя сценария
+    if (customName) {
+      setScenarioName(decodeURIComponent(customName));
+    } else if (templateId === "welcome-series") {
+      setScenarioName("Приветственная серия");
+    } else if (templateId === "churn-prevention") {
+      setScenarioName("Предотвращение оттока VIP");
+    } else if (templateId === "deposit-booster") {
+      setScenarioName("Стимулирование депозитов");
+    } else if (templateId === "birthday-campaign") {
+      setScenarioName("День рождения");
+    } else if (templateId === "win-back-30days") {
+      setScenarioName("Возврат после 30 дней");
+    }
+
+    // Загружаем узлы и связи из шаблона
     if (templateId && scenarioTemplates[templateId]) {
       const template = scenarioTemplates[templateId];
       setNodes(template.nodes);
       setEdges(template.edges);
-      
-      // Установка имени сценария по шаблону
-      if (templateId === "welcome-series") {
-        setScenarioName("Приветственная серия");
-      } else if (templateId === "churn-prevention") {
-        setScenarioName("Предотвращение оттока VIP");
-      }
-    } else if (params.id === "new") {
+    } else if (params.id === "new" && !templateId) {
       // Пустой сценарий
       setNodes([]);
       setEdges([]);
     }
-  }, [templateId, params.id, setNodes, setEdges]);
+  }, [templateId, params.id, setNodes, setEdges, customName, segmentName, expectedRevenue, conversionRate]);
 
   // Обработка соединений
   const onConnect = useCallback((params: Connection) => {
@@ -500,6 +706,12 @@ function ScenarioBuilder() {
                 {scenarioStatus === "paused" && "На паузе"}
                 {scenarioStatus === "draft" && "Черновик"}
               </Badge>
+              {fromSource && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                  {fromSource === "templates" && "Из шаблона"}
+                  {fromSource === "ai-recommendations" && "ИИ рекомендация"}
+                </Badge>
+              )}
             </div>
             
             <div className="flex items-center gap-2">
