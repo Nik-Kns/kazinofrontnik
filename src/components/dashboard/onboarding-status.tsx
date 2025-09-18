@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Circle, ArrowRight, Settings, Target, Database, Rocket, Shield, Loader2, CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
+import { CheckCircle2, Circle, ArrowRight, Settings, Target, Database, Rocket, Shield, Loader2, CheckCircle, AlertCircle, TrendingUp, Brain } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { GoalsModal } from "./goals-modal";
+import { AuditModal } from "./audit-modal";
 
 interface OnboardingStep {
   id: string;
@@ -27,6 +28,7 @@ export function OnboardingStatus() {
   const [auditCompleted, setAuditCompleted] = useState(false);
   const [auditResults, setAuditResults] = useState<any>(null);
   const [goalsModalOpen, setGoalsModalOpen] = useState(false);
+  const [auditModalOpen, setAuditModalOpen] = useState(false);
 
   useEffect(() => {
     // Проверяем статус онбординга из localStorage
@@ -76,11 +78,11 @@ export function OnboardingStatus() {
         },
         {
           id: 'audit',
-          title: 'Аудит retention структуры',
-          description: 'Проверьте эффективность удержания',
+          title: 'Проверка проекта (ИИ)',
+          description: 'Система проверяет готовность подключения и корректность данных',
           completed: auditPassed,
           href: '#',
-          icon: Shield,
+          icon: Brain,
           priority: 'recommended'
         }
       ]);
@@ -242,20 +244,10 @@ export function OnboardingStatus() {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={runAudit}
-                      disabled={auditRunning}
+                      onClick={() => setAuditModalOpen(true)}
                     >
-                      {auditRunning ? (
-                        <>
-                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                          Анализ...
-                        </>
-                      ) : (
-                        <>
-                          Запустить аудит
-                          <ArrowRight className="ml-2 h-3 w-3" />
-                        </>
-                      )}
+                      Проверка проекта
+                      <ArrowRight className="ml-2 h-3 w-3" />
                     </Button>
                   ) : step.id === 'goals' ? (
                     <Button 
@@ -377,6 +369,21 @@ export function OnboardingStatus() {
             const goalsSet = goalsData ? JSON.parse(goalsData).set : false;
             setSteps(prev => prev.map(step => 
               step.id === 'goals' ? { ...step, completed: goalsSet } : step
+            ));
+          }
+        }}
+      />
+      
+      <AuditModal
+        open={auditModalOpen}
+        onOpenChange={(open) => {
+          setAuditModalOpen(open);
+          if (!open) {
+            // Обновляем статус после закрытия модалки
+            const auditData = localStorage.getItem('projectAudit');
+            const auditPassed = auditData ? JSON.parse(auditData).completed : false;
+            setSteps(prev => prev.map(step => 
+              step.id === 'audit' ? { ...step, completed: auditPassed } : step
             ));
           }
         }}
