@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getRecommendationsWithStatus, updateRecommendationStatus, type Recommendation } from "@/lib/recommendations-data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,155 +41,29 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Типы для рекомендаций
-interface Recommendation {
-  id: string;
-  title: string;
-  description: string;
-  category: 'retention' | 'revenue' | 'engagement' | 'risk' | 'optimization';
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  status: 'new' | 'in_progress' | 'completed' | 'dismissed' | 'postponed';
-  impact: {
-    metric: string;
-    value: string;
-    trend: 'up' | 'down';
-  };
-  deadline?: Date;
-  createdAt: Date;
-  completedAt?: Date;
-  tags: string[];
-  actions: {
-    primary: { label: string; href?: string };
-    secondary?: { label: string };
-  };
-  reasoning: string;
-  dataPoints: Array<{ label: string; value: string }>;
-  confidence: number;
-}
-
-// Моковые данные рекомендаций
-const mockRecommendations: Recommendation[] = [
-  {
-    id: '1',
-    title: 'Запустить кампанию реактивации для спящих игроков',
-    description: 'Обнаружено 2,847 игроков без активности 30+ дней с высоким историческим LTV',
-    category: 'retention',
-    priority: 'critical',
-    status: 'new',
-    impact: { metric: 'Monthly Revenue', value: '+12%', trend: 'up' },
-    deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    tags: ['Реактивация', 'Высокий приоритет', 'Quick Win'],
-    actions: {
-      primary: { label: 'Создать кампанию', href: '/builder?template=reactivation' },
-      secondary: { label: 'Детали анализа' }
-    },
-    reasoning: 'Анализ показал, что игроки с периодом неактивности 30-45 дней имеют 35% вероятность возврата при правильной стимуляции. Средний депозит после реактивации составляет €250.',
-    dataPoints: [
-      { label: 'Целевая аудитория', value: '2,847 игроков' },
-      { label: 'Средний LTV', value: '€485' },
-      { label: 'Ожидаемая конверсия', value: '8-12%' },
-      { label: 'Потенциальный доход', value: '€142,350' }
-    ],
-    confidence: 92
-  },
-  {
-    id: '2',
-    title: 'Оптимизировать бонусную программу для VIP сегмента',
-    description: 'VIP игроки используют только 45% доступных бонусов, что ниже среднего',
-    category: 'revenue',
-    priority: 'high',
-    status: 'new',
-    impact: { metric: 'GGR', value: '+€85,000/мес', trend: 'up' },
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    tags: ['VIP', 'Бонусы', 'Оптимизация'],
-    actions: {
-      primary: { label: 'Настроить бонусы', href: '/segments?filter=vip' },
-      secondary: { label: 'Анализ использования' }
-    },
-    reasoning: 'VIP игроки предпочитают cashback и эксклюзивные турниры вместо стандартных депозитных бонусов. Персонализация предложений может увеличить утилизацию до 75%.',
-    dataPoints: [
-      { label: 'VIP активность', value: '71%' },
-      { label: 'Bonus ROI', value: '2.3x' },
-      { label: 'Неиспользованные бонусы', value: '€124,000' },
-      { label: 'Потенциал роста', value: '+30%' }
-    ],
-    confidence: 87
-  },
-  {
-    id: '3',
-    title: 'Предотвратить отток высокоценных игроков',
-    description: 'ML-модель обнаружила 156 игроков с высоким риском ухода в ближайшие 7 дней',
-    category: 'risk',
-    priority: 'critical',
-    status: 'in_progress',
-    impact: { metric: 'Потери', value: '-€68,000', trend: 'down' },
-    deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    tags: ['Риск', 'Срочно', 'ML-прогноз'],
-    actions: {
-      primary: { label: 'Применить стратегию', href: '/builder?template=risk-prevention' },
-      secondary: { label: 'Список игроков' }
-    },
-    reasoning: 'Снижение частоты игр на 40%, уменьшение размера ставок и увеличение времени между сессиями указывают на потерю интереса.',
-    dataPoints: [
-      { label: 'Risk Score', value: '8.7/10' },
-      { label: 'Дней до ухода', value: '5-7' },
-      { label: 'Средний LTV группы', value: '€436' },
-      { label: 'Успех предотвращения', value: '65%' }
-    ],
-    confidence: 89
-  },
-  {
-    id: '4',
-    title: 'Увеличить вовлеченность через турниры',
-    description: 'Игроки с участием в турнирах показывают на 45% выше retention',
-    category: 'engagement',
-    priority: 'medium',
-    status: 'new',
-    impact: { metric: 'DAU', value: '+18%', trend: 'up' },
-    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-    tags: ['Турниры', 'Вовлеченность', 'Соревнования'],
-    actions: {
-      primary: { label: 'Создать турнир', href: '/tournaments/create' },
-      secondary: { label: 'Расписание' }
-    },
-    reasoning: 'Еженедельные турниры с призовым фондом €5,000+ привлекают в среднем 1,200 участников и увеличивают время в игре на 35%.',
-    dataPoints: [
-      { label: 'Текущее участие', value: '12%' },
-      { label: 'Целевое участие', value: '25%' },
-      { label: 'ROI турниров', value: '3.8x' },
-      { label: 'Средняя ставка в турнире', value: '€85' }
-    ],
-    confidence: 91
-  },
-  {
-    id: '5',
-    title: 'Оптимизировать время отправки push-уведомлений',
-    description: 'Анализ показал низкий CTR уведомлений в текущие временные слоты',
-    category: 'optimization',
-    priority: 'low',
-    status: 'completed',
-    impact: { metric: 'CTR', value: '+34%', trend: 'up' },
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-    completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    tags: ['Push', 'Оптимизация', 'Коммуникации'],
-    actions: {
-      primary: { label: 'Применено', href: '#' },
-    },
-    reasoning: 'Оптимальное время для вашей аудитории: 19:00-21:00 в будни и 14:00-16:00 в выходные.',
-    dataPoints: [
-      { label: 'Прежний CTR', value: '2.1%' },
-      { label: 'Новый CTR', value: '2.8%' },
-      { label: 'Охват', value: '+15%' },
-      { label: 'Конверсия', value: '+8%' }
-    ],
-    confidence: 94
-  }
-];
 
 export default function RecommendationsPage() {
-  const [recommendations, setRecommendations] = useState(mockRecommendations);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  
+  // Загружаем рекомендации из общего источника
+  useEffect(() => {
+    const loadRecommendations = () => {
+      setRecommendations(getRecommendationsWithStatus());
+    };
+    
+    loadRecommendations();
+    
+    // Подписываемся на изменения статусов
+    const handleStatusChange = () => {
+      loadRecommendations();
+    };
+    
+    window.addEventListener('recommendationStatusChanged', handleStatusChange);
+    
+    return () => {
+      window.removeEventListener('recommendationStatusChanged', handleStatusChange);
+    };
+  }, []);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('active');
@@ -235,14 +110,16 @@ export default function RecommendationsPage() {
   };
 
   const handleAction = (id: string, action: 'apply' | 'dismiss' | 'postpone') => {
+    const newStatus = action === 'apply' ? 'in_progress' :
+                      action === 'dismiss' ? 'dismissed' : 'postponed';
+    
+    // Обновляем статус в общем хранилище
+    updateRecommendationStatus(id, newStatus);
+    
+    // Обновляем локальное состояние
     setRecommendations(prev => prev.map(rec => 
       rec.id === id 
-        ? { 
-            ...rec, 
-            status: action === 'apply' ? 'in_progress' : 
-                   action === 'dismiss' ? 'dismissed' : 
-                   'postponed' 
-          }
+        ? { ...rec, status: newStatus as Recommendation['status'] }
         : rec
     ));
   };
@@ -470,9 +347,9 @@ export default function RecommendationsPage() {
                   <div className="text-right">
                     <div className="flex items-center gap-1 text-sm font-medium">
                       <Zap className="h-4 w-4 text-green-600" />
-                      <span className="text-green-600">{rec.impact.value}</span>
+                      <span className="text-green-600">{rec.impact?.value}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">{rec.impact.metric}</p>
+                    <p className="text-xs text-muted-foreground">{rec.impact?.metric}</p>
                   </div>
                 </div>
               </CardHeader>

@@ -50,7 +50,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { FullMetricsDashboard } from "@/components/dashboard/full-metrics-dashboard";
+import { getRecommendationsWithStatus, updateRecommendationStatus, type Recommendation } from "@/lib/recommendations-data";
 import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -197,88 +197,52 @@ function RisksAndWarnings() {
   );
 }
 
-// Компонент активных кампаний
-function ActiveCampaigns() {
-  const campaigns = [
-    {
-      id: '1',
-      name: 'VIP Реактивация',
-      status: 'active',
-      performance: 'good',
-      sent: 1234,
-      converted: 156,
-      revenue: '€12,450'
-    },
-    {
-      id: '2',
-      name: 'Welcome Series',
-      status: 'active',
-      performance: 'excellent',
-      sent: 3456,
-      converted: 892,
-      revenue: '€45,230'
-    },
-    {
-      id: '3',
-      name: 'Weekend Promo',
-      status: 'scheduled',
-      performance: null,
-      sent: 0,
-      converted: 0,
-      revenue: '€0'
-    }
-  ];
-
+// Компонент кратких трендов
+function TrendsSummary() {
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-primary" />
-            <CardTitle>Активные кампании</CardTitle>
+            <Activity className="h-5 w-5 text-primary" />
+            <CardTitle>Краткие тренды</CardTitle>
           </div>
           <Button size="sm" variant="outline" asChild>
-            <Link href="/campaigns">
-              Все кампании
+            <Link href="/trends">
+              Подробный анализ
               <ChevronRight className="ml-1 h-3 w-3" />
             </Link>
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {campaigns.map((campaign) => (
-            <div key={campaign.id} className="flex items-center justify-between p-3 border rounded-lg">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="font-medium text-sm">{campaign.name}</h4>
-                  <Badge 
-                    variant={campaign.status === 'active' ? 'default' : 'secondary'}
-                    className="text-xs"
-                  >
-                    {campaign.status === 'active' ? 'Активна' : 'Запланирована'}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
-                  <span>Отправлено: {campaign.sent.toLocaleString()}</span>
-                  <span>Конверсий: {campaign.converted}</span>
-                  <span className="font-medium text-green-600">{campaign.revenue}</span>
-                </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Положительные тренды</h4>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <span>LTV вырос на 12% за месяц</span>
               </div>
-              {campaign.performance && (
-                <div className={cn(
-                  "px-2 py-1 rounded text-xs font-medium",
-                  campaign.performance === 'excellent' && "bg-green-100 text-green-700",
-                  campaign.performance === 'good' && "bg-blue-100 text-blue-700",
-                  campaign.performance === 'poor' && "bg-red-100 text-red-700"
-                )}>
-                  {campaign.performance === 'excellent' && 'Отлично'}
-                  {campaign.performance === 'good' && 'Хорошо'}
-                  {campaign.performance === 'poor' && 'Плохо'}
-                </div>
-              )}
+              <div className="flex items-center gap-2 text-sm">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <span>Конверсия в депозит +5%</span>
+              </div>
             </div>
-          ))}
+          </div>
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Требуют внимания</h4>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm">
+                <TrendingDown className="h-4 w-4 text-red-600" />
+                <span>Retention D7 -8%</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <span>Рост жалоб +3%</span>
+              </div>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -417,49 +381,8 @@ export default function DashboardPage() {
         <RisksAndWarnings />
       </div>
 
-      {/* Секция 2: Анализ трендов */}
-      <CollapsibleSection 
-        id="trend-analysis" 
-        title="📊 Анализ трендов" 
-        defaultOpen={true}
-      >
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Положительные тренды</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-                <span>LTV вырос на 12% за последний месяц</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-                <span>Конверсия в депозит +5% после оптимизации</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-                <span>Активность VIP игроков +23%</span>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Требуют внимания</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <TrendingDown className="h-4 w-4 text-red-600" />
-                <span>Retention D7 снизился на 8%</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <TrendingDown className="h-4 w-4 text-red-600" />
-                <span>Использование бонусов -15%</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <AlertCircle className="h-4 w-4 text-yellow-600" />
-                <span>Рост жалоб на выплаты +3%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CollapsibleSection>
+      {/* Краткие тренды с ссылкой на детальный анализ */}
+      <TrendsSummary />
 
       {/* Секция 3: Рекомендации и Действия */}
       <CollapsibleSection 
