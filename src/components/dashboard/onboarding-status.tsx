@@ -245,8 +245,10 @@ export function OnboardingStatus() {
                       asChild
                     >
                       <Link href="/audit">
-                        Проверка проекта
-                        <ArrowRight className="ml-2 h-3 w-3" />
+                        <span className="inline-flex items-center">
+                          Проверка проекта
+                          <ArrowRight className="ml-2 h-3 w-3" />
+                        </span>
                       </Link>
                     </Button>
                   ) : step.id === 'goals' ? (
@@ -261,8 +263,10 @@ export function OnboardingStatus() {
                   ) : (
                     <Button asChild variant="outline" size="sm">
                       <Link href={step.href}>
-                        Настроить
-                        <ArrowRight className="ml-2 h-3 w-3" />
+                        <span className="inline-flex items-center">
+                          Настроить
+                          <ArrowRight className="ml-2 h-3 w-3" />
+                        </span>
                       </Link>
                     </Button>
                   )
@@ -297,8 +301,10 @@ export function OnboardingStatus() {
                           <span className="text-muted-foreground">• {segment}</span>
                           <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" asChild>
                             <Link href={`/segments?action=create&name=${encodeURIComponent(segment)}&type=behavioral`}>
-                              Создать
-                              <ArrowRight className="ml-1 h-3 w-3" />
+                              <span className="inline-flex items-center">
+                                Создать
+                                <ArrowRight className="ml-1 h-3 w-3" />
+                              </span>
                             </Link>
                           </Button>
                         </div>
@@ -320,8 +326,10 @@ export function OnboardingStatus() {
                           <span className="text-muted-foreground">• {comm}</span>
                           <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" asChild>
                             <Link href={`/builder?action=create&audience=${encodeURIComponent(comm)}&type=retention`}>
-                              Создать сценарий
-                              <ArrowRight className="ml-1 h-3 w-3" />
+                              <span className="inline-flex items-center">
+                                Создать сценарий
+                                <ArrowRight className="ml-1 h-3 w-3" />
+                              </span>
                             </Link>
                           </Button>
                         </div>
@@ -343,8 +351,10 @@ export function OnboardingStatus() {
                           <span className="text-muted-foreground">• {test}</span>
                           <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" asChild>
                             <Link href={`/triggers?action=create&test=${encodeURIComponent(test)}&type=ab`}>
-                              Создать тест
-                              <ArrowRight className="ml-1 h-3 w-3" />
+                              <span className="inline-flex items-center">
+                                Создать тест
+                                <ArrowRight className="ml-1 h-3 w-3" />
+                              </span>
                             </Link>
                           </Button>
                         </div>

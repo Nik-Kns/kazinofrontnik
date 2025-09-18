@@ -493,8 +493,10 @@ export default function AuditPage() {
                                       asChild
                                     >
                                       <Link href={fix.href}>
-                                        {fix.label}
-                                        <ChevronRight className="ml-1 h-3 w-3" />
+                                        <span className="inline-flex items-center">
+                                          {fix.label}
+                                          <ChevronRight className="ml-1 h-3 w-3" />
+                                        </span>
                                       </Link>
                                     </Button>
                                   ))}
