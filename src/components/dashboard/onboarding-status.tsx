@@ -9,7 +9,6 @@ import { CheckCircle2, Circle, ArrowRight, Settings, Target, Database, Rocket, S
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { GoalsModal } from "./goals-modal";
-import { AuditModal } from "./audit-modal";
 
 interface OnboardingStep {
   id: string;
@@ -28,7 +27,6 @@ export function OnboardingStatus() {
   const [auditCompleted, setAuditCompleted] = useState(false);
   const [auditResults, setAuditResults] = useState<any>(null);
   const [goalsModalOpen, setGoalsModalOpen] = useState(false);
-  const [auditModalOpen, setAuditModalOpen] = useState(false);
 
   useEffect(() => {
     // Проверяем статус онбординга из localStorage
@@ -244,10 +242,12 @@ export function OnboardingStatus() {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => setAuditModalOpen(true)}
+                      asChild
                     >
-                      Проверка проекта
-                      <ArrowRight className="ml-2 h-3 w-3" />
+                      <Link href="/audit">
+                        Проверка проекта
+                        <ArrowRight className="ml-2 h-3 w-3" />
+                      </Link>
                     </Button>
                   ) : step.id === 'goals' ? (
                     <Button 
@@ -369,21 +369,6 @@ export function OnboardingStatus() {
             const goalsSet = goalsData ? JSON.parse(goalsData).set : false;
             setSteps(prev => prev.map(step => 
               step.id === 'goals' ? { ...step, completed: goalsSet } : step
-            ));
-          }
-        }}
-      />
-      
-      <AuditModal
-        open={auditModalOpen}
-        onOpenChange={(open) => {
-          setAuditModalOpen(open);
-          if (!open) {
-            // Обновляем статус после закрытия модалки
-            const auditData = localStorage.getItem('projectAudit');
-            const auditPassed = auditData ? JSON.parse(auditData).completed : false;
-            setSteps(prev => prev.map(step => 
-              step.id === 'audit' ? { ...step, completed: auditPassed } : step
             ));
           }
         }}
