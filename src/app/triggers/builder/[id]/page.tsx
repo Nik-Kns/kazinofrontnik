@@ -516,6 +516,16 @@ function ScenarioBuilder() {
     expectedRevenue: "",
     conversionTarget: ""
   });
+  const [campaignGoals, setCampaignGoals] = useState({
+    depositConversion: "",
+    bonusUsage: "",
+    avgDeposit: ""
+  });
+  const [goalsErrors, setGoalsErrors] = useState({
+    depositConversion: "",
+    bonusUsage: "",
+    avgDeposit: ""
+  });
 
   // Загрузка шаблона при монтировании
   useEffect(() => {
@@ -613,10 +623,68 @@ function ScenarioBuilder() {
     setSelectedNode(node);
   }, []);
 
+  // Валидация целей кампании
+  const validateGoals = () => {
+    const errors = {
+      depositConversion: "",
+      bonusUsage: "",
+      avgDeposit: ""
+    };
+    let isValid = true;
+
+    // Проверка конверсии в депозит
+    if (!campaignGoals.depositConversion) {
+      errors.depositConversion = "Обязательное поле";
+      isValid = false;
+    } else if (isNaN(Number(campaignGoals.depositConversion)) || Number(campaignGoals.depositConversion) < 0 || Number(campaignGoals.depositConversion) > 100) {
+      errors.depositConversion = "Введите значение от 0 до 100";
+      isValid = false;
+    }
+
+    // Проверка использования бонусов
+    if (!campaignGoals.bonusUsage) {
+      errors.bonusUsage = "Обязательное поле";
+      isValid = false;
+    } else if (isNaN(Number(campaignGoals.bonusUsage)) || Number(campaignGoals.bonusUsage) < 0 || Number(campaignGoals.bonusUsage) > 100) {
+      errors.bonusUsage = "Введите значение от 0 до 100";
+      isValid = false;
+    }
+
+    // Проверка среднего депозита
+    if (!campaignGoals.avgDeposit) {
+      errors.avgDeposit = "Обязательное поле";
+      isValid = false;
+    } else if (isNaN(Number(campaignGoals.avgDeposit)) || Number(campaignGoals.avgDeposit) < 0) {
+      errors.avgDeposit = "Введите положительное значение";
+      isValid = false;
+    }
+
+    setGoalsErrors(errors);
+    return isValid;
+  };
+
   // Сохранение сценария
   const handleSave = async () => {
+    // Валидируем цели перед сохранением
+    if (!validateGoals()) {
+      return;
+    }
+
     setIsSaving(true);
-    // Здесь будет логика сохранения
+    // Сохраняем в localStorage
+    const scenarioData = {
+      id: params.id,
+      name: scenarioName,
+      status: scenarioStatus,
+      nodes,
+      edges,
+      info: scenarioInfo,
+      goals: campaignGoals,
+      lastSaved: new Date().toISOString()
+    };
+    
+    localStorage.setItem(`scenario-${params.id}`, JSON.stringify(scenarioData));
+    
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsSaving(false);
   };
@@ -789,6 +857,50 @@ function ScenarioBuilder() {
           <TabsContent value="stats" className="p-4 space-y-4">
             <Card>
               <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Цели кампании
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Конверсия в депозит</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{campaignGoals.depositConversion || "—"}%</span>
+                    {campaignGoals.depositConversion && (
+                      <Badge variant="outline" className="text-xs">
+                        Цель
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Использование бонусов</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{campaignGoals.bonusUsage || "—"}%</span>
+                    {campaignGoals.bonusUsage && (
+                      <Badge variant="outline" className="text-xs">
+                        Цель
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Средний депозит</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">${campaignGoals.avgDeposit || "—"}</span>
+                    {campaignGoals.avgDeposit && (
+                      <Badge variant="outline" className="text-xs">
+                        Цель
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
                 <CardTitle className="text-sm">Производительность</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -800,7 +912,7 @@ function ScenarioBuilder() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Конверсия</span>
+                  <span className="text-sm text-muted-foreground">Текущая конверсия</span>
                   <div className="flex items-center gap-1">
                     <Target className="h-4 w-4" />
                     <span className="font-semibold">24.5%</span>
@@ -1025,6 +1137,78 @@ function ScenarioBuilder() {
                         <SelectItem value="low">Низкий</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  
+                  <Separator className="my-4" />
+                  
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-medium flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      Цели кампании
+                      <Badge variant="destructive" className="ml-2">Обязательно</Badge>
+                    </h3>
+                    
+                    <div>
+                      <Label>Конверсия в депозит (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="Например: 25"
+                        value={campaignGoals.depositConversion}
+                        onChange={(e) => {
+                          setCampaignGoals({...campaignGoals, depositConversion: e.target.value});
+                          if (goalsErrors.depositConversion) {
+                            setGoalsErrors({...goalsErrors, depositConversion: ""});
+                          }
+                        }}
+                        className={goalsErrors.depositConversion ? "border-red-500" : ""}
+                      />
+                      {goalsErrors.depositConversion && (
+                        <p className="text-xs text-red-500 mt-1">{goalsErrors.depositConversion}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label>Использование бонусов (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="Например: 60"
+                        value={campaignGoals.bonusUsage}
+                        onChange={(e) => {
+                          setCampaignGoals({...campaignGoals, bonusUsage: e.target.value});
+                          if (goalsErrors.bonusUsage) {
+                            setGoalsErrors({...goalsErrors, bonusUsage: ""});
+                          }
+                        }}
+                        className={goalsErrors.bonusUsage ? "border-red-500" : ""}
+                      />
+                      {goalsErrors.bonusUsage && (
+                        <p className="text-xs text-red-500 mt-1">{goalsErrors.bonusUsage}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label>Средний депозит ($)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="Например: 150"
+                        value={campaignGoals.avgDeposit}
+                        onChange={(e) => {
+                          setCampaignGoals({...campaignGoals, avgDeposit: e.target.value});
+                          if (goalsErrors.avgDeposit) {
+                            setGoalsErrors({...goalsErrors, avgDeposit: ""});
+                          }
+                        }}
+                        className={goalsErrors.avgDeposit ? "border-red-500" : ""}
+                      />
+                      {goalsErrors.avgDeposit && (
+                        <p className="text-xs text-red-500 mt-1">{goalsErrors.avgDeposit}</p>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
