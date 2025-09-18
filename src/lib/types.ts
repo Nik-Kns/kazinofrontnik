@@ -954,3 +954,98 @@ export type AiSegmentTemplate = {
     recommendation: string;
   };
 };
+
+// Scenario Builder Types
+export interface ScenarioNode {
+  id: string;
+  type: 'trigger' | 'action' | 'logic';
+  position: { x: number; y: number };
+  data: TriggerNode | ActionNode | LogicNode;
+}
+
+export interface TriggerNode {
+  type: 'event' | 'schedule' | 'segment' | 'behavior';
+  name: string;
+  description: string;
+  icon: string;
+  config: {
+    eventType?: string;
+    schedule?: string;
+    segmentId?: string;
+    behaviorRule?: string;
+    [key: string]: any;
+  };
+}
+
+export interface ActionNode {
+  type: 'email' | 'sms' | 'push' | 'bonus' | 'segment' | 'webhook';
+  name: string;
+  description: string;
+  icon: string;
+  config: {
+    template?: string;
+    message?: string;
+    bonusAmount?: number;
+    segmentAction?: 'add' | 'remove';
+    webhookUrl?: string;
+    [key: string]: any;
+  };
+}
+
+export interface LogicNode {
+  type: 'condition' | 'delay' | 'split' | 'merge';
+  name: string;
+  description: string;
+  icon: string;
+  config: {
+    condition?: string;
+    delayTime?: number;
+    delayUnit?: 'minutes' | 'hours' | 'days';
+    splitRatio?: number[];
+    [key: string]: any;
+  };
+}
+
+export interface ScenarioEdge {
+  id: string;
+  source: string;
+  target: string;
+  sourceHandle?: string;
+  targetHandle?: string;
+  label?: string;
+  animated?: boolean;
+}
+
+export interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  status: 'draft' | 'active' | 'paused' | 'archived';
+  nodes: ScenarioNode[];
+  edges: ScenarioEdge[];
+  stats: {
+    totalPlayers: number;
+    conversionRate: number;
+    revenue: number;
+    lastRun?: Date;
+  };
+  created: Date;
+  modified: Date;
+  tags?: string[];
+}
+
+export interface ScenarioTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: 'retention' | 'reactivation' | 'vip' | 'onboarding' | 'custom';
+  estimatedRevenue: string;
+  conversionRate: string;
+  segmentCoverage: {
+    percentage: number;
+    totalPlayers: number;
+  };
+  scenario: Partial<Scenario>;
+  aiRecommended?: boolean;
+  difficulty: 'easy' | 'medium' | 'hard';
+}

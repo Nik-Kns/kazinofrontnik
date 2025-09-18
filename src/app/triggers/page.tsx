@@ -1,411 +1,525 @@
 "use client";
 
-import * as React from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Zap, Settings, Bot, Layers, Target, DollarSign, Sparkles, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { TemplatesTable } from '@/components/builder/templates-table';
-import { TemplatesGrid } from '@/components/builder/templates-grid';
-import { AIScenariosTab, type AIScenario } from '@/components/builder/ai-scenarios-tab';
-import { TemplateData } from '@/lib/types';
-import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
-import { CurrencyBadge } from "@/components/ui/currency-badge";
-import { useCurrency } from "@/contexts/currency-context";
-import { useRouter, useSearchParams } from "next/navigation";
-import { scenarioTemplates, createPersonalizedScenario } from '@/lib/scenario-templates';
+  Plus,
+  Sparkles,
+  Clock,
+  Users,
+  TrendingUp,
+  Zap,
+  Calendar,
+  UserCheck,
+  UserX,
+  Gift,
+  Target,
+  AlertCircle,
+  ChevronRight,
+  Filter,
+  Search
+} from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TriggerFilters } from '@/components/filters/trigger-filters';
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScenarioTemplate } from "@/lib/types";
 
-function searchParamsSafe() {
-  // хелпер, возвращаем прокси без SSR обращения
-  const sp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  return {
-    get: (key: string) => sp ? sp.get(key) : null
-  } as unknown as URLSearchParams;
-}
+const aiTemplates: ScenarioTemplate[] = [
+  {
+    id: "welcome-series",
+    name: "Приветственная серия для новых игроков",
+    description: "Автоматическая последовательность коммуникаций для онбординга новых игроков с персонализированными бонусами",
+    category: "onboarding",
+    estimatedRevenue: "€45K - €67K/мес",
+    conversionRate: "32%",
+    segmentCoverage: {
+      percentage: 85,
+      totalPlayers: 2340
+    },
+    scenario: {
+      name: "Welcome Series",
+      description: "Multi-step onboarding flow",
+      status: "draft"
+    },
+    aiRecommended: true,
+    difficulty: "easy"
+  },
+  {
+    id: "churn-prevention",
+    name: "Предотвращение оттока VIP игроков",
+    description: "Триггерный сценарий для удержания VIP игроков при снижении активности",
+    category: "retention",
+    estimatedRevenue: "€187K - €245K/мес",
+    conversionRate: "47%",
+    segmentCoverage: {
+      percentage: 92,
+      totalPlayers: 450
+    },
+    scenario: {
+      name: "VIP Churn Prevention",
+      description: "Advanced retention flow for VIP players",
+      status: "draft"
+    },
+    aiRecommended: true,
+    difficulty: "medium"
+  },
+  {
+    id: "deposit-booster",
+    name: "Стимулирование повторных депозитов",
+    description: "Умная система начисления бонусов на основе паттернов игрового поведения",
+    category: "reactivation",
+    estimatedRevenue: "€78K - €112K/мес",
+    conversionRate: "28%",
+    segmentCoverage: {
+      percentage: 73,
+      totalPlayers: 8920
+    },
+    scenario: {
+      name: "Smart Deposit Booster",
+      description: "Behavioral trigger-based bonus system",
+      status: "draft"
+    },
+    aiRecommended: true,
+    difficulty: "hard"
+  },
+  {
+    id: "weekly-tournaments",
+    name: "Еженедельные турниры для активных",
+    description: "Автоматические приглашения на турниры с прогрессивными наградами",
+    category: "retention",
+    estimatedRevenue: "€95K - €130K/мес",
+    conversionRate: "38%",
+    segmentCoverage: {
+      percentage: 67,
+      totalPlayers: 5430
+    },
+    scenario: {
+      name: "Weekly Tournament Invites",
+      description: "Automated tournament invitation system",
+      status: "draft"
+    },
+    aiRecommended: false,
+    difficulty: "easy"
+  },
+  {
+    id: "birthday-campaign",
+    name: "Поздравления с днем рождения",
+    description: "Персонализированные поздравления с эксклюзивными подарками",
+    category: "retention",
+    estimatedRevenue: "€12K - €18K/мес",
+    conversionRate: "52%",
+    segmentCoverage: {
+      percentage: 100,
+      totalPlayers: 890
+    },
+    scenario: {
+      name: "Birthday Celebrations",
+      description: "Personalized birthday greetings and bonuses",
+      status: "draft"
+    },
+    aiRecommended: false,
+    difficulty: "easy"
+  },
+  {
+    id: "win-back-30days",
+    name: "Возврат игроков после 30 дней",
+    description: "Многоэтапная кампания для реактивации неактивных игроков",
+    category: "reactivation",
+    estimatedRevenue: "€156K - €189K/мес",
+    conversionRate: "18%",
+    segmentCoverage: {
+      percentage: 88,
+      totalPlayers: 12450
+    },
+    scenario: {
+      name: "30-Day Win-Back",
+      description: "Multi-step reactivation campaign",
+      status: "draft"
+    },
+    aiRecommended: true,
+    difficulty: "medium"
+  }
+];
 
-// Динамический импорт Builder компонента для избежания SSR проблем
-const BuilderWrapper = React.lazy(() => import('./builder-standalone'));
+const existingScenarios = [
+  {
+    id: "scenario-1",
+    name: "Утренние фриспины",
+    status: "active" as const,
+    players: 3450,
+    conversionRate: 24,
+    revenue: 67000,
+    lastRun: "2 часа назад"
+  },
+  {
+    id: "scenario-2",
+    name: "VIP кэшбэк программа",
+    status: "active" as const,
+    players: 890,
+    conversionRate: 42,
+    revenue: 234000,
+    lastRun: "5 часов назад"
+  },
+  {
+    id: "scenario-3",
+    name: "Реактивация спящих",
+    status: "paused" as const,
+    players: 12300,
+    conversionRate: 15,
+    revenue: 45000,
+    lastRun: "3 дня назад"
+  }
+];
 
-export default function ScenariosPage() {
-    const [isBuilderMode, setIsBuilderMode] = React.useState(false);
-    const [editingScenario, setEditingScenario] = React.useState<TemplateData | null>(null);
-    const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
-    const [templateLoaded, setTemplateLoaded] = React.useState(false);
-    const [loadedTemplateInfo, setLoadedTemplateInfo] = React.useState<any>(null);
-    
-    // Валютные настройки
-    const { state: currencyState } = useCurrency();
-    const router = useRouter();
-    const search = searchParamsSafe();
-    const initialTab = (search?.get('tab') || 'all') as 'all'|'default'|'tournaments'|'event-driven'|'promo-events';
-    const [tab, setTab] = React.useState<typeof initialTab>(initialTab);
-    
-    // Обработка параметров из URL для загрузки шаблона
-    React.useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            const templateId = params.get('template');
-            
-            if (templateId && !templateLoaded) {
-                // Загружаем шаблон с персонализацией
-                const template = scenarioTemplates[templateId];
-                if (template) {
-                    const personalizationData = {
-                        targetAudience: parseInt(params.get('audience') || '0'),
-                        budget: parseInt(params.get('budget') || '0'),
-                        urgency: (params.get('urgency') || 'medium') as any,
-                        customSegments: params.get('segment')?.split(',') || [],
-                        expectedRevenue: params.get('expectedRevenue'),
-                        conversion: params.get('conversion'),
-                        riskScore: params.get('riskScore'),
-                        potentialLoss: params.get('potentialLoss'),
-                        daysToChurn: params.get('daysToChurn'),
-                        bonusUtilization: params.get('bonusUtilization')
-                    };
-                    
-                    const personalizedScenario = createPersonalizedScenario(template, personalizationData);
-                    
-                    // Сохраняем информацию о загруженном шаблоне
-                    setLoadedTemplateInfo({
-                        ...personalizedScenario,
-                        params: personalizationData
-                    });
-                    
-                    // Открываем редактор с загруженным шаблоном
-                    setEditingScenario(personalizedScenario as any);
-                    setIsBuilderMode(true);
-                    setTemplateLoaded(true);
-                }
-            }
-        }
-    }, [templateLoaded]);
+export default function TriggersPage() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
-    const handleTabChange = (value: string) => {
-        setTab(value as any);
-        if (typeof window !== 'undefined') {
-          const params = new URLSearchParams(window.location.search);
-          params.set('tab', value);
-          router.replace(`/builder?${params.toString()}`);
-        }
-    };
+  const handleCreateFromTemplate = (templateId: string) => {
+    router.push(`/triggers/builder/new?template=${templateId}`);
+  };
 
-    const handleEditTemplate = (templateData: TemplateData) => {
-        setEditingScenario(templateData); // Передаем данные шаблона для редактирования
-        setIsBuilderMode(true);
-    };
-    
-    const handleCloneTemplate = (templateData: TemplateData) => {
-        // Клонируем шаблон (создаем копию с новым ID)
-        const clonedTemplate = {
-            ...templateData,
-            id: `${templateData.id}_clone_${Date.now()}`,
-            name: `${templateData.name} (копия)`
-        };
-        setEditingScenario(clonedTemplate);
-        setIsBuilderMode(true);
-    };
-    
-    const handleCreateNew = () => {
-        setEditingScenario(null); // Создаем новый сценарий
-        setIsBuilderMode(true);
-        setIsCreateDialogOpen(false); // Закрываем диалог
-    };
+  const handleEditScenario = (scenarioId: string) => {
+    router.push(`/triggers/builder/${scenarioId}`);
+  };
 
-    const handleCreateAIScenario = (aiScenario: AIScenario) => {
-        const mapChannel = (c: string): 'Email' | 'Push' | 'SMS' | 'InApp' | 'Multi-channel' => {
-            const lc = (c || '').toLowerCase();
-            if (lc === 'email') return 'Email';
-            if (lc === 'push') return 'Push';
-            if (lc === 'sms') return 'SMS';
-            if (lc === 'inapp' || lc === 'in-app' || lc === 'in_app') return 'InApp';
-            return 'Email';
-        };
-        // Конвертируем AI-сценарий в TemplateData для передачи в builder
-        const templateData: TemplateData = {
-            id: `ai_${aiScenario.id}_${Date.now()}`,
-            name: aiScenario.name,
-            description: `${aiScenario.description}\n\nЦелевая метрика: ${aiScenario.targetMetric}\nОжидаемое улучшение: ${aiScenario.expectedImprovement}\nКаналы: ${aiScenario.channels.join(', ')}\nТриггеры: ${aiScenario.triggers.join(', ')}`,
-            type: 'custom',
-            category: aiScenario.category.toLowerCase(),
-            channel: aiScenario.channels.length > 1 ? 'Multi-channel' : mapChannel(aiScenario.channels[0] || 'email'),
-            performance: 5, // AI-сценарии имеют высокую оценку
-            // Builder-specific config omitted to satisfy TemplateData type
-        };
-        setEditingScenario(templateData);
-        setIsBuilderMode(true);
-        setIsCreateDialogOpen(false);
-    };
+  const handleCreateNew = () => {
+    router.push("/triggers/builder/new");
+  };
 
-    const handleCreateFromScratch = () => {
-        setEditingScenario(null);
-        setIsBuilderMode(true);
-        setIsCreateDialogOpen(false);
-    };
+  const filteredTemplates = aiTemplates.filter(template => {
+    const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          template.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || template.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
-    const handleBuilderExit = () => {
-        setIsBuilderMode(false);
-        setEditingScenario(null);
-    };
-
-    if (isBuilderMode) {
-    return (
-            <React.Suspense fallback={
-                <div className="flex items-center justify-center h-screen">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                        <p className="text-muted-foreground">Загружаем конструктор...</p>
-                    </div>
+  return (
+    <div className="flex-1 space-y-6 p-8 pt-6">
+      {/* Заголовок */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Конструктор сценариев</h1>
+          <p className="text-muted-foreground">
+            Создавайте автоматические сценарии для управления коммуникациями
+          </p>
         </div>
-            }>
-                <BuilderWrapper onExit={handleBuilderExit} scenario={editingScenario} />
-            </React.Suspense>
-        );
-    }
+        <Button onClick={handleCreateNew} size="lg">
+          <Plus className="mr-2 h-5 w-5" />
+          Создать сценарий
+        </Button>
+      </div>
 
-    return (
-        <div className="p-4 md:p-6 lg:p-8 space-y-6">
-            {/* Уведомление о загруженном шаблоне из ИИ-рекомендации */}
-            {loadedTemplateInfo && !isBuilderMode && (
-                <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-purple-500/5">
-                    <CardContent className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Sparkles className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                                <p className="font-semibold">Шаблон из ИИ-рекомендации загружен</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {loadedTemplateInfo.name} • Целевая аудитория: {loadedTemplateInfo.params?.targetAudience || 'N/A'} игроков
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Badge variant="secondary">
-                                <AlertCircle className="mr-1 h-3 w-3" />
-                                {loadedTemplateInfo.params?.urgency || 'medium'}
-                            </Badge>
-                            <Button 
-                                size="sm" 
-                                onClick={() => {
-                                    setEditingScenario(loadedTemplateInfo);
-                                    setIsBuilderMode(true);
-                                }}
-                            >
-                                Открыть в редакторе
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-            
-            <div className="flex items-center justify-between">
-                        <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Триггеры</h1>
-                    <p className="text-muted-foreground">
-                        Создавайте, управляйте и анализируйте ваши CRM-кампании и триггеры.
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <CompactCurrencyToggle />
-                    <div className="text-xs text-muted-foreground">
-                        Офферы в: <CurrencyBadge currency={currencyState.base_currency || 'EUR'} size="sm" />
+      <Tabs defaultValue="templates" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="templates">
+            <Sparkles className="mr-2 h-4 w-4" />
+            ИИ-рекомендации
+          </TabsTrigger>
+          <TabsTrigger value="active">
+            <Zap className="mr-2 h-4 w-4" />
+            Активные ({existingScenarios.filter(s => s.status === 'active').length})
+          </TabsTrigger>
+          <TabsTrigger value="all">
+            <Clock className="mr-2 h-4 w-4" />
+            Все сценарии ({existingScenarios.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* ИИ-рекомендации */}
+        <TabsContent value="templates" className="space-y-6">
+          {/* Фильтры */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Поиск шаблонов..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-[200px]">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Категория" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Все категории</SelectItem>
+                <SelectItem value="onboarding">Онбординг</SelectItem>
+                <SelectItem value="retention">Удержание</SelectItem>
+                <SelectItem value="reactivation">Реактивация</SelectItem>
+                <SelectItem value="vip">VIP</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Алерт с рекомендациями */}
+          <Card className="border-blue-200 bg-blue-50/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Sparkles className="h-5 w-5 text-blue-600" />
+                ИИ обнаружил возможности для роста
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-3">
+                На основе анализа вашей базы игроков, мы рекомендуем запустить следующие сценарии:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary">
+                  <TrendingUp className="mr-1 h-3 w-3" />
+                  +€823K потенциальный доход
+                </Badge>
+                <Badge variant="secondary">
+                  <Users className="mr-1 h-3 w-3" />
+                  Покрытие 89% активных игроков
+                </Badge>
+                <Badge variant="secondary">
+                  <Target className="mr-1 h-3 w-3" />
+                  Средняя конверсия 35%
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Сетка шаблонов */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredTemplates.map((template) => (
+              <Card 
+                key={template.id} 
+                className="group hover:shadow-lg transition-all cursor-pointer relative overflow-hidden"
+                onClick={() => handleCreateFromTemplate(template.id)}
+              >
+                {template.aiRecommended && (
+                  <div className="absolute top-0 right-0 bg-gradient-to-l from-blue-600 to-purple-600 text-white px-3 py-1 text-xs font-medium rounded-bl-lg">
+                    <Sparkles className="inline-block h-3 w-3 mr-1" />
+                    ИИ рекомендует
+                  </div>
+                )}
+                
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      {template.category === 'onboarding' && <UserCheck className="h-5 w-5 text-primary" />}
+                      {template.category === 'retention' && <Users className="h-5 w-5 text-primary" />}
+                      {template.category === 'reactivation' && <UserX className="h-5 w-5 text-primary" />}
+                      {template.category === 'vip' && <Gift className="h-5 w-5 text-primary" />}
+                      {template.category === 'custom' && <Zap className="h-5 w-5 text-primary" />}
                     </div>
-                </div>
-                        </div>
-            
-            {/* Фильтры */}
-            <TriggerFilters onFiltersChange={(filters) => console.log('Filters changed:', filters)} />
-            
-            {/* Раздел с шаблонами */}
-            <div id="templates-section">
-                <div className="flex items-center justify-between mb-6">
-                    <Button onClick={() => setIsCreateDialogOpen(true)}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Создать пустой сценарий
+                    <Badge variant={
+                      template.difficulty === 'easy' ? 'secondary' :
+                      template.difficulty === 'medium' ? 'default' : 'destructive'
+                    }>
+                      {template.difficulty === 'easy' && 'Простой'}
+                      {template.difficulty === 'medium' && 'Средний'}
+                      {template.difficulty === 'hard' && 'Сложный'}
+                    </Badge>
+                  </div>
+                  
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                    {template.name}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-2">
+                    {template.description}
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-3">
+                    {/* Метрики */}
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Доход</p>
+                        <p className="font-semibold text-green-600">{template.estimatedRevenue}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Конверсия</p>
+                        <p className="font-semibold">{template.conversionRate}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Покрытие сегмента */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Покрытие сегмента</span>
+                        <span className="font-medium">{template.segmentCoverage.percentage}%</span>
+                      </div>
+                      <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary transition-all"
+                          style={{ width: `${template.segmentCoverage.percentage}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {template.segmentCoverage.totalPlayers.toLocaleString()} игроков
+                      </p>
+                    </div>
+
+                    {/* Кнопка действия */}
+                    <Button className="w-full group-hover:bg-primary" variant="outline">
+                      Создать сценарий
+                      <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* Активные сценарии */}
+        <TabsContent value="active" className="space-y-4">
+          {existingScenarios.filter(s => s.status === 'active').map((scenario) => (
+            <Card key={scenario.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-green-100">
+                      <Zap className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{scenario.name}</CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary" className="bg-green-100 text-green-700">
+                          Активен
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          Последний запуск: {scenario.lastRun}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditScenario(scenario.id);
+                    }}
+                  >
+                    Редактировать
+                  </Button>
                 </div>
-
-                <Tabs value={tab} onValueChange={handleTabChange} className="space-y-4">
-                    <TabsList className="flex flex-wrap gap-2">
-                        <TabsTrigger value="all">Все</TabsTrigger>
-                        <TabsTrigger value="default">Дефолтные</TabsTrigger>
-                        <TabsTrigger value="tournaments">Турниры</TabsTrigger>
-                        <TabsTrigger value="event-driven">Событийные</TabsTrigger>
-                        <TabsTrigger value="promo-events">Эвенты</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="all">
-                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} />
-                    </TabsContent>
-                    <TabsContent value="default">
-                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> t.type==='basic'} />
-                    </TabsContent>
-                    <TabsContent value="tournaments">
-                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> (t.category||'').toLowerCase().includes('tournament')} />
-                    </TabsContent>
-                    <TabsContent value="event-driven">
-                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> t.type==='event'} />
-                    </TabsContent>
-                    <TabsContent value="promo-events">
-                        <TemplatesTable onClone={handleCloneTemplate} onEdit={handleEditTemplate} predicate={(t)=> (t.category||'').toLowerCase().includes('promotion') || (t.category||'').toLowerCase().includes('loyalty')} />
-                    </TabsContent>
-                </Tabs>
-            </div>
-
-            {/* Раздел с конструктором */}
-            <div id="constructor-section" className="pt-8 mt-8 border-t">
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Card className="relative overflow-hidden border-2 border-dashed hover:border-primary/50 transition-colors group">
-                        <CardHeader>
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                                    <Zap className="h-6 w-6 text-primary" />
-                                </div>
-                                <div>
-                                    <CardTitle>Быстрое создание</CardTitle>
-                                    <CardDescription>Создайте сценарий с нуля</CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <p className="text-sm text-muted-foreground">
-                                Используйте drag&drop конструктор для создания сложных многошаговых кампаний 
-                                с условной логикой, A/B тестами и персонализацией.
-                            </p>
-                            <Button size="lg" onClick={handleCreateNew} className="w-full">
-                                Перейти в конструктор
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="relative overflow-hidden border-2 border-dashed hover:border-primary/50 transition-colors group">
-                        <CardHeader>
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                                    <Settings className="h-6 w-6 text-primary" />
-                                </div>
-                                <div>
-                                    <CardTitle>Расширенные функции</CardTitle>
-                                    <CardDescription>Мощные возможности для экспертов</CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <ul className="text-sm text-muted-foreground space-y-2">
-                                <li>• Условная логика и ветвления</li>
-                                <li>• A/B тестирование кампаний</li>
-                                <li>• Интеграция с сегментами и метриками</li>
-                                <li>• AI-ассистент для оптимизации</li>
-                            </ul>
-                            <Button size="lg" variant="outline" onClick={handleCreateNew} className="w-full">
-                                Создать продвинутый сценарий
-                            </Button>
-                        </CardContent>
-                    </Card>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Охват</p>
+                    <p className="text-lg font-semibold">
+                      <Users className="inline-block h-4 w-4 mr-1" />
+                      {scenario.players.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Конверсия</p>
+                    <p className="text-lg font-semibold">
+                      <Target className="inline-block h-4 w-4 mr-1" />
+                      {scenario.conversionRate}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Доход</p>
+                    <p className="text-lg font-semibold text-green-600">
+                      €{scenario.revenue.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-            </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
 
-            {/* Create Scenario Dialog */}
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Target className="h-5 w-5" />
-                            Создание сценария
-                        </DialogTitle>
-                        <DialogDescription>
-                            Выберите способ создания сценария: используйте AI-рекомендации, создайте с нуля или выберите готовый шаблон
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <Tabs defaultValue="ai-scenarios" className="flex-1 flex flex-col">
-                        <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="ai-scenarios">
-                                <div className="flex items-center gap-2">
-                                    <Bot className="h-4 w-4" />
-                                    <span>ИИ сценарии</span>
-                                </div>
-                            </TabsTrigger>
-                            <TabsTrigger value="from-scratch">
-                                <div className="flex items-center gap-2">
-                                    <Zap className="h-4 w-4" />
-                                    <span>Создать с нуля</span>
-                                </div>
-                            </TabsTrigger>
-                            <TabsTrigger value="templates">
-                                <div className="flex items-center gap-2">
-                                    <Layers className="h-4 w-4" />
-                                    <span>Шаблоны сценариев</span>
-                                </div>
-                            </TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="ai-scenarios" className="flex-1 overflow-hidden">
-                            <ScrollArea className="h-[500px]">
-                                <AIScenariosTab onCreateScenario={handleCreateAIScenario} />
-                            </ScrollArea>
-                        </TabsContent>
-
-                        <TabsContent value="from-scratch" className="flex-1">
-                            <div className="flex items-center justify-center h-[500px]">
-                                <Card className="w-full max-w-md p-6 text-center">
-                                    <CardHeader>
-                                        <div className="p-4 bg-primary/10 rounded-full w-fit mx-auto mb-4">
-                                            <Zap className="h-8 w-8 text-primary" />
-                                        </div>
-                                        <CardTitle>Создать сценарий с нуля</CardTitle>
-                                        <CardDescription>
-                                            Используйте drag&drop конструктор для создания кампаний с условной логикой и персонализацией
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <Button size="lg" onClick={handleCreateFromScratch} className="w-full">
-                                            <Zap className="mr-2 h-5 w-5" />
-                                            Открыть конструктор
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="templates" className="flex-1 overflow-hidden">
-                            <ScrollArea className="h-[500px]">
-                                <div className="p-1">
-                                    <div className="space-y-2 mb-4">
-                                        <h3 className="text-lg font-semibold flex items-center gap-2">
-                                            <Layers className="h-5 w-5" />
-                                            Шаблоны сценариев
-                                        </h3>
-                                        <p className="text-sm text-muted-foreground">
-                                            Готовые шаблоны для быстрого создания кампаний
-                                        </p>
-                                    </div>
-                                    <TemplatesGrid 
-                                        onClone={(template: TemplateData) => {
-                                            handleCloneTemplate(template);
-                                            setIsCreateDialogOpen(false);
-                                        }} 
-                                        onEdit={(template: TemplateData) => {
-                                            handleEditTemplate(template);
-                                            setIsCreateDialogOpen(false);
-                                        }}
-                                    />
-                                </div>
-                            </ScrollArea>
-                        </TabsContent>
-                    </Tabs>
-                </DialogContent>
-            </Dialog>
-        </div>
-    );
+        {/* Все сценарии */}
+        <TabsContent value="all" className="space-y-4">
+          {existingScenarios.map((scenario) => (
+            <Card key={scenario.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                      scenario.status === 'active' ? 'bg-green-100' : 'bg-gray-100'
+                    }`}>
+                      <Zap className={`h-5 w-5 ${
+                        scenario.status === 'active' ? 'text-green-600' : 'text-gray-600'
+                      }`} />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{scenario.name}</CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge 
+                          variant="secondary" 
+                          className={scenario.status === 'active' 
+                            ? "bg-green-100 text-green-700" 
+                            : "bg-gray-100 text-gray-700"
+                          }
+                        >
+                          {scenario.status === 'active' ? 'Активен' : 'На паузе'}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          Последний запуск: {scenario.lastRun}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {scenario.status === 'paused' && (
+                      <Button variant="outline" size="sm">
+                        <Zap className="mr-2 h-4 w-4" />
+                        Запустить
+                      </Button>
+                    )}
+                    <Button 
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditScenario(scenario.id);
+                      }}
+                    >
+                      Редактировать
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Охват</p>
+                    <p className="text-lg font-semibold">
+                      <Users className="inline-block h-4 w-4 mr-1" />
+                      {scenario.players.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Конверсия</p>
+                    <p className="text-lg font-semibold">
+                      <Target className="inline-block h-4 w-4 mr-1" />
+                      {scenario.conversionRate}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Доход</p>
+                    <p className="text-lg font-semibold text-green-600">
+                      €{scenario.revenue.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 }
