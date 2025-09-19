@@ -26,6 +26,7 @@ import {
   Filter
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { safeRender, safeJoin } from "@/lib/safe-render";
 import type { AuditSnapshot, AuditStatus, AuditChecklistItem } from "@/lib/audit-types";
 import { mockAuditSnapshot, calculateProgress } from "@/lib/audit-data";
 import Link from "next/link";
@@ -325,7 +326,7 @@ export default function AuditPage() {
                 <ul className="mt-2 space-y-1">
                   {criticalFailures.map(item => (
                     <li key={item.id} className="text-sm text-red-800">
-                      <span>• <strong>{item.title}:</strong> {item.aiNotes}</span>
+                      <span>• <strong>{safeRender(item.title)}:</strong> {safeRender(item.aiNotes)}</span>
                     </li>
                   ))}
                 </ul>
@@ -457,11 +458,11 @@ export default function AuditPage() {
                               <div className="flex items-start justify-between">
                                 <div className="space-y-1 flex-1">
                                   <div className="flex items-center gap-2">
-                                    <span className="font-medium">{item.id}. {item.title}</span>
+                                    <span className="font-medium">{safeRender(item.id)}. {safeRender(item.title)}</span>
                                     {getStatusBadge(item.status)}
                                   </div>
                                   <p className="text-sm text-muted-foreground">
-                                    {item.shortDescription}
+                                    {safeRender(item.shortDescription)}
                                   </p>
                                 </div>
                               </div>
@@ -469,14 +470,14 @@ export default function AuditPage() {
                               {item.aiNotes && (
                                 <div className="flex items-start gap-2 p-2 bg-muted rounded-md">
                                   <Info className="h-4 w-4 text-primary mt-0.5" />
-                                  <p className="text-xs">{item.aiNotes}</p>
+                                  <p className="text-xs">{safeRender(item.aiNotes)}</p>
                                 </div>
                               )}
 
                               <div className="flex items-center justify-between text-xs text-muted-foreground">
                                 <div className="flex items-center gap-4">
-                                  <span>Источники: {item.dataSources.join(', ')}</span>
-                                  <span>Проверка: {item.howWeCheckShort}</span>
+                                  <span>Источники: {safeJoin(item.dataSources, ', ')}</span>
+                                  <span>Проверка: {safeRender(item.howWeCheckShort)}</span>
                                   {item.lastCheckedAt && (
                                     <span>Обновлено: {formatLastChecked(item.lastCheckedAt)}</span>
                                   )}
@@ -494,7 +495,7 @@ export default function AuditPage() {
                                     >
                                       <Link href={fix.href}>
                                         <span className="inline-flex items-center">
-                                          {fix.label}
+                                          {safeRender(fix.label)}
                                           <ChevronRight className="ml-1 h-3 w-3" />
                                         </span>
                                       </Link>

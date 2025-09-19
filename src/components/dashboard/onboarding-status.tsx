@@ -66,21 +66,21 @@ export function OnboardingStatus() {
           priority: 'required'
         },
         {
-          id: 'goals',
-          title: 'Постановка KPI-целей',
-          description: 'Определите целевые показатели',
-          completed: goalsSet,
-          href: '#',
-          icon: Target,
-          priority: 'recommended'
-        },
-        {
           id: 'audit',
           title: 'Проверка проекта (ИИ)',
           description: 'Система проверяет готовность подключения и корректность данных',
           completed: auditPassed,
           href: '#',
           icon: Brain,
+          priority: 'recommended'
+        },
+        {
+          id: 'goals',
+          title: 'Постановка KPI-целей',
+          description: 'Определите целевые показатели',
+          completed: goalsSet,
+          href: '#',
+          icon: Target,
           priority: 'recommended'
         }
       ]);
