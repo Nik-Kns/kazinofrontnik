@@ -425,7 +425,7 @@ export default function AuditPage() {
                 <AccordionItem key={section.id} value={section.id} className="border rounded-lg">
                   <AccordionTrigger className="px-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-medium">{section.title}</span>
+                      <span className="font-medium">{safeRender(section.title)}</span>
                       <div className="flex items-center gap-2 mr-4">
                         {section.items.filter(i => i.status === 'passed').length > 0 && (
                           <Badge variant="outline" className="bg-green-50">
