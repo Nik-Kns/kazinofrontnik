@@ -1,33 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   RefreshCw,
   CheckCircle,
   XCircle,
   AlertCircle,
-  Clock,
-  HelpCircle,
+  AlertTriangle,
+  Loader2,
   Download,
   ChevronRight,
   Info,
-  AlertTriangle,
-  Loader2,
-  ExternalLink,
   Brain,
   ArrowLeft,
   Filter
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { safeRender, safeJoin } from "@/lib/safe-render";
-import type { AuditSnapshot, AuditStatus, AuditChecklistItem } from "@/lib/audit-types";
+import type { AuditSnapshot, AuditStatus } from "@/lib/audit-types";
 import { mockAuditSnapshot, calculateProgress } from "@/lib/audit-data";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -37,14 +32,56 @@ export default function AuditPage() {
   const [snapshot, setSnapshot] = useState<AuditSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | AuditStatus>('all');
-  const [isPolling, setIsPolling] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Загрузка данных аудита
+  // Загрузка данных аудита при монтировании
   useEffect(() => {
     loadAuditSnapshot();
-  }, []);
+    
+    // Cleanup при размонтировании
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []); // Пустой массив зависимостей - только при монтировании
 
-  // Polling для обновления прогресса
+  const loadAuditSnapshot = useCallback(async () => {
+    if (loading) return; // Предотвращаем двойную загрузку
+    
+    setLoading(true);
+    try {
+      // Симуляция загрузки данных
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const updatedSnapshot = { ...mockAuditSnapshot };
+      
+      // Симуляция обновления статусов
+      updatedSnapshot.sections = updatedSnapshot.sections.map(section => ({
+        ...section,
+        items: section.items.map(item => {
+          if (item.status === 'running' && Math.random() > 0.7) {
+            return { 
+              ...item, 
+              status: (Math.random() > 0.3 ? 'passed' : 'failed') as AuditStatus,
+              lastCheckedAt: new Date().toISOString()
+            };
+          }
+          return item;
+        })
+      }));
+      
+      updatedSnapshot.overallProgressPct = calculateProgress(updatedSnapshot);
+      setSnapshot(updatedSnapshot);
+    } catch (error) {
+      console.error('Failed to load audit snapshot:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading]);
+
+  // Запуск polling отдельно от основной загрузки
   useEffect(() => {
     if (!snapshot) return;
     
@@ -52,58 +89,35 @@ export default function AuditPage() {
       s.items.some(i => i.status === 'running')
     );
     
-    if (hasRunningItems && !isPolling) {
-      setIsPolling(true);
-      const interval = setInterval(() => {
+    if (hasRunningItems && !intervalRef.current) {
+      intervalRef.current = setInterval(() => {
         loadAuditSnapshot();
-      }, 3000); // Обновление каждые 3 секунды
-      
-      return () => {
-        clearInterval(interval);
-        setIsPolling(false);
-      };
+      }, 5000); // Увеличил интервал до 5 секунд
+    } else if (!hasRunningItems && intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  }, [snapshot, isPolling]);
+    
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [snapshot?.sections, loadAuditSnapshot]); // Зависимости только от sections
 
-  const loadAuditSnapshot = async () => {
-    setLoading(true);
-    try {
-      // В реальном приложении здесь будет API запрос
-      // const response = await fetch('/api/audit/status?projectId=...');
-      // const data = await response.json();
-      
-      // Для демо используем моковые данные с симуляцией прогресса
-      setTimeout(() => {
-        const updatedSnapshot = { ...mockAuditSnapshot };
-        
-        // Симуляция обновления статусов running -> passed
-        updatedSnapshot.sections = updatedSnapshot.sections.map(section => ({
-          ...section,
-          items: section.items.map(item => {
-            if (item.status === 'running' && Math.random() > 0.7) {
-              return { 
-                ...item, 
-                status: Math.random() > 0.3 ? 'passed' : 'failed' as AuditStatus,
-                lastCheckedAt: new Date().toISOString()
-              };
-            }
-            return item;
-          })
-        }));
-        
-        updatedSnapshot.overallProgressPct = calculateProgress(updatedSnapshot);
-        setSnapshot(updatedSnapshot);
-        setLoading(false);
-      }, 500);
-    } catch (error) {
-      console.error('Failed to load audit snapshot:', error);
-      setLoading(false);
+  const handleRestartAudit = useCallback(async () => {
+    if (loading) return; // Предотвращаем двойной запуск
+    
+    // Очищаем старый интервал
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  };
-
-  const handleRestartAudit = async () => {
+    
     setLoading(true);
-    // Сброс всех статусов на running
+    
+    // Сброс всех статусов
     const resetSnapshot = { ...mockAuditSnapshot };
     resetSnapshot.sections = resetSnapshot.sections.map(section => ({
       ...section,
@@ -115,11 +129,13 @@ export default function AuditPage() {
     }));
     resetSnapshot.overallProgressPct = 0;
     setSnapshot(resetSnapshot);
-    setLoading(false);
     
-    // Запуск нового аудита
-    setTimeout(() => loadAuditSnapshot(), 1000);
-  };
+    // Небольшая задержка перед началом обновлений
+    setTimeout(() => {
+      setLoading(false);
+      loadAuditSnapshot();
+    }, 1000);
+  }, [loading, loadAuditSnapshot]);
 
   const getStatusIcon = (status: AuditStatus) => {
     switch (status) {
@@ -133,6 +149,8 @@ export default function AuditPage() {
         return <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />;
       case 'review':
         return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+      default:
+        return null;
     }
   };
 
@@ -161,21 +179,6 @@ export default function AuditPage() {
     );
   };
 
-  const getFilteredItems = () => {
-    if (!snapshot) return [];
-    
-    const allItems = snapshot.sections.flatMap(section => 
-      section.items.map(item => ({ ...item, sectionTitle: section.title }))
-    );
-    
-    if (activeFilter === 'all') return allItems;
-    return allItems.filter(item => item.status === activeFilter);
-  };
-
-  const criticalFailures = snapshot?.sections
-    .flatMap(s => s.items)
-    .filter(i => snapshot.criticalIds.includes(i.id) && ['failed', 'missing'].includes(i.status));
-
   const formatLastChecked = (dateStr?: string) => {
     if (!dateStr) return 'Не проверялось';
     const date = new Date(dateStr);
@@ -190,22 +193,20 @@ export default function AuditPage() {
     return date.toLocaleDateString('ru-RU');
   };
 
-  // Статистика по статусам
-  const getStatusStats = () => {
-    if (!snapshot) return { passed: 0, failed: 0, missing: 0, running: 0, review: 0, total: 0 };
-    
-    const allItems = snapshot.sections.flatMap(s => s.items);
-    return {
-      passed: allItems.filter(i => i.status === 'passed').length,
-      failed: allItems.filter(i => i.status === 'failed').length,
-      missing: allItems.filter(i => i.status === 'missing').length,
-      running: allItems.filter(i => i.status === 'running').length,
-      review: allItems.filter(i => i.status === 'review').length,
-      total: allItems.length
-    };
-  };
+  // Статистика
+  const stats = snapshot ? {
+    passed: snapshot.sections.flatMap(s => s.items).filter(i => i.status === 'passed').length,
+    failed: snapshot.sections.flatMap(s => s.items).filter(i => i.status === 'failed').length,
+    missing: snapshot.sections.flatMap(s => s.items).filter(i => i.status === 'missing').length,
+    running: snapshot.sections.flatMap(s => s.items).filter(i => i.status === 'running').length,
+    review: snapshot.sections.flatMap(s => s.items).filter(i => i.status === 'review').length,
+    total: snapshot.sections.flatMap(s => s.items).length
+  } : { passed: 0, failed: 0, missing: 0, running: 0, review: 0, total: 0 };
 
-  const stats = getStatusStats();
+  const criticalFailures = snapshot?.sections
+    .flatMap(s => s.items)
+    .filter(i => snapshot.criticalIds.includes(i.id) && ['failed', 'missing'].includes(i.status))
+    || [];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -236,7 +237,7 @@ export default function AuditPage() {
             onClick={handleRestartAudit}
             disabled={loading}
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
             Перезапустить аудит
           </Button>
           <Button variant="outline">
@@ -246,13 +247,27 @@ export default function AuditPage() {
         </div>
       </div>
 
-      {loading && !snapshot ? (
+      {!snapshot ? (
         <Card>
-          <CardContent className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            {loading ? (
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            ) : (
+              <>
+                <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-lg font-medium mb-2">Аудит ещё не запускался</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Нажмите "Перезапустить аудит" чтобы начать проверку
+                </p>
+                <Button onClick={handleRestartAudit}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Запустить аудит
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
-      ) : snapshot ? (
+      ) : (
         <>
           {/* Прогресс и статистика */}
           <div className="grid gap-4 md:grid-cols-2">
@@ -287,7 +302,7 @@ export default function AuditPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{stats.passed}</div>
                     <div className="text-xs text-muted-foreground">Пройдено</div>
@@ -318,15 +333,17 @@ export default function AuditPage() {
           </div>
 
           {/* Критические проблемы */}
-          {criticalFailures && criticalFailures.length > 0 && (
+          {criticalFailures.length > 0 && (
             <Alert className="border-red-200 bg-red-50">
               <AlertTriangle className="h-4 w-4 text-red-600" />
               <AlertDescription>
-                <span className="font-medium text-red-900">Критические проблемы ({criticalFailures.length}):</span>
-                <ul className="mt-2 space-y-1">
+                <div className="font-medium text-red-900 mb-2">
+                  Критические проблемы ({criticalFailures.length}):
+                </div>
+                <ul className="space-y-1">
                   {criticalFailures.map(item => (
                     <li key={item.id} className="text-sm text-red-800">
-                      <span>• <strong>{safeRender(item.title)}:</strong> {safeRender(item.aiNotes)}</span>
+                      • <strong>{item.title}:</strong> {item.aiNotes || 'Требует внимания'}
                     </li>
                   ))}
                 </ul>
@@ -337,27 +354,10 @@ export default function AuditPage() {
           {/* Фильтры */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  Фильтры
-                </CardTitle>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <HelpCircle className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="text-xs space-y-1">
-                        <p>Прогресс считается как процент завершённых проверок.</p>
-                        <p>Проверки выполняются ИИ автоматически и обновляются в реальном времени.</p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
+              <CardTitle className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Фильтры
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex gap-2 flex-wrap">
@@ -412,8 +412,8 @@ export default function AuditPage() {
             </CardContent>
           </Card>
 
-          {/* Секции чек-листа */}
-          <Accordion type="multiple" className="space-y-2" defaultValue={snapshot?.sections.map(s => s.id) || []}>
+          {/* Результаты аудита */}
+          <Accordion type="multiple" className="space-y-2" defaultValue={snapshot.sections.map(s => s.id)}>
             {snapshot.sections.map(section => {
               const filteredItems = activeFilter === 'all' 
                 ? section.items 
@@ -425,20 +425,10 @@ export default function AuditPage() {
                 <AccordionItem key={section.id} value={section.id} className="border rounded-lg">
                   <AccordionTrigger className="px-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-medium">{safeRender(section.title)}</span>
+                      <span className="font-medium">{section.title || 'Раздел'}</span>
                       <div className="flex items-center gap-2 mr-4">
-                        {section.items.filter(i => i.status === 'passed').length > 0 && (
-                          <Badge variant="outline" className="bg-green-50">
-                            {section.items.filter(i => i.status === 'passed').length} пройдено
-                          </Badge>
-                        )}
-                        {section.items.filter(i => i.status === 'failed').length > 0 && (
-                          <Badge variant="outline" className="bg-red-50">
-                            {section.items.filter(i => i.status === 'failed').length} провалено
-                          </Badge>
-                        )}
                         <span className="text-sm text-muted-foreground">
-                          ({filteredItems.length} пунктов)
+                          {filteredItems.length} пунктов
                         </span>
                       </div>
                     </div>
@@ -458,11 +448,13 @@ export default function AuditPage() {
                               <div className="flex items-start justify-between">
                                 <div className="space-y-1 flex-1">
                                   <div className="flex items-center gap-2">
-                                    <span className="font-medium">{safeRender(item.id)}. {safeRender(item.title)}</span>
+                                    <span className="font-medium">
+                                      {item.id}. {item.title || 'Проверка'}
+                                    </span>
                                     {getStatusBadge(item.status)}
                                   </div>
                                   <p className="text-sm text-muted-foreground">
-                                    {safeRender(item.shortDescription)}
+                                    {item.shortDescription || 'Описание недоступно'}
                                   </p>
                                 </div>
                               </div>
@@ -470,14 +462,18 @@ export default function AuditPage() {
                               {item.aiNotes && (
                                 <div className="flex items-start gap-2 p-2 bg-muted rounded-md">
                                   <Info className="h-4 w-4 text-primary mt-0.5" />
-                                  <p className="text-xs">{safeRender(item.aiNotes)}</p>
+                                  <p className="text-xs">{item.aiNotes}</p>
                                 </div>
                               )}
 
                               <div className="flex items-center justify-between text-xs text-muted-foreground">
                                 <div className="flex items-center gap-4">
-                                  <span>Источники: {safeJoin(item.dataSources, ', ')}</span>
-                                  <span>Проверка: {safeRender(item.howWeCheckShort)}</span>
+                                  {item.dataSources && item.dataSources.length > 0 && (
+                                    <span>Источники: {item.dataSources.join(', ')}</span>
+                                  )}
+                                  {item.howWeCheckShort && (
+                                    <span>Проверка: {item.howWeCheckShort}</span>
+                                  )}
                                   {item.lastCheckedAt && (
                                     <span>Обновлено: {formatLastChecked(item.lastCheckedAt)}</span>
                                   )}
@@ -494,19 +490,11 @@ export default function AuditPage() {
                                       asChild
                                     >
                                       <Link href={fix.href}>
-                                        <span className="inline-flex items-center">
-                                          {safeRender(fix.label)}
-                                          <ChevronRight className="ml-1 h-3 w-3" />
-                                        </span>
+                                        {fix.label}
+                                        <ChevronRight className="ml-1 h-3 w-3" />
                                       </Link>
                                     </Button>
                                   ))}
-                                  {item.moreLink && (
-                                    <Button size="sm" variant="ghost">
-                                      <ExternalLink className="h-3 w-3 mr-1" />
-                                      Подробнее
-                                    </Button>
-                                  )}
                                 </div>
                               )}
                             </div>
@@ -520,20 +508,6 @@ export default function AuditPage() {
             })}
           </Accordion>
         </>
-      ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium mb-2">Аудит ещё не запускался</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Нажмите "Перезапустить аудит" чтобы начать проверку
-            </p>
-            <Button onClick={handleRestartAudit}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Запустить аудит
-            </Button>
-          </CardContent>
-        </Card>
       )}
     </div>
   );
