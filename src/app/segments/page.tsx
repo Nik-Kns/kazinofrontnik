@@ -10,7 +10,7 @@ import {
   Save, Download, Plus, Minus, Move, Grip, Settings,
   ChevronDown, ChevronRight, Users, BarChart3, Target,
   Layers, Zap, Shield, Brain, Euro, Calendar, Hash,
-  TrendingUp, TrendingDown
+  TrendingUp, TrendingDown, Calculator, Merge, GitBranch
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,6 +34,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { AiSegmentsTab, convertAISegmentToBuilder, type AISegment } from "@/components/segments/ai-segments-tab";
+import { AdvancedSegmentOperations, type SegmentOperation, type BaseSegment } from "@/components/segments/advanced-segment-operations";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import type { 
   SegmentData, 
@@ -59,6 +68,8 @@ export default function SegmentsPage() {
   const [selectedSegment, setSelectedSegment] = React.useState<SegmentData | null>(null);
   const [defaultTab, setDefaultTab] = React.useState("builder");
   const [activeMainTab, setActiveMainTab] = React.useState("library");
+  const [isOperationsOpen, setIsOperationsOpen] = React.useState(false);
+  const [operationBaseSegment, setOperationBaseSegment] = React.useState<BaseSegment | null>(null);
 
   // Обработчики для AI-сегментов
   const handleCreateAISegment = (aiSegment: AISegment) => {
@@ -81,6 +92,21 @@ export default function SegmentsPage() {
 
   const [predefinedSegment, setPredefinedSegment] = React.useState<SegmentBuilder | null>(null);
 
+  // Обработчик сохранения операции
+  const handleOperationSave = (operation: SegmentOperation) => {
+    console.log('Saving segment operation:', operation);
+    // Здесь будет логика создания нового сегмента на основе операции
+    // Можно добавить API вызов или обновление состояния
+  };
+
+  // Преобразование данных сегмента для операций
+  const availableSegmentsForOperations: BaseSegment[] = segmentsData.map(s => ({
+    id: s.id,
+    name: s.name,
+    playerCount: s.playerCount,
+    description: s.description
+  }));
+
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
       {/* Header */}
@@ -91,14 +117,26 @@ export default function SegmentsPage() {
             Создание и управление сегментами пользователей для CRM-кампаний.
           </p>
         </div>
-        <Button onClick={() => {
-          setSelectedSegment(null);
-          setDefaultTab(activeMainTab === "constructor" ? "ai-templates" : "builder");
-          setIsAdvancedBuilderOpen(true);
-        }}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Создать сегмент
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => {
+              setOperationBaseSegment(null);
+              setIsOperationsOpen(true);
+            }}
+          >
+            <Calculator className="mr-2 h-4 w-4" />
+            Операции с сегментами
+          </Button>
+          <Button onClick={() => {
+            setSelectedSegment(null);
+            setDefaultTab(activeMainTab === "constructor" ? "ai-templates" : "builder");
+            setIsAdvancedBuilderOpen(true);
+          }}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Создать сегмент
+          </Button>
+        </div>
       </div>
 
       {/* Main Tabs */}
@@ -236,45 +274,85 @@ export default function SegmentsPage() {
                             </Tooltip>
                           </TooltipProvider>
                           
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  onClick={() => {
-                                    setSelectedSegment(segment);
-                                    setIsAdvancedBuilderOpen(true);
-                                  }}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Редактировать</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <Copy className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Копировать</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Удалить</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <GitBranch className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Операции с сегментом</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedSegment(segment);
+                                  setIsAdvancedBuilderOpen(true);
+                                }}
+                              >
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Редактировать
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  // Копирование с изменением
+                                  setSelectedSegment(segment);
+                                  setDefaultTab("builder");
+                                  setIsAdvancedBuilderOpen(true);
+                                }}
+                              >
+                                <Copy className="mr-2 h-4 w-4" />
+                                Дублировать и изменить
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setOperationBaseSegment({
+                                    id: segment.id,
+                                    name: segment.name,
+                                    playerCount: segment.playerCount,
+                                    description: segment.description
+                                  });
+                                  setIsOperationsOpen(true);
+                                }}
+                              >
+                                <Merge className="mr-2 h-4 w-4" />
+                                Объединить с другими
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setOperationBaseSegment({
+                                    id: segment.id,
+                                    name: segment.name,
+                                    playerCount: segment.playerCount,
+                                    description: segment.description
+                                  });
+                                  setIsOperationsOpen(true);
+                                }}
+                              >
+                                <Minus className="mr-2 h-4 w-4" />
+                                Исключить из этого
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setOperationBaseSegment({
+                                    id: segment.id,
+                                    name: segment.name,
+                                    playerCount: segment.playerCount,
+                                    description: segment.description
+                                  });
+                                  setIsOperationsOpen(true);
+                                }}
+                              >
+                                <Calculator className="mr-2 h-4 w-4" />
+                                Расширенные операции
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-red-600">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Удалить
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -388,6 +466,15 @@ export default function SegmentsPage() {
         defaultTab={defaultTab}
         predefinedSegment={predefinedSegment}
         onClearPredefined={() => setPredefinedSegment(null)}
+      />
+
+      {/* Advanced Segment Operations */}
+      <AdvancedSegmentOperations
+        open={isOperationsOpen}
+        onOpenChange={setIsOperationsOpen}
+        availableSegments={availableSegmentsForOperations}
+        baseSegment={operationBaseSegment}
+        onSave={handleOperationSave}
       />
     </div>
   );
