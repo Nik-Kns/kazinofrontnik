@@ -18,7 +18,7 @@ import {
 import { 
   MessageSquare, Mail, Smartphone, Bell, Target, TrendingUp, TrendingDown, 
   Users, Euro, Calendar, Clock, Zap, Award, AlertTriangle, Info, 
-  Filter, Download, RefreshCw, ChevronRight, ArrowUpRight, ArrowDownRight,
+  Filter, Download, RefreshCw, ChevronRight, ArrowUpRight, ArrowDownRight, ArrowRight,
   BarChart3, PieChart as PieChartIcon, Activity, Layers, GitBranch,
   Send, Eye, MousePointer, DollarSign, Percent, Hash, Star, ThumbsUp
 } from "lucide-react";
