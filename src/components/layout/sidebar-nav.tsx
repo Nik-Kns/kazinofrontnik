@@ -14,6 +14,7 @@ import {
   Contact,
   LayoutGrid,
   Brain,
+  MessageSquareText,
 } from "lucide-react";
 import {
   Tooltip,
@@ -33,6 +34,7 @@ const navItems = [
   { href: "/campaigns", label: "Кампании", icon: Contact },
   { href: "/templates", label: "Шаблоны", icon: LayoutGrid },
   { href: "/analytics", label: "Аналитика", icon: BarChart2 },
+  { href: "/comm_analyz", label: "Анализ коммуникаций", icon: MessageSquareText },
   { href: "/reports", label: "Отчёты", icon: FileText },
   { href: "/calendar", label: "Календарь кампаний", icon: Calendar },
   { href: "/knowledge-base", label: "База знаний", icon: FileText },
