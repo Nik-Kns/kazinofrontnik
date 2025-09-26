@@ -11,6 +11,8 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, ScatterChart, Scatter
@@ -19,7 +21,7 @@ import {
   MessageSquare, Mail, Smartphone, Bell, Target, TrendingUp, TrendingDown, 
   Users, Euro, Calendar, Clock, Zap, Award, AlertTriangle, Info, 
   Filter, Download, RefreshCw, ChevronRight, ArrowUpRight, ArrowDownRight, ArrowRight,
-  BarChart3, PieChart as PieChartIcon, Activity, Layers, GitBranch,
+  BarChart3, PieChart as PieChartIcon, Activity, Layers, GitBranch, GitCompare, ExternalLink,
   Send, Eye, MousePointer, DollarSign, Percent, Hash, Star, ThumbsUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,10 +39,13 @@ const campaignMetrics = [
     clicked: 2341,
     converted: 456,
     revenue: 125400,
+    ggr: 87500,
     roi: 245,
     openRate: 58,
     ctr: 26.7,
     conversionRate: 3.0,
+    ctaConversion: 42.3,
+    goalAchievement: 92,
     trend: 'up',
     performance: 92
   },
@@ -55,10 +60,13 @@ const campaignMetrics = [
     clicked: 1120,
     converted: 320,
     revenue: 450000,
+    ggr: 315000,
     roi: 520,
     openRate: 77,
     ctr: 45.7,
     conversionRate: 10.1,
+    ctaConversion: 61.4,
+    goalAchievement: 98,
     trend: 'up',
     performance: 98
   },
@@ -73,12 +81,78 @@ const campaignMetrics = [
     clicked: 450,
     converted: 89,
     revenue: 15600,
+    ggr: 10920,
     roi: 120,
     openRate: 28,
     ctr: 21.4,
     conversionRate: 1.2,
+    ctaConversion: 19.8,
+    goalAchievement: 65,
     trend: 'down',
     performance: 65
+  },
+  {
+    id: '4',
+    name: 'Персональные предложения',
+    type: 'SMS',
+    segment: 'Лояльные',
+    sent: 5420,
+    delivered: 5380,
+    opened: 4304,
+    clicked: 1721,
+    converted: 344,
+    revenue: 67800,
+    ggr: 47460,
+    roi: 310,
+    openRate: 80,
+    ctr: 40,
+    conversionRate: 6.4,
+    ctaConversion: 20.0,
+    goalAchievement: 85,
+    trend: 'up',
+    performance: 85
+  },
+  {
+    id: '5',
+    name: 'Flash Sale Weekend',
+    type: 'Email',
+    segment: 'Активные',
+    sent: 12500,
+    delivered: 12200,
+    opened: 7320,
+    clicked: 2196,
+    converted: 549,
+    revenue: 98200,
+    ggr: 68740,
+    roi: 280,
+    openRate: 60,
+    ctr: 30,
+    conversionRate: 4.5,
+    ctaConversion: 25.0,
+    goalAchievement: 78,
+    trend: 'up',
+    performance: 78
+  },
+  {
+    id: '6',
+    name: 'Birthday Bonus',
+    type: 'Multi-channel',
+    segment: 'Все',
+    sent: 1820,
+    delivered: 1810,
+    opened: 1629,
+    clicked: 1302,
+    converted: 912,
+    revenue: 45600,
+    ggr: 31920,
+    roi: 420,
+    openRate: 90,
+    ctr: 80,
+    conversionRate: 50.4,
+    ctaConversion: 70.0,
+    goalAchievement: 110,
+    trend: 'up',
+    performance: 96
   }
 ];
 
@@ -219,6 +293,9 @@ export default function CommunicationAnalyticsPage() {
   const [selectedChannel, setSelectedChannel] = useState('all');
   const [selectedSegment, setSelectedSegment] = useState('all');
   const [activeTab, setActiveTab] = useState('overview');
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+  const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
 
   const getPerformanceColor = (value: number) => {
     if (value >= 90) return 'text-green-600';
@@ -243,6 +320,14 @@ export default function CommunicationAnalyticsPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsCompareModalOpen(true)}
+            className="gap-2"
+          >
+            <GitCompare className="h-4 w-4" />
+            Сравнить кампании
+          </Button>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Период" />
@@ -410,11 +495,12 @@ export default function CommunicationAnalyticsPage() {
                   <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-4">
                       <div className={cn(
-                        "w-12 h-12 rounded-full flex items-center justify-center",
-                        campaign.performance >= 90 ? "bg-green-100" : 
-                        campaign.performance >= 70 ? "bg-yellow-100" : "bg-red-100"
+                        "w-16 h-16 rounded-lg flex flex-col items-center justify-center",
+                        campaign.goalAchievement >= 90 ? "bg-green-100" : 
+                        campaign.goalAchievement >= 70 ? "bg-yellow-100" : "bg-red-100"
                       )}>
-                        <span className="font-bold text-lg">{campaign.performance}</span>
+                        <span className="font-bold text-lg">{campaign.goalAchievement}%</span>
+                        <span className="text-xs">цели</span>
                       </div>
                       <div>
                         <h4 className="font-semibold">{campaign.name}</h4>
@@ -425,17 +511,18 @@ export default function CommunicationAnalyticsPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <div className="text-sm text-muted-foreground">ROI</div>
-                        <div className="font-semibold">{campaign.roi}%</div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <div className="text-sm text-muted-foreground">GGR</div>
+                        <div className="font-semibold">€{campaign.ggr.toLocaleString()}</div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm text-muted-foreground">Revenue</div>
-                        <div className="font-semibold">€{campaign.revenue.toLocaleString()}</div>
+                      <div className="text-center">
+                        <div className="text-sm text-muted-foreground">CR в CTA</div>
+                        <div className="font-semibold">{campaign.ctaConversion}%</div>
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <ChevronRight className="h-4 w-4" />
+                      <Button variant="outline" size="sm" className="gap-1">
+                        <ExternalLink className="h-3 w-3" />
+                        Открыть
                       </Button>
                     </div>
                   </div>
@@ -993,6 +1080,233 @@ export default function CommunicationAnalyticsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Comparison Modal */}
+      <Dialog open={isCompareModalOpen} onOpenChange={setIsCompareModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Сравнение кампаний</DialogTitle>
+            <DialogDescription>
+              Выберите кампании для сравнения по всем ключевым метрикам
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!showComparison ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                {campaignMetrics.map((campaign) => (
+                  <div key={campaign.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/50 cursor-pointer">
+                    <Checkbox
+                      id={campaign.id}
+                      checked={selectedCampaigns.includes(campaign.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedCampaigns([...selectedCampaigns, campaign.id]);
+                        } else {
+                          setSelectedCampaigns(selectedCampaigns.filter(id => id !== campaign.id));
+                        }
+                      }}
+                    />
+                    <label htmlFor={campaign.id} className="flex-1 cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium">{campaign.name}</span>
+                          <span className="ml-2 text-sm text-muted-foreground">
+                            ({campaign.type} • {campaign.segment})
+                          </span>
+                        </div>
+                        <Badge variant={campaign.performance >= 90 ? "default" : campaign.performance >= 70 ? "secondary" : "destructive"}>
+                          {campaign.performance}% эффективность
+                        </Badge>
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsCompareModalOpen(false)}>
+                  Отмена
+                </Button>
+                <Button 
+                  onClick={() => setShowComparison(true)}
+                  disabled={selectedCampaigns.length < 2}
+                >
+                  Сравнить ({selectedCampaigns.length})
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold">Сравнение {selectedCampaigns.length} кампаний</h3>
+                <Button variant="outline" size="sm" onClick={() => setShowComparison(false)}>
+                  Назад к выбору
+                </Button>
+              </div>
+              
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Метрика</TableHead>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableHead key={id} className="text-center">
+                          <div>
+                            <div className="font-medium">{campaign?.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {campaign?.type} • {campaign?.segment}
+                            </div>
+                          </div>
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">% достижения цели</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center">
+                          <div className={cn(
+                            "inline-flex px-2 py-1 rounded-md font-medium",
+                            campaign && campaign.goalAchievement >= 90 ? "bg-green-100 text-green-700" : 
+                            campaign && campaign.goalAchievement >= 70 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+                          )}>
+                            {campaign?.goalAchievement}%
+                          </div>
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">GGR кампании</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center font-medium">
+                          €{campaign?.ggr.toLocaleString()}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">CR в CTA</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center">
+                          {campaign?.ctaConversion}%
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Open Rate</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center">
+                          {campaign?.openRate}%
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">CTR</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center">
+                          {campaign?.ctr}%
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Конверсия</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center">
+                          {campaign?.conversionRate}%
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Revenue</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center">
+                          €{campaign?.revenue.toLocaleString()}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">ROI</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center">
+                          <div className={cn(
+                            "inline-flex px-2 py-1 rounded-md font-medium",
+                            campaign && campaign.roi >= 300 ? "bg-green-100 text-green-700" : 
+                            campaign && campaign.roi >= 150 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+                          )}>
+                            {campaign?.roi}%
+                          </div>
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Отправлено</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center">
+                          {campaign?.sent.toLocaleString()}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Доставлено</TableCell>
+                    {selectedCampaigns.map(id => {
+                      const campaign = campaignMetrics.find(c => c.id === id);
+                      return (
+                        <TableCell key={id} className="text-center">
+                          {campaign?.delivered.toLocaleString()}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                </TableBody>
+              </Table>
+              
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => {
+                  setIsCompareModalOpen(false);
+                  setShowComparison(false);
+                  setSelectedCampaigns([]);
+                }}>
+                  Закрыть
+                </Button>
+                <Button className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Экспорт сравнения
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
