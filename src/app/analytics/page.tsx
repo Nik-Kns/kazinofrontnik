@@ -21,7 +21,8 @@ import { FullMetricsDashboard } from "@/components/dashboard/full-metrics-dashbo
 import { useState } from "react";
 import type { FilterConfig } from "@/lib/types";
 import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
-import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp as TrendingUpIcon, DollarSign, Download } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp as TrendingUpIcon, DollarSign, Download, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState<boolean>(() => {
@@ -54,6 +55,7 @@ function CollapsibleSection({ id, title, children }: { id: string; title: string
 }
 
 export default function AnalyticsPage() {
+  const router = useRouter();
   const [activeFilters, setActiveFilters] = useState<FilterConfig>(() => {
     try {
       const saved = localStorage.getItem('analyticsFilters');
@@ -85,12 +87,22 @@ export default function AnalyticsPage() {
               Полный контроль над метриками казино. Настраиваемые дашборды, глубокая аналитика и экспорт отчетов.
             </p>
           </div>
-          <Link href="/analytics/campaigns">
-            <Button className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Аналитика кампаний
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => router.push('/analytics/custom-metric')}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <Plus className="h-4 w-4" />
+              Создать кастомную метрику
             </Button>
-          </Link>
+            <Link href="/analytics/campaigns">
+              <Button className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Аналитика кампаний
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
