@@ -12,12 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, ArrowRight, Check, Info, Plus, X, 
   Calculator, TrendingUp, Users, DollarSign, Activity,
-  BarChart3, Target, Clock, Calendar, Percent,
-  Hash, AlertCircle, Sparkles, Save, Eye
+  Target, Percent, Hash, AlertCircle, Save
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +31,7 @@ interface Metric {
 
 interface FormulaElement {
   id: string;
-  type: 'metric' | 'operator' | 'number' | 'parenthesis';
+  type: 'metric' | 'operator' | 'number';
   value: string;
   displayName?: string;
 }
@@ -82,7 +80,6 @@ const operators = [
   { id: "multiply", symbol: "*", name: "Умножение" },
   { id: "divide", symbol: "/", name: "Деление" },
   { id: "percent", symbol: "%", name: "Процент" },
-  { id: "power", symbol: "^", name: "Степень" },
 ];
 
 export default function CustomMetricPage() {
@@ -93,8 +90,8 @@ export default function CustomMetricPage() {
   // Шаг 1: Название и описание
   const [metricName, setMetricName] = useState("");
   const [metricDescription, setMetricDescription] = useState("");
-  const [metricCategory, setMetricCategory] = useState("");
-  const [metricUnit, setMetricUnit] = useState("€");
+  const [metricCategory, setMetricCategory] = useState("financial");
+  const [metricUnit, setMetricUnit] = useState("euro");
   
   // Шаг 2: Выбранные метрики
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
@@ -201,6 +198,20 @@ export default function CustomMetricPage() {
     return acc;
   }, {} as Record<string, Metric[]>);
 
+  // Получение единицы измерения для отображения
+  const getUnitDisplay = () => {
+    switch(metricUnit) {
+      case 'euro': return '€';
+      case 'dollar': return '$';
+      case 'percent': return '%';
+      case 'people': return 'чел';
+      case 'pieces': return 'шт';
+      case 'days': return 'дни';
+      case 'none': return '';
+      default: return '';
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       {/* Шапка */}
@@ -274,7 +285,7 @@ export default function CustomMetricPage() {
                     <Label htmlFor="metric-category">Категория</Label>
                     <Select value={metricCategory} onValueChange={setMetricCategory}>
                       <SelectTrigger id="metric-category" className="mt-1">
-                        <SelectValue placeholder="Выберите категорию" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="financial">Финансовые</SelectItem>
@@ -294,13 +305,13 @@ export default function CustomMetricPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="€">€ (Евро)</SelectItem>
-                        <SelectItem value="$">$ (Доллар)</SelectItem>
-                        <SelectItem value="%">% (Процент)</SelectItem>
-                        <SelectItem value="чел">Человек</SelectItem>
-                        <SelectItem value="шт">Штук</SelectItem>
-                        <SelectItem value="дни">Дни</SelectItem>
-                        <SelectItem value="">Без единицы</SelectItem>
+                        <SelectItem value="euro">€ (Евро)</SelectItem>
+                        <SelectItem value="dollar">$ (Доллар)</SelectItem>
+                        <SelectItem value="percent">% (Процент)</SelectItem>
+                        <SelectItem value="people">Человек</SelectItem>
+                        <SelectItem value="pieces">Штук</SelectItem>
+                        <SelectItem value="days">Дни</SelectItem>
+                        <SelectItem value="none">Без единицы</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -407,197 +418,155 @@ export default function CustomMetricPage() {
               <div>
                 <Label>Создайте формулу</Label>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Перетаскивайте метрики и операторы для создания формулы
+                  Нажимайте на элементы ниже для создания формулы
                 </p>
 
-                <Tabs defaultValue="constructor">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="constructor">Конструктор</TabsTrigger>
-                    <TabsTrigger value="text">Текстовый режим</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="constructor" className="space-y-4">
-                    {/* Формула */}
-                    <div className="min-h-[80px] p-4 border-2 border-dashed rounded-lg bg-muted/20">
-                      {formula.length === 0 ? (
-                        <div className="text-center text-muted-foreground">
-                          Нажимайте на элементы ниже для добавления в формулу
-                        </div>
-                      ) : (
-                        <div className="flex flex-wrap items-center gap-2">
-                          {formula.map((element, index) => (
-                            <div
-                              key={index}
-                              className={cn(
-                                "px-3 py-1.5 rounded-md flex items-center gap-2",
-                                element.type === 'metric' && "bg-blue-100 text-blue-900",
-                                element.type === 'operator' && "bg-orange-100 text-orange-900",
-                                element.type === 'number' && "bg-green-100 text-green-900",
-                                element.type === 'parenthesis' && "bg-gray-100 text-gray-900"
-                              )}
-                            >
-                              <span className="font-medium">
-                                {element.displayName || element.value}
-                              </span>
-                              <button
-                                onClick={() => removeFromFormula(index)}
-                                className="hover:bg-black/10 rounded"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                {/* Формула */}
+                <div className="min-h-[80px] p-4 border-2 border-dashed rounded-lg bg-muted/20 mb-4">
+                  {formula.length === 0 ? (
+                    <div className="text-center text-muted-foreground">
+                      Нажимайте на метрики и операторы ниже
                     </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {formula.map((element, index) => (
+                        <div
+                          key={index}
+                          className={cn(
+                            "px-3 py-1.5 rounded-md flex items-center gap-2",
+                            element.type === 'metric' && "bg-blue-100 text-blue-900",
+                            element.type === 'operator' && "bg-orange-100 text-orange-900",
+                            element.type === 'number' && "bg-green-100 text-green-900"
+                          )}
+                        >
+                          <span className="font-medium">
+                            {element.displayName || element.value}
+                          </span>
+                          <button
+                            onClick={() => removeFromFormula(index)}
+                            className="hover:bg-black/10 rounded"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-                    {formulaError && (
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{formulaError}</AlertDescription>
-                      </Alert>
-                    )}
+                {formulaError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{formulaError}</AlertDescription>
+                  </Alert>
+                )}
 
-                    {/* Панель инструментов */}
-                    <div className="space-y-4">
-                      {/* Выбранные метрики */}
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Метрики</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedMetrics.map(metricId => {
-                            const metric = availableMetrics.find(m => m.id === metricId);
-                            return metric ? (
-                              <Button
-                                key={metric.id}
-                                variant="outline"
-                                size="sm"
-                                onClick={() => addToFormula({
-                                  id: crypto.randomUUID(),
-                                  type: 'metric',
-                                  value: metric.id,
-                                  displayName: metric.name
-                                })}
-                              >
-                                <Plus className="mr-1 h-3 w-3" />
-                                {metric.name}
-                              </Button>
-                            ) : null;
+                {/* Панель инструментов */}
+                <div className="space-y-4">
+                  {/* Выбранные метрики */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Метрики</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedMetrics.map(metricId => {
+                        const metric = availableMetrics.find(m => m.id === metricId);
+                        return metric ? (
+                          <Button
+                            key={metric.id}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => addToFormula({
+                              id: crypto.randomUUID(),
+                              type: 'metric',
+                              value: metric.id,
+                              displayName: metric.name
+                            })}
+                          >
+                            <Plus className="mr-1 h-3 w-3" />
+                            {metric.name}
+                          </Button>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Операторы */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Операторы</h4>
+                    <div className="flex gap-2">
+                      {operators.map(op => (
+                        <Button
+                          key={op.id}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addToFormula({
+                            id: crypto.randomUUID(),
+                            type: 'operator',
+                            value: op.symbol,
+                            displayName: op.symbol
                           })}
-                        </div>
-                      </div>
-
-                      {/* Операторы */}
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Операторы</h4>
-                        <div className="flex gap-2">
-                          {operators.map(op => (
-                            <Button
-                              key={op.id}
-                              variant="outline"
-                              size="sm"
-                              onClick={() => addToFormula({
-                                id: crypto.randomUUID(),
-                                type: 'operator',
-                                value: op.symbol,
-                                displayName: op.symbol
-                              })}
-                            >
-                              {op.symbol}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Дополнительные элементы */}
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Дополнительно</h4>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const number = prompt('Введите число:');
-                              if (number && !isNaN(Number(number))) {
-                                addToFormula({
-                                  id: crypto.randomUUID(),
-                                  type: 'number',
-                                  value: number,
-                                  displayName: number
-                                });
-                              }
-                            }}
-                          >
-                            <Hash className="mr-1 h-3 w-3" />
-                            Число
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => addToFormula({
-                              id: crypto.randomUUID(),
-                              type: 'parenthesis',
-                              value: '(',
-                              displayName: '('
-                            })}
-                          >
-                            (
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => addToFormula({
-                              id: crypto.randomUUID(),
-                              type: 'parenthesis',
-                              value: ')',
-                              displayName: ')'
-                            })}
-                          >
-                            )
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={clearFormula}
-                          >
-                            Очистить
-                          </Button>
-                        </div>
-                      </div>
+                        >
+                          {op.symbol}
+                        </Button>
+                      ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addToFormula({
+                          id: crypto.randomUUID(),
+                          type: 'operator',
+                          value: '(',
+                          displayName: '('
+                        })}
+                      >
+                        (
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addToFormula({
+                          id: crypto.randomUUID(),
+                          type: 'operator',
+                          value: ')',
+                          displayName: ')'
+                        })}
+                      >
+                        )
+                      </Button>
                     </div>
+                  </div>
 
-                    {/* Примеры формул */}
-                    <Alert>
-                      <Sparkles className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Примеры формул:</strong>
-                        <ul className="mt-2 space-y-1 text-xs">
-                          <li>• ARPU = Revenue / Активные юзеры</li>
-                          <li>• Маржа = (GGR - Стоимость бонусов) / GGR * 100</li>
-                          <li>• Средний депозит на юзера = Депозиты / Депозитеры</li>
-                        </ul>
-                      </AlertDescription>
-                    </Alert>
-                  </TabsContent>
-
-                  <TabsContent value="text" className="space-y-4">
-                    <Textarea
-                      placeholder="Введите формулу в текстовом виде..."
-                      rows={5}
-                      className="font-mono"
-                      value={formula.map(el => el.displayName || el.value).join(' ')}
-                      onChange={(e) => {
-                        // Здесь должен быть парсер текстовой формулы
-                        console.log('Parsing formula:', e.target.value);
-                      }}
-                    />
-                    <Alert>
-                      <Info className="h-4 w-4" />
-                      <AlertDescription>
-                        Используйте названия метрик из списка и стандартные математические операторы
-                      </AlertDescription>
-                    </Alert>
-                  </TabsContent>
-                </Tabs>
+                  {/* Дополнительные элементы */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Дополнительно</h4>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const number = prompt('Введите число:');
+                          if (number && !isNaN(Number(number))) {
+                            addToFormula({
+                              id: crypto.randomUUID(),
+                              type: 'number',
+                              value: number,
+                              displayName: number
+                            });
+                          }
+                        }}
+                      >
+                        <Hash className="mr-1 h-3 w-3" />
+                        Число
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={clearFormula}
+                      >
+                        Очистить
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -618,19 +587,17 @@ export default function CustomMetricPage() {
                       <div>
                         <span className="text-sm text-muted-foreground">Категория:</span>
                         <div className="font-medium">
-                          {metricCategory ? 
-                            metricCategory === 'financial' ? 'Финансовые' :
-                            metricCategory === 'users' ? 'Пользователи' :
-                            metricCategory === 'gaming' ? 'Игровые' :
-                            metricCategory === 'retention' ? 'Retention' :
-                            metricCategory === 'conversion' ? 'Конверсии' :
-                            'Другое'
-                          : 'Не указана'}
+                          {metricCategory === 'financial' ? 'Финансовые' :
+                           metricCategory === 'users' ? 'Пользователи' :
+                           metricCategory === 'gaming' ? 'Игровые' :
+                           metricCategory === 'retention' ? 'Retention' :
+                           metricCategory === 'conversion' ? 'Конверсии' :
+                           'Другое'}
                         </div>
                       </div>
                       <div>
                         <span className="text-sm text-muted-foreground">Единица измерения:</span>
-                        <div className="font-medium">{metricUnit || "Без единицы"}</div>
+                        <div className="font-medium">{getUnitDisplay() || "Без единицы"}</div>
                       </div>
                     </div>
 
@@ -665,7 +632,7 @@ export default function CustomMetricPage() {
                           <span className="text-sm text-muted-foreground">Тестовое значение:</span>
                           <div className="text-2xl font-bold">
                             {testResult !== null 
-                              ? `${testResult.toFixed(2)}${metricUnit}`
+                              ? `${testResult.toFixed(2)}${getUnitDisplay()}`
                               : "—"
                             }
                           </div>
