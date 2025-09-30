@@ -19,8 +19,7 @@ import {
 } from "lucide-react";
 import type { FilterConfig, SegmentType } from "@/lib/types";
 import { CurrencyFilters, CurrencyFiltersState } from "@/components/ui/currency-filters";
-import { CurrencyDisplayMode } from "@/lib/currency-types";
-import type { CurrencyCode } from "@/lib/currency-types";
+import { CurrencyDisplayMode, CurrencyCode } from "@/lib/currency-types";
 
 interface EnhancedFiltersProps {
   onApply: (filters: FilterConfig) => void;
@@ -65,14 +64,47 @@ const countries = [
   { value: 'ua', label: 'Украина' }
 ];
 
-// Список валют
+// Список валют - топ 25 мировых валют + топ 5 криптовалют
 const currencies = [
-  { value: 'EUR', label: 'EUR' },
-  { value: 'USD', label: 'USD' },
-  { value: 'GBP', label: 'GBP' },
-  { value: 'PLN', label: 'PLN' },
-  { value: 'BTC', label: 'BTC' },
-  { value: 'ETH', label: 'ETH' }
+  // Основные мировые валюты
+  { value: 'USD', label: 'USD - Доллар США', group: 'Основные' },
+  { value: 'EUR', label: 'EUR - Евро', group: 'Основные' },
+  { value: 'GBP', label: 'GBP - Британский фунт', group: 'Основные' },
+  { value: 'JPY', label: 'JPY - Японская иена', group: 'Основные' },
+  { value: 'CNY', label: 'CNY - Китайский юань', group: 'Основные' },
+  
+  // Европейские валюты
+  { value: 'CHF', label: 'CHF - Швейцарский франк', group: 'Европа' },
+  { value: 'SEK', label: 'SEK - Шведская крона', group: 'Европа' },
+  { value: 'NOK', label: 'NOK - Норвежская крона', group: 'Европа' },
+  { value: 'DKK', label: 'DKK - Датская крона', group: 'Европа' },
+  { value: 'PLN', label: 'PLN - Польский злотый', group: 'Европа' },
+  { value: 'CZK', label: 'CZK - Чешская крона', group: 'Европа' },
+  { value: 'HUF', label: 'HUF - Венгерский форинт', group: 'Европа' },
+  { value: 'RON', label: 'RON - Румынский лей', group: 'Европа' },
+  
+  // Америка и Океания
+  { value: 'CAD', label: 'CAD - Канадский доллар', group: 'Америка' },
+  { value: 'AUD', label: 'AUD - Австралийский доллар', group: 'Океания' },
+  { value: 'NZD', label: 'NZD - Новозеландский доллар', group: 'Океания' },
+  { value: 'MXN', label: 'MXN - Мексиканское песо', group: 'Америка' },
+  { value: 'BRL', label: 'BRL - Бразильский реал', group: 'Америка' },
+  
+  // Азия
+  { value: 'SGD', label: 'SGD - Сингапурский доллар', group: 'Азия' },
+  { value: 'HKD', label: 'HKD - Гонконгский доллар', group: 'Азия' },
+  { value: 'KRW', label: 'KRW - Южнокорейская вона', group: 'Азия' },
+  { value: 'INR', label: 'INR - Индийская рупия', group: 'Азия' },
+  { value: 'THB', label: 'THB - Тайский бат', group: 'Азия' },
+  { value: 'MYR', label: 'MYR - Малайзийский ринггит', group: 'Азия' },
+  { value: 'IDR', label: 'IDR - Индонезийская рупия', group: 'Азия' },
+  
+  // Криптовалюты - топ 5
+  { value: 'BTC', label: 'BTC - Bitcoin', group: 'Криптовалюты' },
+  { value: 'ETH', label: 'ETH - Ethereum', group: 'Криптовалюты' },
+  { value: 'USDT', label: 'USDT - Tether', group: 'Криптовалюты' },
+  { value: 'BNB', label: 'BNB - Binance Coin', group: 'Криптовалюты' },
+  { value: 'USDC', label: 'USDC - USD Coin', group: 'Криптовалюты' }
 ];
 
 // Список языков
@@ -86,6 +118,20 @@ const languages = [
   { value: 'pt', label: 'Português' },
   { value: 'pl', label: 'Polski' }
 ];
+
+// Функция для получения флага страны по коду валюты
+const getCurrencyFlag = (currencyCode: string): string => {
+  const flagMap: Record<string, string> = {
+    'USD': '🇺🇸', 'EUR': '🇪🇺', 'GBP': '🇬🇧', 'JPY': '🇯🇵', 'CNY': '🇨🇳',
+    'CHF': '🇨🇭', 'SEK': '🇸🇪', 'NOK': '🇳🇴', 'DKK': '🇩🇰', 'PLN': '🇵🇱',
+    'CZK': '🇨🇿', 'HUF': '🇭🇺', 'RON': '🇷🇴', 'CAD': '🇨🇦', 'AUD': '🇦🇺',
+    'NZD': '🇳🇿', 'MXN': '🇲🇽', 'BRL': '🇧🇷', 'SGD': '🇸🇬', 'HKD': '🇭🇰',
+    'KRW': '🇰🇷', 'INR': '🇮🇳', 'THB': '🇹🇭', 'MYR': '🇲🇾', 'IDR': '🇮🇩',
+    // Криптовалюты
+    'BTC': '₿', 'ETH': 'Ξ', 'USDT': '₮', 'BNB': '🔸', 'USDC': '💲'
+  };
+  return flagMap[currencyCode] || '';
+};
 
 export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: EnhancedFiltersProps) {
   const [filters, setFilters] = useState<FilterConfig>(defaultFilters);
@@ -269,20 +315,80 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
 
           {/* Валюта */}
           <div className="space-y-2">
-            <Label>Валюта</Label>
-            <Select
-              value={currencyFilters.display_mode || 'native'}
-              onValueChange={(value) => setCurrencyFilters(prev => ({ ...prev, display_mode: value as CurrencyDisplayMode }))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="native">Исходные валюты</SelectItem>
-                <SelectItem value="base_converted">Базовая валюта (EUR)</SelectItem>
-                <SelectItem value="specific_currency">Конкретная валюта</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>Режим отображения валют</Label>
+            <div className="space-y-2">
+              <Select
+                value={currencyFilters.display_mode || 'native'}
+                onValueChange={(value) => {
+                  setCurrencyFilters(prev => ({ 
+                    ...prev, 
+                    display_mode: value as CurrencyDisplayMode,
+                    selected_currencies: value !== 'specific_currency' ? [] : prev.selected_currencies
+                  }));
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="native">
+                    <div className="flex items-center gap-2">
+                      <span>💱</span> Исходные валюты
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="base_converted">
+                    <div className="flex items-center gap-2">
+                      <span>🇪🇺</span> Базовая валюта (EUR)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="specific_currency">
+                    <div className="flex items-center gap-2">
+                      <span>🎯</span> Конвертировать в выбранную валюту
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {/* Показываем селектор валют только если выбран режим specific_currency */}
+              {currencyFilters.display_mode === 'specific_currency' && (
+                <Select
+                  value={currencyFilters.selected_currencies?.[0] || ''}
+                  onValueChange={(value) => {
+                    setCurrencyFilters(prev => ({ 
+                      ...prev, 
+                      selected_currencies: [value as CurrencyCode]
+                    }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите валюту для конвертации" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {/* Группировка валют */}
+                    {['Основные', 'Европа', 'Америка', 'Океания', 'Азия', 'Криптовалюты'].map(group => {
+                      const groupCurrencies = currencies.filter(c => c.group === group);
+                      if (groupCurrencies.length === 0) return null;
+                      
+                      return (
+                        <div key={group}>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                            {group}
+                          </div>
+                          {groupCurrencies.map(currency => (
+                            <SelectItem key={currency.value} value={currency.value}>
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">{getCurrencyFlag(currency.value)}</span>
+                                <span>{currency.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
           </div>
         </div>
 
