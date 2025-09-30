@@ -18,8 +18,6 @@ import {
   Video, Tag, X, Settings, Building2
 } from "lucide-react";
 import type { FilterConfig, SegmentType } from "@/lib/types";
-import { CurrencyFilters, CurrencyFiltersState } from "@/components/ui/currency-filters";
-import { CurrencyDisplayMode, CurrencyCode } from "@/lib/currency-types";
 
 interface EnhancedFiltersProps {
   onApply: (filters: FilterConfig) => void;
@@ -137,11 +135,6 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
   const [filters, setFilters] = useState<FilterConfig>(defaultFilters);
   const [isExpanded, setIsExpanded] = useState(false);
   const [uploadedLogo, setUploadedLogo] = useState<string | null>(null);
-  const [currencyFilters, setCurrencyFilters] = useState<CurrencyFiltersState>({
-    display_mode: 'native',
-    selected_currencies: [],
-    is_multi_currency: undefined,
-  });
 
   const handleDatePresetChange = (preset: string) => {
     const today = new Date();
@@ -315,80 +308,40 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
 
           {/* Валюта */}
           <div className="space-y-2">
-            <Label>Режим отображения валют</Label>
-            <div className="space-y-2">
-              <Select
-                value={currencyFilters.display_mode || 'native'}
-                onValueChange={(value) => {
-                  setCurrencyFilters(prev => ({ 
-                    ...prev, 
-                    display_mode: value as CurrencyDisplayMode,
-                    selected_currencies: value !== 'specific_currency' ? [] : prev.selected_currencies
-                  }));
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="native">
-                    <div className="flex items-center gap-2">
-                      <span>💱</span> Исходные валюты
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="base_converted">
-                    <div className="flex items-center gap-2">
-                      <span>🇪🇺</span> Базовая валюта (EUR)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="specific_currency">
-                    <div className="flex items-center gap-2">
-                      <span>🎯</span> Конвертировать в выбранную валюту
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              
-              {/* Показываем селектор валют только если выбран режим specific_currency */}
-              {currencyFilters.display_mode === 'specific_currency' && (
-                <Select
-                  value={currencyFilters.selected_currencies?.[0] || ''}
-                  onValueChange={(value) => {
-                    setCurrencyFilters(prev => ({ 
-                      ...prev, 
-                      selected_currencies: [value as CurrencyCode]
-                    }));
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите валюту для конвертации" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {/* Группировка валют */}
-                    {['Основные', 'Европа', 'Америка', 'Океания', 'Азия', 'Криптовалюты'].map(group => {
-                      const groupCurrencies = currencies.filter(c => c.group === group);
-                      if (groupCurrencies.length === 0) return null;
-                      
-                      return (
-                        <div key={group}>
-                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                            {group}
+            <Label>Валюта</Label>
+            <Select
+              value={filters.currency || ''}
+              onValueChange={(value) => {
+                setFilters(prev => ({ ...prev, currency: value }));
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите валюту" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {/* Группировка валют */}
+                {['Основные', 'Европа', 'Америка', 'Океания', 'Азия', 'Криптовалюты'].map(group => {
+                  const groupCurrencies = currencies.filter(c => c.group === group);
+                  if (groupCurrencies.length === 0) return null;
+                  
+                  return (
+                    <div key={group}>
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                        {group}
+                      </div>
+                      {groupCurrencies.map(currency => (
+                        <SelectItem key={currency.value} value={currency.value}>
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{getCurrencyFlag(currency.value)}</span>
+                            <span>{currency.label}</span>
                           </div>
-                          {groupCurrencies.map(currency => (
-                            <SelectItem key={currency.value} value={currency.value}>
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg">{getCurrencyFlag(currency.value)}</span>
-                                <span>{currency.label}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </div>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
+                        </SelectItem>
+                      ))}
+                    </div>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -688,14 +641,6 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
                   showSelectAll
                   selectAllLabel="Выбрать все"
                 />
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium mb-2">Расширенные настройки валют</h4>
-                  <CurrencyFilters
-                    value={currencyFilters}
-                    onChange={setCurrencyFilters}
-                    compact={false}
-                  />
-                </div>
               </div>
             </TabsContent>
           </Tabs>
@@ -707,25 +652,12 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
             variant="outline"
             onClick={() => {
               setFilters({});
-              setCurrencyFilters({
-                display_mode: 'native',
-                selected_currencies: [],
-                is_multi_currency: undefined,
-              });
             }}
           >
             <X className="h-4 w-4 mr-2" />
             Сбросить
           </Button>
-          <Button onClick={() => {
-            const finalFilters = {
-              ...filters,
-              currencyDisplay: currencyFilters.display_mode,
-              selectedCurrencies: currencyFilters.selected_currencies,
-              isMultiCurrency: currencyFilters.is_multi_currency
-            };
-            onApply(finalFilters);
-          }}>
+          <Button onClick={() => onApply(filters)}>
             Применить фильтры
           </Button>
         </div>
