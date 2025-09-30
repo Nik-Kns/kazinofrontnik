@@ -12,7 +12,6 @@ import { FlexibleCharts } from "@/components/analytics/flexible-charts";
 import { SegmentMetricsTable } from "@/components/analytics/segment-metrics-table";
 import { AlertsAndSignals } from "@/components/analytics/alerts-and-signals";
 import { CampaignDeepAnalytics } from "@/components/analytics/campaign-deep-analytics";
-import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
 import { HandCoins, TrendingUp, Users, BarChart3, Activity, Target } from "lucide-react";
 import Link from "next/link";
 import { CampaignPerformanceTable } from "@/components/analytics/campaign-performance-table";
@@ -108,19 +107,11 @@ export default function AnalyticsPage() {
 
       {/* Сворачиваемая панель фильтров */}
       <CollapsibleSection id="filters" title="Фильтры и настройки">
-        <div className="space-y-4">
-          <div className="flex items-center justify-end">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Валюта:</span>
-              <CurrencyToggleButton size="sm" />
-            </div>
-          </div>
-          <EnhancedFilters 
-            onApply={handleFiltersChange} 
-            onExport={handleExport}
-            defaultFilters={activeFilters}
-          />
-        </div>
+        <EnhancedFilters 
+          onApply={handleFiltersChange} 
+          onExport={handleExport}
+          defaultFilters={activeFilters}
+        />
       </CollapsibleSection>
 
       <Tabs defaultValue="overview">

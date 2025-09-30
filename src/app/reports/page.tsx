@@ -7,7 +7,6 @@ import { reportsData } from "@/lib/mock-data";
 import { Download, PlusCircle, Trash2, Settings, FileText, Calendar, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
 import { CurrencyFilters, CurrencyFiltersState } from "@/components/ui/currency-filters";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -192,7 +191,6 @@ export default function ReportsPage() {
             <p className="text-muted-foreground">Генерация, управление и рассылка отчетов по сценариям, сегментам и retention.</p>
         </div>
         <div className="flex items-center gap-3">
-          <CompactCurrencyToggle />
           <CreateReportDialog />
         </div>
       </div>
@@ -208,7 +206,6 @@ export default function ReportsPage() {
               </CardTitle>
               <CardDescription>Выберите валютные настройки для просмотра отчетов</CardDescription>
             </div>
-            <CurrencyToggleButton size="sm" />
           </div>
         </CardHeader>
         <CardContent>

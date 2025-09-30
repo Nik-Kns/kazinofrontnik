@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import type { FilterConfig, SegmentType } from "@/lib/types";
 import { CurrencyFilters, CurrencyFiltersState } from "@/components/ui/currency-filters";
+import { CurrencyDisplayMode } from "@/lib/currency-types";
 import type { CurrencyCode } from "@/lib/currency-types";
 
 interface EnhancedFiltersProps {
@@ -190,7 +191,7 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
       
       <CardContent>
         {/* Основные фильтры - всегда видимы */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-4">
           {/* Проекты/Казино (мультивыбор с логотипами) */}
           <div className="space-y-2">
             <Label>Проекты</Label>
@@ -266,36 +267,23 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
             />
           </div>
 
-          {/* Кампании */}
+          {/* Валюта */}
           <div className="space-y-2">
-            <Label>Кампании</Label>
-            <MultiSelect
-              options={[
-                { value: 'welcome_bonus', label: 'Welcome Bonus' },
-                { value: 'vip_rewards', label: 'VIP Rewards' },
-                { value: 'weekend_promo', label: 'Weekend Promo' },
-                { value: 'birthday_campaign', label: 'Birthday Campaign' },
-                { value: 'reactivation_1', label: 'Reactivation Stage 1' },
-                { value: 'reactivation_2', label: 'Reactivation Stage 2' },
-                { value: 'cashback_tuesday', label: 'Cashback Tuesday' },
-                { value: 'loyalty_program', label: 'Loyalty Program' },
-                { value: 'tournament_invite', label: 'Tournament Invites' },
-                { value: 'deposit_bonus', label: 'Deposit Bonuses' }
-              ]}
-              selected={filters.campaigns || []}
-              onChange={(selected) => setFilters(prev => ({ ...prev, campaigns: selected }))}
-              placeholder="Выберите кампании"
-            />
+            <Label>Валюта</Label>
+            <Select
+              value={currencyFilters.display_mode || 'native'}
+              onValueChange={(value) => setCurrencyFilters(prev => ({ ...prev, display_mode: value as CurrencyDisplayMode }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="native">Исходные валюты</SelectItem>
+                <SelectItem value="base_converted">Базовая валюта (EUR)</SelectItem>
+                <SelectItem value="specific_currency">Конкретная валюта</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </div>
-
-        {/* Валютные фильтры */}
-        <div className="mt-4 p-4 border rounded-lg bg-muted/30">
-          <CurrencyFilters
-            value={currencyFilters}
-            onChange={setCurrencyFilters}
-            compact={true}
-          />
         </div>
 
         {/* Расширенные фильтры - показываются при разворачивании */}
@@ -306,7 +294,7 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
               <TabsTrigger value="demographics">Демография</TabsTrigger>
               <TabsTrigger value="behavior">Поведение</TabsTrigger>
               <TabsTrigger value="contacts">Контакты</TabsTrigger>
-              <TabsTrigger value="currency">Валюты</TabsTrigger>
+              <TabsTrigger value="campaigns">Кампании</TabsTrigger>
             </TabsList>
 
             <TabsContent value="source" className="space-y-4">
@@ -441,24 +429,6 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Валюта</Label>
-                  <Select
-                    value={filters.currency || ''}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, currency: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите валюту" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies.map(curr => (
-                        <SelectItem key={curr.value} value={curr.value}>
-                          {curr.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
             </TabsContent>
 
@@ -590,14 +560,36 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
               </div>
             </TabsContent>
 
-            <TabsContent value="currency" className="space-y-4">
+            <TabsContent value="campaigns" className="space-y-4">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Расширенные валютные настройки</h3>
-                <CurrencyFilters
-                  value={currencyFilters}
-                  onChange={setCurrencyFilters}
-                  compact={false}
+                <h3 className="text-lg font-semibold">Фильтр по кампаниям</h3>
+                <MultiSelect
+                  options={[
+                    { value: 'welcome_bonus', label: 'Welcome Bonus' },
+                    { value: 'vip_rewards', label: 'VIP Rewards' },
+                    { value: 'weekend_promo', label: 'Weekend Promo' },
+                    { value: 'birthday_campaign', label: 'Birthday Campaign' },
+                    { value: 'reactivation_1', label: 'Reactivation Stage 1' },
+                    { value: 'reactivation_2', label: 'Reactivation Stage 2' },
+                    { value: 'cashback_tuesday', label: 'Cashback Tuesday' },
+                    { value: 'loyalty_program', label: 'Loyalty Program' },
+                    { value: 'tournament_invite', label: 'Tournament Invites' },
+                    { value: 'deposit_bonus', label: 'Deposit Bonuses' }
+                  ]}
+                  selected={filters.campaigns || []}
+                  onChange={(selected) => setFilters(prev => ({ ...prev, campaigns: selected }))}
+                  placeholder="Выберите кампании"
+                  showSelectAll
+                  selectAllLabel="Выбрать все"
                 />
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium mb-2">Расширенные настройки валют</h4>
+                  <CurrencyFilters
+                    value={currencyFilters}
+                    onChange={setCurrencyFilters}
+                    compact={false}
+                  />
+                </div>
               </div>
             </TabsContent>
           </Tabs>
@@ -609,12 +601,25 @@ export function EnhancedFilters({ onApply, onExport, defaultFilters = {} }: Enha
             variant="outline"
             onClick={() => {
               setFilters({});
+              setCurrencyFilters({
+                display_mode: 'native',
+                selected_currencies: [],
+                is_multi_currency: undefined,
+              });
             }}
           >
             <X className="h-4 w-4 mr-2" />
             Сбросить
           </Button>
-          <Button onClick={() => onApply(filters)}>
+          <Button onClick={() => {
+            const finalFilters = {
+              ...filters,
+              currencyDisplay: currencyFilters.display_mode,
+              selectedCurrencies: currencyFilters.selected_currencies,
+              isMultiCurrency: currencyFilters.is_multi_currency
+            };
+            onApply(finalFilters);
+          }}>
             Применить фильтры
           </Button>
         </div>

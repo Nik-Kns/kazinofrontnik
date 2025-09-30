@@ -13,7 +13,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CompactCurrencyToggle, CurrencyToggleButton } from "@/components/ui/currency-toggle";
 import { CurrencyBadge, CurrencyAmountDisplay } from "@/components/ui/currency-badge";
 import { useCurrency } from "@/contexts/currency-context";
 import { formatCurrency } from "@/lib/currency-utils";
@@ -358,7 +357,6 @@ export default function CalendarPage() {
             <CardDescription>Визуальный план всех активностей с просмотром по месяцам и неделям.</CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <CompactCurrencyToggle />
             <Tabs value={view} onValueChange={setView} className="mr-4">
               <TabsList>
                 <TabsTrigger value="month">Месяц</TabsTrigger>
@@ -671,10 +669,7 @@ export default function CalendarPage() {
                     <div className="mt-6 pt-4 border-t">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-semibold text-lg">Статистика эффективности</h4>
-                        <div className="flex items-center gap-2">
-                          <CurrencyToggleButton size="sm" />
-                          <CurrencyBadge currency={currencyState.base_currency || 'EUR'} showFlag size="sm" />
-                        </div>
+                        <CurrencyBadge currency={currencyState.base_currency || 'EUR'} showFlag size="sm" />
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="p-3 bg-muted rounded-lg">

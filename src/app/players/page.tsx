@@ -9,7 +9,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PlusCircle, Upload, Download, Brain, TrendingUp, AlertCircle, Users, Sparkles } from "lucide-react";
 import { AdvancedFilters } from "@/components/ui/advanced-filters";
 import { CurrencyFilters, type CurrencyFiltersState } from "@/components/ui/currency-filters";
-import { CompactCurrencyToggle } from "@/components/ui/currency-toggle";
 import { Separator } from "@/components/ui/separator";
 import type { FilterConfig, FilterGroup, VipLevel } from "@/lib/types";
 import { Input } from "@/components/ui/input";
