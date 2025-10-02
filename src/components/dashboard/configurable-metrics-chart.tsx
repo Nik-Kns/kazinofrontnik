@@ -202,7 +202,6 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
   // Рендер графика
   const renderChart = () => {
     const ChartComponent = chartType === 'bar' ? BarChart : chartType === 'area' ? AreaChart : LineChart;
-    const DataComponent = chartType === 'bar' ? Bar : chartType === 'area' ? Area : Line;
 
     return (
       <ResponsiveContainer width="100%" height={400}>
@@ -218,41 +217,92 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
             const metric = ALL_METRICS.find(m => m.id === metricId);
             if (!metric) return null;
             
-            return (
-              <React.Fragment key={metricId}>
-                <DataComponent
-                  type="monotone"
-                  dataKey={metricId}
-                  stroke={metric.color}
-                  fill={metric.color}
-                  strokeWidth={2}
-                  name={metric.name}
-                  fillOpacity={chartType === 'area' ? 0.3 : 1}
-                />
-                
-                {showComparison && (
-                  <DataComponent
+            if (chartType === 'bar') {
+              return (
+                <React.Fragment key={metricId}>
+                  <Bar
+                    dataKey={metricId}
+                    fill={metric.color}
+                    name={metric.name}
+                  />
+                  {showComparison && (
+                    <Bar
+                      dataKey={`${metricId}_prev`}
+                      fill={metric.color}
+                      fillOpacity={0.5}
+                      name={`${metric.name} (пред.)`}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            } else if (chartType === 'area') {
+              return (
+                <React.Fragment key={metricId}>
+                  <Area
                     type="monotone"
-                    dataKey={`${metricId}_prev`}
+                    dataKey={metricId}
                     stroke={metric.color}
                     fill={metric.color}
-                    strokeWidth={1}
-                    strokeDasharray="5 5"
-                    name={`${metric.name} (пред.)`}
-                    fillOpacity={chartType === 'area' ? 0.1 : 0.5}
+                    strokeWidth={2}
+                    name={metric.name}
+                    fillOpacity={0.3}
                   />
-                )}
-                
-                {showAverage && (
-                  <ReferenceLine 
-                    y={averageValues[metricId]} 
+                  {showComparison && (
+                    <Area
+                      type="monotone"
+                      dataKey={`${metricId}_prev`}
+                      stroke={metric.color}
+                      fill={metric.color}
+                      strokeWidth={1}
+                      strokeDasharray="5 5"
+                      name={`${metric.name} (пред.)`}
+                      fillOpacity={0.1}
+                    />
+                  )}
+                  {showAverage && (
+                    <ReferenceLine 
+                      y={averageValues[metricId]} 
+                      stroke={metric.color}
+                      strokeDasharray="3 3"
+                      label={`Среднее: ${Math.round(averageValues[metricId])}`}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            } else {
+              return (
+                <React.Fragment key={metricId}>
+                  <Line
+                    type="monotone"
+                    dataKey={metricId}
                     stroke={metric.color}
-                    strokeDasharray="3 3"
-                    label={`Среднее: ${Math.round(averageValues[metricId])}`}
+                    strokeWidth={2}
+                    name={metric.name}
+                    dot={false}
                   />
-                )}
-              </React.Fragment>
-            );
+                  {showComparison && (
+                    <Line
+                      type="monotone"
+                      dataKey={`${metricId}_prev`}
+                      stroke={metric.color}
+                      strokeWidth={1}
+                      strokeDasharray="5 5"
+                      name={`${metric.name} (пред.)`}
+                      dot={false}
+                      opacity={0.5}
+                    />
+                  )}
+                  {showAverage && (
+                    <ReferenceLine 
+                      y={averageValues[metricId]} 
+                      stroke={metric.color}
+                      strokeDasharray="3 3"
+                      label={`Среднее: ${Math.round(averageValues[metricId])}`}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            }
           })}
         </ChartComponent>
       </ResponsiveContainer>
