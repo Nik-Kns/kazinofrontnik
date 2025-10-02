@@ -56,7 +56,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OnboardingStatus } from "@/components/dashboard/onboarding-status";
 import { AlertsAndSignals } from "@/components/analytics/alerts-and-signals";
-import { AdvancedMetricsChart } from "@/components/dashboard/advanced-metrics-chart";
+import { ConfigurableMetricsChart } from "@/components/dashboard/configurable-metrics-chart";
 
 // Компонент для сворачиваемых секций
 function CollapsibleSection({ 
@@ -251,41 +251,6 @@ function TrendsSummary() {
 
 export default function DashboardPage() {
   const [savedFilters, setSavedFilters] = useState<any>(null);
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(() => {
-    // Загружаем выбранные метрики из localStorage
-    try {
-      const saved = localStorage.getItem('analyticsSelectedTile') || localStorage.getItem('selectedKpis');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return Array.isArray(parsed) ? parsed : parsed.map((m: any) => m.key || m);
-      }
-    } catch {
-      // Метрики по умолчанию
-      return ['ggr', 'retention_rate', 'crm_spend', 'arpu', 'conversion_rate'];
-    }
-    return ['ggr', 'retention_rate', 'crm_spend', 'arpu', 'conversion_rate'];
-  });
-  const [activeMetric, setActiveMetric] = useState<string>(() => {
-    try {
-      const saved = localStorage.getItem('activeMetric');
-      if (saved) return saved;
-      // Если нет сохраненной, берем первую из выбранных
-      const savedMetrics = localStorage.getItem('analyticsSelectedTile') || localStorage.getItem('selectedKpis');
-      if (savedMetrics) {
-        const parsed = JSON.parse(savedMetrics);
-        const metrics = Array.isArray(parsed) ? parsed : parsed.map((m: any) => m.key || m);
-        return metrics[0] || 'ggr';
-      }
-    } catch {}
-    return 'ggr';
-  });
-  const [timeRange, setTimeRange] = useState<string>(() => {
-    try {
-      return localStorage.getItem('selectedKpiTimeRange') || 'today';
-    } catch {
-      return 'today';
-    }
-  });
 
   useEffect(() => {
     // Загружаем сохраненные фильтры из localStorage
@@ -298,46 +263,6 @@ export default function DashboardPage() {
       console.error('Error loading saved filters:', error);
     }
   }, []);
-
-  useEffect(() => {
-    // Следим за изменениями выбранных метрик и временного периода в localStorage
-    const handleStorageChange = () => {
-      try {
-        // Проверяем обновления выбранных метрик
-        const savedMetrics = localStorage.getItem('analyticsSelectedTile') || localStorage.getItem('selectedKpis');
-        if (savedMetrics) {
-          const parsed = JSON.parse(savedMetrics);
-          const newMetrics = Array.isArray(parsed) ? parsed : parsed.map((m: any) => m.key || m);
-          setSelectedMetrics(newMetrics);
-          
-          // Если активная метрика не в новом списке, сбрасываем её
-          if (activeMetric && !newMetrics.includes(activeMetric)) {
-            setActiveMetric(newMetrics[0] || '');
-            localStorage.setItem('activeMetric', newMetrics[0] || '');
-          }
-        }
-        
-        const savedTimeRange = localStorage.getItem('selectedKpiTimeRange');
-        if (savedTimeRange) {
-          setTimeRange(savedTimeRange);
-        }
-        
-        const savedActiveMetric = localStorage.getItem('activeMetric');
-        if (savedActiveMetric) {
-          setActiveMetric(savedActiveMetric);
-        }
-      } catch {}
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    // Также проверяем при изменении через наш же компонент
-    const interval = setInterval(handleStorageChange, 1000);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, [activeMetric]);
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -364,18 +289,10 @@ export default function DashboardPage() {
       {/* Основные метрики и аналитика */}
       <div className="space-y-6">
         {/* Избранные метрики */}
-        <SelectedKpiTile 
-          activeMetric={activeMetric}
-          onMetricClick={setActiveMetric}
-        />
+        <SelectedKpiTile />
         
         {/* График динамики выбранных метрик */}
-        <AdvancedMetricsChart 
-          selectedMetrics={selectedMetrics}
-          timeRange={timeRange}
-          activeMetric={activeMetric}
-          onMetricClick={setActiveMetric}
-        />
+        <ConfigurableMetricsChart />
         
         {/* Риски и предупреждения */}
         <RisksAndWarnings />
