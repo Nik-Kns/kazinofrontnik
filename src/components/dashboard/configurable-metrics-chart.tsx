@@ -86,9 +86,9 @@ interface ConfigurableMetricsChartProps {
 }
 
 export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChartProps) {
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['revenue', 'ggr', 'active_players', 'retention_day7']);
-  const [timePeriod, setTimePeriod] = useState('30d');
-  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('area');
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['revenue', 'ggr']);
+  const [timePeriod, setTimePeriod] = useState('7d');
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line');
   const [showComparison, setShowComparison] = useState(false);
   const [comparisonPeriod, setComparisonPeriod] = useState('previous');
   const [showAverage, setShowAverage] = useState(false);
@@ -138,10 +138,7 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
       date.setDate(date.getDate() - i);
       
       const dataPoint: any = {
-        date: date.toLocaleDateString('ru-RU', { 
-          day: 'numeric', 
-          month: 'short' 
-        }),
+        date: `${date.getDate()}/${date.getMonth() + 1}`,
         fullDate: date.toISOString()
       };
       
@@ -262,13 +259,15 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
   // Рендер графика
   const renderChart = () => {
     const ChartComponent = chartType === 'bar' ? BarChart : chartType === 'area' ? AreaChart : LineChart;
+    const chartData = generateChartData;
 
     return (
       <ResponsiveContainer width="100%" height={400}>
-        <ChartComponent data={generateChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <ChartComponent data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
           <XAxis dataKey="date" />
-          <YAxis />
+          <YAxis yAxisId="left" />
+          <YAxis yAxisId="right" orientation="right" />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
           {selectedMetrics.length > 4 && <Brush dataKey="date" height={30} stroke="#8884d8" />}
@@ -277,16 +276,20 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
             const metric = ALL_METRICS.find(m => m.id === metricId);
             if (!metric) return null;
             
+            const yAxisId = metric.category === 'financial' ? 'left' : 'right';
+            
             if (chartType === 'bar') {
               return (
                 <React.Fragment key={metricId}>
                   <Bar
+                    yAxisId={yAxisId}
                     dataKey={metricId}
                     fill={metric.color}
                     name={metric.name}
                   />
                   {showComparison && (
                     <Bar
+                      yAxisId={yAxisId}
                       dataKey={`${metricId}_prev`}
                       fill={metric.color}
                       fillOpacity={0.5}
@@ -299,6 +302,7 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
               return (
                 <React.Fragment key={metricId}>
                   <Area
+                    yAxisId={yAxisId}
                     type="monotone"
                     dataKey={metricId}
                     stroke={metric.color}
@@ -309,6 +313,7 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
                   />
                   {showComparison && (
                     <Area
+                      yAxisId={yAxisId}
                       type="monotone"
                       dataKey={`${metricId}_prev`}
                       stroke={metric.color}
@@ -321,6 +326,7 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
                   )}
                   {showAverage && (
                     <ReferenceLine 
+                      yAxisId={yAxisId}
                       y={averageValues[metricId]} 
                       stroke={metric.color}
                       strokeDasharray="3 3"
@@ -333,6 +339,7 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
               return (
                 <React.Fragment key={metricId}>
                   <Line
+                    yAxisId={yAxisId}
                     type="monotone"
                     dataKey={metricId}
                     stroke={metric.color}
@@ -342,6 +349,7 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
                   />
                   {showComparison && (
                     <Line
+                      yAxisId={yAxisId}
                       type="monotone"
                       dataKey={`${metricId}_prev`}
                       stroke={metric.color}
@@ -354,6 +362,7 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
                   )}
                   {showAverage && (
                     <ReferenceLine 
+                      yAxisId={yAxisId}
                       y={averageValues[metricId]} 
                       stroke={metric.color}
                       strokeDasharray="3 3"
