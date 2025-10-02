@@ -86,13 +86,13 @@ interface ConfigurableMetricsChartProps {
 }
 
 export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChartProps) {
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['revenue', 'ggr']);
-  const [timePeriod, setTimePeriod] = useState('7d');
-  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line');
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['revenue', 'ggr', 'active_players', 'retention_day7']);
+  const [timePeriod, setTimePeriod] = useState('30d');
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('area');
   const [showComparison, setShowComparison] = useState(false);
   const [comparisonPeriod, setComparisonPeriod] = useState('previous');
   const [showAverage, setShowAverage] = useState(false);
-  const [showTrend, setShowTrend] = useState(false);
+  const [showTrend, setShowTrend] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isMetricSelectorOpen, setIsMetricSelectorOpen] = useState(false);
 
@@ -100,6 +100,35 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
   const generateChartData = useMemo(() => {
     const period = TIME_PERIODS.find(p => p.id === timePeriod);
     const points = period?.dataPoints || 7;
+    
+    // Базовые значения для каждой метрики с реалистичными диапазонами
+    const baseValues: Record<string, number> = {
+      revenue: 125000,
+      ggr: 95000,
+      ngr: 72000,
+      deposits: 45000,
+      withdrawals: 28000,
+      bonuses_issued: 15000,
+      active_players: 3450,
+      new_registrations: 280,
+      ftd: 125,
+      returning_players: 1850,
+      vip_players: 145,
+      at_risk_players: 420,
+      retention_day1: 68,
+      retention_day7: 42,
+      retention_day30: 28,
+      churn_rate: 18,
+      ltv: 285,
+      arpu: 35.50,
+      arppu: 125.80,
+      conversion_reg_ftd: 8.5,
+      conversion_ftd_deposit: 45,
+      avg_deposit: 250,
+      avg_withdrawal: 180,
+      avg_session_time: 42,
+      games_played: 15
+    };
     
     const data = [];
     const now = new Date();
@@ -116,24 +145,55 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
         fullDate: date.toISOString()
       };
       
+      // Прогрессия для создания трендов
+      const dayProgress = (points - i) / points;
+      const weekDay = date.getDay();
+      const isWeekend = weekDay === 0 || weekDay === 6;
+      
       // Генерируем значения для выбранных метрик
       selectedMetrics.forEach(metricId => {
         const metric = ALL_METRICS.find(m => m.id === metricId);
         if (metric) {
-          // Базовое значение с случайными вариациями
-          const baseValue = metric.category === 'financial' 
-            ? Math.random() * 50000 + 30000
-            : metric.category === 'players'
-            ? Math.floor(Math.random() * 500 + 200)
-            : metric.unit === '%'
-            ? Math.random() * 30 + 50
-            : Math.random() * 1000 + 500;
+          let baseValue = baseValues[metricId] || 1000;
           
-          dataPoint[metricId] = Math.round(baseValue * 100) / 100;
+          // Добавляем тренд (рост или падение в зависимости от метрики)
+          const trendMultiplier = metricId.includes('churn') || metricId.includes('at_risk')
+            ? 1 - (dayProgress * 0.15) // Негативные метрики улучшаются (уменьшаются)
+            : 1 + (dayProgress * 0.25); // Позитивные метрики растут
           
-          // Данные для сравнения
+          // Недельная сезонность (выходные выше для большинства метрик)
+          const weekendMultiplier = isWeekend ? 1.35 : 0.92;
+          
+          // Случайные ежедневные вариации (±15%)
+          const dailyVariation = 0.85 + Math.random() * 0.30;
+          
+          // Итоговое значение
+          let value = baseValue * trendMultiplier * weekendMultiplier * dailyVariation;
+          
+          // Особые правила для процентных метрик
+          if (metric.unit === '%') {
+            value = Math.min(100, Math.max(0, value));
+          }
+          
+          // Округление в зависимости от типа метрики
+          if (metric.category === 'financial' || metricId.includes('avg_') || metricId === 'ltv' || metricId === 'arpu' || metricId === 'arppu') {
+            dataPoint[metricId] = Math.round(value * 100) / 100;
+          } else if (metric.category === 'players' || metricId === 'games_played') {
+            dataPoint[metricId] = Math.floor(value);
+          } else {
+            dataPoint[metricId] = Math.round(value * 10) / 10;
+          }
+          
+          // Данные для сравнения с предыдущим периодом
           if (showComparison) {
-            dataPoint[`${metricId}_prev`] = Math.round((baseValue * (0.8 + Math.random() * 0.4)) * 100) / 100;
+            const prevValue = value * (0.72 + Math.random() * 0.18); // Предыдущий период был на 10-28% ниже
+            if (metric.category === 'financial' || metricId.includes('avg_') || metricId === 'ltv' || metricId === 'arpu' || metricId === 'arppu') {
+              dataPoint[`${metricId}_prev`] = Math.round(prevValue * 100) / 100;
+            } else if (metric.category === 'players' || metricId === 'games_played') {
+              dataPoint[`${metricId}_prev`] = Math.floor(prevValue);
+            } else {
+              dataPoint[`${metricId}_prev`] = Math.round(prevValue * 10) / 10;
+            }
           }
         }
       });
