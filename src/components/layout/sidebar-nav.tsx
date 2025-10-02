@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   Brain,
   MessageSquareText,
+  Gift,
 } from "lucide-react";
 import {
   Tooltip,
@@ -32,6 +33,7 @@ const navItems = [
   { href: "/segments", label: "Сегменты", icon: FolderKanban },
   { href: "/triggers", label: "Триггеры", icon: Workflow },
   { href: "/campaigns", label: "Кампании", icon: Contact },
+  { href: "/bonuses", label: "Бонусы и офферы", icon: Gift },
   { href: "/templates", label: "Шаблоны", icon: LayoutGrid },
   { href: "/analytics", label: "Аналитика", icon: BarChart2 },
   { href: "/comm_analyz", label: "Анализ коммуникаций", icon: MessageSquareText },
