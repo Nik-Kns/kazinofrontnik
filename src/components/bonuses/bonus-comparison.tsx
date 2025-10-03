@@ -22,27 +22,126 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { X, Settings } from "lucide-react";
+import { X, Settings, Info } from "lucide-react";
 import { Bonus } from "@/lib/types/bonuses";
 import { generateBonusKPI, generateTimeSeries } from "@/lib/mock-bonuses-data";
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface BonusComparisonProps {
   bonuses: Bonus[];
   onClose?: () => void;
 }
 
-// Доступные метрики для сравнения
+// Доступные метрики для сравнения с описаниями
 const METRICS = [
-  { id: "completion_rate", name: "Completion Rate", unit: "%" },
-  { id: "net_roi", name: "Net ROI", unit: "" },
-  { id: "abuse_rate", name: "Abuse Rate", unit: "%" },
-  { id: "deposit_uplift", name: "Deposit Uplift", unit: "%" },
-  { id: "take_up_rate", name: "Take-up Rate", unit: "%" },
-  { id: "wagering_progress", name: "Wagering Progress", unit: "%" },
+  {
+    id: "completion_rate",
+    name: "Процент отыгрыша",
+    unit: "%",
+    description: "Доля игроков, которые полностью отыграли бонус. Показывает, насколько выполнимы условия вейджера."
+  },
+  {
+    id: "net_roi",
+    name: "Чистый ROI",
+    unit: "",
+    description: "Возврат инвестиций с учетом всех затрат на бонус. Показывает реальную прибыльность бонуса."
+  },
+  {
+    id: "abuse_rate",
+    name: "Процент злоупотреблений",
+    unit: "%",
+    description: "Доля игроков, злоупотребляющих бонусом (мультиаккаунты, бонус-хантинг). Риск-индикатор."
+  },
+  {
+    id: "deposit_uplift",
+    name: "Прирост депозитов",
+    unit: "%",
+    description: "На сколько % вырос объем депозитов по сравнению с контрольной группой без бонуса."
+  },
+  {
+    id: "take_up_rate",
+    name: "Процент активации",
+    unit: "%",
+    description: "Доля игроков, активировавших бонус из тех, кто его получил. Показывает привлекательность оффера."
+  },
+  {
+    id: "wagering_progress",
+    name: "Прогресс отыгрыша",
+    unit: "%",
+    description: "Средний прогресс выполнения вейджера среди всех игроков. Помогает понять сложность условий."
+  },
 ];
 
 // Цвета для бонусов
 const BONUS_COLORS = ["#3b82f6", "#8b5cf6", "#10b981"];
+
+// Метрики для таблицы с тултипами
+const TABLE_METRICS = [
+  {
+    key: "completion_rate",
+    name: "Процент отыгрыша",
+    description: "Доля игроков, полностью отыгравших бонус",
+    format: (val: number) => `${val.toFixed(1)}%`
+  },
+  {
+    key: "net_roi",
+    name: "Чистый ROI",
+    description: "Возврат инвестиций с учетом всех затрат",
+    format: (val: number) => `${((val - 1) * 100).toFixed(0)}%`,
+    badge: true
+  },
+  {
+    key: "deposit_uplift",
+    name: "Прирост депозитов",
+    description: "Рост депозитов vs контроль",
+    format: (val: number) => `+${val.toFixed(1)}%`,
+    green: true
+  },
+  {
+    key: "abuse_rate",
+    name: "% злоупотреблений",
+    description: "Доля игроков с подозрительным поведением",
+    format: (val: number) => `${val.toFixed(1)}%`,
+    badge: true
+  },
+  {
+    key: "take_up_rate",
+    name: "% активации",
+    description: "Активировали из получивших",
+    format: (val: number) => `${val.toFixed(1)}%`
+  },
+  {
+    key: "effective_cost_pct",
+    name: "Эффективная стоимость",
+    description: "% от депозитов, потраченный на бонусы",
+    format: (val: number) => `${val.toFixed(1)}%`
+  },
+  {
+    key: "time_to_completion_median",
+    name: "Время отыгрыша (медиана)",
+    description: "Среднее время до полного отыгрыша",
+    format: (val: number) => `${val.toFixed(0)}ч`
+  },
+  {
+    key: "retention_uplift_d7",
+    name: "Удержание D7",
+    description: "Прирост удержания на 7 день",
+    format: (val: number) => `+${val.toFixed(1)}%`,
+    green: true
+  },
+  {
+    key: "retention_uplift_d30",
+    name: "Удержание D30",
+    description: "Прирост удержания на 30 день",
+    format: (val: number) => `+${val.toFixed(1)}%`,
+    green: true
+  }
+];
 
 export function BonusComparison({ bonuses, onClose }: BonusComparisonProps) {
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["completion_rate", "net_roi"]);
@@ -111,24 +210,42 @@ export function BonusComparison({ bonuses, onClose }: BonusComparisonProps) {
                 Показатели ({selectedMetrics.length})
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80">
+            <PopoverContent className="w-96">
               <div className="space-y-4">
                 <div>
                   <h4 className="font-medium mb-3">Выберите показатели</h4>
-                  <div className="space-y-2">
-                    {METRICS.map((metric) => (
-                      <div key={metric.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={metric.id}
-                          checked={selectedMetrics.includes(metric.id)}
-                          onCheckedChange={() => toggleMetric(metric.id)}
-                        />
-                        <Label htmlFor={metric.id} className="cursor-pointer">
-                          {metric.name}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
+                  <TooltipProvider>
+                    <div className="space-y-3">
+                      {METRICS.map((metric) => (
+                        <div key={metric.id} className="flex items-start space-x-2">
+                          <Checkbox
+                            id={metric.id}
+                            checked={selectedMetrics.includes(metric.id)}
+                            onCheckedChange={() => toggleMetric(metric.id)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-1">
+                              <Label htmlFor={metric.id} className="cursor-pointer font-medium">
+                                {metric.name}
+                              </Label>
+                              <UITooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs">
+                                  <p className="text-sm">{metric.description}</p>
+                                </TooltipContent>
+                              </UITooltip>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {metric.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </TooltipProvider>
                 </div>
               </div>
             </PopoverContent>
@@ -184,121 +301,72 @@ export function BonusComparison({ bonuses, onClose }: BonusComparisonProps) {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium">Метрика</th>
-                  {bonuses.map((bonus, index) => (
-                    <th key={bonus.id} className="text-right py-3 px-4 font-medium">
-                      <div className="flex items-center justify-end gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: BONUS_COLORS[index] }}
-                        />
-                        {bonus.name}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {/* Completion Rate */}
-                <tr className="border-b">
-                  <td className="py-3 px-4">Completion Rate</td>
-                  {bonusesKPI.map(({ kpi }) => (
-                    <td key={`cr_${kpi.bonus_id}`} className="text-right py-3 px-4 font-medium">
-                      {kpi.completion_rate.toFixed(1)}%
-                    </td>
-                  ))}
-                </tr>
+            <TooltipProvider>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4 font-medium">Метрика</th>
+                    {bonuses.map((bonus, index) => (
+                      <th key={bonus.id} className="text-right py-3 px-4 font-medium">
+                        <div className="flex items-center justify-end gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: BONUS_COLORS[index] }}
+                          />
+                          {bonus.name}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {TABLE_METRICS.map((metric) => (
+                    <tr key={metric.key} className="border-b">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-1">
+                          <span>{metric.name}</span>
+                          <UITooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-sm">{metric.description}</p>
+                            </TooltipContent>
+                          </UITooltip>
+                        </div>
+                      </td>
+                      {bonusesKPI.map(({ kpi }) => {
+                        const value = kpi[metric.key as keyof typeof kpi] as number;
+                        const formatted = metric.format(value);
 
-                {/* Net ROI */}
-                <tr className="border-b">
-                  <td className="py-3 px-4">Net ROI</td>
-                  {bonusesKPI.map(({ kpi }) => (
-                    <td key={`roi_${kpi.bonus_id}`} className="text-right py-3 px-4 font-medium">
-                      <Badge
-                        variant={kpi.bonus_roi_net >= 2 ? "default" : kpi.bonus_roi_net >= 1 ? "secondary" : "destructive"}
-                      >
-                        {((kpi.bonus_roi_net - 1) * 100).toFixed(0)}%
-                      </Badge>
-                    </td>
+                        return (
+                          <td
+                            key={`${metric.key}_${kpi.bonus_id}`}
+                            className={`text-right py-3 px-4 font-medium ${metric.green ? 'text-green-600' : ''}`}
+                          >
+                            {metric.badge ? (
+                              <Badge
+                                variant={
+                                  metric.key === 'net_roi'
+                                    ? value >= 2 ? "default" : value >= 1 ? "secondary" : "destructive"
+                                    : metric.key === 'abuse_rate'
+                                    ? value < 3 ? "secondary" : "destructive"
+                                    : "secondary"
+                                }
+                              >
+                                {formatted}
+                              </Badge>
+                            ) : (
+                              formatted
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
                   ))}
-                </tr>
-
-                {/* Deposit Uplift */}
-                <tr className="border-b">
-                  <td className="py-3 px-4">Deposit Uplift</td>
-                  {bonusesKPI.map(({ kpi }) => (
-                    <td key={`uplift_${kpi.bonus_id}`} className="text-right py-3 px-4 font-medium text-green-600">
-                      +{kpi.deposit_uplift.toFixed(1)}%
-                    </td>
-                  ))}
-                </tr>
-
-                {/* Abuse Rate */}
-                <tr className="border-b">
-                  <td className="py-3 px-4">Abuse Rate</td>
-                  {bonusesKPI.map(({ kpi }) => (
-                    <td key={`abuse_${kpi.bonus_id}`} className="text-right py-3 px-4 font-medium">
-                      <Badge variant={kpi.abuse_rate < 3 ? "secondary" : "destructive"}>
-                        {kpi.abuse_rate.toFixed(1)}%
-                      </Badge>
-                    </td>
-                  ))}
-                </tr>
-
-                {/* Take-up Rate */}
-                <tr className="border-b">
-                  <td className="py-3 px-4">Take-up Rate</td>
-                  {bonusesKPI.map(({ kpi }) => (
-                    <td key={`takeup_${kpi.bonus_id}`} className="text-right py-3 px-4 font-medium">
-                      {kpi.take_up_rate.toFixed(1)}%
-                    </td>
-                  ))}
-                </tr>
-
-                {/* Effective Cost */}
-                <tr className="border-b">
-                  <td className="py-3 px-4">Effective Cost %</td>
-                  {bonusesKPI.map(({ kpi }) => (
-                    <td key={`cost_${kpi.bonus_id}`} className="text-right py-3 px-4 font-medium">
-                      {kpi.effective_cost_pct.toFixed(1)}%
-                    </td>
-                  ))}
-                </tr>
-
-                {/* Time to Completion */}
-                <tr className="border-b">
-                  <td className="py-3 px-4">Time to Completion (медиана)</td>
-                  {bonusesKPI.map(({ kpi }) => (
-                    <td key={`time_${kpi.bonus_id}`} className="text-right py-3 px-4 font-medium">
-                      {kpi.time_to_completion_median.toFixed(0)}ч
-                    </td>
-                  ))}
-                </tr>
-
-                {/* Retention Uplift D7 */}
-                <tr className="border-b">
-                  <td className="py-3 px-4">Retention Uplift D7</td>
-                  {bonusesKPI.map(({ kpi }) => (
-                    <td key={`ret7_${kpi.bonus_id}`} className="text-right py-3 px-4 font-medium text-green-600">
-                      +{kpi.retention_uplift_d7.toFixed(1)}%
-                    </td>
-                  ))}
-                </tr>
-
-                {/* Retention Uplift D30 */}
-                <tr>
-                  <td className="py-3 px-4">Retention Uplift D30</td>
-                  {bonusesKPI.map(({ kpi }) => (
-                    <td key={`ret30_${kpi.bonus_id}`} className="text-right py-3 px-4 font-medium text-green-600">
-                      +{kpi.retention_uplift_d30.toFixed(1)}%
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </TooltipProvider>
           </div>
         </CardContent>
       </Card>
