@@ -22,7 +22,7 @@ const random = (min: number, max: number) => Math.random() * (max - min) + min;
 const randomInt = (min: number, max: number) => Math.floor(random(min, max));
 
 // Генератор реалистичных временных рядов
-function generateTimeSeries(days: number = 30): BonusTimeSeries[] {
+export function generateTimeSeries(days: number = 30): BonusTimeSeries[] {
   const data: BonusTimeSeries[] = [];
   const now = new Date();
 
