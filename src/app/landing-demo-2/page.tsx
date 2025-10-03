@@ -368,6 +368,260 @@ export default function LandingDemo2Page() {
           </div>
         </section>
 
+        {/* AI-анализ и оптимизация бонусов */}
+        <section className="py-16 bg-gradient-to-br from-purple-50 to-blue-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50 mb-4">
+                🎁 Работа с бонусами
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">AI-анализ и оптимизация бонусов</h2>
+              <p className="text-lg text-muted-foreground">
+                Платформа помогает считать оборачиваемость бонусов, прогнозировать их эффективность и снижать издержки
+              </p>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2 max-w-7xl mx-auto mb-12">
+              {/* Карточки возможностей */}
+              <div className="space-y-6">
+                <Card className="p-6 hover:shadow-lg transition-shadow bg-white">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-blue-100 rounded-lg">
+                        <Activity className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <CardTitle className="text-xl">Оборачиваемость бонусов</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      Полная картина эффективности каждого бонуса с ключевыми метриками
+                    </p>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span><strong>Completion rate</strong> — процент полного отыгрыша</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span><strong>Breakage</strong> — доля неиспользованных бонусов</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span><strong>Abuse rate</strong> — выявление bonus hunters</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span><strong>Deposit uplift</strong> — рост депозитов от бонуса</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="p-6 hover:shadow-lg transition-shadow bg-white">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-green-100 rounded-lg">
+                        <Euro className="h-6 w-6 text-green-600" />
+                      </div>
+                      <CardTitle className="text-xl">ROI с учётом бонусов</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      Прозрачная экономика бонусов с учётом всех затрат
+                    </p>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+                      <div className="text-sm font-mono text-green-800">
+                        Net Revenue = GGR − Bonus Costs
+                      </div>
+                    </div>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span>Чистый ROI по каждому бонусу</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span>Учёт стоимости отыгрыша</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span>Прогноз прибыльности</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="p-6 hover:shadow-lg transition-shadow bg-white">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-purple-100 rounded-lg">
+                        <Brain className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <CardTitle className="text-xl">AI-рекомендации</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      Elasticity-модуль прогнозирует оптимальные условия бонусов
+                    </p>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center gap-2">
+                        <Lightbulb className="h-4 w-4 text-yellow-600" />
+                        <span>Оптимальный размер бонуса для сегмента</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Lightbulb className="h-4 w-4 text-yellow-600" />
+                        <span>Влияние wagering на retention</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Lightbulb className="h-4 w-4 text-yellow-600" />
+                        <span>Прогноз ROI при изменении условий</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Визуализация воронки и ROI */}
+              <div className="space-y-6">
+                {/* Воронка бонуса */}
+                <Card className="p-6 bg-white shadow-xl">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">Воронка бонуса "Welcome Pack"</CardTitle>
+                      <Badge className="bg-green-600">Рекомендовано AI</Badge>
+                    </div>
+                    <CardDescription>Конверсия по этапам жизненного цикла</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">Получил</span>
+                          <span className="text-sm font-bold">10,000 игроков</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div className="bg-blue-600 h-3 rounded-full" style={{width: '100%'}}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">Активировал</span>
+                          <span className="text-sm font-bold">8,200 игроков (82%)</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div className="bg-blue-600 h-3 rounded-full" style={{width: '82%'}}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">Начал отыгрывать</span>
+                          <span className="text-sm font-bold">6,500 игроков (65%)</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div className="bg-green-600 h-3 rounded-full" style={{width: '65%'}}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">Завершил отыгрыш</span>
+                          <span className="text-sm font-bold">3,900 игроков (39%)</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div className="bg-green-600 h-3 rounded-full" style={{width: '39%'}}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">Повторный депозит</span>
+                          <span className="text-sm font-bold">2,800 игроков (28%)</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div className="bg-purple-600 h-3 rounded-full" style={{width: '28%'}}></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="text-xs text-muted-foreground">Completion Rate</div>
+                          <div className="text-lg font-bold text-green-600">39%</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground">Retention Uplift</div>
+                          <div className="text-lg font-bold text-blue-600">+28%</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ROI график */}
+                <Card className="p-6 bg-white shadow-xl">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">ROI бонуса по времени</CardTitle>
+                      <Badge variant="outline" className="text-green-600 border-green-200">
+                        Окупается за 12 дней
+                      </Badge>
+                    </div>
+                    <CardDescription>Чистая прибыль с учётом всех затрат</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {/* Простой график ROI */}
+                      <div className="h-40 flex items-end gap-2">
+                        {[
+                          {day: 1, roi: -100},
+                          {day: 3, roi: -80},
+                          {day: 7, roi: -40},
+                          {day: 12, roi: 0},
+                          {day: 15, roi: 45},
+                          {day: 21, roi: 85},
+                          {day: 30, roi: 142}
+                        ].map((point, i) => (
+                          <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                            <div className="text-xs font-bold text-green-600">
+                              {point.roi > 0 ? '+' : ''}{point.roi}%
+                            </div>
+                            <div
+                              className={`w-full rounded-t ${point.roi >= 0 ? 'bg-green-500' : 'bg-red-400'}`}
+                              style={{height: `${Math.abs(point.roi) / 142 * 100}%`, minHeight: '4px'}}
+                            ></div>
+                            <div className="text-xs text-muted-foreground">D{point.day}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3 pt-4 border-t">
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground">Net ROI</div>
+                          <div className="text-lg font-bold text-green-600">+142%</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground">Break-even</div>
+                          <div className="text-lg font-bold">12 дней</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground">Net Revenue</div>
+                          <div className="text-lg font-bold">€42,300</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Killer Features MVP */}
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
@@ -388,7 +642,10 @@ export default function LandingDemo2Page() {
                 { title: "AI-сегменты", desc: "автоматическая гиперсегментация, которую невозможно построить вручную", icon: Filter },
                 { title: "Карточка игрока", desc: "churn probability, next deposit, next best offer", icon: UserCheck },
                 { title: "Бенчмарки по GEO", desc: "сравнение ваших метрик с рынком", icon: Globe },
-                { title: "Автоотчёты", desc: "регламентные отчёты собираются без участия сотрудников", icon: Activity }
+                { title: "Автоотчёты", desc: "регламентные отчёты собираются без участия сотрудников", icon: Activity },
+                { title: "Бонусная аналитика", desc: "полный цикл — начисление, отыгрыш, депозиты, повторные депозиты", icon: CreditCard },
+                { title: "Elasticity Analysis", desc: "система прогнозирует оптимальный размер и условия бонуса для разных сегментов", icon: PieChart },
+                { title: "Антифрод-модуль", desc: "выявляет bonus hunters и подсвечивает подозрительные паттерны", icon: Shield }
               ].map((feature, index) => (
                 <Card key={index} className="p-4 hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
@@ -422,7 +679,7 @@ export default function LandingDemo2Page() {
                   level: 1,
                   title: "CSV / API",
                   desc: "базовые данные: регистрации, депозиты/выводы, кампании/бонусы, сессии",
-                  value: "Сводный дашборд финансов и retention, базовые AI-рекомендации",
+                  value: "Сводный дашборд финансов и retention, базовые AI-рекомендации. Кампании и бонусы → система считает completion rate, breakage, ROI",
                   color: "bg-blue-100 text-blue-600"
                 },
                 {
@@ -450,7 +707,7 @@ export default function LandingDemo2Page() {
                   level: 5,
                   title: "Predictive",
                   desc: "прогнозы, моделирование, оптимизация бюджета",
-                  value: "Предиктивный 'мозг' CRM, AI управляет стратегиями и бюджетом",
+                  value: "Предиктивный 'мозг' CRM, AI управляет стратегиями и бюджетом. Elasticity бонусов и прогноз uplift от изменений условий",
                   color: "bg-red-100 text-red-600"
                 }
               ].map((level, index) => (
@@ -486,7 +743,7 @@ export default function LandingDemo2Page() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
               {[
                 "Полная автоматизация отчетности",
-                "Существенное сокращение времени на аналитику", 
+                "Существенное сокращение времени на аналитику",
                 "AI-инсайты, которых нет в обычных BI",
                 "Автоматическая динамическая сегментация игроков",
                 "Возможность тестировать десятки стратегий с одним менеджером",
@@ -502,7 +759,8 @@ export default function LandingDemo2Page() {
                 "Триггерные коммуникации в реальном времени",
                 "Единый контроль всех каналов",
                 "Комплаенс и безопасность",
-                "Полная прозрачность пути игрока"
+                "Полная прозрачность пути игрока",
+                "Полный контроль бонусов → видите, сколько депозитов принес каждый бонус, сколько ушло на отыгрыш, какой ROI и retention uplift он дал"
               ].map((benefit, index) => (
                 <Card key={index} className="p-4">
                   <CardContent className="p-0">
