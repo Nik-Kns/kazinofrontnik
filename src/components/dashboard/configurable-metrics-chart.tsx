@@ -9,19 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { 
-  LineChart, Line, BarChart, Bar, AreaChart, Area, 
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-  ResponsiveContainer, ReferenceLine, Brush, ComposedChart
+import {
+  LineChart, Line, BarChart, Bar, AreaChart, Area,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, Brush
 } from "recharts";
-import { 
-  Settings, TrendingUp, Calendar, ChevronDown, 
+import {
+  Calendar, ChevronDown,
   BarChart3, LineChart as LineChartIcon, AreaChart as AreaChartIcon,
-  Eye, EyeOff, Download, Maximize2, X, Plus, Filter
+  Download, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getMetricsData, transformToChartData } from "@/lib/mock-metrics-data";
 
 // Список всех доступных метрик
 const ALL_METRICS = [
@@ -64,15 +63,12 @@ const METRIC_CATEGORIES = [
   { id: 'bonuses', name: 'Бонусы' }
 ];
 
-// Временные периоды
+// Временные периоды (упрощено по ТЗ)
 const TIME_PERIODS = [
-  { id: '24h', name: '24 часа', dataPoints: 24 },
-  { id: '7d', name: '7 дней', dataPoints: 7 },
-  { id: '30d', name: '30 дней', dataPoints: 30 },
-  { id: '90d', name: '90 дней', dataPoints: 90 },
-  { id: '1y', name: '1 год', dataPoints: 365 },
-  { id: 'custom', name: 'Выбрать период', dataPoints: 0 }
-];
+  { id: 7, name: '7 дней' },
+  { id: 30, name: '30 дней' },
+  { id: 90, name: '90 дней' }
+] as const;
 
 // Типы графиков
 const CHART_TYPES = [
@@ -86,132 +82,20 @@ interface ConfigurableMetricsChartProps {
 }
 
 export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChartProps) {
+  // State - упрощено по ТЗ
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['revenue', 'ggr']);
-  const [timePeriod, setTimePeriod] = useState('7d');
+  const [timePeriod, setTimePeriod] = useState<7 | 30 | 90>(7);
   const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line');
-  const [showComparison, setShowComparison] = useState(false);
-  const [comparisonPeriod, setComparisonPeriod] = useState('previous');
-  const [showAverage, setShowAverage] = useState(false);
-  const [showTrend, setShowTrend] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isMetricSelectorOpen, setIsMetricSelectorOpen] = useState(false);
 
-  // Генерация данных для графика
-  const generateChartData = useMemo(() => {
-    const period = TIME_PERIODS.find(p => p.id === timePeriod);
-    const points = period?.dataPoints || 7;
-    
-    // Базовые значения для каждой метрики с реалистичными диапазонами
-    const baseValues: Record<string, number> = {
-      revenue: 125000,
-      ggr: 95000,
-      ngr: 72000,
-      deposits: 45000,
-      withdrawals: 28000,
-      bonuses_issued: 15000,
-      active_players: 3450,
-      new_registrations: 280,
-      ftd: 125,
-      returning_players: 1850,
-      vip_players: 145,
-      at_risk_players: 420,
-      retention_day1: 68,
-      retention_day7: 42,
-      retention_day30: 28,
-      churn_rate: 18,
-      ltv: 285,
-      arpu: 35.50,
-      arppu: 125.80,
-      conversion_reg_ftd: 8.5,
-      conversion_ftd_deposit: 45,
-      avg_deposit: 250,
-      avg_withdrawal: 180,
-      avg_session_time: 42,
-      games_played: 15
-    };
-    
-    const data = [];
-    const now = new Date();
-    
-    for (let i = points - 1; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      
-      const dataPoint: any = {
-        date: `${date.getDate()}/${date.getMonth() + 1}`,
-        fullDate: date.toISOString()
-      };
-      
-      // Прогрессия для создания трендов
-      const dayProgress = (points - i) / points;
-      const weekDay = date.getDay();
-      const isWeekend = weekDay === 0 || weekDay === 6;
-      
-      // Генерируем значения для выбранных метрик
-      selectedMetrics.forEach(metricId => {
-        const metric = ALL_METRICS.find(m => m.id === metricId);
-        if (metric) {
-          let baseValue = baseValues[metricId] || 1000;
-          
-          // Добавляем тренд (рост или падение в зависимости от метрики)
-          const trendMultiplier = metricId.includes('churn') || metricId.includes('at_risk')
-            ? 1 - (dayProgress * 0.15) // Негативные метрики улучшаются (уменьшаются)
-            : 1 + (dayProgress * 0.25); // Позитивные метрики растут
-          
-          // Недельная сезонность (выходные выше для большинства метрик)
-          const weekendMultiplier = isWeekend ? 1.35 : 0.92;
-          
-          // Случайные ежедневные вариации (±15%)
-          const dailyVariation = 0.85 + Math.random() * 0.30;
-          
-          // Итоговое значение
-          let value = baseValue * trendMultiplier * weekendMultiplier * dailyVariation;
-          
-          // Особые правила для процентных метрик
-          if (metric.unit === '%') {
-            value = Math.min(100, Math.max(0, value));
-          }
-          
-          // Округление в зависимости от типа метрики
-          if (metric.category === 'financial' || metricId.includes('avg_') || metricId === 'ltv' || metricId === 'arpu' || metricId === 'arppu') {
-            dataPoint[metricId] = Math.round(value * 100) / 100;
-          } else if (metric.category === 'players' || metricId === 'games_played') {
-            dataPoint[metricId] = Math.floor(value);
-          } else {
-            dataPoint[metricId] = Math.round(value * 10) / 10;
-          }
-          
-          // Данные для сравнения с предыдущим периодом
-          if (showComparison) {
-            const prevValue = value * (0.72 + Math.random() * 0.18); // Предыдущий период был на 10-28% ниже
-            if (metric.category === 'financial' || metricId.includes('avg_') || metricId === 'ltv' || metricId === 'arpu' || metricId === 'arppu') {
-              dataPoint[`${metricId}_prev`] = Math.round(prevValue * 100) / 100;
-            } else if (metric.category === 'players' || metricId === 'games_played') {
-              dataPoint[`${metricId}_prev`] = Math.floor(prevValue);
-            } else {
-              dataPoint[`${metricId}_prev`] = Math.round(prevValue * 10) / 10;
-            }
-          }
-        }
-      });
-      
-      data.push(dataPoint);
-    }
-    
-    return data;
-  }, [selectedMetrics, timePeriod, showComparison]);
-
-  // Расчет средних значений
-  const averageValues = useMemo(() => {
-    const averages: Record<string, number> = {};
-    
-    selectedMetrics.forEach(metricId => {
-      const values = generateChartData.map(d => d[metricId]).filter(v => v !== undefined);
-      averages[metricId] = values.reduce((sum, val) => sum + val, 0) / values.length;
-    });
-    
-    return averages;
-  }, [generateChartData, selectedMetrics]);
+  // Получение данных для графика из моковых данных
+  const chartData = useMemo(() => {
+    // Получаем данные для выбранных метрик с фильтрацией по периоду
+    const metricsData = getMetricsData(selectedMetrics, timePeriod);
+    // Трансформируем в формат для Recharts
+    return transformToChartData(metricsData);
+  }, [selectedMetrics, timePeriod]);
 
   // Обработка выбора метрик
   const handleMetricToggle = (metricId: string) => {
@@ -259,7 +143,6 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
   // Рендер графика
   const renderChart = () => {
     const ChartComponent = chartType === 'bar' ? BarChart : chartType === 'area' ? AreaChart : LineChart;
-    const chartData = generateChartData;
 
     return (
       <ResponsiveContainer width="100%" height={400}>
@@ -271,105 +154,50 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
           <Tooltip content={<CustomTooltip />} />
           <Legend />
           {selectedMetrics.length > 4 && <Brush dataKey="date" height={30} stroke="#8884d8" />}
-          
-          {selectedMetrics.map((metricId, index) => {
+
+          {selectedMetrics.map((metricId) => {
             const metric = ALL_METRICS.find(m => m.id === metricId);
             if (!metric) return null;
-            
+
+            // Финансовые метрики на левой оси, остальные на правой
             const yAxisId = metric.category === 'financial' ? 'left' : 'right';
-            
+
             if (chartType === 'bar') {
               return (
-                <React.Fragment key={metricId}>
-                  <Bar
-                    yAxisId={yAxisId}
-                    dataKey={metricId}
-                    fill={metric.color}
-                    name={metric.name}
-                  />
-                  {showComparison && (
-                    <Bar
-                      yAxisId={yAxisId}
-                      dataKey={`${metricId}_prev`}
-                      fill={metric.color}
-                      fillOpacity={0.5}
-                      name={`${metric.name} (пред.)`}
-                    />
-                  )}
-                </React.Fragment>
+                <Bar
+                  key={metricId}
+                  yAxisId={yAxisId}
+                  dataKey={metricId}
+                  fill={metric.color}
+                  name={metric.name}
+                />
               );
             } else if (chartType === 'area') {
               return (
-                <React.Fragment key={metricId}>
-                  <Area
-                    yAxisId={yAxisId}
-                    type="monotone"
-                    dataKey={metricId}
-                    stroke={metric.color}
-                    fill={metric.color}
-                    strokeWidth={2}
-                    name={metric.name}
-                    fillOpacity={0.3}
-                  />
-                  {showComparison && (
-                    <Area
-                      yAxisId={yAxisId}
-                      type="monotone"
-                      dataKey={`${metricId}_prev`}
-                      stroke={metric.color}
-                      fill={metric.color}
-                      strokeWidth={1}
-                      strokeDasharray="5 5"
-                      name={`${metric.name} (пред.)`}
-                      fillOpacity={0.1}
-                    />
-                  )}
-                  {showAverage && (
-                    <ReferenceLine 
-                      yAxisId={yAxisId}
-                      y={averageValues[metricId]} 
-                      stroke={metric.color}
-                      strokeDasharray="3 3"
-                      label={`Среднее: ${Math.round(averageValues[metricId])}`}
-                    />
-                  )}
-                </React.Fragment>
+                <Area
+                  key={metricId}
+                  yAxisId={yAxisId}
+                  type="monotone"
+                  dataKey={metricId}
+                  stroke={metric.color}
+                  fill={metric.color}
+                  strokeWidth={2}
+                  name={metric.name}
+                  fillOpacity={0.3}
+                />
               );
             } else {
               return (
-                <React.Fragment key={metricId}>
-                  <Line
-                    yAxisId={yAxisId}
-                    type="monotone"
-                    dataKey={metricId}
-                    stroke={metric.color}
-                    strokeWidth={2}
-                    name={metric.name}
-                    dot={false}
-                  />
-                  {showComparison && (
-                    <Line
-                      yAxisId={yAxisId}
-                      type="monotone"
-                      dataKey={`${metricId}_prev`}
-                      stroke={metric.color}
-                      strokeWidth={1}
-                      strokeDasharray="5 5"
-                      name={`${metric.name} (пред.)`}
-                      dot={false}
-                      opacity={0.5}
-                    />
-                  )}
-                  {showAverage && (
-                    <ReferenceLine 
-                      yAxisId={yAxisId}
-                      y={averageValues[metricId]} 
-                      stroke={metric.color}
-                      strokeDasharray="3 3"
-                      label={`Среднее: ${Math.round(averageValues[metricId])}`}
-                    />
-                  )}
-                </React.Fragment>
+                <Line
+                  key={metricId}
+                  yAxisId={yAxisId}
+                  type="monotone"
+                  dataKey={metricId}
+                  stroke={metric.color}
+                  strokeWidth={2}
+                  name={metric.name}
+                  dot={false}
+                />
               );
             }
           })}
@@ -399,68 +227,25 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
                 ))}
               </TabsList>
             </Tabs>
-            
+
             {/* Кнопка экспорта */}
             <Button variant="outline" size="sm">
               <Download className="h-4 w-4" />
             </Button>
-            
-            {/* Настройки */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Настройки отображения</h4>
-                  </div>
-                  <Separator />
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="show-comparison">Сравнение с прошлым периодом</Label>
-                      <Switch
-                        id="show-comparison"
-                        checked={showComparison}
-                        onCheckedChange={setShowComparison}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="show-average">Показать средние линии</Label>
-                      <Switch
-                        id="show-average"
-                        checked={showAverage}
-                        onCheckedChange={setShowAverage}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="show-trend">Показать тренды</Label>
-                      <Switch
-                        id="show-trend"
-                        checked={showTrend}
-                        onCheckedChange={setShowTrend}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
           </div>
         </div>
         
         {/* Панель управления */}
         <div className="flex flex-wrap items-center gap-2 mt-4">
           {/* Выбор периода */}
-          <Select value={timePeriod} onValueChange={setTimePeriod}>
+          <Select value={String(timePeriod)} onValueChange={(v) => setTimePeriod(Number(v) as 7 | 30 | 90)}>
             <SelectTrigger className="w-[140px]">
               <Calendar className="h-4 w-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {TIME_PERIODS.map(period => (
-                <SelectItem key={period.id} value={period.id}>
+                <SelectItem key={period.id} value={String(period.id)}>
                   {period.name}
                 </SelectItem>
               ))}
@@ -596,51 +381,6 @@ export function ConfigurableMetricsChart({ className }: ConfigurableMetricsChart
           <div className="flex flex-col items-center justify-center h-[400px] text-muted-foreground">
             <BarChart3 className="h-12 w-12 mb-4" />
             <p>Выберите метрики для отображения на графике</p>
-          </div>
-        )}
-        
-        {/* Статистика по выбранным метрикам */}
-        {selectedMetrics.length > 0 && (
-          <div className="grid gap-4 mt-6 md:grid-cols-2 lg:grid-cols-4">
-            {selectedMetrics.slice(0, 4).map(metricId => {
-              const metric = ALL_METRICS.find(m => m.id === metricId);
-              if (!metric) return null;
-              
-              const currentValue = generateChartData[generateChartData.length - 1]?.[metricId] || 0;
-              const previousValue = generateChartData[generateChartData.length - 2]?.[metricId] || 0;
-              const change = previousValue ? ((currentValue - previousValue) / previousValue) * 100 : 0;
-              
-              return (
-                <div key={metricId} className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: metric.color }}
-                    />
-                    <p className="text-sm font-medium">{metric.name}</p>
-                  </div>
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-2xl font-bold">
-                      {currentValue.toLocaleString('ru-RU')}
-                      <span className="text-sm text-muted-foreground ml-1">
-                        {metric.unit}
-                      </span>
-                    </span>
-                    <Badge 
-                      variant={change > 0 ? 'default' : 'destructive'}
-                      className="text-xs"
-                    >
-                      {change > 0 ? '+' : ''}{change.toFixed(1)}%
-                    </Badge>
-                  </div>
-                  {showAverage && (
-                    <p className="text-xs text-muted-foreground">
-                      Среднее: {averageValues[metricId]?.toFixed(0)} {metric.unit}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
           </div>
         )}
       </CardContent>
