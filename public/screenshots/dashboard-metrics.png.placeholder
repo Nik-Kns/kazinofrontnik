@@ -1,0 +1,9 @@
+# Placeholder for dashboard screenshot
+# Please replace this file with the actual screenshot image:
+# dashboard-metrics.png
+
+The screenshot should show:
+- Избранные метрики (Favorite Metrics)
+- GGR, Retention Rate, CRM Spend, Average Revenue Per User, Conversion Rate
+- Period filter showing "Год" (Year)
+- Green metrics cards with positive trends

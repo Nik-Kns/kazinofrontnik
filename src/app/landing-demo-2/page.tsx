@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -166,99 +167,18 @@ export default function LandingDemo2Page() {
                 </Card>
               </div>
 
-              {/* Демонстрация интерфейса */}
+              {/* Демонстрация интерфейса - Скриншот дашборда */}
               <div className="lg:order-last">
-                <Card className="p-4 bg-white shadow-2xl">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <BarChart3 className="h-4 w-4" />
-                      <span>Командный центр</span>
-                    </div>
-                    <CardTitle className="text-lg">Полный мониторинг 25 ключевых метрик эффективности ретеншена и AI-рекомендации</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Цели по метрикам */}
-                    <div>
-                      <h3 className="font-semibold mb-3 flex items-center gap-2">
-                        <Target className="h-4 w-4" />
-                        Цели по ключевым метрикам
-                      </h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between items-center">
-                          <span>Retention Rate</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-20 bg-gray-200 rounded-full h-2">
-                              <div className="bg-blue-600 h-2 rounded-full" style={{width: '78%'}}></div>
-                            </div>
-                            <span className="text-orange-600 font-medium">78%</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span>Churn Rate</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-20 bg-gray-200 rounded-full h-2">
-                              <div className="bg-blue-600 h-2 rounded-full" style={{width: '80%'}}></div>
-                            </div>
-                            <span className="text-green-600 font-medium">80%</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span>GGR</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-20 bg-gray-200 rounded-full h-2">
-                              <div className="bg-red-600 h-2 rounded-full" style={{width: '3%'}}></div>
-                            </div>
-                            <span className="text-red-600 font-medium">3%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Избранные метрики */}
-                    <div>
-                      <h3 className="font-semibold mb-3 flex items-center gap-2">
-                        <Star className="h-4 w-4" />
-                        Избранные метрики
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                          <div className="text-xs text-muted-foreground">GGR</div>
-                          <div className="font-bold text-lg">125340€</div>
-                          <div className="text-xs text-green-600">+18.2%</div>
-                        </div>
-                        <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                          <div className="text-xs text-muted-foreground">Retention Rate</div>
-                          <div className="font-bold text-lg">62.3%</div>
-                          <div className="text-xs text-red-600">-2.1%</div>
-                        </div>
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                          <div className="text-xs text-muted-foreground">CRM Spend</div>
-                          <div className="font-bold text-lg">5400€</div>
-                          <div className="text-xs text-green-600">+8%</div>
-                        </div>
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                          <div className="text-xs text-muted-foreground">ARPU</div>
-                          <div className="font-bold text-lg">125€</div>
-                          <div className="text-xs text-green-600">+€0.2</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Фильтры */}
-                    <div>
-                      <h3 className="font-semibold mb-3 flex items-center gap-2">
-                        <Filter className="h-4 w-4" />
-                        Фильтры во всех вкладках
-                      </h3>
-                      <div className="flex gap-2 text-xs">
-                        <Badge variant="outline">7 дней</Badge>
-                        <Badge variant="outline">30 дней</Badge>
-                        <Badge variant="secondary">90 дней</Badge>
-                        <Badge variant="outline">None</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="rounded-xl overflow-hidden shadow-2xl border bg-white">
+                  <Image
+                    src="/screenshots/dashboard-metrics.png"
+                    alt="Избранные метрики дашборда AIGAMING.BOT"
+                    width={1400}
+                    height={800}
+                    className="w-full h-auto"
+                    priority
+                  />
+                </div>
               </div>
             </div>
           </div>
