@@ -7,18 +7,18 @@ export const retentionMetrics: RetentionMetric[] = [
     id: 'retention_rate',
     name: 'Retention Rate',
     description: 'Процент удержанных игроков',
-    value: 62.3,
+    value: 46.0,
     unit: '%',
     category: 'retention',
     frequency: 'daily',
-    targetValue: 75,
-    trend: 'down',
-    trendValue: '-2.1%',
-    sparkline: [65, 64.5, 64, 63.5, 63, 62.8, 62.3],
+    targetValue: 55,
+    trend: 'up',
+    trendValue: '+1.8%',
+    sparkline: [43.5, 44.0, 44.5, 45.0, 45.3, 45.7, 46.0],
     breakdown: [
-      { label: 'VIP', value: 80, color: '#f59e42' },
-      { label: 'Active', value: 70, color: '#60a5fa' },
-      { label: 'New', value: 50, color: '#34d399' }
+      { label: 'VIP', value: 68, color: '#f59e42' },
+      { label: 'Active', value: 52, color: '#60a5fa' },
+      { label: 'New', value: 32, color: '#34d399' }
     ]
   },
   {

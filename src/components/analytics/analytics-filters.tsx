@@ -49,36 +49,44 @@ export function SelectedKpiTile({ activeMetric, onMetricClick }: SelectedKpiTile
   const generateMetricsForPeriod = (period: string) => {
     const baseMetrics = { ...metricsMap };
     const result: Record<string, RetentionMetric> = {};
-    
+
     // Множители для разных периодов
-    const multipliers: Record<string, { value: number, trend: number }> = {
-      today: { value: 1, trend: 0.05 },
-      yesterday: { value: 0.95, trend: -0.02 },
-      week: { value: 7.2, trend: 0.12 },
-      month: { value: 30.5, trend: 0.18 },
-      quarter: { value: 91, trend: 0.25 },
-      year: { value: 365, trend: 0.35 }
+    const multipliers: Record<string, { value: number, trend: number, percentVariation: number }> = {
+      today: { value: 1, trend: 0.05, percentVariation: 0 },
+      yesterday: { value: 0.95, trend: -0.02, percentVariation: -0.5 },
+      week: { value: 7.2, trend: 0.12, percentVariation: 1.2 },
+      month: { value: 30.5, trend: 0.18, percentVariation: 2.3 },
+      quarter: { value: 91, trend: 0.25, percentVariation: 2.8 },
+      year: { value: 365, trend: 0.35, percentVariation: 3.2 }
     };
-    
+
     const mult = multipliers[period] || multipliers.today;
-    
+
     for (const [id, metric] of Object.entries(baseMetrics)) {
       const newMetric = { ...metric };
-      
+
       // Обновляем значения в зависимости от типа метрики
       if (metric.unit === '€') {
         const baseValue = parseFloat(metric.value.toString().replace(/[€,]/g, ''));
         newMetric.value = (baseValue * mult.value).toFixed(0);
       } else if (metric.unit === '%') {
-        // Проценты остаются примерно одинаковыми, с небольшими вариациями
         const baseValue = parseFloat(metric.value.toString());
-        newMetric.value = (baseValue + (Math.random() * 4 - 2)).toFixed(1);
+
+        // Для retention_rate применяем специальную логику вариации 2-3%
+        if (id === 'retention_rate') {
+          // Базовое значение 46%, вариация от -1% до +3% в зависимости от периода
+          const variation = mult.percentVariation * (0.8 + Math.random() * 0.4); // 80-120% от базовой вариации
+          newMetric.value = (46.0 + variation).toFixed(1);
+        } else {
+          // Для остальных процентных метрик небольшие вариации
+          newMetric.value = (baseValue + (Math.random() * 4 - 2)).toFixed(1);
+        }
       } else {
         // Для чисел без единиц
         const baseValue = parseFloat(metric.value.toString().replace(/,/g, ''));
         newMetric.value = Math.round(baseValue * mult.value).toLocaleString();
       }
-      
+
       // Обновляем тренд
       if (metric.trendValue) {
         const trendNum = parseFloat(metric.trendValue.toString().replace(/[+%]/g, ''));
@@ -86,10 +94,10 @@ export function SelectedKpiTile({ activeMetric, onMetricClick }: SelectedKpiTile
         newMetric.trendValue = `+${newTrend.toFixed(1)}%`;
         newMetric.trend = newTrend > 0 ? 'up' : newTrend < 0 ? 'down' : 'stable';
       }
-      
+
       result[id] = newMetric;
     }
-    
+
     return result;
   };
 
