@@ -9,55 +9,22 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Gift, Plus, TrendingUp } from "lucide-react";
 import { BonusesTable } from "@/components/bonuses/bonuses-table";
 import { BonusDetailCard } from "@/components/bonuses/bonus-detail-card";
 import { BonusComparison } from "@/components/bonuses/bonus-comparison";
+import { BonusWizard, BonusFormData } from "@/components/bonuses/bonus-wizard";
+import { BonusFunnel } from "@/components/bonuses/bonus-funnel";
 import { MOCK_BONUSES, getBonusDetail } from "@/lib/mock-bonuses-data";
 import { generateBonusKPI } from "@/lib/mock-bonuses-data";
 import { BonusType } from "@/lib/types/bonuses";
-
-// Интерфейс для создания бонуса
-interface BonusCreation {
-  name: string;
-  type: BonusType;
-  amount: number;
-  amountType: 'percentage' | 'fixed';
-  wageringRequirement: number;
-  maxBet: number;
-  minDeposit: number;
-  maxWinnings: number;
-  validityDays: number;
-  autoActivate: boolean;
-  stackable: boolean;
-}
 
 export default function BonusesPage() {
   const [selectedBonusId, setSelectedBonusId] = useState<string | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [comparedBonusIds, setComparedBonusIds] = useState<string[]>([]);
-
-  // State для создания бонуса
-  const [newBonus, setNewBonus] = useState<BonusCreation>({
-    name: '',
-    type: 'deposit',
-    amount: 100,
-    amountType: 'percentage',
-    wageringRequirement: 30,
-    maxBet: 10,
-    minDeposit: 20,
-    maxWinnings: 1000,
-    validityDays: 7,
-    autoActivate: false,
-    stackable: false
-  });
 
   // Общие метрики по всем бонусам
   const activeBonuses = MOCK_BONUSES.filter((b) => b.status === "active");
@@ -94,30 +61,10 @@ export default function BonusesPage() {
     // TODO: применить рекомендацию
   };
 
-  // Создать бонус
-  const handleCreateBonus = () => {
-    console.log("Создать бонус:", newBonus);
-    setShowCreateDialog(false);
-    // TODO: сохранить бонус
-  };
-
-  // Расчет оптимального wagering
-  const calculateOptimalWagering = (bonusAmount: number, bonusType: BonusType): number => {
-    const baseWagering = {
-      deposit: 30,
-      reload: 25,
-      freespins: 40,
-      cashback: 10,
-      insurance: 15,
-      tournament: 0
-    };
-
-    const wageringMultiplier = baseWagering[bonusType];
-    const adjustedWagering = bonusAmount > 100
-      ? wageringMultiplier * 0.9
-      : wageringMultiplier;
-
-    return Math.round(adjustedWagering);
+  // Создать бонус через новый визард
+  const handleCreateBonusComplete = (bonusData: BonusFormData) => {
+    console.log("Создан бонус:", bonusData);
+    // TODO: сохранить бонус в state или отправить на сервер
   };
 
   // Получить детализацию бонуса
@@ -350,6 +297,19 @@ export default function BonusesPage() {
         onCreateCampaignClick={handleCreateCampaign}
       />
 
+      {/* Воронка конверсии для примера бонуса */}
+      <BonusFunnel
+        bonusName="Welcome Pack 200%"
+        data={{
+          offered: 5420,
+          claimed: 4680,
+          activated: 3920,
+          inProgress: 2145,
+          completed: 1820,
+          abandoned: 2860
+        }}
+      />
+
       {/* Диалог с деталями бонуса */}
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
         <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
@@ -364,170 +324,13 @@ export default function BonusesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Диалог создания бонуса */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Создание нового бонуса</DialogTitle>
-            <DialogDescription>
-              Настройте параметры бонуса с учетом рекомендаций ИИ
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label>Название бонуса</Label>
-                <Input
-                  placeholder="Например: Welcome Bonus 200%"
-                  value={newBonus.name}
-                  onChange={(e) => setNewBonus({ ...newBonus, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Тип бонуса</Label>
-                <Select value={newBonus.type} onValueChange={(v) => setNewBonus({ ...newBonus, type: v as BonusType })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="deposit">Депозитный</SelectItem>
-                    <SelectItem value="reload">Релоад</SelectItem>
-                    <SelectItem value="cashback">Кэшбэк</SelectItem>
-                    <SelectItem value="freespins">Фриспины</SelectItem>
-                    <SelectItem value="insurance">Страховка</SelectItem>
-                    <SelectItem value="tournament">Турнир</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label>Размер бонуса</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="number"
-                    value={newBonus.amount}
-                    onChange={(e) => setNewBonus({ ...newBonus, amount: parseInt(e.target.value) })}
-                  />
-                  <Select value={newBonus.amountType} onValueChange={(v) => setNewBonus({ ...newBonus, amountType: v as 'percentage' | 'fixed' })}>
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="percentage">%</SelectItem>
-                      <SelectItem value="fixed">€</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div>
-                <Label>Wagering requirement</Label>
-                <div className="flex items-center gap-4">
-                  <Slider
-                    value={[newBonus.wageringRequirement]}
-                    onValueChange={([v]) => setNewBonus({ ...newBonus, wageringRequirement: v })}
-                    max={100}
-                    step={5}
-                    className="flex-1"
-                  />
-                  <span className="text-lg font-semibold w-16">{newBonus.wageringRequirement}x</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <div>
-                <Label>Мин. депозит</Label>
-                <Input
-                  type="number"
-                  value={newBonus.minDeposit}
-                  onChange={(e) => setNewBonus({ ...newBonus, minDeposit: parseInt(e.target.value) })}
-                />
-              </div>
-              <div>
-                <Label>Макс. ставка</Label>
-                <Input
-                  type="number"
-                  value={newBonus.maxBet}
-                  onChange={(e) => setNewBonus({ ...newBonus, maxBet: parseInt(e.target.value) })}
-                />
-              </div>
-              <div>
-                <Label>Срок действия (дней)</Label>
-                <Input
-                  type="number"
-                  value={newBonus.validityDays}
-                  onChange={(e) => setNewBonus({ ...newBonus, validityDays: parseInt(e.target.value) })}
-                />
-              </div>
-            </div>
-
-            {/* Рекомендации ИИ */}
-            <Card className="bg-primary/5 border-primary/20">
-              <CardHeader>
-                <CardTitle className="text-lg">Рекомендации ИИ</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Оптимальный wagering:</span>
-                  <Badge variant="secondary">
-                    {calculateOptimalWagering(newBonus.amount, newBonus.type)}x
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Ожидаемый completion rate:</span>
-                  <Badge variant="secondary">
-                    {newBonus.wageringRequirement <= 30 ? '45-55%' : '25-35%'}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Риск bonus abuse:</span>
-                  <Badge variant={newBonus.wageringRequirement < 20 ? 'destructive' : 'secondary'}>
-                    {newBonus.wageringRequirement < 20 ? 'Высокий' : 'Низкий'}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Прогноз ROI:</span>
-                  <Badge variant="secondary">
-                    {150 + Math.round((50 - newBonus.wageringRequirement) * 5)}%
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="auto-activate"
-                    checked={newBonus.autoActivate}
-                    onCheckedChange={(v) => setNewBonus({ ...newBonus, autoActivate: v })}
-                  />
-                  <Label htmlFor="auto-activate">Автоактивация</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="stackable"
-                    checked={newBonus.stackable}
-                    onCheckedChange={(v) => setNewBonus({ ...newBonus, stackable: v })}
-                  />
-                  <Label htmlFor="stackable">Стекируемый</Label>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                  Отмена
-                </Button>
-                <Button onClick={handleCreateBonus}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Создать бонус
-                </Button>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Конструктор бонусов с AI-помощником (6 шагов) */}
+      <BonusWizard
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onComplete={handleCreateBonusComplete}
+      />
     </div>
   );
 }
