@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,8 +39,15 @@ import {
   PieChart,
   Activity
 } from "lucide-react";
+import { RequestFormDialog } from "@/components/pilot/request-form-dialog";
 
 export default function LandingDemo2Page() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const handleButtonClick = () => {
+    setIsFormOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -59,8 +67,8 @@ export default function LandingDemo2Page() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">Войти</Button>
-            <Button size="sm">Попробовать демо</Button>
+            <Button variant="outline" size="sm" onClick={handleButtonClick}>Войти</Button>
+            <Button size="sm" onClick={handleButtonClick}>Попробовать демо</Button>
           </div>
         </div>
       </header>
@@ -84,11 +92,11 @@ export default function LandingDemo2Page() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-8">
+              <Button size="lg" className="text-lg px-8" onClick={handleButtonClick}>
                 <Rocket className="mr-2 h-5 w-5" />
                 Запросить пилот
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8">
+              <Button size="lg" variant="outline" className="text-lg px-8" onClick={handleButtonClick}>
                 <Eye className="mr-2 h-5 w-5" />
                 Посмотреть MVP
               </Button>
@@ -713,11 +721,11 @@ export default function LandingDemo2Page() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                  <Button size="lg" className="text-lg px-8">
+                  <Button size="lg" className="text-lg px-8" onClick={handleButtonClick}>
                     <Rocket className="mr-2 h-5 w-5" />
                     Запросить пилот
                   </Button>
-                  <Button size="lg" variant="outline" className="text-lg px-8">
+                  <Button size="lg" variant="outline" className="text-lg px-8" onClick={handleButtonClick}>
                     <MessageSquare className="mr-2 h-5 w-5" />
                     Обсудить условия
                   </Button>
@@ -808,6 +816,9 @@ export default function LandingDemo2Page() {
           </div>
         </div>
       </footer>
+
+      {/* Request Form Dialog */}
+      <RequestFormDialog open={isFormOpen} onOpenChange={setIsFormOpen} />
     </div>
   );
 }
