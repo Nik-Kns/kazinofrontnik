@@ -21,7 +21,7 @@ import {
 const random = (min: number, max: number) => Math.random() * (max - min) + min;
 const randomInt = (min: number, max: number) => Math.floor(random(min, max));
 
-// Генератор реалистичных временных рядов
+// Генератор реалистичных временных рядов (обновлено)
 export function generateTimeSeries(days: number = 30): BonusTimeSeries[] {
   const data: BonusTimeSeries[] = [];
   const now = new Date();
@@ -36,12 +36,12 @@ export function generateTimeSeries(days: number = 30): BonusTimeSeries[] {
 
     data.push({
       date: date.toISOString().split('T')[0],
-      completion_rate: 35 + dayProgress * 15 + random(-5, 5),
-      net_roi: 150 + dayProgress * 100 + random(-30, 30),
-      abuse_rate: 2.5 - dayProgress * 0.5 + random(-0.5, 0.5),
-      wagering_progress: 40 + dayProgress * 30 + random(-10, 10),
-      deposits_from_bonus: randomInt(10000, 50000) * (isWeekend ? 1.3 : 1),
-      deposits_control: randomInt(8000, 40000) * (isWeekend ? 1.2 : 1),
+      completion_rate: 38 + dayProgress * 12 + random(-4, 4), // 30-60%
+      net_roi: 125 + dayProgress * 35 + random(-15, 15), // 110-160%
+      abuse_rate: 2.8 - dayProgress * 0.6 + random(-0.3, 0.3), // 1.5-4%
+      wagering_progress: 45 + dayProgress * 28 + random(-8, 8),
+      deposits_from_bonus: randomInt(15000, 38000) * (isWeekend ? 1.25 : 1),
+      deposits_control: randomInt(12000, 32000) * (isWeekend ? 1.15 : 1),
     });
   }
 
@@ -142,9 +142,16 @@ export function generateMockBonuses(count: number = 40): Bonus[] {
   return bonuses;
 }
 
-// Генератор KPI для бонуса
+// Генератор KPI для бонуса (обновлено с реалистичными диапазонами)
 export function generateBonusKPI(bonusId: string, bonusType: BonusType): BonusKPI {
   const isGoodBonus = Math.random() > 0.3;
+
+  // Реалистичные диапазоны для iGaming
+  const completionRate = random(isGoodBonus ? 38 : 30, isGoodBonus ? 58 : 45); // 30-60%
+  const depositUplift = random(isGoodBonus ? 15 : 10, isGoodBonus ? 28 : 20); // 10-30%
+  const netROI = random(isGoodBonus ? 1.15 : 1.05, isGoodBonus ? 1.58 : 1.35); // 110-160%
+  const abuseRate = random(isGoodBonus ? 1.8 : 2.5, isGoodBonus ? 3.2 : 4.5); // 1.5-4%
+  const breakageRate = random(18, 24); // 15-25%
 
   return {
     bonus_id: bonusId,
@@ -153,30 +160,30 @@ export function generateBonusKPI(bonusId: string, bonusType: BonusType): BonusKP
       end: new Date().toISOString().split('T')[0],
     },
 
-    // Оборачиваемость
-    completion_rate: random(isGoodBonus ? 35 : 20, isGoodBonus ? 65 : 40),
-    wagering_progress_avg: random(40, 85),
-    avg_wagering_cycles: random(1.5, 4.5),
-    time_to_completion_median: random(24, 120),
-    breakage_rate: random(15, 35),
-    early_abandon_rate: random(10, 25),
+    // Оборачиваемость (реалистичные значения)
+    completion_rate: completionRate,
+    wagering_progress_avg: random(42, 78),
+    avg_wagering_cycles: random(1.8, 3.9),
+    time_to_completion_median: random(36, 96),
+    breakage_rate: breakageRate,
+    early_abandon_rate: random(12, 22),
 
-    // Экономика
-    take_up_rate: random(isGoodBonus ? 60 : 40, isGoodBonus ? 85 : 65),
-    activation_to_deposit_cr: random(isGoodBonus ? 15 : 8, isGoodBonus ? 30 : 18),
-    deposit_uplift: random(isGoodBonus ? 20 : 5, isGoodBonus ? 50 : 25),
-    net_revenue: random(50000, 500000),
-    bonus_roi_gross: random(isGoodBonus ? 2 : 1.2, isGoodBonus ? 5 : 2.5),
-    bonus_roi_net: random(isGoodBonus ? 1.5 : 0.8, isGoodBonus ? 4 : 2),
-    effective_cost_pct: random(5, 15),
-    bonus_liability: random(10000, 100000),
-    abuse_rate: random(1, isGoodBonus ? 3 : 8),
+    // Экономика (реалистичные диапазоны)
+    take_up_rate: random(isGoodBonus ? 55 : 45, isGoodBonus ? 78 : 62),
+    activation_to_deposit_cr: random(isGoodBonus ? 18 : 12, isGoodBonus ? 32 : 22),
+    deposit_uplift: depositUplift,
+    net_revenue: random(85000, 420000),
+    bonus_roi_gross: random(isGoodBonus ? 1.8 : 1.3, isGoodBonus ? 2.9 : 2.1),
+    bonus_roi_net: netROI,
+    effective_cost_pct: random(6, 13),
+    bonus_liability: random(18000, 85000),
+    abuse_rate: abuseRate,
 
     // Ретеншн
-    retention_uplift_d7: random(isGoodBonus ? 8 : 2, isGoodBonus ? 20 : 10),
-    retention_uplift_d30: random(isGoodBonus ? 5 : 1, isGoodBonus ? 15 : 8),
-    repeat_deposit_rate: random(isGoodBonus ? 25 : 15, isGoodBonus ? 45 : 30),
-    vip_save_rate: random(isGoodBonus ? 30 : 10, isGoodBonus ? 60 : 35),
+    retention_uplift_d7: random(isGoodBonus ? 6 : 3, isGoodBonus ? 16 : 9),
+    retention_uplift_d30: random(isGoodBonus ? 4 : 2, isGoodBonus ? 12 : 7),
+    repeat_deposit_rate: random(isGoodBonus ? 28 : 18, isGoodBonus ? 42 : 32),
+    vip_save_rate: random(isGoodBonus ? 32 : 15, isGoodBonus ? 55 : 38),
   };
 }
 

@@ -29,33 +29,33 @@ export const sharedRecommendations: Recommendation[] = [
   {
     id: 'rec-001',
     title: 'Запустить кампанию реактивации для спящих игроков',
-    description: 'Обнаружено 2,847 игроков без активности 30+ дней с высоким историческим LTV',
+    description: 'Обнаружено 1,247 игроков без активности 30+ дней с высоким историческим LTV',
     category: 'retention',
     type: 'campaign',
     priority: 'critical',
     status: 'new',
-    impact: { metric: 'Monthly Revenue', value: '+12%', trend: 'up' },
+    impact: { metric: 'Monthly Revenue', value: '+8%', trend: 'up' },
     deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     tags: ['Реактивация', 'Высокий приоритет', 'Quick Win'],
     actions: {
-      primary: { 
-        label: 'Создать кампанию', 
+      primary: {
+        label: 'Создать кампанию',
         href: '/triggers/builder/new?template=reactivation',
         action: 'create_campaign'
       },
       secondary: { label: 'Детали анализа' }
     },
-    reasoning: 'Анализ показал, что игроки с периодом неактивности 30-45 дней имеют 35% вероятность возврата при правильной стимуляции. Средний депозит после реактивации составляет €250.',
+    reasoning: 'Анализ показал, что игроки с периодом неактивности 30-45 дней имеют 28% вероятность возврата при правильной стимуляции. Средний депозит после реактивации составляет €180.',
     dataPoints: [
-      { label: 'Целевая аудитория', value: '2,847 игроков' },
-      { label: 'Средний LTV', value: '€485' },
-      { label: 'Ожидаемая конверсия', value: '8-12%' },
-      { label: 'Потенциальный доход', value: '€142,350' }
+      { label: 'Целевая аудитория', value: '1,247 игроков' },
+      { label: 'Средний LTV', value: '€340' },
+      { label: 'Ожидаемая конверсия', value: '6-10%' },
+      { label: 'Потенциальный доход', value: '€52,400' }
     ],
-    confidence: 92,
-    expectedUplift: '+€142,350 в месяц (+12% к текущему доходу)',
-    calculations: '2,847 игроков × 8% конверсия × €250 средний депозит × 2.5 LTV = €142,350',
+    confidence: 87,
+    expectedUplift: '+€52,400 в месяц (+8% к текущему доходу)',
+    calculations: '1,247 игроков × 8% конверсия × €180 средний депозит × 2.9 LTV = €52,400',
     checklist: [
       'Создать сегмент спящих игроков (30+ дней без активности)',
       'Настроить триггер автоматической отправки',
@@ -67,32 +67,32 @@ export const sharedRecommendations: Recommendation[] = [
   {
     id: 'rec-002',
     title: 'Оптимизировать бонусную программу для VIP сегмента',
-    description: 'VIP игроки используют только 45% доступных бонусов, что ниже среднего',
+    description: 'VIP игроки используют только 48% доступных бонусов, что ниже среднего',
     category: 'revenue',
     type: 'segment',
     priority: 'high',
     status: 'new',
-    impact: { metric: 'GGR', value: '+€85,000/мес', trend: 'up' },
+    impact: { metric: 'GGR', value: '+€42,000/мес', trend: 'up' },
     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
     tags: ['VIP', 'Бонусы', 'Оптимизация'],
     actions: {
-      primary: { 
-        label: 'Настроить бонусы', 
+      primary: {
+        label: 'Настроить бонусы',
         href: '/segments?filter=vip',
-        action: 'create_segment' 
+        action: 'create_segment'
       },
       secondary: { label: 'Анализ использования' }
     },
-    reasoning: 'VIP игроки предпочитают cashback и эксклюзивные турниры вместо стандартных депозитных бонусов. Персонализация предложений может увеличить утилизацию до 75%.',
+    reasoning: 'VIP игроки предпочитают cashback и эксклюзивные турниры вместо стандартных депозитных бонусов. Персонализация предложений может увеличить утилизацию до 68%.',
     dataPoints: [
-      { label: 'VIP активность', value: '71%' },
-      { label: 'Bonus ROI', value: '2.3x' },
-      { label: 'Неиспользованные бонусы', value: '€124,000' },
-      { label: 'Потенциал роста', value: '+30%' }
+      { label: 'VIP активность', value: '68%' },
+      { label: 'Bonus ROI', value: '1.9x' },
+      { label: 'Неиспользованные бонусы', value: '€65,200' },
+      { label: 'Потенциал роста', value: '+18%' }
     ],
-    confidence: 87,
-    expectedUplift: '+€85,000 ежемесячно (+30% к текущему GGR сегмента)',
-    calculations: '312 VIP игроков × €910 средний месячный GGR × 30% увеличение = €85,000',
+    confidence: 83,
+    expectedUplift: '+€42,000 ежемесячно (+18% к текущему GGR сегмента)',
+    calculations: '385 VIP игроков × €610 средний месячный GGR × 18% увеличение = €42,400',
     checklist: [
       'Проанализировать текущие предпочтения VIP игроков',
       'Создать персональные cashback предложения',
@@ -103,33 +103,33 @@ export const sharedRecommendations: Recommendation[] = [
   {
     id: 'rec-003',
     title: 'Предотвратить отток высокоценных игроков',
-    description: 'ML-модель обнаружила 156 игроков с высоким риском ухода в ближайшие 7 дней',
+    description: 'ML-модель обнаружила 92 игрока с высоким риском ухода в ближайшие 7 дней',
     category: 'risk',
     type: 'trigger',
     priority: 'critical',
     status: 'in_progress',
-    impact: { metric: 'Потери', value: '-€68,000', trend: 'down' },
+    impact: { metric: 'Потери', value: '-€38,500', trend: 'down' },
     deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     tags: ['Риск', 'Срочно', 'ML-прогноз'],
     actions: {
-      primary: { 
-        label: 'Применить стратегию', 
+      primary: {
+        label: 'Применить стратегию',
         href: '/triggers/builder/new?template=risk-prevention',
         action: 'create_trigger'
       },
       secondary: { label: 'Список игроков' }
     },
-    reasoning: 'Снижение частоты игр на 40%, уменьшение размера ставок и увеличение времени между сессиями указывают на потерю интереса.',
+    reasoning: 'Снижение частоты игр на 38%, уменьшение размера ставок и увеличение времени между сессиями указывают на потерю интереса.',
     dataPoints: [
-      { label: 'Risk Score', value: '8.7/10' },
-      { label: 'Дней до ухода', value: '5-7' },
-      { label: 'Средний LTV группы', value: '€436' },
-      { label: 'Успех предотвращения', value: '65%' }
+      { label: 'Risk Score', value: '7.9/10' },
+      { label: 'Дней до ухода', value: '5-8' },
+      { label: 'Средний LTV группы', value: '€385' },
+      { label: 'Успех предотвращения', value: '58%' }
     ],
-    confidence: 89,
-    expectedUplift: 'Предотвращение потерь €68,000',
-    calculations: '156 игроков × €436 LTV × (100% - 65% успех) = €68,016 потерь',
+    confidence: 84,
+    expectedUplift: 'Предотвращение потерь €38,500',
+    calculations: '92 игрока × €385 LTV × (100% - 58% успех) = €38,542 потерь',
     checklist: [
       'Немедленно создать триггер для игроков в зоне риска',
       'Отправить персональные предложения',
@@ -181,27 +181,27 @@ export const sharedRecommendations: Recommendation[] = [
     type: 'optimization',
     priority: 'low',
     status: 'completed',
-    impact: { metric: 'CTR', value: '+34%', trend: 'up' },
+    impact: { metric: 'CTR', value: '+28%', trend: 'up' },
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
     tags: ['Push', 'Оптимизация', 'Коммуникации'],
     actions: {
-      primary: { 
-        label: 'Применено', 
+      primary: {
+        label: 'Применено',
         href: '#',
-        action: 'completed' 
+        action: 'completed'
       },
     },
     reasoning: 'Оптимальное время для вашей аудитории: 19:00-21:00 в будни и 14:00-16:00 в выходные.',
     dataPoints: [
-      { label: 'Прежний CTR', value: '2.1%' },
-      { label: 'Новый CTR', value: '2.8%' },
-      { label: 'Охват', value: '+15%' },
-      { label: 'Конверсия', value: '+8%' }
+      { label: 'Прежний CTR', value: '3.2%' },
+      { label: 'Новый CTR', value: '4.1%' },
+      { label: 'Охват', value: '+12%' },
+      { label: 'Конверсия', value: '+6%' }
     ],
-    confidence: 94,
-    expectedUplift: '+34% CTR, +8% конверсия',
-    calculations: 'CTR: 2.1% → 2.8% (+0.7pp, +33.3% относительно)',
+    confidence: 91,
+    expectedUplift: '+28% CTR, +6% конверсия',
+    calculations: 'CTR: 3.2% → 4.1% (+0.9pp, +28.1% относительно)',
     checklist: [
       'Проанализировать текущее время отправки',
       'Настроить A/B тестирование',

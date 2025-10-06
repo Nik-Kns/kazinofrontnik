@@ -57,46 +57,46 @@ function generateMockData(
   return data;
 }
 
-// Моковые данные для всех метрик
+// Моковые данные для всех метрик (обновлено с реалистичными диапазонами для iGaming)
 export const MOCK_METRICS_DATA: MetricsData = {
   // Финансовые метрики
-  revenue: generateMockData(125000, 'up', 0.12),
-  ggr: generateMockData(95000, 'up', 0.15),
-  ngr: generateMockData(72000, 'up', 0.14),
-  deposits: generateMockData(45000, 'up', 0.18),
-  withdrawals: generateMockData(28000, 'stable', 0.16),
-  bonus_cost: generateMockData(15000, 'down', 0.12),
+  revenue: generateMockData(145000, 'up', 0.10), // Недельный доход 80-250k€
+  ggr: generateMockData(135000, 'up', 0.12), // GGR 80-250k€/неделя
+  ngr: generateMockData(102000, 'up', 0.11),
+  deposits: generateMockData(62000, 'up', 0.14),
+  withdrawals: generateMockData(38000, 'stable', 0.13),
+  bonus_cost: generateMockData(4500, 'down', 0.10), // CRM Spend 2-8k€/неделя
 
   // Метрики игроков
-  new_players: generateMockData(280, 'up', 0.25),
-  active_players: generateMockData(3450, 'stable', 0.10),
+  new_players: generateMockData(420, 'up', 0.22),
+  active_players: generateMockData(5200, 'stable', 0.09),
 
   // Средние показатели
-  avg_deposit: generateMockData(250, 'stable', 0.08),
-  arpu: generateMockData(35.5, 'up', 0.12),
-  arppu: generateMockData(125.8, 'up', 0.10),
-  ltv: generateMockData(285, 'up', 0.15),
+  avg_deposit: generateMockData(165, 'stable', 0.07), // Реалистичный депозит
+  arpu: generateMockData(85, 'up', 0.10), // ARPU 45-160€
+  arppu: generateMockData(142, 'up', 0.09),
+  ltv: generateMockData(320, 'up', 0.12),
 
-  // Retention метрики
-  retention_d1: generateMockData(68, 'up', 0.08),
-  retention_d7: generateMockData(42, 'up', 0.10),
-  retention_d30: generateMockData(28, 'stable', 0.12),
+  // Retention метрики (реалистичные значения для mid-tier казино)
+  retention_d1: generateMockData(58, 'up', 0.07),
+  retention_d7: generateMockData(38, 'stable', 0.09),
+  retention_d30: generateMockData(32, 'stable', 0.10), // 25-45% для D30
 
-  // Конверсия
-  conversion_rate: generateMockData(8.5, 'up', 0.15),
-  churn_rate: generateMockData(18, 'down', 0.12),
-  reactivation_rate: generateMockData(12.5, 'up', 0.18),
+  // Конверсия (реалистичная конверсия Reg→Dep: 18-35%)
+  conversion_rate: generateMockData(24.5, 'up', 0.12), // Конверсия 18-35%
+  churn_rate: generateMockData(22, 'down', 0.11),
+  reactivation_rate: generateMockData(14.2, 'up', 0.15),
 
   // Игровая активность
-  rtp: generateMockData(96.5, 'stable', 0.02),
-  bet_amount: generateMockData(850000, 'up', 0.14),
-  win_amount: generateMockData(820000, 'up', 0.16),
-  game_sessions: generateMockData(12500, 'up', 0.12),
-  avg_session_time: generateMockData(42, 'stable', 0.10),
+  rtp: generateMockData(96.2, 'stable', 0.02),
+  bet_amount: generateMockData(1240000, 'up', 0.12),
+  win_amount: generateMockData(1192000, 'up', 0.13),
+  game_sessions: generateMockData(18500, 'up', 0.11),
+  avg_session_time: generateMockData(38, 'stable', 0.09),
 
   // Бонусы
-  bonus_conversion: generateMockData(22.5, 'up', 0.15),
-  wagering_completion: generateMockData(35.8, 'up', 0.12),
+  bonus_conversion: generateMockData(28.5, 'up', 0.13),
+  wagering_completion: generateMockData(42.3, 'up', 0.11), // Completion 30-60%
 };
 
 /**
