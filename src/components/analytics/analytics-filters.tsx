@@ -21,23 +21,24 @@ interface SelectedKpiTileProps {
 
 export function SelectedKpiTile({ activeMetric, onMetricClick }: SelectedKpiTileProps = {}) {
   const [open, setOpen] = useState(false);
-  const [timeRange, setTimeRange] = useState<string>(() => {
-    try {
-      const saved = localStorage.getItem("selectedKpiTimeRange");
-      return saved || "today";
-    } catch {
-      return "today";
-    }
-  });
-  const [selected, setSelected] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem("analyticsSelectedTile");
-      return saved ? JSON.parse(saved) : DEFAULT_IDS;
-    } catch {
-      return DEFAULT_IDS;
-    }
-  });
+  const [isMounted, setIsMounted] = useState(false);
+  const [timeRange, setTimeRange] = useState<string>("today");
+  const [selected, setSelected] = useState<string[]>(DEFAULT_IDS);
   const [metrics, setMetrics] = useState<Record<string, RetentionMetric>>({});
+
+  // Загружаем из localStorage только после монтирования
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const savedTimeRange = localStorage.getItem("selectedKpiTimeRange");
+      if (savedTimeRange) setTimeRange(savedTimeRange);
+
+      const savedSelected = localStorage.getItem("analyticsSelectedTile");
+      if (savedSelected) setSelected(JSON.parse(savedSelected));
+    } catch (error) {
+      console.error('Failed to load KPI settings:', error);
+    }
+  }, []);
 
   const metricsMap = useMemo(() => {
     const map: Record<string, RetentionMetric> = {} as any;
