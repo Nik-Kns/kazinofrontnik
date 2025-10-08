@@ -15,10 +15,16 @@ import {
 export function useOnboarding() {
   const router = useRouter();
   const [state, setState] = useState<OnboardingState>(INITIAL_ONBOARDING_STATE);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Устанавливаем флаг монтирования
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Загружаем состояние из localStorage при монтировании
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isMounted) return;
 
     const savedState = localStorage.getItem(ONBOARDING_STORAGE_KEY);
     if (savedState) {
@@ -35,13 +41,13 @@ export function useOnboarding() {
         setState({ ...INITIAL_ONBOARDING_STATE, isActive: true });
       }
     }
-  }, []);
+  }, [isMounted]);
 
   // Сохраняем состояние в localStorage при изменениях
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isMounted) return;
     localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
+  }, [state, isMounted]);
 
   // Запустить онбординг
   const startOnboarding = useCallback(() => {

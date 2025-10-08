@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useOnboarding } from '@/hooks/use-onboarding';
 import { HighlightMask } from './highlight-mask';
 import { StepBubble } from './step-bubble';
@@ -10,6 +11,7 @@ import { SidePanel } from './side-panel';
  * Объединяет затемнение, подсказки и боковую панель
  */
 export function OnboardingOverlay() {
+  const [isMounted, setIsMounted] = useState(false);
   const {
     isActive,
     currentStep,
@@ -23,7 +25,12 @@ export function OnboardingOverlay() {
     handleSecondaryAction
   } = useOnboarding();
 
-  if (!isActive) return null;
+  // Предотвращаем гидратацию
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted || !isActive) return null;
 
   return (
     <>
