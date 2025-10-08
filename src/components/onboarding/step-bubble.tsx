@@ -39,9 +39,6 @@ export function StepBubble({
 
     const updatePosition = () => {
       const targetElement = document.querySelector(step.targetSelector!);
-      if (!targetElement) return;
-
-      const targetRect = targetElement.getBoundingClientRect();
       const bubbleWidth = 400;
       const bubbleHeight = 250;
       const gap = 24;
@@ -49,6 +46,19 @@ export function StepBubble({
       let top = 0;
       let left = 0;
       let arrow: typeof arrowPosition = 'top';
+
+      // Если элемент не найден - показываем по центру
+      if (!targetElement) {
+        console.warn(`⚠️ Target element not found: ${step.targetSelector}`);
+        left = window.innerWidth / 2 - bubbleWidth / 2;
+        top = window.innerHeight / 2 - bubbleHeight / 2;
+        arrow = 'top';
+        setPosition({ top, left });
+        setArrowPosition(arrow);
+        return;
+      }
+
+      const targetRect = targetElement.getBoundingClientRect();
 
       // Вычисляем позицию в зависимости от конфига
       switch (step.position) {
