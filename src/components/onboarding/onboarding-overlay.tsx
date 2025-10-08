@@ -32,12 +32,12 @@ export function OnboardingOverlay() {
 
   // Логирование для отладки
   useEffect(() => {
-    if (isMounted) {
-      console.log('OnboardingOverlay state:', { isMounted, isActive, currentStep });
-    }
+    console.log('OnboardingOverlay state:', { isMounted, isActive, currentStep });
   }, [isMounted, isActive, currentStep]);
 
-  if (!isMounted || !isActive) return null;
+  // Не показываем пока не смонтировалось или не активно
+  if (!isActive) return null;
+  if (!isMounted) return null;
 
   return (
     <>

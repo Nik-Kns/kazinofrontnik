@@ -17,31 +17,22 @@ export function useOnboarding() {
   const [state, setState] = useState<OnboardingState>(INITIAL_ONBOARDING_STATE);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Устанавливаем флаг монтирования
+  // Загружаем состояние из localStorage при монтировании (только один раз)
   useEffect(() => {
     setIsMounted(true);
-  }, []);
-
-  // Загружаем состояние из localStorage при монтировании
-  useEffect(() => {
-    if (!isMounted) return;
 
     const savedState = localStorage.getItem(ONBOARDING_STORAGE_KEY);
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState);
+        console.log('📦 Loaded onboarding state:', parsed);
         setState(parsed);
       } catch (error) {
         console.error('Failed to parse onboarding state:', error);
       }
-    } else {
-      // Первый визит - автоматически запускаем онбординг
-      const shouldAutoStart = !localStorage.getItem('onboarding-completed');
-      if (shouldAutoStart) {
-        setState({ ...INITIAL_ONBOARDING_STATE, isActive: true });
-      }
     }
-  }, [isMounted]);
+    // Убрал автостарт - теперь только вручную через кнопку
+  }, []);
 
   // Сохраняем состояние в localStorage при изменениях
   useEffect(() => {
@@ -52,10 +43,12 @@ export function useOnboarding() {
   // Запустить онбординг
   const startOnboarding = useCallback(() => {
     console.log('🚀 AI Onboarding started!');
-    setState({
+    const newState = {
       ...INITIAL_ONBOARDING_STATE,
       isActive: true
-    });
+    };
+    console.log('Setting new state:', newState);
+    setState(newState);
   }, []);
 
   // Остановить онбординг
