@@ -11,6 +11,7 @@ import {
   Settings,
   PiggyBank,
   Zap,
+  Sparkles,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,8 @@ import { useCurrency } from "@/contexts/currency-context";
 import { CurrencyBadge } from "@/components/ui/currency-badge";
 import { CurrencySettingsDialog } from "@/components/ui/currency-settings-dialog";
 import { CurrencyErrorsList } from "@/components/ui/currency-error-handler";
- 
+import { useOnboarding } from "@/hooks/use-onboarding";
+
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
@@ -37,8 +39,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<"light" | "dark">("light");
   const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = React.useState(false);
   const [economyMode, setEconomyMode] = React.useState(false);
-  
+
   const { state: currencyState } = useCurrency();
+  const { startOnboarding } = useOnboarding();
   const BRAND_OPTIONS = React.useMemo(
     () => [
       {
@@ -224,6 +227,11 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuSeparator />
               <DropdownMenuItem>Настройки</DropdownMenuItem>
               <DropdownMenuItem>Поддержка</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={startOnboarding} className="gap-2">
+                <Sparkles className="h-4 w-4 text-blue-600" />
+                <span>AI Онбординг</span>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Выйти</DropdownMenuItem>
             </DropdownMenuContent>
