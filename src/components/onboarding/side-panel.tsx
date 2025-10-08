@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Check, Circle, X } from 'lucide-react';
@@ -26,7 +27,13 @@ export function SidePanel({
   progress,
   onClose
 }: SidePanelProps) {
-  if (!isActive) return null;
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isActive || !isMounted) return null;
 
   return (
     <div className="fixed top-0 right-0 h-screen w-80 z-[9997] animate-in slide-in-from-right duration-300">
