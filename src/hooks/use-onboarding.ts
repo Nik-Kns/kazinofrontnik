@@ -37,6 +37,7 @@ export function useOnboarding() {
   // Сохраняем состояние в localStorage при изменениях
   useEffect(() => {
     if (!isMounted) return;
+    console.log('💾 Saving state to localStorage:', state);
     localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(state));
   }, [state, isMounted]);
 
