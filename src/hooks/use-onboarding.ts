@@ -51,6 +51,7 @@ export function useOnboarding() {
 
   // Запустить онбординг
   const startOnboarding = useCallback(() => {
+    console.log('🚀 AI Onboarding started!');
     setState({
       ...INITIAL_ONBOARDING_STATE,
       isActive: true

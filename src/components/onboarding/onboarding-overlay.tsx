@@ -30,6 +30,13 @@ export function OnboardingOverlay() {
     setIsMounted(true);
   }, []);
 
+  // Логирование для отладки
+  useEffect(() => {
+    if (isMounted) {
+      console.log('OnboardingOverlay state:', { isMounted, isActive, currentStep });
+    }
+  }, [isMounted, isActive, currentStep]);
+
   if (!isMounted || !isActive) return null;
 
   return (
