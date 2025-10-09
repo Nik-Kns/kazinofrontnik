@@ -30,7 +30,7 @@ import { useCurrency } from "@/contexts/currency-context";
 import { CurrencyBadge } from "@/components/ui/currency-badge";
 import { CurrencySettingsDialog } from "@/components/ui/currency-settings-dialog";
 import { CurrencyErrorsList } from "@/components/ui/currency-error-handler";
-import { useOnboarding } from "@/hooks/use-onboarding";
+import { SimpleOnboarding } from "@/components/onboarding/simple-onboarding";
 
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
@@ -39,9 +39,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<"light" | "dark">("light");
   const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = React.useState(false);
   const [economyMode, setEconomyMode] = React.useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = React.useState(false);
 
   const { state: currencyState } = useCurrency();
-  const { startOnboarding } = useOnboarding();
   const BRAND_OPTIONS = React.useMemo(
     () => [
       {
@@ -228,7 +228,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuItem>Настройки</DropdownMenuItem>
               <DropdownMenuItem>Поддержка</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={startOnboarding} className="gap-2">
+              <DropdownMenuItem onClick={() => setIsOnboardingOpen(true)} className="gap-2">
                 <Sparkles className="h-4 w-4 text-blue-600" />
                 <span>AI Онбординг</span>
               </DropdownMenuItem>
@@ -244,9 +244,15 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       </div>
       
       {/* Диалог настроек валют */}
-      <CurrencySettingsDialog 
-        open={isCurrencySettingsOpen} 
-        onOpenChange={setIsCurrencySettingsOpen} 
+      <CurrencySettingsDialog
+        open={isCurrencySettingsOpen}
+        onOpenChange={setIsCurrencySettingsOpen}
+      />
+
+      {/* AI Онбординг */}
+      <SimpleOnboarding
+        open={isOnboardingOpen}
+        onOpenChange={setIsOnboardingOpen}
       />
     </div>
   );

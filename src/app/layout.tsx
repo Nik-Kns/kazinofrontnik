@@ -6,7 +6,6 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { Toaster } from '@/components/ui/toaster';
 import { CurrencyProvider } from '@/contexts/currency-context';
 import { ChatAssistant } from '@/components/ai/chat-assistant';
-import { OnboardingOverlay } from '@/components/onboarding/onboarding-overlay';
 import { usePathname } from 'next/navigation';
 
 export default function RootLayout({
@@ -42,7 +41,6 @@ export default function RootLayout({
               {children}
             </MainLayout>
             <ChatAssistant />
-            <OnboardingOverlay />
             <Toaster />
           </CurrencyProvider>
         )}
