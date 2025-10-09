@@ -1,5 +1,13 @@
 # Commit History
 
+## 589f496 - refactor: полностью переделан онбординг на простую модалку
+- Удалены все сложные компоненты (HighlightMask, StepBubble, SidePanel, хуки, типы)
+- Создан простой компонент SimpleOnboarding на базе shadcn/ui Dialog
+- 5 шагов в модалке с прогресс-баром и цветовым кодированием
+- Работает через простой state без localStorage
+- Никаких гидратационных проблем - чистый client-side
+- 164 новых строк вместо 1273 удаленных
+
 ## edcb468 - fix: удалены все вызовы localStorage из хука use-onboarding
 - Убраны localStorage.setItem('onboarding-completed') из nextStep и skipStep
 - Удален неиспользуемый импорт ONBOARDING_STORAGE_KEY
