@@ -19,13 +19,16 @@ import {
   Info,
   Brain,
   ArrowLeft,
-  Filter
+  Filter,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AuditSnapshot, AuditStatus } from "@/lib/audit-types";
 import { mockAuditSnapshot, calculateProgress } from "@/lib/audit-data";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
+import { AUDIT_ONBOARDING } from "@/lib/onboarding-configs";
 
 export default function AuditPage() {
   const router = useRouter();
@@ -33,6 +36,7 @@ export default function AuditPage() {
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | AuditStatus>('all');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   // Загрузка данных аудита при монтировании
   useEffect(() => {
@@ -232,7 +236,15 @@ export default function AuditPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button 
+          <Button
+            onClick={() => setIsOnboardingOpen(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            Как работать с разделом
+          </Button>
+          <Button
             variant="outline"
             onClick={handleRestartAudit}
             disabled={loading}
@@ -509,6 +521,14 @@ export default function AuditPage() {
           </Accordion>
         </>
       )}
+
+      {/* Section Onboarding */}
+      <SectionOnboarding
+        open={isOnboardingOpen}
+        onOpenChange={setIsOnboardingOpen}
+        steps={AUDIT_ONBOARDING}
+        sectionName="Аудит"
+      />
     </div>
   );
 }

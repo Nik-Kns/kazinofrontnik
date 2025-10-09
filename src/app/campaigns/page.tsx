@@ -31,6 +31,8 @@ import { cn } from "@/lib/utils";
 import { CreativeGeneratorModal } from "@/components/campaigns/creative-generator-modal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CampaignFilters } from "@/components/filters/campaign-filters";
+import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
+import { CAMPAIGNS_ONBOARDING } from "@/lib/onboarding-configs";
 
 // Типы кампаний
 const campaignTypes = [
@@ -674,6 +676,7 @@ function CampaignsContent() {
   const [highlightedCampaign, setHighlightedCampaign] = useState<string | null>(null);
   const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
   const [showCampaignDetails, setShowCampaignDetails] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [campaignData, setCampaignData] = useState({
     name: "",
     type: "",
@@ -737,10 +740,20 @@ function CampaignsContent() {
             Управление маркетинговыми кампаниями и коммуникациями
           </p>
         </div>
-        <Button onClick={() => setShowCreateWizard(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Создать кампанию
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsOnboardingOpen(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            Как работать с разделом
+          </Button>
+          <Button onClick={() => setShowCreateWizard(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Создать кампанию
+          </Button>
+        </div>
       </div>
 
       {/* Фильтры */}
@@ -1933,6 +1946,14 @@ function CampaignsContent() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Section Onboarding */}
+      <SectionOnboarding
+        open={isOnboardingOpen}
+        onOpenChange={setIsOnboardingOpen}
+        steps={CAMPAIGNS_ONBOARDING}
+        sectionName="Кампании"
+      />
     </div>
   );
 }

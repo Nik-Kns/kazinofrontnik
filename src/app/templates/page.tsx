@@ -51,6 +51,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
+import { TEMPLATES_ONBOARDING } from "@/lib/onboarding-configs";
 
 
 const channelIcons: Record<string, React.ElementType> = {
@@ -162,6 +164,7 @@ export default function TemplatesPage() {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [templateData, setTemplateData] = useState({
     name: '',
     category: '',
@@ -260,6 +263,14 @@ export default function TemplatesPage() {
             <p className="text-muted-foreground">Библиотека готовых шаблонов для быстрого старта ваших кампаний.</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              onClick={() => setIsOnboardingOpen(true)}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              Как работать с разделом
+            </Button>
             <div className="relative w-full md:w-64">
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Поиск по шаблонам..." className="pl-10" />
@@ -1398,6 +1409,14 @@ export default function TemplatesPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Section Onboarding */}
+      <SectionOnboarding
+        open={isOnboardingOpen}
+        onOpenChange={setIsOnboardingOpen}
+        steps={TEMPLATES_ONBOARDING}
+        sectionName="Шаблоны"
+      />
     </div>
   );
 }

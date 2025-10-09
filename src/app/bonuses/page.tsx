@@ -19,12 +19,16 @@ import { BonusFunnel } from "@/components/bonuses/bonus-funnel";
 import { MOCK_BONUSES, getBonusDetail } from "@/lib/mock-bonuses-data";
 import { generateBonusKPI } from "@/lib/mock-bonuses-data";
 import { BonusType } from "@/lib/types/bonuses";
+import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
+import { BONUSES_ONBOARDING } from "@/lib/onboarding-configs";
+import { Sparkles } from "lucide-react";
 
 export default function BonusesPage() {
   const [selectedBonusId, setSelectedBonusId] = useState<string | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [comparedBonusIds, setComparedBonusIds] = useState<string[]>([]);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   // Общие метрики по всем бонусам
   const activeBonuses = MOCK_BONUSES.filter((b) => b.status === "active");
@@ -87,6 +91,14 @@ export default function BonusesPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            onClick={() => setIsOnboardingOpen(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            Как работать с разделом
+          </Button>
           <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Создать бонус
@@ -330,6 +342,14 @@ export default function BonusesPage() {
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         onComplete={handleCreateBonusComplete}
+      />
+
+      {/* Section Onboarding */}
+      <SectionOnboarding
+        open={isOnboardingOpen}
+        onOpenChange={setIsOnboardingOpen}
+        steps={BONUSES_ONBOARDING}
+        sectionName="Бонусы"
       />
     </div>
   );

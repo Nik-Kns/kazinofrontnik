@@ -1,16 +1,17 @@
 "use client";
 
 import * as React from 'react';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { segmentsData } from "@/lib/mock-data";
-import { 
-  Bot, Copy, Pencil, PlusCircle, Trash2, X, Filter, Eye, Play, 
+import {
+  Bot, Copy, Pencil, PlusCircle, Trash2, X, Filter, Eye, Play,
   Save, Download, Plus, Minus, Move, Grip, Settings,
   ChevronDown, ChevronRight, Users, BarChart3, Target,
   Layers, Zap, Shield, Brain, Euro, Calendar, Hash,
-  TrendingUp, TrendingDown, Calculator, Merge, GitBranch
+  TrendingUp, TrendingDown, Calculator, Merge, GitBranch, Sparkles
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -43,6 +44,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
+import { SEGMENTS_ONBOARDING } from "@/lib/onboarding-configs";
 
 import type { 
   SegmentData, 
@@ -70,6 +73,7 @@ export default function SegmentsPage() {
   const [activeMainTab, setActiveMainTab] = React.useState("library");
   const [isOperationsOpen, setIsOperationsOpen] = React.useState(false);
   const [operationBaseSegment, setOperationBaseSegment] = React.useState<BaseSegment | null>(null);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   // Обработчики для AI-сегментов
   const handleCreateAISegment = (aiSegment: AISegment) => {
@@ -118,7 +122,15 @@ export default function SegmentsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
+          <Button
+            onClick={() => setIsOnboardingOpen(true)}
+            className="flex items-center gap-2"
+            variant="outline"
+          >
+            <Sparkles className="h-4 w-4" />
+            Как работать с разделом
+          </Button>
+          <Button
             variant="outline"
             onClick={() => {
               setOperationBaseSegment(null);
@@ -475,6 +487,14 @@ export default function SegmentsPage() {
         availableSegments={availableSegmentsForOperations}
         baseSegment={operationBaseSegment}
         onSave={handleOperationSave}
+      />
+
+      {/* Section Onboarding */}
+      <SectionOnboarding
+        open={isOnboardingOpen}
+        onOpenChange={setIsOnboardingOpen}
+        steps={SEGMENTS_ONBOARDING}
+        sectionName="Сегменты"
       />
     </div>
   );

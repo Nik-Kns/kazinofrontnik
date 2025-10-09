@@ -19,6 +19,8 @@ import {
   Filter,
   Search
 } from "lucide-react";
+import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
+import { SCENARIOS_ONBOARDING } from "@/lib/onboarding-configs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -184,6 +186,7 @@ export default function TriggersPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   const handleCreateFromTemplate = (templateId: string) => {
     router.push(`/triggers/builder/new?template=${templateId}`);
@@ -214,10 +217,20 @@ export default function TriggersPage() {
             Создавайте автоматические сценарии для управления коммуникациями
           </p>
         </div>
-        <Button onClick={handleCreateNew} size="lg">
-          <Plus className="mr-2 h-5 w-5" />
-          Создать сценарий
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsOnboardingOpen(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            Как работать с разделом
+          </Button>
+          <Button onClick={handleCreateNew} size="lg">
+            <Plus className="mr-2 h-5 w-5" />
+            Создать сценарий
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="templates" className="space-y-6">
@@ -520,6 +533,14 @@ export default function TriggersPage() {
           ))}
         </TabsContent>
       </Tabs>
+
+      {/* Section Onboarding */}
+      <SectionOnboarding
+        open={isOnboardingOpen}
+        onOpenChange={setIsOnboardingOpen}
+        steps={SCENARIOS_ONBOARDING}
+        sectionName="Сценарии"
+      />
     </div>
   );
 }

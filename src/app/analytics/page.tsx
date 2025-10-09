@@ -20,8 +20,10 @@ import { FullMetricsDashboard } from "@/components/dashboard/full-metrics-dashbo
 import { useState } from "react";
 import type { FilterConfig } from "@/lib/types";
 import { SelectedKpiTile } from "@/components/analytics/analytics-filters";
-import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp as TrendingUpIcon, DollarSign, Download, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp as TrendingUpIcon, DollarSign, Download, Plus, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
+import { DASHBOARD_ONBOARDING } from "@/lib/onboarding-configs";
 
 function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState<boolean>(() => {
@@ -55,6 +57,7 @@ function CollapsibleSection({ id, title, children }: { id: string; title: string
 
 export default function AnalyticsPage() {
   const router = useRouter();
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterConfig>(() => {
     try {
       const saved = localStorage.getItem('analyticsFilters');
@@ -87,7 +90,15 @@ export default function AnalyticsPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button 
+            <Button
+              onClick={() => setIsOnboardingOpen(true)}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <Sparkles className="h-4 w-4" />
+              Как работать с разделом
+            </Button>
+            <Button
               onClick={() => router.push('/analytics/custom-metric')}
               className="flex items-center gap-2"
               variant="outline"
@@ -228,6 +239,14 @@ export default function AnalyticsPage() {
           </CollapsibleSection>
         </div>
       </CollapsibleSection>
+
+      {/* Онбординг раздела */}
+      <SectionOnboarding
+        open={isOnboardingOpen}
+        onOpenChange={setIsOnboardingOpen}
+        steps={DASHBOARD_ONBOARDING}
+        sectionName="Командный центр"
+      />
     </div>
   );
 }

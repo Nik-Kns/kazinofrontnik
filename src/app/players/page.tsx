@@ -13,6 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import type { FilterConfig, FilterGroup, VipLevel } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
+import { PLAYERS_ONBOARDING } from "@/lib/onboarding-configs";
 
 // Конфигурация фильтров для страницы игроков (соответствует ТЗ)
 const PLAYERS_FILTER_GROUPS: FilterGroup[] = [
@@ -52,6 +54,7 @@ export default function PlayersPage() {
         is_multi_currency: undefined,
         amount_range: undefined
     });
+    const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
     const statusOptions = [
       { value: 'Активен', label: 'Активен' },
@@ -86,6 +89,14 @@ export default function PlayersPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button
+                        onClick={() => setIsOnboardingOpen(true)}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                    >
+                        <Sparkles className="h-4 w-4" />
+                        Как работать с разделом
+                    </Button>
                     <Button variant="outline">
                         <Upload className="mr-2 h-4 w-4" />
                         Импортировать
@@ -251,8 +262,16 @@ export default function PlayersPage() {
             
             {/* Секция разворачиваемых фильтров (оставим как отдельную страницу/кнопку при необходимости) */}
             {/* <AdvancedFilters ... /> можно оставить закомментированным */}
-            
+
             <PlayersTable filters={filters} currencyFilters={currencyFilters} />
+
+            {/* Section Onboarding */}
+            <SectionOnboarding
+                open={isOnboardingOpen}
+                onOpenChange={setIsOnboardingOpen}
+                steps={PLAYERS_ONBOARDING}
+                sectionName="Игроки"
+            />
         </div>
     );
 }
