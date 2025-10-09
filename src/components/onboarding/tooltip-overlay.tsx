@@ -13,14 +13,13 @@ export interface TooltipStep {
 
 interface TooltipOverlayProps {
   steps: TooltipStep[];
-  storageKey: string; // Ключ для localStorage чтобы не показывать повторно
-  onComplete?: () => void;
+  isActive: boolean; // Активен ли тур (управляется извне)
+  onClose?: () => void;
 }
 
-export function TooltipOverlay({ steps, storageKey, onComplete }: TooltipOverlayProps) {
+export function TooltipOverlay({ steps, isActive, onClose }: TooltipOverlayProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [elementRect, setElementRect] = useState<DOMRect | null>(null);
 
@@ -29,18 +28,15 @@ export function TooltipOverlay({ steps, storageKey, onComplete }: TooltipOverlay
     setIsMounted(true);
   }, []);
 
+  // Сбрасываем шаг при активации
   useEffect(() => {
-    if (!isMounted) return;
-
-    // Проверяем показывали ли уже этот тур
-    const completed = localStorage.getItem(storageKey);
-    if (!completed) {
-      setIsVisible(true);
+    if (isActive) {
+      setCurrentStep(0);
     }
-  }, [storageKey, isMounted]);
+  }, [isActive]);
 
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isActive || !isMounted) return;
 
     const step = steps[currentStep];
     const element = document.querySelector(step.selector);
@@ -83,7 +79,7 @@ export function TooltipOverlay({ steps, storageKey, onComplete }: TooltipOverlay
       // Скроллим к элементу
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }, [currentStep, isVisible, steps]);
+  }, [currentStep, isActive, steps, isMounted]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -100,18 +96,15 @@ export function TooltipOverlay({ steps, storageKey, onComplete }: TooltipOverlay
   };
 
   const handleComplete = () => {
-    localStorage.setItem(storageKey, 'true');
-    setIsVisible(false);
-    onComplete?.();
+    onClose?.();
   };
 
   const handleSkip = () => {
-    localStorage.setItem(storageKey, 'true');
-    setIsVisible(false);
+    onClose?.();
   };
 
-  // Не рендерим пока не смонтировались на клиенте
-  if (!isMounted || !isVisible) return null;
+  // Не рендерим пока не смонтировались на клиенте или не активны
+  if (!isMounted || !isActive) return null;
 
   const step = steps[currentStep];
   const isFirstStep = currentStep === 0;

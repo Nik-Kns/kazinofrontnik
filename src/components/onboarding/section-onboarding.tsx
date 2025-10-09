@@ -25,13 +25,15 @@ interface SectionOnboardingProps {
   onOpenChange: (open: boolean) => void;
   steps: OnboardingStep[];
   sectionName: string;
+  onStartDetailedTour?: () => void; // Коллбек для запуска детального тура с тултипами
 }
 
 export function SectionOnboarding({
   open,
   onOpenChange,
   steps,
-  sectionName
+  sectionName,
+  onStartDetailedTour
 }: SectionOnboardingProps) {
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -109,25 +111,39 @@ export function SectionOnboarding({
           </div>
         </div>
 
-        <DialogFooter className="flex-row gap-2 sm:gap-2">
-          {!isFirstStep && (
+        <DialogFooter className="flex-col gap-2 sm:gap-2">
+          <div className="flex gap-2 w-full">
+            {!isFirstStep && (
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                className="flex-1"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Назад
+              </Button>
+            )}
+            <Button
+              onClick={handleNext}
+              className="flex-1"
+              style={{ backgroundColor: currentStepData.color }}
+            >
+              {isLastStep ? 'Закрыть' : 'Далее'}
+              {!isLastStep && <ArrowRight className="h-4 w-4 ml-2" />}
+            </Button>
+          </div>
+          {onStartDetailedTour && (
             <Button
               variant="outline"
-              onClick={handleBack}
-              className="flex-1"
+              onClick={() => {
+                onOpenChange(false);
+                setTimeout(() => onStartDetailedTour(), 300);
+              }}
+              className="w-full"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Назад
+              🎯 Запустить детальный тур по интерфейсу
             </Button>
           )}
-          <Button
-            onClick={handleNext}
-            className="flex-1"
-            style={{ backgroundColor: currentStepData.color }}
-          >
-            {isLastStep ? 'Начать работу' : 'Далее'}
-            {!isLastStep && <ArrowRight className="h-4 w-4 ml-2" />}
-          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

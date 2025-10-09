@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
 import { DASHBOARD_ONBOARDING } from "@/lib/onboarding-configs";
 import { TooltipOverlay } from "@/components/onboarding/tooltip-overlay";
-import { DASHBOARD_TOOLTIPS } from "@/lib/tooltip-configs";
+import { DASHBOARD_TOOLTIPS_EXTENDED } from "@/lib/tooltip-configs-extended";
 
 function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState<boolean>(() => {
@@ -60,6 +60,7 @@ function CollapsibleSection({ id, title, children }: { id: string; title: string
 export default function AnalyticsPage() {
   const router = useRouter();
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isTooltipTourActive, setIsTooltipTourActive] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterConfig>(() => {
     try {
       const saved = localStorage.getItem('analyticsFilters');
@@ -252,12 +253,14 @@ export default function AnalyticsPage() {
         onOpenChange={setIsOnboardingOpen}
         steps={DASHBOARD_ONBOARDING}
         sectionName="Командный центр"
+        onStartDetailedTour={() => setIsTooltipTourActive(true)}
       />
 
       {/* Подсказки на элементах */}
       <TooltipOverlay
-        steps={DASHBOARD_TOOLTIPS}
-        storageKey="dashboard-tooltips-completed"
+        steps={DASHBOARD_TOOLTIPS_EXTENDED}
+        isActive={isTooltipTourActive}
+        onClose={() => setIsTooltipTourActive(false)}
       />
     </div>
   );
