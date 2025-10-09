@@ -30,7 +30,12 @@ export function OnboardingOverlay() {
     setIsMounted(true);
   }, []);
 
-  // Убрали логирование
+  // Debug
+  useEffect(() => {
+    if (isActive) {
+      console.log('📍 OnboardingOverlay: isActive=true, isMounted=', isMounted, 'currentStep=', currentStep);
+    }
+  }, [isActive, isMounted, currentStep]);
 
   // Не показываем пока не смонтировалось или не активно
   if (!isActive) return null;

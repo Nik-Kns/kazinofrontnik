@@ -24,10 +24,12 @@ export function useOnboarding() {
 
   // Запустить онбординг
   const startOnboarding = useCallback(() => {
+    console.log('🚀 Starting onboarding...');
     setState({
       ...INITIAL_ONBOARDING_STATE,
       isActive: true
     });
+    console.log('✅ State updated to active');
   }, []);
 
   // Остановить онбординг
