@@ -18,18 +18,26 @@ interface TooltipOverlayProps {
 }
 
 export function TooltipOverlay({ steps, storageKey, onComplete }: TooltipOverlayProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [elementRect, setElementRect] = useState<DOMRect | null>(null);
 
+  // Флаг монтирования для предотвращения гидратации
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     // Проверяем показывали ли уже этот тур
     const completed = localStorage.getItem(storageKey);
     if (!completed) {
       setIsVisible(true);
     }
-  }, [storageKey]);
+  }, [storageKey, isMounted]);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -102,7 +110,8 @@ export function TooltipOverlay({ steps, storageKey, onComplete }: TooltipOverlay
     setIsVisible(false);
   };
 
-  if (!isVisible) return null;
+  // Не рендерим пока не смонтировались на клиенте
+  if (!isMounted || !isVisible) return null;
 
   const step = steps[currentStep];
   const isFirstStep = currentStep === 0;
