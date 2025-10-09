@@ -46,6 +46,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
 import { SEGMENTS_ONBOARDING } from "@/lib/onboarding-configs";
+import { TooltipOverlay } from "@/components/onboarding/tooltip-overlay";
+import { SEGMENTS_TOOLTIPS } from "@/lib/tooltip-configs";
 
 import type { 
   SegmentData, 
@@ -140,7 +142,9 @@ export default function SegmentsPage() {
             <Calculator className="mr-2 h-4 w-4" />
             Операции с сегментами
           </Button>
-          <Button onClick={() => {
+          <Button
+            data-tooltip="create-segment"
+            onClick={() => {
             setSelectedSegment(null);
             setDefaultTab(activeMainTab === "constructor" ? "ai-templates" : "builder");
             setIsAdvancedBuilderOpen(true);
@@ -179,7 +183,7 @@ export default function SegmentsPage() {
           </Card>
 
           {/* Segments Table */}
-          <Card>
+          <Card data-tooltip="segments-table">
             <CardHeader>
               <CardTitle>Список сегментов</CardTitle>
               <CardDescription>
@@ -274,7 +278,7 @@ export default function SegmentsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1" data-tooltip="segment-actions">
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -285,7 +289,7 @@ export default function SegmentsPage() {
                               <TooltipContent>Просмотреть</TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
-                          
+
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon">
@@ -377,7 +381,7 @@ export default function SegmentsPage() {
 
         <TabsContent value="constructor" className="space-y-6">
           {/* AI рекомендации */}
-          <Card>
+          <Card data-tooltip="ai-segments">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
@@ -388,7 +392,7 @@ export default function SegmentsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AiSegmentsTab 
+              <AiSegmentsTab
                 onCreateSegment={handleCreateAISegment}
                 onViewDetails={handleViewAISegmentDetails}
               />
@@ -495,6 +499,12 @@ export default function SegmentsPage() {
         onOpenChange={setIsOnboardingOpen}
         steps={SEGMENTS_ONBOARDING}
         sectionName="Сегменты"
+      />
+
+      {/* Tooltip Overlay */}
+      <TooltipOverlay
+        steps={SEGMENTS_TOOLTIPS}
+        storageKey="segments-tooltips-completed"
       />
     </div>
   );

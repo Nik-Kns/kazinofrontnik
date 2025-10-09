@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
 import { PLAYERS_ONBOARDING } from "@/lib/onboarding-configs";
+import { TooltipOverlay } from "@/components/onboarding/tooltip-overlay";
+import { PLAYERS_TOOLTIPS } from "@/lib/tooltip-configs";
 
 // Конфигурация фильтров для страницы игроков (соответствует ТЗ)
 const PLAYERS_FILTER_GROUPS: FilterGroup[] = [
@@ -187,7 +189,7 @@ export default function PlayersPage() {
             {/* Убрали дублирующий переключатель валют из шапки */}
             
             {/* Горизонтальная панель фильтров */}
-            <div className="rounded-lg border bg-card px-4 py-3 flex flex-wrap items-end gap-3">
+            <div className="rounded-lg border bg-card px-4 py-3 flex flex-wrap items-end gap-3" data-tooltip="players-filters">
               {/* Валютные */}
               <div className="flex items-end gap-2 pr-4 mr-2 border-r">
                 <span className="text-xs font-medium text-muted-foreground">Валюты</span>
@@ -200,7 +202,7 @@ export default function PlayersPage() {
 
               {/* Быстрые фильтры */}
               <div className="flex flex-wrap items-end gap-3">
-                <div className="space-y-1">
+                <div className="space-y-1" data-tooltip="search-players">
                   <label className="text-xs text-muted-foreground">ID</label>
                   <Input
                     className="h-9 w-[160px]"
@@ -263,7 +265,9 @@ export default function PlayersPage() {
             {/* Секция разворачиваемых фильтров (оставим как отдельную страницу/кнопку при необходимости) */}
             {/* <AdvancedFilters ... /> можно оставить закомментированным */}
 
-            <PlayersTable filters={filters} currencyFilters={currencyFilters} />
+            <div data-tooltip="players-table">
+              <PlayersTable filters={filters} currencyFilters={currencyFilters} />
+            </div>
 
             {/* Section Onboarding */}
             <SectionOnboarding
@@ -271,6 +275,12 @@ export default function PlayersPage() {
                 onOpenChange={setIsOnboardingOpen}
                 steps={PLAYERS_ONBOARDING}
                 sectionName="Игроки"
+            />
+
+            {/* Tooltip Overlay */}
+            <TooltipOverlay
+                steps={PLAYERS_TOOLTIPS}
+                storageKey="players-tooltips-completed"
             />
         </div>
     );

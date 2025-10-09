@@ -22,6 +22,8 @@ import { BonusType } from "@/lib/types/bonuses";
 import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
 import { BONUSES_ONBOARDING } from "@/lib/onboarding-configs";
 import { Sparkles } from "lucide-react";
+import { TooltipOverlay } from "@/components/onboarding/tooltip-overlay";
+import { BONUSES_TOOLTIPS } from "@/lib/tooltip-configs";
 
 export default function BonusesPage() {
   const [selectedBonusId, setSelectedBonusId] = useState<string | null>(null);
@@ -99,7 +101,7 @@ export default function BonusesPage() {
             <Sparkles className="h-4 w-4" />
             Как работать с разделом
           </Button>
-          <Button onClick={() => setShowCreateDialog(true)}>
+          <Button data-tooltip="create-bonus" onClick={() => setShowCreateDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Создать бонус
           </Button>
@@ -204,7 +206,7 @@ export default function BonusesPage() {
       </div>
 
       {/* Топ рекомендаций ИИ */}
-      <Card>
+      <Card data-tooltip="bonus-performance">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -219,7 +221,7 @@ export default function BonusesPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3" data-tooltip="bonus-conditions">
             <Card className="border-primary/20 bg-primary/5">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -302,12 +304,14 @@ export default function BonusesPage() {
       )}
 
       {/* Таблица бонусов */}
-      <BonusesTable
-        bonuses={MOCK_BONUSES}
-        onBonusClick={handleBonusClick}
-        onCompareClick={handleCompare}
-        onCreateCampaignClick={handleCreateCampaign}
-      />
+      <div data-tooltip="bonuses-list">
+        <BonusesTable
+          bonuses={MOCK_BONUSES}
+          onBonusClick={handleBonusClick}
+          onCompareClick={handleCompare}
+          onCreateCampaignClick={handleCreateCampaign}
+        />
+      </div>
 
       {/* Воронка конверсии для примера бонуса */}
       <BonusFunnel
@@ -350,6 +354,12 @@ export default function BonusesPage() {
         onOpenChange={setIsOnboardingOpen}
         steps={BONUSES_ONBOARDING}
         sectionName="Бонусы"
+      />
+
+      {/* Tooltip Overlay */}
+      <TooltipOverlay
+        steps={BONUSES_TOOLTIPS}
+        storageKey="bonuses-tooltips-completed"
       />
     </div>
   );

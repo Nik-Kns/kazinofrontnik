@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
 import { SCENARIOS_ONBOARDING } from "@/lib/onboarding-configs";
+import { TooltipOverlay } from "@/components/onboarding/tooltip-overlay";
+import { SCENARIOS_TOOLTIPS } from "@/lib/tooltip-configs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -226,7 +228,7 @@ export default function TriggersPage() {
             <Sparkles className="h-4 w-4" />
             Как работать с разделом
           </Button>
-          <Button onClick={handleCreateNew} size="lg">
+          <Button data-tooltip="create-scenario" onClick={handleCreateNew} size="lg">
             <Plus className="mr-2 h-5 w-5" />
             Создать сценарий
           </Button>
@@ -250,7 +252,7 @@ export default function TriggersPage() {
         </TabsList>
 
         {/* ИИ-рекомендации */}
-        <TabsContent value="templates" className="space-y-6">
+        <TabsContent value="templates" className="space-y-6" data-tooltip="ai-copilot">
           {/* Фильтры */}
           <div className="flex gap-4">
             <div className="flex-1">
@@ -309,10 +311,10 @@ export default function TriggersPage() {
           </Card>
 
           {/* Сетка шаблонов */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-tooltip="scenario-builder">
             {filteredTemplates.map((template) => (
-              <Card 
-                key={template.id} 
+              <Card
+                key={template.id}
                 className="group hover:shadow-lg transition-all cursor-pointer relative overflow-hidden"
                 onClick={() => handleCreateFromTemplate(template.id)}
               >
@@ -394,7 +396,7 @@ export default function TriggersPage() {
         </TabsContent>
 
         {/* Активные сценарии */}
-        <TabsContent value="active" className="space-y-4">
+        <TabsContent value="active" className="space-y-4" data-tooltip="scenarios-list">
           {existingScenarios.filter(s => s.status === 'active').map((scenario) => (
             <Card key={scenario.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
@@ -540,6 +542,12 @@ export default function TriggersPage() {
         onOpenChange={setIsOnboardingOpen}
         steps={SCENARIOS_ONBOARDING}
         sectionName="Сценарии"
+      />
+
+      {/* Tooltip Overlay */}
+      <TooltipOverlay
+        steps={SCENARIOS_TOOLTIPS}
+        storageKey="scenarios-tooltips-completed"
       />
     </div>
   );

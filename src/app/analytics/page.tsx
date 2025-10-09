@@ -24,6 +24,8 @@ import { ChevronDown, ChevronUp, AlertTriangle, TrendingUp as TrendingUpIcon, Do
 import { useRouter } from "next/navigation";
 import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
 import { DASHBOARD_ONBOARDING } from "@/lib/onboarding-configs";
+import { TooltipOverlay } from "@/components/onboarding/tooltip-overlay";
+import { DASHBOARD_TOOLTIPS } from "@/lib/tooltip-configs";
 
 function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState<boolean>(() => {
@@ -89,7 +91,7 @@ export default function AnalyticsPage() {
               Полный контроль над метриками казино. Настраиваемые дашборды, глубокая аналитика и экспорт отчетов.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2" data-tooltip="actions">
             <Button
               onClick={() => setIsOnboardingOpen(true)}
               className="flex items-center gap-2"
@@ -117,13 +119,15 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Сворачиваемая панель фильтров */}
-      <CollapsibleSection id="filters" title="Фильтры и настройки">
-        <EnhancedFilters 
-          onApply={handleFiltersChange} 
-          onExport={handleExport}
-          defaultFilters={activeFilters}
-        />
-      </CollapsibleSection>
+      <div data-tooltip="filters">
+        <CollapsibleSection id="filters" title="Фильтры и настройки">
+          <EnhancedFilters
+            onApply={handleFiltersChange}
+            onExport={handleExport}
+            defaultFilters={activeFilters}
+          />
+        </CollapsibleSection>
+      </div>
 
       <Tabs defaultValue="overview">
         <TabsList className="mb-4 grid w-full grid-cols-4">
@@ -135,10 +139,12 @@ export default function AnalyticsPage() {
 
         <TabsContent value="overview" className="space-y-6">
           {/* Избранные метрики */}
-          <SelectedKpiTile />
+          <div data-tooltip="kpi-cards">
+            <SelectedKpiTile />
+          </div>
 
           {/* Карточки-шорткаты для навигации */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3" data-tooltip="charts">
             {/* Карточка Сигналы и Риски */}
             <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => document.querySelector('[value="kpi-summary"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))}>
               <CardHeader className="pb-3">
@@ -246,6 +252,12 @@ export default function AnalyticsPage() {
         onOpenChange={setIsOnboardingOpen}
         steps={DASHBOARD_ONBOARDING}
         sectionName="Командный центр"
+      />
+
+      {/* Подсказки на элементах */}
+      <TooltipOverlay
+        steps={DASHBOARD_TOOLTIPS}
+        storageKey="dashboard-tooltips-completed"
       />
     </div>
   );

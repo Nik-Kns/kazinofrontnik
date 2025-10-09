@@ -33,6 +33,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { CampaignFilters } from "@/components/filters/campaign-filters";
 import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
 import { CAMPAIGNS_ONBOARDING } from "@/lib/onboarding-configs";
+import { TooltipOverlay } from "@/components/onboarding/tooltip-overlay";
+import { CAMPAIGNS_TOOLTIPS } from "@/lib/tooltip-configs";
 
 // Типы кампаний
 const campaignTypes = [
@@ -749,7 +751,7 @@ function CampaignsContent() {
             <Sparkles className="h-4 w-4" />
             Как работать с разделом
           </Button>
-          <Button onClick={() => setShowCreateWizard(true)}>
+          <Button data-tooltip="create-campaign" onClick={() => setShowCreateWizard(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Создать кампанию
           </Button>
@@ -1274,7 +1276,7 @@ function CampaignsContent() {
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">
-          <Card>
+          <Card data-tooltip="campaigns-table">
             <CardHeader>
               <CardTitle>Активные кампании</CardTitle>
               <CardDescription>Кампании в процессе выполнения с метриками эффективности</CardDescription>
@@ -1328,7 +1330,7 @@ function CampaignsContent() {
                               <span className="text-sm">{type?.name}</span>
                             </div>
                           </td>
-                          <td className="p-3">
+                          <td className="p-3" data-tooltip="campaign-status">
                             <Badge className="bg-green-100 text-green-700">Активна</Badge>
                           </td>
                           <td className="p-3 text-center">
@@ -1953,6 +1955,12 @@ function CampaignsContent() {
         onOpenChange={setIsOnboardingOpen}
         steps={CAMPAIGNS_ONBOARDING}
         sectionName="Кампании"
+      />
+
+      {/* Tooltip Overlay */}
+      <TooltipOverlay
+        steps={CAMPAIGNS_TOOLTIPS}
+        storageKey="campaigns-tooltips-completed"
       />
     </div>
   );
