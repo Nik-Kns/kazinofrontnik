@@ -31,6 +31,7 @@ export default function BonusesPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [comparedBonusIds, setComparedBonusIds] = useState<string[]>([]);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isTooltipTourActive, setIsTooltipTourActive] = useState(false);
 
   // Общие метрики по всем бонусам
   const activeBonuses = MOCK_BONUSES.filter((b) => b.status === "active");
@@ -354,12 +355,14 @@ export default function BonusesPage() {
         onOpenChange={setIsOnboardingOpen}
         steps={BONUSES_ONBOARDING}
         sectionName="Бонусы"
+        onStartDetailedTour={() => setIsTooltipTourActive(true)}
       />
 
       {/* Tooltip Overlay */}
       <TooltipOverlay
         steps={BONUSES_TOOLTIPS}
-        storageKey="bonuses-tooltips-completed"
+        isActive={isTooltipTourActive}
+        onClose={() => setIsTooltipTourActive(false)}
       />
     </div>
   );

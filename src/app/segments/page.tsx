@@ -76,6 +76,7 @@ export default function SegmentsPage() {
   const [isOperationsOpen, setIsOperationsOpen] = React.useState(false);
   const [operationBaseSegment, setOperationBaseSegment] = React.useState<BaseSegment | null>(null);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isTooltipTourActive, setIsTooltipTourActive] = useState(false);
 
   // Обработчики для AI-сегментов
   const handleCreateAISegment = (aiSegment: AISegment) => {
@@ -499,12 +500,14 @@ export default function SegmentsPage() {
         onOpenChange={setIsOnboardingOpen}
         steps={SEGMENTS_ONBOARDING}
         sectionName="Сегменты"
+        onStartDetailedTour={() => setIsTooltipTourActive(true)}
       />
 
       {/* Tooltip Overlay */}
       <TooltipOverlay
         steps={SEGMENTS_TOOLTIPS}
-        storageKey="segments-tooltips-completed"
+        isActive={isTooltipTourActive}
+        onClose={() => setIsTooltipTourActive(false)}
       />
     </div>
   );

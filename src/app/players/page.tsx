@@ -57,6 +57,7 @@ export default function PlayersPage() {
         amount_range: undefined
     });
     const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+    const [isTooltipTourActive, setIsTooltipTourActive] = useState(false);
 
     const statusOptions = [
       { value: 'Активен', label: 'Активен' },
@@ -275,12 +276,14 @@ export default function PlayersPage() {
                 onOpenChange={setIsOnboardingOpen}
                 steps={PLAYERS_ONBOARDING}
                 sectionName="Игроки"
+                onStartDetailedTour={() => setIsTooltipTourActive(true)}
             />
 
             {/* Tooltip Overlay */}
             <TooltipOverlay
                 steps={PLAYERS_TOOLTIPS}
-                storageKey="players-tooltips-completed"
+                isActive={isTooltipTourActive}
+                onClose={() => setIsTooltipTourActive(false)}
             />
         </div>
     );

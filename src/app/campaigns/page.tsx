@@ -679,6 +679,7 @@ function CampaignsContent() {
   const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
   const [showCampaignDetails, setShowCampaignDetails] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isTooltipTourActive, setIsTooltipTourActive] = useState(false);
   const [campaignData, setCampaignData] = useState({
     name: "",
     type: "",
@@ -1955,12 +1956,14 @@ function CampaignsContent() {
         onOpenChange={setIsOnboardingOpen}
         steps={CAMPAIGNS_ONBOARDING}
         sectionName="Кампании"
+        onStartDetailedTour={() => setIsTooltipTourActive(true)}
       />
 
       {/* Tooltip Overlay */}
       <TooltipOverlay
         steps={CAMPAIGNS_TOOLTIPS}
-        storageKey="campaigns-tooltips-completed"
+        isActive={isTooltipTourActive}
+        onClose={() => setIsTooltipTourActive(false)}
       />
     </div>
   );

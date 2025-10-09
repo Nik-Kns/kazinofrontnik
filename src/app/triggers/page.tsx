@@ -189,6 +189,7 @@ export default function TriggersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isTooltipTourActive, setIsTooltipTourActive] = useState(false);
 
   const handleCreateFromTemplate = (templateId: string) => {
     router.push(`/triggers/builder/new?template=${templateId}`);
@@ -542,12 +543,14 @@ export default function TriggersPage() {
         onOpenChange={setIsOnboardingOpen}
         steps={SCENARIOS_ONBOARDING}
         sectionName="Сценарии"
+        onStartDetailedTour={() => setIsTooltipTourActive(true)}
       />
 
       {/* Tooltip Overlay */}
       <TooltipOverlay
         steps={SCENARIOS_TOOLTIPS}
-        storageKey="scenarios-tooltips-completed"
+        isActive={isTooltipTourActive}
+        onClose={() => setIsTooltipTourActive(false)}
       />
     </div>
   );
