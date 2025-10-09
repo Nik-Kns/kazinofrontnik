@@ -42,42 +42,90 @@ export function TooltipOverlay({ steps, isActive, onClose }: TooltipOverlayProps
     const element = document.querySelector(step.selector);
 
     if (element) {
-      const rect = element.getBoundingClientRect();
-      setElementRect(rect);
+      // Небольшая задержка чтобы элемент точно отрендерился
+      setTimeout(() => {
+        const rect = element.getBoundingClientRect();
+        setElementRect(rect);
 
-      // Позиционируем тултип в зависимости от position
-      const position = step.position || 'top';
-      let top = 0;
-      let left = 0;
+        // Константы для тултипа
+        const tooltipWidth = 320;
+        const tooltipHeight = 200; // примерная высота
+        const gap = 20; // отступ от элемента
 
-      switch (position) {
-        case 'top':
-          top = rect.top - 120; // Над элементом
-          left = rect.left + rect.width / 2 - 150; // По центру
-          break;
-        case 'bottom':
-          top = rect.bottom + 20; // Под элементом
-          left = rect.left + rect.width / 2 - 150;
-          break;
-        case 'left':
-          top = rect.top + rect.height / 2 - 60;
-          left = rect.left - 320; // Слева
-          break;
-        case 'right':
-          top = rect.top + rect.height / 2 - 60;
-          left = rect.right + 20; // Справа
-          break;
-      }
+        // Определяем лучшую позицию автоматически
+        let position = step.position || 'auto';
 
-      // Проверяем границы экрана
-      if (left < 10) left = 10;
-      if (left > window.innerWidth - 310) left = window.innerWidth - 310;
-      if (top < 10) top = 10;
+        // Автоопределение позиции если 'auto'
+        if (position === 'auto') {
+          const spaceTop = rect.top;
+          const spaceBottom = window.innerHeight - rect.bottom;
+          const spaceLeft = rect.left;
+          const spaceRight = window.innerWidth - rect.right;
 
-      setTooltipPosition({ top, left });
+          // Приоритет: bottom > top > right > left
+          if (spaceBottom > tooltipHeight + gap) {
+            position = 'bottom';
+          } else if (spaceTop > tooltipHeight + gap) {
+            position = 'top';
+          } else if (spaceRight > tooltipWidth + gap) {
+            position = 'right';
+          } else if (spaceLeft > tooltipWidth + gap) {
+            position = 'left';
+          } else {
+            position = 'bottom'; // фоллбэк
+          }
+        }
 
-      // Скроллим к элементу
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        let top = 0;
+        let left = 0;
+
+        switch (position) {
+          case 'top':
+            top = rect.top - tooltipHeight - gap;
+            left = rect.left + rect.width / 2 - tooltipWidth / 2;
+            break;
+          case 'bottom':
+            top = rect.bottom + gap;
+            left = rect.left + rect.width / 2 - tooltipWidth / 2;
+            break;
+          case 'left':
+            top = rect.top + rect.height / 2 - tooltipHeight / 2;
+            left = rect.left - tooltipWidth - gap;
+            break;
+          case 'right':
+            top = rect.top + rect.height / 2 - tooltipHeight / 2;
+            left = rect.right + gap;
+            break;
+        }
+
+        // Проверяем границы экрана и корректируем
+        const padding = 16;
+
+        // Горизонтальные границы
+        if (left < padding) {
+          left = padding;
+        }
+        if (left + tooltipWidth > window.innerWidth - padding) {
+          left = window.innerWidth - tooltipWidth - padding;
+        }
+
+        // Вертикальные границы
+        if (top < padding) {
+          top = padding;
+        }
+        if (top + tooltipHeight > window.innerHeight - padding) {
+          top = window.innerHeight - tooltipHeight - padding;
+        }
+
+        setTooltipPosition({ top, left });
+
+        // Скроллим к элементу с отступом
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center'
+        });
+      }, 100);
     }
   }, [currentStep, isActive, steps, isMounted]);
 
@@ -117,23 +165,38 @@ export function TooltipOverlay({ steps, isActive, onClose }: TooltipOverlayProps
 
       {/* Подсветка элемента */}
       {elementRect && (
-        <div
-          className="fixed z-[9999] rounded-lg ring-4 ring-blue-500 ring-offset-4 pointer-events-none animate-pulse"
-          style={{
-            top: elementRect.top - 4,
-            left: elementRect.left - 4,
-            width: elementRect.width + 8,
-            height: elementRect.height + 8,
-          }}
-        />
+        <>
+          {/* Белый фон за элементом для выделения */}
+          <div
+            className="fixed z-[9999] bg-white rounded-lg pointer-events-none"
+            style={{
+              top: elementRect.top - 8,
+              left: elementRect.left - 8,
+              width: elementRect.width + 16,
+              height: elementRect.height + 16,
+            }}
+          />
+          {/* Синее кольцо подсветки */}
+          <div
+            className="fixed z-[10000] rounded-lg ring-4 ring-blue-500 pointer-events-none animate-pulse"
+            style={{
+              top: elementRect.top - 8,
+              left: elementRect.left - 8,
+              width: elementRect.width + 16,
+              height: elementRect.height + 16,
+              boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6)'
+            }}
+          />
+        </>
       )}
 
       {/* Тултип с подсказкой */}
       <div
-        className="fixed z-[10000] w-[300px] bg-white rounded-lg shadow-2xl p-4 animate-in fade-in slide-in-from-bottom-4 duration-300"
+        className="fixed z-[10001] w-[320px] bg-white rounded-lg shadow-2xl p-5 animate-in fade-in slide-in-from-bottom-4 duration-300"
         style={{
           top: tooltipPosition.top,
           left: tooltipPosition.left,
+          maxHeight: 'calc(100vh - 32px)'
         }}
       >
         <button
