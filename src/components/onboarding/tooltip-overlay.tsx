@@ -144,15 +144,22 @@ export function TooltipOverlay({ steps, isActive, onClose }: TooltipOverlayProps
   };
 
   const handleComplete = () => {
+    console.log('🎯 TooltipOverlay: handleComplete called, closing...');
     onClose?.();
   };
 
   const handleSkip = () => {
+    console.log('🎯 TooltipOverlay: handleSkip called, closing...');
     onClose?.();
   };
 
   // Не рендерим пока не смонтировались на клиенте или не активны
-  if (!isMounted || !isActive) return null;
+  if (!isMounted || !isActive) {
+    console.log('🎯 TooltipOverlay: not rendering, isMounted:', isMounted, 'isActive:', isActive);
+    return null;
+  }
+
+  console.log('🎯 TooltipOverlay: rendering, step:', currentStep);
 
   const step = steps[currentStep];
   const isFirstStep = currentStep === 0;
