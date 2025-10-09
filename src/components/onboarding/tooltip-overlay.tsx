@@ -165,29 +165,15 @@ export function TooltipOverlay({ steps, isActive, onClose }: TooltipOverlayProps
 
       {/* Подсветка элемента */}
       {elementRect && (
-        <>
-          {/* Белый фон за элементом для выделения */}
-          <div
-            className="fixed z-[9999] bg-white rounded-lg pointer-events-none"
-            style={{
-              top: elementRect.top - 8,
-              left: elementRect.left - 8,
-              width: elementRect.width + 16,
-              height: elementRect.height + 16,
-            }}
-          />
-          {/* Синее кольцо подсветки */}
-          <div
-            className="fixed z-[10000] rounded-lg ring-4 ring-blue-500 pointer-events-none animate-pulse"
-            style={{
-              top: elementRect.top - 8,
-              left: elementRect.left - 8,
-              width: elementRect.width + 16,
-              height: elementRect.height + 16,
-              boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6)'
-            }}
-          />
-        </>
+        <div
+          className="fixed z-[9999] rounded-lg ring-4 ring-blue-500 ring-offset-4 pointer-events-none animate-pulse"
+          style={{
+            top: elementRect.top - 4,
+            left: elementRect.left - 4,
+            width: elementRect.width + 8,
+            height: elementRect.height + 8,
+          }}
+        />
       )}
 
       {/* Тултип с подсказкой */}
