@@ -17,45 +17,22 @@ export function useOnboarding() {
   const [state, setState] = useState<OnboardingState>(INITIAL_ONBOARDING_STATE);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Загружаем состояние из localStorage при монтировании (только один раз)
+  // Просто устанавливаем флаг монтирования
   useEffect(() => {
     setIsMounted(true);
-
-    const savedState = localStorage.getItem(ONBOARDING_STORAGE_KEY);
-    if (savedState) {
-      try {
-        const parsed = JSON.parse(savedState);
-        console.log('📦 Loaded onboarding state:', parsed);
-        setState(parsed);
-      } catch (error) {
-        console.error('Failed to parse onboarding state:', error);
-      }
-    }
-    // Убрал автостарт - теперь только вручную через кнопку
   }, []);
-
-  // Сохраняем состояние в localStorage при изменениях
-  useEffect(() => {
-    if (!isMounted) return;
-    console.log('💾 Saving state to localStorage:', state);
-    localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(state));
-  }, [state, isMounted]);
 
   // Запустить онбординг
   const startOnboarding = useCallback(() => {
-    console.log('🚀 AI Onboarding started!');
-    const newState = {
+    setState({
       ...INITIAL_ONBOARDING_STATE,
       isActive: true
-    };
-    console.log('Setting new state:', newState);
-    setState(newState);
+    });
   }, []);
 
   // Остановить онбординг
   const stopOnboarding = useCallback(() => {
-    setState(prev => ({ ...prev, isActive: false }));
-    localStorage.setItem('onboarding-completed', 'true');
+    setState(INITIAL_ONBOARDING_STATE); // Полный сброс
   }, []);
 
   // Следующий шаг

@@ -30,10 +30,7 @@ export function OnboardingOverlay() {
     setIsMounted(true);
   }, []);
 
-  // Логирование для отладки
-  useEffect(() => {
-    console.log('OnboardingOverlay state:', { isMounted, isActive, currentStep });
-  }, [isMounted, isActive, currentStep]);
+  // Убрали логирование
 
   // Не показываем пока не смонтировалось или не активно
   if (!isActive) return null;
