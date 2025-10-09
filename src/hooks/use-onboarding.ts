@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import type { OnboardingState, OnboardingStep } from '@/lib/onboarding-types';
 import {
   INITIAL_ONBOARDING_STATE,
-  ONBOARDING_STORAGE_KEY,
   ONBOARDING_STEPS
 } from '@/lib/onboarding-types';
 
@@ -54,7 +53,6 @@ export function useOnboarding() {
 
       if (isLastStep) {
         // Завершаем онбординг
-        localStorage.setItem('onboarding-completed', 'true');
         return {
           ...prev,
           isActive: false,
@@ -98,7 +96,6 @@ export function useOnboarding() {
       const isLastStep = nextStepIndex >= ONBOARDING_STEPS.length;
 
       if (isLastStep) {
-        localStorage.setItem('onboarding-completed', 'true');
         return {
           ...prev,
           isActive: false,
