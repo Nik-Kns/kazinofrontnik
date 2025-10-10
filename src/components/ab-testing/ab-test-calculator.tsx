@@ -23,7 +23,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Sparkles, TrendingUp, Users, DollarSign, Target, Clock, Globe, Gift, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Sparkles, TrendingUp, Users, DollarSign, Target, Clock, Globe, Gift, ArrowRight, ArrowLeft, Mail, MessageSquare, Bell } from 'lucide-react';
 
 interface ABTestConfig {
   // Базовые настройки
@@ -52,6 +53,7 @@ interface ABTestConfig {
   geo: string[];
   duration: number;
   confidence: number;
+  channels: string[];
 }
 
 interface ABTestResult {
@@ -94,6 +96,7 @@ export function ABTestCalculator({ open, onOpenChange, onTestCreated }: ABTestCa
     geo: ['all'],
     duration: 7,
     confidence: 95,
+    channels: ['email'],
   });
 
   const totalSteps = 4;
@@ -253,28 +256,51 @@ export function ABTestCalculator({ open, onOpenChange, onTestCreated }: ABTestCa
 
             <div>
               <Label htmlFor="variantA-bonus">Бонус</Label>
-              <Input
-                id="variantA-bonus"
+              <Select
                 value={config.variantA.bonus}
-                onChange={(e) => setConfig({
+                onValueChange={(value) => setConfig({
                   ...config,
-                  variantA: { ...config.variantA, bonus: e.target.value }
+                  variantA: { ...config.variantA, bonus: value }
                 })}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите тип бонуса" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10% кэшбэк">10% кэшбэк</SelectItem>
+                  <SelectItem value="20% кэшбэк">20% кэшбэк</SelectItem>
+                  <SelectItem value="50% на депозит">50% на депозит</SelectItem>
+                  <SelectItem value="100% на депозит">100% на депозит</SelectItem>
+                  <SelectItem value="50 фриспинов">50 фриспинов</SelectItem>
+                  <SelectItem value="100 фриспинов">100 фриспинов</SelectItem>
+                  <SelectItem value="€10 бонус">€10 бонус</SelectItem>
+                  <SelectItem value="€25 бонус">€25 бонус</SelectItem>
+                  <SelectItem value="€50 бонус">€50 бонус</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <Label htmlFor="variantA-offer">Условия оффера</Label>
-              <Textarea
-                id="variantA-offer"
-                placeholder="Условия получения бонуса, вейджер, срок действия..."
+              <Select
                 value={config.variantA.offer}
-                onChange={(e) => setConfig({
+                onValueChange={(value) => setConfig({
                   ...config,
-                  variantA: { ...config.variantA, offer: e.target.value }
+                  variantA: { ...config.variantA, offer: value }
                 })}
-                rows={2}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите условия" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Вейджер x1, 7 дней">Вейджер x1, 7 дней</SelectItem>
+                  <SelectItem value="Вейджер x3, 7 дней">Вейджер x3, 7 дней</SelectItem>
+                  <SelectItem value="Вейджер x5, 14 дней">Вейджер x5, 14 дней</SelectItem>
+                  <SelectItem value="Вейджер x10, 30 дней">Вейджер x10, 30 дней</SelectItem>
+                  <SelectItem value="Без вейджера, 3 дня">Без вейджера, 3 дня</SelectItem>
+                  <SelectItem value="Без вейджера, 7 дней">Без вейджера, 7 дней</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}
@@ -302,28 +328,51 @@ export function ABTestCalculator({ open, onOpenChange, onTestCreated }: ABTestCa
 
             <div>
               <Label htmlFor="variantB-bonus">Бонус</Label>
-              <Input
-                id="variantB-bonus"
+              <Select
                 value={config.variantB.bonus}
-                onChange={(e) => setConfig({
+                onValueChange={(value) => setConfig({
                   ...config,
-                  variantB: { ...config.variantB, bonus: e.target.value }
+                  variantB: { ...config.variantB, bonus: value }
                 })}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите тип бонуса" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10% кэшбэк">10% кэшбэк</SelectItem>
+                  <SelectItem value="20% кэшбэк">20% кэшбэк</SelectItem>
+                  <SelectItem value="50% на депозит">50% на депозит</SelectItem>
+                  <SelectItem value="100% на депозит">100% на депозит</SelectItem>
+                  <SelectItem value="50 фриспинов">50 фриспинов</SelectItem>
+                  <SelectItem value="100 фриспинов">100 фриспинов</SelectItem>
+                  <SelectItem value="€10 бонус">€10 бонус</SelectItem>
+                  <SelectItem value="€25 бонус">€25 бонус</SelectItem>
+                  <SelectItem value="€50 бонус">€50 бонус</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <Label htmlFor="variantB-offer">Условия оффера</Label>
-              <Textarea
-                id="variantB-offer"
-                placeholder="Условия получения бонуса, вейджер, срок действия..."
+              <Select
                 value={config.variantB.offer}
-                onChange={(e) => setConfig({
+                onValueChange={(value) => setConfig({
                   ...config,
-                  variantB: { ...config.variantB, offer: e.target.value }
+                  variantB: { ...config.variantB, offer: value }
                 })}
-                rows={2}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите условия" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Вейджер x1, 7 дней">Вейджер x1, 7 дней</SelectItem>
+                  <SelectItem value="Вейджер x3, 7 дней">Вейджер x3, 7 дней</SelectItem>
+                  <SelectItem value="Вейджер x5, 14 дней">Вейджер x5, 14 дней</SelectItem>
+                  <SelectItem value="Вейджер x10, 30 дней">Вейджер x10, 30 дней</SelectItem>
+                  <SelectItem value="Без вейджера, 3 дня">Без вейджера, 3 дня</SelectItem>
+                  <SelectItem value="Без вейджера, 7 дней">Без вейджера, 7 дней</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}
@@ -389,6 +438,65 @@ export function ABTestCalculator({ open, onOpenChange, onTestCreated }: ABTestCa
                   <SelectItem value="99">99% - Максимальная точность</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Каналы коммуникации</Label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent">
+                  <Checkbox
+                    id="channel-email"
+                    checked={config.channels.includes('email')}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setConfig({ ...config, channels: [...config.channels, 'email'] });
+                      } else {
+                        setConfig({ ...config, channels: config.channels.filter(c => c !== 'email') });
+                      }
+                    }}
+                  />
+                  <Label htmlFor="channel-email" className="flex items-center gap-2 cursor-pointer flex-1">
+                    <Mail className="h-4 w-4 text-blue-600" />
+                    <span>Email</span>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent">
+                  <Checkbox
+                    id="channel-sms"
+                    checked={config.channels.includes('sms')}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setConfig({ ...config, channels: [...config.channels, 'sms'] });
+                      } else {
+                        setConfig({ ...config, channels: config.channels.filter(c => c !== 'sms') });
+                      }
+                    }}
+                  />
+                  <Label htmlFor="channel-sms" className="flex items-center gap-2 cursor-pointer flex-1">
+                    <MessageSquare className="h-4 w-4 text-green-600" />
+                    <span>SMS</span>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent">
+                  <Checkbox
+                    id="channel-push"
+                    checked={config.channels.includes('push')}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setConfig({ ...config, channels: [...config.channels, 'push'] });
+                      } else {
+                        setConfig({ ...config, channels: config.channels.filter(c => c !== 'push') });
+                      }
+                    }}
+                  />
+                  <Label htmlFor="channel-push" className="flex items-center gap-2 cursor-pointer flex-1">
+                    <Bell className="h-4 w-4 text-purple-600" />
+                    <span>Push уведомления</span>
+                  </Label>
+                </div>
+              </div>
             </div>
           </div>
         )}
