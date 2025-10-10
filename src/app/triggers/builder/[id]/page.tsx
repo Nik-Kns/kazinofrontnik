@@ -35,6 +35,10 @@ import {
   CheckCircle,
   Settings,
   BarChart3,
+  Image as ImageIcon,
+  Mail,
+  MessageSquare,
+  Bell,
 } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1065,18 +1069,105 @@ function ScenarioBuilder() {
                   )}
                   
                   {selectedNode.data.type === "email" && (
-                    <div>
-                      <Label>Шаблон письма</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите шаблон" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="welcome">Приветственное</SelectItem>
-                          <SelectItem value="bonus">Бонусное предложение</SelectItem>
-                          <SelectItem value="retention">Удержание</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="space-y-4">
+                      {/* Загрузка креатива для Email */}
+                      <div>
+                        <Label>Креатив Email</Label>
+                        <div className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary transition-colors mt-2">
+                          <input
+                            type="file"
+                            id="email-creative"
+                            accept="image/*,.pdf"
+                            className="hidden"
+                          />
+                          <label htmlFor="email-creative" className="cursor-pointer">
+                            <div className="flex flex-col items-center gap-2">
+                              <Upload className="h-8 w-8 text-muted-foreground" />
+                              <p className="text-sm font-medium">Загрузите баннер</p>
+                              <p className="text-xs text-muted-foreground">JPG, PNG, PDF до 5MB</p>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Текст сообщения */}
+                      <div>
+                        <Label>Текст email</Label>
+                        <Textarea
+                          placeholder="Введите текст email..."
+                          rows={4}
+                          className="mt-2"
+                        />
+                      </div>
+
+                      {/* Шаблон */}
+                      <div>
+                        <Label>Шаблон оформления</Label>
+                        <Select>
+                          <SelectTrigger className="mt-2">
+                            <SelectValue placeholder="Выберите шаблон" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="welcome">Приветственное</SelectItem>
+                            <SelectItem value="bonus">Бонусное предложение</SelectItem>
+                            <SelectItem value="retention">Удержание</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedNode.data.type === "sms" && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Текст SMS</Label>
+                        <Textarea
+                          placeholder="Введите текст SMS (макс. 160 символов)..."
+                          maxLength={160}
+                          rows={3}
+                          className="mt-2"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">0/160 символов</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedNode.data.type === "push" && (
+                    <div className="space-y-4">
+                      {/* Загрузка креатива для Push */}
+                      <div>
+                        <Label>Креатив Push</Label>
+                        <div className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary transition-colors mt-2">
+                          <input
+                            type="file"
+                            id="push-creative"
+                            accept="image/*"
+                            className="hidden"
+                          />
+                          <label htmlFor="push-creative" className="cursor-pointer">
+                            <div className="flex flex-col items-center gap-2">
+                              <Upload className="h-8 w-8 text-muted-foreground" />
+                              <p className="text-sm font-medium">Загрузите иконку/изображение</p>
+                              <p className="text-xs text-muted-foreground">PNG, JPG до 2MB</p>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Текст push */}
+                      <div>
+                        <Label>Заголовок</Label>
+                        <Input placeholder="Заголовок push-уведомления" className="mt-2" />
+                      </div>
+
+                      <div>
+                        <Label>Текст сообщения</Label>
+                        <Textarea
+                          placeholder="Текст push-уведомления..."
+                          rows={3}
+                          className="mt-2"
+                        />
+                      </div>
                     </div>
                   )}
 

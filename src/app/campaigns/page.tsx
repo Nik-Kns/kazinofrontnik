@@ -14,11 +14,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { 
-  Contact, Plus, Brain, TrendingUp, Users, Calendar, DollarSign, 
-  Target, Zap, Gift, Trophy, Mail, MessageSquare, Bell, 
+  Contact, Plus, Brain, TrendingUp, Users, Calendar, DollarSign,
+  Target, Zap, Gift, Trophy, Mail, MessageSquare, Bell,
   ChevronRight, ChevronLeft, Sparkles, AlertCircle, CheckCircle2,
   Play, Pause, Archive, BarChart3, Clock, Filter, Search,
-  Edit, Copy, Trash2, MoreVertical, Palette, Image, Wand2, Eye, X
+  Edit, Copy, Trash2, MoreVertical, Palette, Image, Wand2, Eye, X, Upload, Image as ImageIcon
 } from "lucide-react";
 import {
   Select,
@@ -689,6 +689,7 @@ function CampaignsContent() {
     channels: [] as string[],
     schedule: "immediate",
     message: "",
+    creativeFile: null as File | null,
     budget: "",
     targets: {
       conversionRate: "",
@@ -1163,19 +1164,87 @@ function CampaignsContent() {
               </div>
             )}
 
-            {/* Шаг 5: Сообщение */}
+            {/* Шаг 5: Сообщение и креатив */}
             {wizardStep === 5 && (
               <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="message">Текст сообщения</Label>
-                  <Textarea
-                    id="message"
-                    placeholder="Введите текст сообщения..."
-                    className="min-h-[150px]"
-                    value={campaignData.message}
-                    onChange={(e) => setCampaignData({...campaignData, message: e.target.value})}
-                  />
-                </div>
+                {/* Для SMS - только текст с лимитом */}
+                {campaignData.channels.length === 1 && campaignData.channels.includes('sms') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Текст SMS</Label>
+                    <Textarea
+                      id="message"
+                      placeholder="Введите текст SMS (макс. 160 символов)..."
+                      className="min-h-[150px]"
+                      maxLength={160}
+                      value={campaignData.message}
+                      onChange={(e) => setCampaignData({...campaignData, message: e.target.value})}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {campaignData.message.length}/160 символов
+                    </p>
+                  </div>
+                )}
+
+                {/* Для Email/Push - загрузка креатива + текст */}
+                {(campaignData.channels.includes('email') || campaignData.channels.includes('push')) && (
+                  <>
+                    {/* Загрузка креатива */}
+                    <div className="space-y-2">
+                      <Label>Креатив</Label>
+                      <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                        <input
+                          type="file"
+                          id="campaign-creative"
+                          accept="image/*,.pdf"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setCampaignData({...campaignData, creativeFile: file});
+                            }
+                          }}
+                        />
+                        <label htmlFor="campaign-creative" className="cursor-pointer">
+                          <div className="flex flex-col items-center gap-2">
+                            {campaignData.creativeFile ? (
+                              <>
+                                <ImageIcon className="h-12 w-12 text-green-600" />
+                                <p className="text-sm font-medium text-green-600">
+                                  {campaignData.creativeFile.name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Нажмите для замены
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="h-12 w-12 text-muted-foreground" />
+                                <p className="text-sm font-medium">
+                                  Загрузите креатив для email/push
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  JPG, PNG, PDF до 5MB
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Текст сообщения */}
+                    <div className="space-y-2">
+                      <Label htmlFor="message">Текст сообщения</Label>
+                      <Textarea
+                        id="message"
+                        placeholder="Введите текст сообщения..."
+                        className="min-h-[150px]"
+                        value={campaignData.message}
+                        onChange={(e) => setCampaignData({...campaignData, message: e.target.value})}
+                      />
+                    </div>
+                  </>
+                )}
                 
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm">
