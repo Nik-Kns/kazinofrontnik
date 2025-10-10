@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Sparkles, TrendingUp, Users, DollarSign, Target, Clock, Globe, Gift, ArrowRight, ArrowLeft, Mail, MessageSquare, Bell } from 'lucide-react';
+import { Sparkles, TrendingUp, Users, DollarSign, Target, Clock, Globe, Gift, ArrowRight, ArrowLeft, Mail, MessageSquare, Bell, Upload, Image as ImageIcon, FileText } from 'lucide-react';
 
 interface ABTestConfig {
   // Базовые настройки
@@ -36,6 +36,7 @@ interface ABTestConfig {
   variantA: {
     name: string;
     creative: string;
+    creativeFile?: File | null;
     bonus: string;
     offer: string;
   };
@@ -44,6 +45,7 @@ interface ABTestConfig {
   variantB: {
     name: string;
     creative: string;
+    creativeFile?: File | null;
     bonus: string;
     offer: string;
   };
@@ -240,19 +242,92 @@ export function ABTestCalculator({ open, onOpenChange, onTestCreated }: ABTestCa
               <Badge variant="outline">Вариант A - Контроль</Badge>
             </div>
 
-            <div>
-              <Label htmlFor="variantA-creative">Креатив / Сообщение</Label>
-              <Textarea
-                id="variantA-creative"
-                placeholder="Текст email/push уведомления для варианта A..."
-                value={config.variantA.creative}
-                onChange={(e) => setConfig({
-                  ...config,
-                  variantA: { ...config.variantA, creative: e.target.value }
-                })}
-                rows={3}
-              />
-            </div>
+            {/* Креатив для SMS - только текст */}
+            {config.channels.length === 1 && config.channels.includes('sms') && (
+              <div>
+                <Label htmlFor="variantA-creative">Текст SMS</Label>
+                <Textarea
+                  id="variantA-creative"
+                  placeholder="Текст SMS для варианта A (макс. 160 символов)..."
+                  value={config.variantA.creative}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    variantA: { ...config.variantA, creative: e.target.value }
+                  })}
+                  rows={3}
+                  maxLength={160}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {config.variantA.creative.length}/160 символов
+                </p>
+              </div>
+            )}
+
+            {/* Креатив для Email/Push - загрузка + текст */}
+            {(config.channels.includes('email') || config.channels.includes('push')) && (
+              <div className="space-y-3">
+                <Label>Креатив</Label>
+
+                {/* Загрузка файла */}
+                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                  <input
+                    type="file"
+                    id="variantA-file"
+                    accept="image/*,.pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setConfig({
+                          ...config,
+                          variantA: { ...config.variantA, creativeFile: file }
+                        });
+                      }
+                    }}
+                  />
+                  <label htmlFor="variantA-file" className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-2">
+                      {config.variantA.creativeFile ? (
+                        <>
+                          <ImageIcon className="h-8 w-8 text-green-600" />
+                          <p className="text-sm font-medium text-green-600">
+                            {config.variantA.creativeFile.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Нажмите для замены
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-8 w-8 text-muted-foreground" />
+                          <p className="text-sm font-medium">
+                            Загрузите креатив
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            JPG, PNG, PDF до 5MB
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </label>
+                </div>
+
+                {/* Текст сообщения */}
+                <div>
+                  <Label htmlFor="variantA-creative">Текст сообщения</Label>
+                  <Textarea
+                    id="variantA-creative"
+                    placeholder="Текст email/push уведомления для варианта A..."
+                    value={config.variantA.creative}
+                    onChange={(e) => setConfig({
+                      ...config,
+                      variantA: { ...config.variantA, creative: e.target.value }
+                    })}
+                    rows={3}
+                  />
+                </div>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="variantA-bonus">Бонус</Label>
@@ -312,19 +387,92 @@ export function ABTestCalculator({ open, onOpenChange, onTestCreated }: ABTestCa
               <Badge className="bg-gradient-to-r from-purple-500 to-blue-500">Вариант B - Тест</Badge>
             </div>
 
-            <div>
-              <Label htmlFor="variantB-creative">Креатив / Сообщение</Label>
-              <Textarea
-                id="variantB-creative"
-                placeholder="Текст email/push уведомления для варианта B..."
-                value={config.variantB.creative}
-                onChange={(e) => setConfig({
-                  ...config,
-                  variantB: { ...config.variantB, creative: e.target.value }
-                })}
-                rows={3}
-              />
-            </div>
+            {/* Креатив для SMS - только текст */}
+            {config.channels.length === 1 && config.channels.includes('sms') && (
+              <div>
+                <Label htmlFor="variantB-creative">Текст SMS</Label>
+                <Textarea
+                  id="variantB-creative"
+                  placeholder="Текст SMS для варианта B (макс. 160 символов)..."
+                  value={config.variantB.creative}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    variantB: { ...config.variantB, creative: e.target.value }
+                  })}
+                  rows={3}
+                  maxLength={160}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {config.variantB.creative.length}/160 символов
+                </p>
+              </div>
+            )}
+
+            {/* Креатив для Email/Push - загрузка + текст */}
+            {(config.channels.includes('email') || config.channels.includes('push')) && (
+              <div className="space-y-3">
+                <Label>Креатив</Label>
+
+                {/* Загрузка файла */}
+                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                  <input
+                    type="file"
+                    id="variantB-file"
+                    accept="image/*,.pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setConfig({
+                          ...config,
+                          variantB: { ...config.variantB, creativeFile: file }
+                        });
+                      }
+                    }}
+                  />
+                  <label htmlFor="variantB-file" className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-2">
+                      {config.variantB.creativeFile ? (
+                        <>
+                          <ImageIcon className="h-8 w-8 text-green-600" />
+                          <p className="text-sm font-medium text-green-600">
+                            {config.variantB.creativeFile.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Нажмите для замены
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-8 w-8 text-muted-foreground" />
+                          <p className="text-sm font-medium">
+                            Загрузите креатив
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            JPG, PNG, PDF до 5MB
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </label>
+                </div>
+
+                {/* Текст сообщения */}
+                <div>
+                  <Label htmlFor="variantB-creative">Текст сообщения</Label>
+                  <Textarea
+                    id="variantB-creative"
+                    placeholder="Текст email/push уведомления для варианта B..."
+                    value={config.variantB.creative}
+                    onChange={(e) => setConfig({
+                      ...config,
+                      variantB: { ...config.variantB, creative: e.target.value }
+                    })}
+                    rows={3}
+                  />
+                </div>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="variantB-bonus">Бонус</Label>
