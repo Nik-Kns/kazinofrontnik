@@ -209,7 +209,7 @@ export function ABTestCalculator({ open, onOpenChange, onTestCreated }: ABTestCa
                   <SelectItem value="vip">VIP игроки</SelectItem>
                   <SelectItem value="new">Новые игроки</SelectItem>
                   <SelectItem value="inactive">Неактивные (7+ дней)</SelectItem>
-                  <SelectItem value="high-value">Высокая ценность (LTV > €500)</SelectItem>
+                  <SelectItem value="high-value">Высокая ценность (LTV &gt; €500)</SelectItem>
                   <SelectItem value="slots-lovers">Любители слотов</SelectItem>
                 </SelectContent>
               </Select>
