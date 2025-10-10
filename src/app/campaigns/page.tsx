@@ -842,7 +842,7 @@ function CampaignsContent() {
             </div>
             <Progress value={(wizardStep / 6) * 100} className="mt-4" />
             <div className="flex justify-between mt-2">
-              {["Основное", "Цели", "Сегменты", "Каналы", "Сообщение", "Креативы"].map((step, index) => (
+              {["Основное", "Цели", "Сегменты", "Каналы", "Креатив", "Сообщение"].map((step, index) => (
                 <span 
                   key={step}
                   className={cn(
@@ -1164,34 +1164,29 @@ function CampaignsContent() {
               </div>
             )}
 
-            {/* Шаг 5: Сообщение и креатив */}
+            {/* Шаг 5: Креатив */}
             {wizardStep === 5 && (
               <div className="space-y-6">
-                {/* Для SMS - только текст с лимитом */}
+                {/* Для SMS - пропускаем креатив */}
                 {campaignData.channels.length === 1 && campaignData.channels.includes('sms') && (
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Текст SMS</Label>
-                    <Textarea
-                      id="message"
-                      placeholder="Введите текст SMS (макс. 160 символов)..."
-                      className="min-h-[150px]"
-                      maxLength={160}
-                      value={campaignData.message}
-                      onChange={(e) => setCampaignData({...campaignData, message: e.target.value})}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {campaignData.message.length}/160 символов
+                  <div className="text-center py-8">
+                    <MessageSquare className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Креатив не требуется для SMS</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Для SMS используется только текстовое сообщение
                     </p>
                   </div>
                 )}
 
-                {/* Для Email/Push - загрузка креатива + текст */}
+                {/* Для Email/Push - загрузка креатива */}
                 {(campaignData.channels.includes('email') || campaignData.channels.includes('push')) && (
-                  <>
-                    {/* Загрузка креатива */}
-                    <div className="space-y-2">
+                  <div className="space-y-4">
+                    <div>
                       <Label>Креатив</Label>
-                      <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Загрузите баннер или изображение для вашей кампании
+                      </p>
+                      <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
                         <input
                           type="file"
                           id="campaign-creative"
@@ -1205,24 +1200,24 @@ function CampaignsContent() {
                           }}
                         />
                         <label htmlFor="campaign-creative" className="cursor-pointer">
-                          <div className="flex flex-col items-center gap-2">
+                          <div className="flex flex-col items-center gap-3">
                             {campaignData.creativeFile ? (
                               <>
-                                <ImageIcon className="h-12 w-12 text-green-600" />
-                                <p className="text-sm font-medium text-green-600">
+                                <ImageIcon className="h-16 w-16 text-green-600" />
+                                <p className="text-base font-medium text-green-600">
                                   {campaignData.creativeFile.name}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Нажмите для замены
+                                <p className="text-sm text-muted-foreground">
+                                  Нажмите для замены файла
                                 </p>
                               </>
                             ) : (
                               <>
-                                <Upload className="h-12 w-12 text-muted-foreground" />
-                                <p className="text-sm font-medium">
-                                  Загрузите креатив для email/push
+                                <Upload className="h-16 w-16 text-muted-foreground" />
+                                <p className="text-base font-medium">
+                                  Перетащите файл сюда или нажмите для выбора
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-sm text-muted-foreground">
                                   JPG, PNG, PDF до 5MB
                                 </p>
                               </>
@@ -1231,28 +1226,76 @@ function CampaignsContent() {
                         </label>
                       </div>
                     </div>
+                  </div>
+                )}
+              </div>
+            )}
 
-                    {/* Текст сообщения */}
-                    <div className="space-y-2">
-                      <Label htmlFor="message">Текст сообщения</Label>
+            {/* Шаг 6: Сообщение */}
+            {wizardStep === 6 && (
+              <div className="space-y-6">
+                {/* SMS - простой текст */}
+                {campaignData.channels.length === 1 && campaignData.channels.includes('sms') && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="message">Текст SMS</Label>
                       <Textarea
                         id="message"
-                        placeholder="Введите текст сообщения..."
+                        placeholder="Введите текст SMS..."
                         className="min-h-[150px]"
+                        maxLength={160}
                         value={campaignData.message}
                         onChange={(e) => setCampaignData({...campaignData, message: e.target.value})}
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {campaignData.message.length}/160 символов
+                      </p>
                     </div>
-                  </>
+                  </div>
                 )}
-                
+
+                {/* Email/Push - HTML или визуальный редактор */}
+                {(campaignData.channels.includes('email') || campaignData.channels.includes('push')) && (
+                  <Tabs defaultValue="visual" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="visual">Визуальный редактор</TabsTrigger>
+                      <TabsTrigger value="html">HTML код</TabsTrigger>
+                    </TabsList>
+
+                    {/* Визуальный редактор */}
+                    <TabsContent value="visual" className="space-y-4">
+                      <div className="border rounded-lg p-6 min-h-[300px] bg-white">
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Drag & drop блоков для создания письма
+                        </p>
+                        <Textarea
+                          placeholder="Введите текст сообщения..."
+                          className="min-h-[200px]"
+                          value={campaignData.message}
+                          onChange={(e) => setCampaignData({...campaignData, message: e.target.value})}
+                        />
+                      </div>
+                    </TabsContent>
+
+                    {/* HTML редактор */}
+                    <TabsContent value="html" className="space-y-4">
+                      <div>
+                        <Label>HTML код письма</Label>
+                        <Textarea
+                          placeholder="<!DOCTYPE html>..."
+                          className="min-h-[300px] font-mono text-sm"
+                          value={campaignData.message}
+                          onChange={(e) => setCampaignData({...campaignData, message: e.target.value})}
+                        />
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                )}
+
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm">
                     <Wand2 className="mr-2 h-4 w-4" />
-                    ИИ генерация текста
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Добавить переменные
+                    ИИ генерация
                   </Button>
                   <Button variant="outline" size="sm">
                     Предпросмотр
@@ -1267,43 +1310,11 @@ function CampaignsContent() {
                     A/B тест
                   </Button>
                 </div>
-                
+
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>Совет:</strong> Используйте персонализацию {"{имя}"} и четкий CTA 
-                    для увеличения конверсии на 23%
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
-
-            {/* Шаг 6: Креативы */}
-            {wizardStep === 6 && (
-              <div className="space-y-6">
-                <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                  <Image className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Создание креативов</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Создайте визуальные материалы для вашей кампании
-                  </p>
-                  <div className="flex justify-center gap-3">
-                    <Button>
-                      <Palette className="mr-2 h-4 w-4" />
-                      Создать креатив
-                    </Button>
-                    <Button variant="outline" onClick={() => setShowCreativeModal(true)}>
-                      <Wand2 className="mr-2 h-4 w-4" />
-                      ИИ генерация
-                    </Button>
-                  </div>
-                </div>
-                
-                <Alert className="border-purple-200 bg-purple-50">
-                  <Sparkles className="h-4 w-4 text-purple-600" />
-                  <AlertDescription>
-                    <strong>ИИ креативы:</strong> Наш ИИ может создать персонализированные 
-                    баннеры и изображения на основе ваших предпочтений и бренда
+                    <strong>Совет:</strong> Используйте персонализацию {"{имя}"} и четкий CTA для увеличения конверсии
                   </AlertDescription>
                 </Alert>
               </div>
