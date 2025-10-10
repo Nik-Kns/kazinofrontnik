@@ -27,6 +27,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { ABTestCalculator } from "@/components/ab-testing/ab-test-calculator";
 import {
   Select,
   SelectContent,
@@ -190,6 +191,7 @@ export default function TriggersPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isTooltipTourActive, setIsTooltipTourActive] = useState(false);
+  const [showABTestCalculator, setShowABTestCalculator] = useState(false);
 
   const handleCreateFromTemplate = (templateId: string) => {
     router.push(`/triggers/builder/new?template=${templateId}`);
@@ -221,6 +223,14 @@ export default function TriggersPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            onClick={() => setShowABTestCalculator(true)}
+            variant="outline"
+            className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200"
+          >
+            <Target className="mr-2 h-4 w-4" />
+            A/B тест
+          </Button>
           <Button
             onClick={() => setIsOnboardingOpen(true)}
             variant="outline"
@@ -551,6 +561,12 @@ export default function TriggersPage() {
         steps={SCENARIOS_TOOLTIPS}
         isActive={isTooltipTourActive}
         onClose={() => setIsTooltipTourActive(false)}
+      />
+
+      {/* A/B Test Calculator */}
+      <ABTestCalculator
+        open={showABTestCalculator}
+        onOpenChange={setShowABTestCalculator}
       />
     </div>
   );

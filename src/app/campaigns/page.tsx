@@ -35,6 +35,7 @@ import { SectionOnboarding } from "@/components/onboarding/section-onboarding";
 import { CAMPAIGNS_ONBOARDING } from "@/lib/onboarding-configs";
 import { TooltipOverlay } from "@/components/onboarding/tooltip-overlay";
 import { CAMPAIGNS_TOOLTIPS } from "@/lib/tooltip-configs";
+import { ABTestCalculator } from "@/components/ab-testing/ab-test-calculator";
 
 // Типы кампаний
 const campaignTypes = [
@@ -680,6 +681,7 @@ function CampaignsContent() {
   const [showCampaignDetails, setShowCampaignDetails] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isTooltipTourActive, setIsTooltipTourActive] = useState(false);
+  const [showABTestCalculator, setShowABTestCalculator] = useState(false);
   const [campaignData, setCampaignData] = useState({
     name: "",
     type: "",
@@ -1185,6 +1187,15 @@ function CampaignsContent() {
                   </Button>
                   <Button variant="outline" size="sm">
                     Предпросмотр
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowABTestCalculator(true)}
+                    className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200"
+                  >
+                    <Target className="mr-2 h-4 w-4" />
+                    A/B тест
                   </Button>
                 </div>
                 
@@ -1964,6 +1975,12 @@ function CampaignsContent() {
         steps={CAMPAIGNS_TOOLTIPS}
         isActive={isTooltipTourActive}
         onClose={() => setIsTooltipTourActive(false)}
+      />
+
+      {/* A/B Test Calculator */}
+      <ABTestCalculator
+        open={showABTestCalculator}
+        onOpenChange={setShowABTestCalculator}
       />
     </div>
   );

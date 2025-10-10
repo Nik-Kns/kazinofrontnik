@@ -29,6 +29,7 @@ import {
   CheckCircle, XCircle, Clock3, MessageCircle, PhoneCall, User, MapPin, Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ABTestCalculator } from "@/components/ab-testing/ab-test-calculator";
 
 // Типы для детальной информации
 interface MessageDetail {
@@ -626,6 +627,7 @@ export default function CommunicationAnalyticsPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDetailedMetrics | null>(null);
   const [messageSearchQuery, setMessageSearchQuery] = useState('');
   const [messageStatusFilter, setMessageStatusFilter] = useState<string>('all');
+  const [showABTestCalculator, setShowABTestCalculator] = useState(false);
 
   const getPerformanceColor = (value: number) => {
     if (value >= 90) return 'text-green-600';
@@ -681,8 +683,16 @@ export default function CommunicationAnalyticsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
+            onClick={() => setShowABTestCalculator(true)}
+            className="gap-2 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200"
+          >
+            <Target className="h-4 w-4" />
+            A/B тест
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => setIsCompareModalOpen(true)}
             className="gap-2"
           >
@@ -2301,6 +2311,12 @@ export default function CommunicationAnalyticsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* A/B Test Calculator */}
+      <ABTestCalculator
+        open={showABTestCalculator}
+        onOpenChange={setShowABTestCalculator}
+      />
     </div>
   );
 }
